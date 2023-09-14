@@ -1,5 +1,5 @@
 {
-  "name": "vue-project",
+  "name": "vilo-web-form",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -13,6 +13,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "nvm": "0.0.4",
     "vue": "^3.3.4",
     "vue-router": "^4.2.4"
   },

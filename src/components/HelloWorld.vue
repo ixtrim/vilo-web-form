@@ -1,41 +1,30 @@
-<script setup lang="ts">
-defineProps<{
-  msg: string
-}>()
-</script>
 
 <template>
-  <div class="greetings">
-    <h1 class="green">{{ msg }}</h1>
-    <h3>
-      You’ve successfully created a project with
-      <a href="https://vitejs.dev/" target="_blank" rel="noopener">Vite</a> +
-      <a href="https://vuejs.org/" target="_blank" rel="noopener">Vue 3</a>. What's next?
-    </h3>
-  </div>
+ <div class="container">
+  Hello World!
+   <v-button
+      width="200px"
+      height="40px"
+      bgcolor="#3498db"
+      size="18px"
+      textColor="#fff"
+      icon="fa fa-search"
+      text="Search"
+      @click="handleButtonClick"
+    ></v-button>
+ </div>
 </template>
+<script>
+import VButton from '@/components/v-button/VButton.vue';
 
-<style scoped>
-h1 {
-  font-weight: 500;
-  font-size: 2.6rem;
-  position: relative;
-  top: -10px;
-}
-
-h3 {
-  font-size: 1.2rem;
-}
-
-.greetings h1,
-.greetings h3 {
-  text-align: center;
-}
-
-@media (min-width: 1024px) {
-  .greetings h1,
-  .greetings h3 {
-    text-align: left;
-  }
-}
-</style>
+export default {
+  components: {
+    VButton,
+  },
+  methods: {
+    handleButtonClick() {
+      // Handle button click here
+    },
+  },
+};
+</script>

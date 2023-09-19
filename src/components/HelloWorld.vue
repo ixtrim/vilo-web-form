@@ -1,25 +1,23 @@
 
 <template>
  <div class="container">
-  Hello World!
+  <v-input/>
    <v-button
-      width="200px"
-      height="40px"
-      bgcolor="#3498db"
-      size="18px"
-      textColor="#fff"
-      icon="fa fa-search"
-      text="Search"
+      rounded=true
+      text="Sign In"
       @click="handleButtonClick"
+      block=true
     ></v-button>
  </div>
 </template>
 <script>
 import VButton from '@/components/v-button/VButton.vue';
+import VInput from '@/components/v-input/VInput.vue';
 
 export default {
   components: {
     VButton,
+    VInput
   },
   methods: {
     handleButtonClick() {

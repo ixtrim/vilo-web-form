@@ -3,9 +3,9 @@
     :class="[
       'v-button',
       buttonClass,
-      { 'v-button-block': block },
-      { 'v-button-rounded': rounded },
-      { 'v-button-outlined': outlined },
+      { 'v-button--block': block },
+      { 'v-button--rounded': rounded },
+      { 'v-button--outlined': outlined },
       hoverClass,
       activeClass,
       focusClass
@@ -34,16 +34,18 @@ export default {
     outlined: Boolean,
     hoverClass: String,
     activeClass: String,
-    focusClass: String,
+    focusClass: String
   },
   methods: {
     handleClick() {
       if (!this.disabled && !this.loading) {
-        this.$emit('click');
+        this.$emit('click')
       }
-    },
-  },
-};
+    }
+  }
+}
 </script>
 
-
+<style>
+@import url(./VButton.scss);
+</style>

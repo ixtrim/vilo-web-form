@@ -1,13 +1,41 @@
 
 <template>
- <div class="container">
-  <v-input/>
+ <div class="sign-in-part">
+<h2>Log in to your account</h2>
+<h4>Welcome back! Please enter your details.</h4>
+  <v-input label="Email" placeholder="Enter your email"/>
+   <v-input label="Password" placeholder="*********" type="password"/>
+
+   <div class="row v-input-group">
+    <div class="col-lg-6">
+    <div class="input-group align-items-center ">
+      <input type="checkbox" id="remember" class="mr-8p">
+      <label for="remember" >Remember me</label></div>
+    </div>
+    <div class="col-lg-6 text-end">
+      <a href="">Forgot passwrod</a>
+    </div>
+   </div>
+
    <v-button
       rounded=true
       text="Sign In"
       @click="handleButtonClick"
       block=true
     ></v-button>
+     <v-button
+     class="v-button--white v-button--flex"
+      rounded=true
+      text="Sign in with Google"
+      outlined="true"
+      @click="handleButtonClick"
+      block=true
+      icon="vicon v-google"
+    ></v-button>
+    <div class="signup-wrap text-center">
+      Don’t have an account?
+      <a href=""> Sign up</a>
+    </div>
  </div>
 </template>
 <script>
@@ -26,3 +54,36 @@ export default {
   },
 };
 </script>
+<style lang="scss">
+@import './styles/variables/fonts.scss';
+@import './styles/variables/colors.scss';
+.sign-in-part{
+max-width: 360px;
+margin: 0 auto;
+h2{
+  font-family: var(--v-font-inter-semi-bold);
+  color: var(--v-gray-900);
+  font-size: 30px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 38px; /* 126.667% */
+}
+h4{
+  font-family: var(--v-font-inter-regular);
+  color: var(--v-gray-600);
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px; /* 150% */
+}
+.input-group{
+  input.mr-8p{
+    margin-right: 8px;
+  }
+}
+.v-input-group{
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+}
+</style>

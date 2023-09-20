@@ -1,0 +1,17 @@
+
+.vicon{
+    height: 24px;
+    width: 24px;
+    margin-right: 12px;
+    &::after{
+    content: '';
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+
+  background-size: cover;
+    }
+    &.v-google:after{
+  background-image: url('@/components/styles/icons/google.svg');
+    }
+}

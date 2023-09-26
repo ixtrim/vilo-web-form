@@ -1,37 +1,30 @@
 
 <template>
  <div class="sign-in-part">
-<h2>Log in to your account</h2>
-<h4>Welcome back! Please enter your details.</h4>
+<h2 class="text-center">Forgot Password</h2>
+<h4 class="mb-">No worries, we’ll send you reset instructions.</h4>
   <v-input label="Email" placeholder="Enter your email"/>
-   <v-input label="Password" placeholder="*********" type="password"/>
 
    <div class="row v-input-group">
     <div class="col-lg-6">
-    <div class="input-group align-items-center ">
-      <input type="checkbox" id="remember" class="mr-8p">
-      <label for="remember" >Remember me</label></div>
-    </div>
-    <div class="col-lg-6 text-end">
-     <VLink to="/forgot-password" isRouteLink>Forgot password</VLink>
     </div>
    </div>
 
    <v-button
       rounded=true
-      text="Sign In"
+      text="Reset password"
       @click="handleButtonClick"
       block=true
     ></v-button>
-     <v-button
+     <!-- <v-button
      class="v-button--white v-button--flex"
       rounded=true
-      text="Sign in with Google"
-      outlined="true"
+      text="Back to login"
       @click="handleButtonClick"
       block=true
-      icon="vicon v-google"
-    ></v-button>
+      icon="vicon v-back"
+    ></v-button> -->
+     <VLink to="/signin" isRouteLink class="v-button v-button--white v-button--flex v-button--link"><i class="vicon v-back icon-20"></i><span>Back to login</span></VLink>
     <div class="signup-wrap text-center">
       <span>Don’t have an account?</span>
        <VLink to="/signup" isRouteLink>Sign Up</VLink>
@@ -105,5 +98,9 @@ h4{
     margin-right: 8px;
   }
 }
+}
+.icon-20:after{
+  height: 20px;
+  width: 20px;
 }
 </style>

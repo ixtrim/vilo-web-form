@@ -63,6 +63,17 @@ color: var(--v-gray-900);
     }
   }
 
+    &--link{
+      &.v-link{
+  color: var(--v-gray-600);
+    &:hover{
+       background-color:transparent;
+    }
+      }
+
+
+  }
+
   .v-button-loader {
     border: 3px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;

@@ -14,4 +14,7 @@
     &.v-google:after{
   background-image: url('@/components/styles/icons/google.svg');
     }
+      &.v-back:after{
+  background-image: url('@/components/styles/icons/back-icon.svg');
+    }
 }

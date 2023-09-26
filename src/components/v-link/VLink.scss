@@ -1,0 +1,10 @@
+@import '@/components/styles/variables/colors.scss';
+@import '@/components/styles/variables/fonts.scss';
+
+.v-link{
+    color:var(--v-primary-indigo-700);
+    font-family:var(--v-font-inter-semi-bold);
+    font-size: 14px;
+    line-height: 20px;
+    text-decoration: none;
+}

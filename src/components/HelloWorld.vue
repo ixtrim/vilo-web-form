@@ -1,7 +1,7 @@
 
 <template>
  <div class="sign-in-part">
-<h2>Log in to your account</h2>
+<h2>Hello</h2>
 <h4>Welcome back! Please enter your details.</h4>
   <v-input label="Email" placeholder="Enter your email"/>
    <v-input label="Password" placeholder="*********" type="password"/>

@@ -1,6 +1,7 @@
 
 <template>
- <div class="sign-in-part">
+ <div class="forgot-part">
+  <v-iconbox class="v-forgot-key"/>
 <h2 class="text-center">Forgot Password</h2>
 <h4 class="mb-">No worries, we’ll send you reset instructions.</h4>
   <v-input label="Email" placeholder="Enter your email"/>
@@ -35,12 +36,14 @@
 import VButton from '@/components/v-button/VButton.vue';
 import VInput from '@/components/v-input/VInput.vue';
 import VLink from '@/components/v-link/VLink.vue';
+import VIconbox from '@/components/v-iconbox/VIconbox.vue';
 
 export default {
   components: {
     VButton,
     VInput,
-    VLink
+    VLink,
+    VIconbox
   },
   methods: {
     handleButtonClick() {
@@ -52,7 +55,7 @@ export default {
 <style lang="scss">
 @import '@/components/styles/variables/fonts.scss';
 @import '@/components/styles/variables/colors.scss';
-.sign-in-part{
+.forgot-part{
 max-width: 360px;
 margin: 0 auto;
 h2{
@@ -98,9 +101,5 @@ h4{
     margin-right: 8px;
   }
 }
-}
-.icon-20:after{
-  height: 20px;
-  width: 20px;
 }
 </style>

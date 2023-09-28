@@ -1,26 +1,20 @@
 
 <template>
  <div class="forgot-part">
-  <v-iconbox class="v-forgot-key"/>
-<h2 class="text-center">Forgot Password</h2>
-<h4 class="text-center">No worries, we’ll send you reset instructions.</h4>
-  <v-input label="Email" placeholder="Enter your email"/>
-
-   <div class="row v-input-group">
-    <div class="col-lg-6">
-    </div>
-   </div>
+  <v-iconbox class="v-mail-icon"/>
+<h2 class="text-center">Check your email</h2>
+<h4 class="text-center">We sent a verification link to olivia@untitledui.com</h4>
 
    <v-button
       rounded=true
-      text="Reset password"
+      text="Go to Login"
       @click="handleButtonClick"
       block=true
     ></v-button>
-     <VLink to="/signin" isRouteLink class="v-button v-button--white v-button--flex v-button--link"><i class="vicon v-back icon-20"></i><span>Back to login</span></VLink>
+
     <div class="signup-wrap text-center">
-      <span>Don’t have an account?</span>
-       <VLink to="/signup" isRouteLink>Sign Up</VLink>
+      <span>Didn’t receive the email?</span>
+       <VLink to="/signup" isRouteLink>Click to resend</VLink>
     </div>
  </div>
 </template>

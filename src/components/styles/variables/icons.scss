@@ -26,6 +26,9 @@
     &.v-forgot-key:after{
   background-image: url('@/components/styles/icons/forgot-key.svg');
     }
+    &.v-mail-icon:after{
+       background-image: url('@/components/styles/icons/mail-icon.svg');
+    }
     &.v-iconbox-icon{
       margin-right: 0;
     }

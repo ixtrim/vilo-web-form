@@ -30,6 +30,11 @@ const router = createRouter({
       path: '/forgot-password',
       name: 'forgot-password',
       component: () => import('../views/ForgotPassword.vue')
+    },
+    {
+      path: '/email-check',
+      name: 'email-check',
+      component: () => import('../views/EmailCheck.vue')
     }
   ]
 })

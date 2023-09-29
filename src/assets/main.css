@@ -1,0 +1,9 @@
+@import '@/components/styles/variables/fonts.scss';
+@import '@/components/styles/variables/colors.scss';
+
+.normal-link {
+  color: var(--v-gray-600);
+  text-decoration: none;
+  font-family: var(--v-font-inter-medium);
+  cursor: pointer;
+}

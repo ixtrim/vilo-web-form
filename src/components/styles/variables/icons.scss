@@ -29,6 +29,9 @@
     &.v-mail-icon:after{
        background-image: url('@/components/styles/icons/mail-icon.svg');
     }
+    &.v-check-circle:after{
+       background-image: url('@/components/styles/icons/check-circle.svg');
+    }
     &.v-iconbox-icon{
       margin-right: 0;
     }

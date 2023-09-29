@@ -35,6 +35,11 @@ const router = createRouter({
       path: '/email-check',
       name: 'email-check',
       component: () => import('../views/EmailCheck.vue')
+    },
+    {
+      path: '/password-changed',
+      name: 'password-changed',
+      component: () => import('../views/PasswordChanged.vue')
     }
   ]
 })

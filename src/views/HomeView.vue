@@ -7,3 +7,7 @@ import HelloWorld from '../components/HelloWorld.vue'
     <HelloWorld/>
   </main>
 </template>
+
+<style>
+  @import url(./styles/home.scss);
+</style>

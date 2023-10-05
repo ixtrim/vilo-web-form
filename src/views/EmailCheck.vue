@@ -1,91 +1,41 @@
 
 <template>
- <div class="forgot-part">
-  <v-iconbox class="v-mail-icon"/>
-<h2 class="text-center">Check your email</h2>
-<h4 class="text-center">We sent a verification link to <a class="normal-link" href="mailto:olivia@untitledui.com">olivia@untitledui.com</a></h4>
+  <div class="forgot-part">
+    <v-iconbox class="v-mail-icon" />
+    <h2 class="text-center">Check your email</h2>
+    <h4 class="text-center">We sent a verification link to <a class="normal-link"
+        href="mailto:olivia@untitledui.com">olivia@untitledui.com</a></h4>
 
-   <v-button
-      rounded=true
-      text="Go to Login"
-      @click="handleButtonClick"
-      block=true
-    ></v-button>
+    <v-button rounded=true text="Go to Login" @click="handleButtonClick" block=true></v-button>
 
     <div class="signup-wrap text-center">
       <span>Didn’t receive the email?</span>
-       <VLink to="/signup" isRouteLink>Click to resend</VLink>
+      <VLink to="/signup" isRouteLink>Click to resend</VLink>
     </div>
- </div>
+  </div>
 </template>
-<script>
-import VButton from '@/components/v-button/VButton.vue';
-import VInput from '@/components/v-input/VInput.vue';
-import VLink from '@/components/v-link/VLink.vue';
-import VIconbox from '@/components/v-iconbox/VIconbox.vue';
 
-export default {
-  components: {
-    VButton,
-    VInput,
-    VLink,
-    VIconbox
-  },
-  methods: {
-    handleButtonClick() {
-      // Handle button click here
+<script>
+  import VButton from '@/components/v-button/VButton.vue';
+  import VInput from '@/components/v-input/VInput.vue';
+  import VLink from '@/components/v-link/VLink.vue';
+  import VIconbox from '@/components/v-iconbox/VIconbox.vue';
+
+  export default {
+    components: {
+      VButton,
+      VInput,
+      VLink,
+      VIconbox
     },
-  },
-};
+    methods: {
+      handleButtonClick() {
+        // Handle button click here
+      },
+    },
+  };
 </script>
-<style lang="scss">
-@import '@/components/styles/variables/fonts.scss';
-@import '@/components/styles/variables/colors.scss';
-.forgot-part{
-max-width: 360px;
-margin: 0 auto;
-h2{
-  font-family: var(--v-font-inter-semi-bold);
-  color: var(--v-gray-900);
-  font-size: 30px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: 38px; /* 126.667% */
-}
-h4{
-  font-family: var(--v-font-inter-regular);
-  color: var(--v-gray-600);
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 24px; /* 150% */
-  margin-bottom: 32px;
-}
-.input-group{
-  input.mr-8p{
-    margin-right: 8px;
-  }
-  label{
-    color: var(--v-gray-700);
-    font-family: var(--v-font-inter-medium);
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 20px;
-  }
-}
-.v-input-group{
-  margin-top: 24px;
-  margin-bottom: 24px;
-}
-.signup-wrap{
-  span{
-    font-family: var(--v-font-inter-regular);
-    color: var(--v-gray-600);
-    font-size: 14px;
-    line-height: 20px;
-    margin-right: 8px;
-  }
-}
-}
+
+<style>
+  @import url(./styles/email-check.scss);
 </style>

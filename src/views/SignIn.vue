@@ -1,42 +1,41 @@
-
 <template>
- <div class="sign-in-part">
-<h2>Log in to your account</h2>
-<h4>Welcome back! Please enter your details.</h4>
-  <v-input label="Email" placeholder="Enter your email"/>
-   <v-input label="Password" placeholder="*********" type="password"/>
+  <div class="sign-in-part">
+    <h2>Log in to your account</h2>
+    <h4>Welcome back! Please enter your details.</h4>
+    <v-input label="Email" placeholder="Enter your email" />
+    <v-input label="Password" placeholder="*********" type="password" />
 
-   <div class="row v-input-group">
-    <div class="col-lg-6">
-    <div class="input-group align-items-center ">
-      <input type="checkbox" id="remember" class="mr-8p">
-      <label for="remember" >Remember me</label></div>
+    <div class="row v-input-group">
+      <div class="col-lg-6">
+        <div class="input-group align-items-center ">
+          <input type="checkbox" id="remember" class="mr-8p">
+          <label for="remember">Remember me</label>
+        </div>
+      </div>
+      <div class="col-lg-6 text-end">
+        <VLink to="/forgot-password" isRouteLink>Forgot password</VLink>
+      </div>
     </div>
-    <div class="col-lg-6 text-end">
-     <VLink to="/forgot-password" isRouteLink>Forgot password</VLink>
-    </div>
-   </div>
 
-   <v-button
-      rounded=true
-      text="Sign In"
-      @click="handleButtonClick"
+    <v-button 
+      text="Sign In" 
+      @click="handleButtonClick" 
       block=true
     ></v-button>
-     <v-button
-     class="v-button--white v-button--flex"
-      rounded=true
-      text="Sign in with Google"
-      outlined="true"
+    <v-button
+      :block="true"
+      size="md"
+      icon="left"
+      icon-style="google"
+      styled="outlined"
       @click="handleButtonClick"
-      block=true
-      icon="vicon v-google"
+      text="Sign in with Google"
     ></v-button>
     <div class="signup-wrap text-center">
       <span>Don’t have an account?</span>
-       <VLink to="/signup" isRouteLink>Sign Up</VLink>
+      <VLink to="/signup" isRouteLink>Sign Up</VLink>
     </div>
- </div>
+  </div>
 </template>
 <script>
 import VButton from '@/components/v-button/VButton.vue';
@@ -56,54 +55,7 @@ export default {
   },
 };
 </script>
-<style lang="scss">
-@import '@/components/styles/variables/fonts.scss';
-@import '@/components/styles/variables/colors.scss';
-.sign-in-part{
-max-width: 360px;
-margin: 0 auto;
-h2{
-  font-family: var(--v-font-inter-semi-bold);
-  color: var(--v-gray-900);
-  font-size: 30px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: 38px; /* 126.667% */
-}
-h4{
-  font-family: var(--v-font-inter-regular);
-  color: var(--v-gray-600);
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 24px; /* 150% */
-  margin-bottom: 32px;
-}
-.input-group{
-  input.mr-8p{
-    margin-right: 8px;
-  }
-  label{
-    color: var(--v-gray-700);
-    font-family: var(--v-font-inter-medium);
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 20px;
-  }
-}
-.v-input-group{
-  margin-top: 24px;
-  margin-bottom: 24px;
-}
-.signup-wrap{
-  span{
-    font-family: var(--v-font-inter-regular);
-    color: var(--v-gray-600);
-    font-size: 14px;
-    line-height: 20px;
-    margin-right: 8px;
-  }
-}
-}
+
+<style>
+@import url(./styles/sign-in.scss);
 </style>

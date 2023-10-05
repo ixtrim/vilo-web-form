@@ -1,10 +1,10 @@
 <template>
-  <router-link v-if="isRouteLink" :to="to" :class="[linkClass, `v-link--${style}`, { [`v-link--icon-${icon}`]: icon !== 'no' }]">
+  <router-link v-if="isRouteLink" :to="to" :class="[linkClass, `v-link--${styled}`, { [`v-link--icon-${icon}`]: icon !== 'no' }, { 'v-link--block': block }]">
     <i v-if="icon === 'left'" :class="iconStyle"></i>
     <slot></slot>
     <i v-if="icon === 'right'" :class="iconStyle"></i>
   </router-link>
-  <a v-else :href="to" :target="openInNewTab ? '_blank' : '_self'" :class="[linkClass, `v-link--${style}`, { [`v-link--icon-${icon}`]: icon !== 'no' }]">
+  <a v-else :href="to" :target="openInNewTab ? '_blank' : '_self'" :class="[linkClass, `v-link--${styled}`, { [`v-link--icon-${icon}`]: icon !== 'no' }, { 'v-link--block': block }]">
     <i v-if="icon === 'left'" :class="iconStyle"></i>
     <slot></slot>
     <i v-if="icon === 'right'" :class="iconStyle"></i>

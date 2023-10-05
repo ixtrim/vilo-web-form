@@ -7,13 +7,9 @@
     <v-input label="Email" placeholder="Enter your email" />
 
     <v-button text="Reset password" @click="handleButtonClick" block=true></v-button>
-    <VLink to="/signin" isRouteLink styled="primary" icon="left" icon-style="arrow-left" block=true>
-      <span>Back to login</span>
+    <VLink to="/signin" isRouteLink styled="secondary" icon="left" icon-style="arrow-left" block=true>
+      <span>Back to log in</span>
     </VLink>
-    <div class="signup-wrap text-center">
-      <span>Don’t have an account?</span>
-      <VLink to="/signup" isRouteLink>Sign Up</VLink>
-    </div>
   </div>
 </template>
 <script>

@@ -1,38 +1,49 @@
-
-.vicon{
-    height: 24px;
-    width: 24px;
-    margin-right: 12px;
-    &::after{
-    content: '';
-  display: inline-block;
-  width: 24px;
+.vicon {
   height: 24px;
+  width: 24px;
+  margin-right: 12px;
 
-  background-size: cover;
-    }
-    &.v-google:after{
-  background-image: url('@/components/styles/icons/google.svg');
-    }
-      &.v-back:after{
-         height: 20px;
+  &::after {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+
+    background-size: cover;
+  }
+
+  &.v-google:after {
+    background-image: url('@/components/styles/icons/google.svg');
+  }
+
+  &.v-back:after {
+    height: 20px;
     width: 20px;
-  background-image: url('@/components/styles/icons/back-icon.svg');
-    }
-    &.v-back{
-      height: 20px;
+    background-image: url('@/components/styles/icons/back-icon.svg');
+  }
+
+  &.v-back {
+    height: 20px;
     width: 20px;
-    }
-    &.v-forgot-key:after{
-  background-image: url('@/components/styles/icons/forgot-key.svg');
-    }
-    &.v-mail-icon:after{
-       background-image: url('@/components/styles/icons/mail-icon.svg');
-    }
-    &.v-check-circle:after{
-       background-image: url('@/components/styles/icons/check-circle.svg');
-    }
-    &.v-iconbox-icon{
-      margin-right: 0;
-    }
+  }
+
+  &.v-forgot-key:after {
+    background-image: url('@/components/styles/icons/forgot-key.svg');
+  }
+
+  &.v-mail-icon:after {
+    background-image: url('@/components/styles/icons/mail-icon.svg');
+  }
+
+  &.v-check-circle:after {
+    background-image: url('@/components/styles/icons/check-circle.svg');
+  }
+
+  &.v-lock-icon:after {
+    background-image: url('@/components/styles/icons/lock-icon.svg');
+  }
+
+  &.v-iconbox-icon {
+    margin-right: 0;
+  }
 }

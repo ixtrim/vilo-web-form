@@ -1,10 +1,135 @@
 @import '@/components/styles/variables/colors.scss';
 @import '@/components/styles/variables/fonts.scss';
 
-.v-link{
-    color:var(--v-primary-indigo-700);
-    font-family:var(--v-font-inter-semi-bold);
-    font-size: 14px;
-    line-height: 20px;
-    text-decoration: none;
+.v-link {
+  font-family: var(--v-font-inter-semi-bold);
+  font-size: 14px;
+  line-height: 20px;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &--block {
+    width: 100%;
+    padding: 10px 16px;
+  }
+
+  &--primary {
+    color: var(--v-primary-indigo-700);
+  }
+
+  &--secondary {
+    color: var(--v-gray-600);
+  }
+
+  &--important {
+    color: var(--v-important-color);
+  }
+
+  &--crucial {
+    color: var(--v-crucial-color);
+  }
+
+  &--icon-left,
+  &--icon-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &--icon-left i {
+    margin-right: 8px;
+  }
+
+  &--icon-right i {
+    margin-left: 8px;
+  }
+
+
+  // Icon positions
+  &--icon-left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      margin-right: 6px;
+    }
+  }
+
+  &--icon-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      margin-left: 6px;
+    }
+  }
+
+  // Icons
+  .arrow-left {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    background-image: url(../styles/icons/back-icon.svg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
+
+  .arrow-right {
+    /* styles for arrow-right icon */
+  }
+
+  .save {
+    /* styles for save icon */
+  }
+
+  .preview {
+    /* styles for preview icon */
+  }
+
+  .edit {
+    /* styles for edit icon */
+  }
+
+  .delete {
+    /* styles for delete icon */
+  }
+
+  .add {
+    /* styles for add icon */
+  }
+
+  .copy {
+    /* styles for copy icon */
+  }
+
+  .upload {
+    /* styles for upload icon */
+  }
+
+  .share {
+    /* styles for share icon */
+  }
+
+  .share {
+    /* styles for share icon */
+  }
+
+  .google {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    background-image: url(../styles/icons/google.svg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
 }

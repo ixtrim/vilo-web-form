@@ -2,10 +2,11 @@
 @import '../styles/variables/colors.scss';
 @import '../styles/variables/fonts.scss';
 @import '../styles/variables/icons.scss';
+
 .v-button {
   padding: 10px 18px;
-  background-color:var(--v-primary-indigo-600);
-  font-family:var(--v-font-inter-semi-bold);
+  background-color: var(--v-primary-indigo-600);
+  font-family: var(--v-font-inter-semi-bold);
   line-height: 24px;
   color: #fff;
   font-size: 16px;
@@ -13,65 +14,182 @@
   cursor: pointer;
   margin-bottom: 16px;
   transition: background-color 0.3s, color 0.3s;
-
-  &--white{
-background-color: #fff;
-color: var(--v-gray-900);
-  }
+  border-radius: 8px;
 
   &--block {
     width: 100%;
   }
 
-  &--flex{
+  &--flex {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
   }
-  &--rounded {
-    border-radius: 8px;
+
+  // Sizes
+  &--sm {
+    font-size: 12px;
+    padding: 5px 10px;
   }
 
-
-
-  &:hover {
-    background-color:var(--v-primary-indigo-700);
+  &--md {
+    font-size: 16px;
+    padding: 10px 16px;
   }
 
-  &:active {
-    background-color: #1b6ca8;
+  &--lg {
+    font-size: 20px;
+    padding: 15px 22px;
   }
 
-  &:focus {
-    outline: none;
-    box-shadow: 0px 0px 0px 4px #E4E6FF, 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+  &--xl {
+    font-size: 24px;
+    padding: 20px 26px;
   }
 
-    &--outlined {
-    border: 1px solid var(--v-gray-300);
-    background-color: #fff;
-    box-shadow: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+  &--xxl {
+    font-size: 28px;
+    padding: 25px 30px;
+  }
 
-    &:hover{
-       background-color: #fff;
+  // Styles
+  &--primary {
+    background-color: var(--v-primary-indigo-600);
+    color: #fff;
+
+    &:hover {
+      background-color: var(--v-primary-indigo-700);
     }
 
-    &:focus{
+    &:focus {
       outline: none;
       box-shadow: 0px 0px 0px 4px #F2F4F7, 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
     }
   }
 
-    &--link{
-      &.v-link{
-  color: var(--v-gray-600);
-    &:hover{
-       background-color:transparent;
+  &--secondary {
+    background-color: var(--v-primary-indigo-100);
+    border: 1px solid var(--v-primary-indigo-200);
+    color: var(--v-primary-indigo-700);
+
+    &:hover {
+      background-color: var(--v-primary-indigo-200);
     }
-      }
 
+    &:focus {
+      outline: none;
+      box-shadow: 0px 0px 0px 4px #F2F4F7, 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+    }
+  }
 
+  &--outlined {
+    border: 1px solid var(--v-gray-300);
+    background-color: #fff;
+    color: var(--v-gray-900);
+  }
+
+  &--outlined {
+    border: 1px solid var(--v-gray-300);
+    background-color: #fff;
+    box-shadow: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+
+    &:hover {
+      background-color: var(--v-gray-100);
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0px 0px 0px 4px #F2F4F7, 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+    }
+  }
+
+  &--important {
+    background-color: var(--v-important-color);
+    color: #fff;
+  }
+
+  &--crucial {
+    background-color: var(--v-crucial-color);
+    color: #fff;
+  }
+
+  // Icon positions
+  &--icon-left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      margin-right: 8px;
+    }
+  }
+
+  &--icon-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      margin-left: 8px;
+    }
+  }
+
+  // Icons
+  .arrow-left {
+    /* styles for arrow-left icon */
+  }
+
+  .arrow-right {
+    /* styles for arrow-right icon */
+  }
+
+  .save {
+    /* styles for save icon */
+  }
+
+  .preview {
+    /* styles for preview icon */
+  }
+
+  .edit {
+    /* styles for edit icon */
+  }
+
+  .delete {
+    /* styles for delete icon */
+  }
+
+  .add {
+    /* styles for add icon */
+  }
+
+  .copy {
+    /* styles for copy icon */
+  }
+
+  .upload {
+    /* styles for upload icon */
+  }
+
+  .share {
+    /* styles for share icon */
+  }
+
+  .share {
+    /* styles for share icon */
+  }
+
+  .google {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    background-image: url(../styles/icons/google.svg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
   }
 
   .v-button-loader {
@@ -83,8 +201,13 @@ color: var(--v-gray-900);
     animation: spin 1s linear infinite;
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
   }
 }

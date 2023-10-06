@@ -6,11 +6,11 @@
     <h4 class="text-center">We sent a verification link to <a class="normal-link"
         href="mailto:olivia@untitledui.com">olivia@untitledui.com</a></h4>
 
-    <v-button rounded=true text="Go to Login" @click="handleButtonClick" block=true></v-button>
+    <v-button text="Go to Login" @click="handleButtonClick" block=true></v-button>
 
     <div class="signup-wrap text-center">
       <span>Didn’t receive the email?</span>
-      <VLink to="/signup" isRouteLink>Click to resend</VLink>
+      <VLink to="/forgot-password" isRouteLink>Click to resend</VLink>
     </div>
   </div>
 </template>
@@ -37,5 +37,5 @@
 </script>
 
 <style>
-  @import url(./styles/email-check.scss);
+  @import url(./styles/email-verification.scss);
 </style>

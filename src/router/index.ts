@@ -32,9 +32,14 @@ const router = createRouter({
       component: () => import('../views/ForgotPassword.vue')
     },
     {
-      path: '/email-check',
-      name: 'email-check',
-      component: () => import('../views/EmailCheck.vue')
+      path: '/email-verification',
+      name: 'email-verification',
+      component: () => import('../views/EmailVerification.vue')
+    },
+    {
+      path: '/set-new-password',
+      name: 'set-new-password',
+      component: () => import('../views/SetNewPassword.vue')
     },
     {
       path: '/password-changed',

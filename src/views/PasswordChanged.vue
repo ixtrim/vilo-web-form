@@ -10,26 +10,26 @@
 </template>
 
 <script>
-import VButton from '@/components/v-button/VButton.vue';
-import VInput from '@/components/v-input/VInput.vue';
-import VLink from '@/components/v-link/VLink.vue';
-import VIconbox from '@/components/v-iconbox/VIconbox.vue';
+  import VButton from '@/components/v-button/VButton.vue';
+  import VInput from '@/components/v-input/VInput.vue';
+  import VLink from '@/components/v-link/VLink.vue';
+  import VIconbox from '@/components/v-iconbox/VIconbox.vue';
 
-export default {
-  components: {
-    VButton,
-    VInput,
-    VLink,
-    VIconbox
-  },
-  methods: {
-    handleButtonClick() {
-      // Handle button click here
+  export default {
+    components: {
+      VButton,
+      VInput,
+      VLink,
+      VIconbox
     },
-  },
-};
+    methods: {
+      handleButtonClick() {
+        // Handle button click here
+      },
+    },
+  };
 </script>
 
 <style>
-  @import url(./styles/password-changed.scss);
+@import url(./styles/password-changed.scss);
 </style>

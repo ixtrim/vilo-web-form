@@ -1,6 +1,6 @@
 <template>
   <div class="set-new-password-part">
-    <v-iconbox class="v-check-circle" />
+    <v-iconbox class="v-lock-icon" />
     <h2 class="text-center">Set new password</h2>
     <h4 class="text-center">Your new password must be different to previously used passwords.</h4>
 
@@ -9,12 +9,12 @@
         type="password" 
         v-model="password" 
         @input="validatePassword" 
-        placeholder="********" 
+        placeholder="••••••••" 
         label="Password"
       />
       <v-input 
         label="Confirm password" 
-        placeholder="********" 
+        placeholder="••••••••" 
         type="password" 
         v-model="confirmPassword"
       />
@@ -32,6 +32,12 @@
           </div>
           <span>Must contain one special character</span>
         </li>
+        <li :class="validationClass(hasSpecialCharacter)">
+          <div class="icon-container" :class="iconContainerClass(hasSpecialCharacter)">
+            <i :class="iconClass(hasSpecialCharacter)"></i>
+          </div>
+          <span>Password fields are matching</span>
+        </li>
       </ul>
 
       <v-button  
@@ -45,69 +51,71 @@
 </template>
 
 <script>
-import VButton from '@/components/v-button/VButton.vue';
-import VInput from '@/components/v-input/VInput.vue';
+  import VButton from '@/components/v-button/VButton.vue';
+  import VInput from '@/components/v-input/VInput.vue';
+  import VIconbox from '@/components/v-iconbox/VIconbox.vue';
 
-export default {
-  components: {
-    VButton,
-    VInput,
-  },
-  data() {
-    return {
-      password: '',
-      confirmPassword: '',
-      isValidLength: false,
-      hasSpecialCharacter: false,
-    };
-  },
-  computed: {
-    isPasswordValid() {
-      return this.isValidLength && this.hasSpecialCharacter && this.password === this.confirmPassword;
+  export default {
+    components: {
+      VButton,
+      VInput,
+      VIconbox
     },
-  },
-  methods: {
-    handleButtonClick() {
-
-    console.log('Button clicked or form submitted'); 
-
-    if (this.isPasswordValid) {
-      // Handle password change
-      console.log('Password is valid and can be changed.');
-    } else {
-      console.log('Password is invalid.');
-    }
-    },
-    validatePassword() {
-      console.log('Typed password:', this.password);
-      this.isValidLength = this.password.length >= 8;
-      this.hasSpecialCharacter = /[!@#$%^&*(),.?":{}|<>]/.test(this.password);
-      console.log('Validating password:', this.isValidLength, this.hasSpecialCharacter);
-    },
-    validationClass(isValid) {
+    data() {
       return {
-        'valid': isValid,
-        'invalid': !isValid && this.password !== '',
-        'default': this.password === ''
+        password: '',
+        confirmPassword: '',
+        isValidLength: false,
+        hasSpecialCharacter: false,
       };
     },
-    iconContainerClass(isValid) {
-      return {
-        'icon-container--valid': isValid,
-        'icon-container--invalid': !isValid && this.password !== '',
-        'icon-container--default': this.password === ''
-      };
+    computed: {
+      isPasswordValid() {
+        return this.isValidLength && this.hasSpecialCharacter && this.password === this.confirmPassword;
+      },
     },
-    iconClass(isValid) {
-      return {
-        'icon--check': isValid,
-        'icon--cross': !isValid && this.password !== '',
-        'icon--default': this.password === ''
-      };
+    methods: {
+      handleButtonClick() {
+
+      console.log('Button clicked or form submitted'); 
+
+      if (this.isPasswordValid) {
+        // Handle password change
+        console.log('Password is valid and can be changed.');
+      } else {
+        console.log('Password is invalid.');
+      }
+      },
+      validatePassword() {
+        console.log('Typed password:', this.password);
+        this.isValidLength = this.password.length >= 8;
+        this.hasSpecialCharacter = /[!@#$%^&*(),.?":{}|<>]/.test(this.password);
+        console.log('Validating password:', this.isValidLength, this.hasSpecialCharacter);
+      },
+      validationClass(isValid) {
+        return {
+          'valid': isValid,
+          'invalid': !isValid && this.password !== '',
+          'default': this.password === ''
+        };
+      },
+      iconContainerClass(isValid) {
+        return {
+          'icon-container--valid': isValid,
+          'icon-container--invalid': !isValid && this.password !== '',
+          'icon-container--default': this.password === ''
+        };
+      },
+      iconClass(isValid) {
+        return {
+          'icon--check': isValid,
+          'icon--cross': !isValid && this.password !== '',
+          'icon--default': this.password === ''
+        };
+      },
+      
     },
-    
-  },
-};
+  };
 </script>
 
 

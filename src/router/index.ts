@@ -17,13 +17,13 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue')
     },
     {
-      path: '/signin',
-      name: 'signin',
+      path: '/sign-in',
+      name: 'sign-in',
       component: () => import('../views/SignIn.vue')
     },
     {
-      path: '/signup',
-      name: 'signup',
+      path: '/sign-up',
+      name: 'sign-up',
       component: () => import('../views/SignUp.vue')
     },
     {
@@ -47,9 +47,9 @@ const router = createRouter({
       component: () => import('../views/PasswordChanged.vue')
     },
     {
-      path: '/change-password',
-      name: 'change-password',
-      component: () => import('../views/ChangePassword.vue')
+      path: '/dashboard',
+      name: 'dashboard',
+      component: () => import('../views/Dashboard.vue')
     }
   ]
 })

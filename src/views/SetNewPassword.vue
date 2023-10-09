@@ -11,12 +11,15 @@
         @input="validatePassword" 
         placeholder="••••••••" 
         label="Password"
+        :errorMessage="passwordValidationMessage"
       />
       <v-input 
         label="Confirm password" 
         placeholder="••••••••" 
         type="password" 
         v-model="confirmPassword"
+        @input="validateConfirmPassword"
+        :errorMessage="confirmPasswordValidationMessage"
       />
 
       <ul role="list" class="password-validation">
@@ -32,9 +35,9 @@
           </div>
           <span>Must contain one special character</span>
         </li>
-        <li :class="validationClass(hasSpecialCharacter)">
-          <div class="icon-container" :class="iconContainerClass(hasSpecialCharacter)">
-            <i :class="iconClass(hasSpecialCharacter)"></i>
+        <li :class="validationClass(arePasswordsMatching)">
+          <div class="icon-container" :class="iconContainerClass(arePasswordsMatching)">
+            <i :class="iconClass(arePasswordsMatching)"></i>
           </div>
           <span>Password fields are matching</span>
         </li>
@@ -43,6 +46,7 @@
       <v-button  
         text="Sign In" 
         type="submit"
+        @click="handleSubmit"
         block=true
       ></v-button>
     </form>
@@ -67,30 +71,29 @@
         confirmPassword: '',
         isValidLength: false,
         hasSpecialCharacter: false,
+        arePasswordsMatching: false,
+        passwordValidationMessage: '',
+        confirmPasswordValidationMessage: '',
       };
     },
     computed: {
       isPasswordValid() {
-        return this.isValidLength && this.hasSpecialCharacter && this.password === this.confirmPassword;
+        return this.isValidLength && this.hasSpecialCharacter && this.arePasswordsMatching;
       },
     },
     methods: {
-      handleButtonClick() {
-
-      console.log('Button clicked or form submitted'); 
-
-      if (this.isPasswordValid) {
-        // Handle password change
-        console.log('Password is valid and can be changed.');
-      } else {
-        console.log('Password is invalid.');
-      }
-      },
       validatePassword() {
-        console.log('Typed password:', this.password);
         this.isValidLength = this.password.length >= 8;
         this.hasSpecialCharacter = /[!@#$%^&*(),.?":{}|<>]/.test(this.password);
-        console.log('Validating password:', this.isValidLength, this.hasSpecialCharacter);
+
+        this.passwordValidationMessage = '';
+
+        this.validateConfirmPassword();
+      },
+      validateConfirmPassword() {
+        this.arePasswordsMatching = this.password === this.confirmPassword;
+
+        this.confirmPasswordValidationMessage = '';
       },
       validationClass(isValid) {
         return {
@@ -113,7 +116,29 @@
           'icon--default': this.password === ''
         };
       },
-      
+      handleSubmit() {
+        console.log('Button clicked or form submitted'); 
+
+        // Check if fields are filled
+        if (!this.password) {
+          this.passwordValidationMessage = 'Password is required!';
+        } else {
+          this.passwordValidationMessage = '';
+        }
+
+        if (!this.confirmPassword) {
+          this.confirmPasswordValidationMessage = 'Confirm password is required!';
+        } else {
+          this.confirmPasswordValidationMessage = '';
+        }
+
+        // Check if password is valid
+        if (this.isPasswordValid && this.password && this.confirmPassword) {
+          this.$router.push('/password-changed');
+        } else {
+          console.log('Password is invalid.');
+        }
+      },
     },
   };
 </script>

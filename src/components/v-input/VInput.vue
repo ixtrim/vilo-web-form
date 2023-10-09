@@ -4,11 +4,12 @@
     <input
       :id="inputId"
       :type="type"
-      :value="value"
+      :value="localValue"
       :placeholder="placeholder"
-      :disabled="disabled"
-      @input="$emit('input', $event.target.value)"
+      @input="updateValue"
+      @blur="$emit('blur')"
     />
+    <p class="error-message" v-if="errorMessage">{{ errorMessage }}</p>
   </div>
 </template>
 
@@ -38,17 +39,38 @@ export default {
     disabled: {
       type: Boolean,
       default: false
-    }
+    },
+    errorMessage: {
+      type: String,
+      default: ''
+    },
+  },
+  data() {
+    return {
+      localValue: this.modelValue,
+    };
+  },
+  watch: {
+    modelValue(newVal) {
+      this.localValue = newVal;
+    },
+    localValue(newVal) {
+      this.$emit('update:modelValue', newVal);
+    },
+  },
+  methods: {
+    updateValue(event) {
+      this.localValue = event.target.value;
+    },
   },
   computed: {
     inputId() {
-      // Generate a unique input ID based on a unique key (timestamp)
-      return `input-${Date.now()}`
+      return `input-${this.type}-${Date.now()}`
     }
   }
 }
 </script>
 
 <style>
-@import url(./VInput.scss);
+  @import url(./VInput.scss);
 </style>

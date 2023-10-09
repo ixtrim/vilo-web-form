@@ -4,10 +4,17 @@
     <v-iconbox class="v-forgot-key" />
     <h2 class="text-center">Forgot Password</h2>
     <h4 class="text-center">No worries, we’ll send you reset instructions.</h4>
-    <v-input label="Email" placeholder="Enter your email" />
 
-    <v-button text="Reset password" @click="handleButtonClick" block=true></v-button>
-    <VLink to="/signin" isRouteLink styled="secondary" icon="left" icon-style="arrow-left" block=true>
+    <v-input 
+      label="Email" 
+      placeholder="Enter your email" 
+      v-model="email" 
+      @blur="validateEmail" 
+      :errorMessage="emailValidationMessage"
+    />
+
+    <v-button text="Reset password" @click="handleSubmit" block=true></v-button>
+    <VLink to="/sign-in" isRouteLink styled="secondary" icon="left" icon-style="arrow-left" block=true>
       <span>Back to log in</span>
     </VLink>
   </div>
@@ -25,9 +32,33 @@
       VLink,
       VIconbox
     },
+    data() {
+      return {
+        email: '',
+        emailValidationMessage: '',
+      };
+    },
     methods: {
-      handleButtonClick() {
-        // Handle button click here
+      validateEmail() {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(this.email)) {
+          this.emailValidationMessage = 'Please enter a valid email address';
+        } else {
+          this.emailValidationMessage = '';
+        }
+      },
+      handleSubmit() {
+        this.emailValidationMessage = '';
+
+        if (!this.email) {
+          this.emailValidationMessage = 'Email is required!';
+        }
+
+        if (!this.emailValidationMessage) {
+          this.$router.push('/email-verification');
+        } else {
+          console.log('Form is invalid, do not submit');
+        }
       },
     },
   };

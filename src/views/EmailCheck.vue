@@ -10,7 +10,7 @@
 
     <div class="signup-wrap text-center">
       <span>Didn’t receive the email?</span>
-      <VLink to="/signup" isRouteLink>Click to resend</VLink>
+      <VLink to="/sign-up" isRouteLink>Click to resend</VLink>
     </div>
   </div>
 </template>

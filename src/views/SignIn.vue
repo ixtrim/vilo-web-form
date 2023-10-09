@@ -37,7 +37,7 @@
 
     <div class="signup-wrap text-center">
       <span>Don’t have an account?</span>
-      <VLink to="/signup" isRouteLink>Sign Up</VLink>
+      <VLink to="/sign-up" isRouteLink>Sign Up</VLink>
     </div>
 
   </div>

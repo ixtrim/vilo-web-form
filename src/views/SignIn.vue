@@ -13,7 +13,7 @@
 
     <v-input 
       label="Password" 
-      placeholder="*********" 
+      placeholder="••••••••" 
       type="password" 
       v-model="password"
       @input="validatePassword"

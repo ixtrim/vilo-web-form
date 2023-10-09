@@ -39,6 +39,7 @@ import HeroSectionVue from './views/HeroSection.vue';
       </nav> -->
   </div>
 </template>
+
 <style lang="scss">
 @import './components/styles/variables/fonts.scss';
 

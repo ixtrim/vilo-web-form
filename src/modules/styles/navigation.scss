@@ -54,10 +54,17 @@ body {
 
         a {
           text-align: left;
-          border-radius: 5px;
+          border-radius: 6px;
+          padding: 10px 8px;
+
+          i {
+            width: 22px;
+            margin-right: 15px;
+          }
 
           span {
             flex-grow: 1;
+            color: var(--v-gray-700);
           }
 
           &:hover {
@@ -76,8 +83,14 @@ body {
 
     a {
       width: 100%;
-      border-radius: 5px;
+      border-radius: 6px;
+      padding: 10px 8px;
       text-align: left;
+
+      i {
+        width: 22px;
+        margin-right: 15px;
+      }
 
       span {
         flex-grow: 1;
@@ -91,6 +104,57 @@ body {
       &.active {
         background: var(--v-gray-200);
 
+        &:hover {
+          background: var(--v-primary-indigo-100);
+        }
+      }
+    }
+  }
+
+  .user-account {
+    width: 100%;
+    border-top: 1px solid var(--v-gray-200);
+    padding: 24px 0 0 8px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    &__avatar {
+      margin-right: 12px;
+
+      img {
+        border-radius: 55%;
+        border: 1px solid var(--v-gray-900);
+      }
+    }
+
+    &__info {
+      flex-grow: 1;
+
+      span {
+        display: block;
+        text-align: left;
+        color: var(--v-gray-700);
+        font-size: .875rem;
+      }
+
+      &__name {
+        font-weight: 600;
+      }
+    }
+
+    &__arrow {
+      margin-left: 12px;
+
+      a {
+        padding: 10px;
+        border-radius: 6px;
+
+        i {
+          margin-right: 0;
+        }
+        
         &:hover {
           background: var(--v-primary-indigo-100);
         }

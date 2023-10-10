@@ -29,3 +29,7 @@
     { name: 'Billing', to: '/settings-billing', },
   ];
 </script>
+
+<style>
+  @import url(./styles/tabs-nav.scss);
+</style>

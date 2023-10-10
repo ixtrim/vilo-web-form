@@ -1,3 +1,30 @@
 <template>
-  Settings - Billing
+  <div class="container-fluid">
+    
+    <div class="row">
+      <div class="col-lg-12">
+        <TabsSettings />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="dashboard__heading">
+          <h1>Billing</h1>
+          <p>Update your billing details and address.</p>
+        </div>
+        
+      </div>
+    </div>
+
+  </div>
 </template>
+
+<script setup lang="ts">
+  import TabsSettings from '@/modules/TabsSettings.vue';
+</script>
+
+<style>
+  @import url(./styles/settings.scss);
+  @import url(./styles/dashboard.scss);
+</style>

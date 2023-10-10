@@ -114,6 +114,16 @@
     color: #fff;
   }
 
+  &--icon-left,
+  &--icon-right {
+    i {
+      display: inline-block;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+    }
+  }
+
   // Icon positions
   &--icon-left {
     display: flex;
@@ -163,7 +173,9 @@
   }
 
   .add {
-    /* styles for add icon */
+    width: 12px;
+    height: 12px;
+    background-image: url(../../assets/icons/icon-plus--white.svg);
   }
 
   .copy {
@@ -185,11 +197,7 @@
   .google {
     width: 24px;
     height: 24px;
-    display: inline-block;
     background-image: url(../styles/icons/google.svg);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
   }
 
   .v-button-loader {

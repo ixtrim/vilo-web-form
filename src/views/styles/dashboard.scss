@@ -1,4 +1,28 @@
+@import '@/components/styles/variables/fonts.scss';
+@import '@/components/styles/variables/colors.scss';
+
 .dashboard {
   width: 100%;
   padding: 32px 24px;
+
+  &__heading {
+    width: 100%;
+    margin: 20px 0 32px;
+    text-align: left;
+
+    h1 {
+      margin: 0;
+      padding: 0;
+      font-size: 1.875rem;
+      font-weight: 600;
+      font-family: var(--v-font-inter-semi-bold);
+    }
+
+    p {
+      margin: 5px 0 0;
+      padding: 0;
+      font-family: var(--v-font-inter-regular);
+      color: var(--v-gray-600);
+    }
+  }
 }

@@ -1,11 +1,30 @@
 <template>
   <div class="container-fluid">
-    <div class="dashboard">
-      <h1>This is an dashboard page</h1>
+    
+    <div class="row">
+      <div class="col-lg-12">
+        <TabsSettings />
+      </div>
     </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="dashboard__heading">
+          <h1>Global settings</h1>
+          <p>Your organisation configuration settings.</p>
+        </div>
+        
+      </div>
+    </div>
+
   </div>
 </template>
 
+<script setup lang="ts">
+  import TabsSettings from '@/modules/TabsSettings.vue';
+</script>
+
 <style>
   @import url(./styles/settings.scss);
+  @import url(./styles/dashboard.scss);
 </style>

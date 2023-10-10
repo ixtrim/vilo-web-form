@@ -143,7 +143,6 @@
   };
 </script>
 
-
 <style>
   @import url(./styles/set-new-password.scss);
 </style>

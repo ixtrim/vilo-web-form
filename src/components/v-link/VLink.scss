@@ -38,6 +38,12 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
+
+    i {
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+    }
   }
 
   &--icon-left i {
@@ -78,49 +84,6 @@
     height: 20px;
     display: inline-block;
     background-image: url(../styles/icons/back-icon.svg);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-  }
-
-  .arrow-right {
-    /* styles for arrow-right icon */
-  }
-
-  .save {
-    /* styles for save icon */
-  }
-
-  .preview {
-    /* styles for preview icon */
-  }
-
-  .edit {
-    /* styles for edit icon */
-  }
-
-  .delete {
-    /* styles for delete icon */
-  }
-
-  .add {
-    /* styles for add icon */
-  }
-
-  .copy {
-    /* styles for copy icon */
-  }
-
-  .upload {
-    /* styles for upload icon */
-  }
-
-  .share {
-    /* styles for share icon */
-  }
-
-  .share {
-    /* styles for share icon */
   }
 
   .google {
@@ -128,8 +91,61 @@
     height: 24px;
     display: inline-block;
     background-image: url(../styles/icons/google.svg);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
+  }
+
+  .home {
+    width: 18px;
+    height: 19px;
+    display: inline-block;
+    background-image: url(../../assets/icons/icon-home.svg);
+  }
+
+  .boards {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    background-image: url(../../assets/icons/icon-boards.svg);
+  }
+
+  .clients {
+    width: 20px;
+    height: 18px;
+    display: inline-block;
+    background-image: url(../../assets/icons/icon-clients.svg);
+  }
+
+  .library {
+    width: 16px;
+    height: 20px;
+    display: inline-block;
+    background-image: url(../../assets/icons/icon-library.svg);
+  }
+
+  .invoices {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    background-image: url(../../assets/icons/icon-invoices.svg);
+  }
+
+  .calendar {
+    width: 18px;
+    height: 20px;
+    display: inline-block;
+    background-image: url(../../assets/icons/icon-calendar.svg);
+  }
+
+  .chat {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    background-image: url(../../assets/icons/icon-chat.svg);
+  }
+
+  .settings {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    background-image: url(../../assets/icons/icon-settings.svg);
   }
 }

@@ -5,5 +5,5 @@
 </template>
 
 <style>
-  @import url(./styles/dashboard.scss);
+@import url(./styles/dashboard.scss);
 </style>

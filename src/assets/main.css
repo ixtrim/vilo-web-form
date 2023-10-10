@@ -1,5 +1,6 @@
 @import '@/components/styles/fonts.scss';
 @import '@/components/styles/variables/colors.scss';
+@import '@/components/styles/variables/spacing.scss';
 
 .normal-link {
   color: var(--v-gray-600);

@@ -1,16 +1,10 @@
 <template>
   <div class="forgot-part">
-    <v-iconbox class="v-mail-icon" />
-    <h2 class="text-center">Check your email</h2>
-    <h4 class="text-center">We sent a verification link to <a class="normal-link"
-        href="mailto:olivia@untitledui.com">olivia@untitledui.com</a></h4>
+    <v-iconbox class="v-check-circle" />
+    <h2 class="text-center">Email verified</h2>
+    <h4 class="text-center">Your email was successfully verified. You can now use it to log in.</h4>
 
-    <v-button text="Go to Login" @click="handleButtonClick" block=true></v-button>
-
-    <div class="signup-wrap text-center">
-      <span>Didn’t receive the email?</span>
-      <VLink to="/forgot-password" isRouteLink>Click to resend</VLink>
-    </div>
+    <v-button text="Continue" @click="handleButtonClick" block=true></v-button>
   </div>
 </template>
 
@@ -29,7 +23,7 @@
     },
     methods: {
       handleButtonClick() {
-        // Handle button click here
+        this.$router.push('/sign-in');
       },
     },
   };

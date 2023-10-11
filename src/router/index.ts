@@ -80,6 +80,11 @@ const router = createRouter({
       path: '/settings-billing',
       name: 'settings-billing',
       component: () => import('../views/SettingsBilling.vue')
+    },
+    {
+      path: '/clients-management',
+      name: 'clients-management',
+      component: () => import('../views/ClientsManagement.vue')
     }
   ]
 })

@@ -149,11 +149,15 @@
 
   // Icons
   .arrow-left {
-    /* styles for arrow-left icon */
+    width: 12px;
+    height: 12px;
+    background-image: url(../../assets/icons/icon-arrow-left.svg);
   }
 
   .arrow-right {
-    /* styles for arrow-right icon */
+    width: 12px;
+    height: 12px;
+    background-image: url(../../assets/icons/icon-arrow-right.svg);
   }
 
   .save {

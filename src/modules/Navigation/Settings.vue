@@ -14,22 +14,33 @@
   </div>
 </template>
 
-<script setup lang="ts">
-  import { computed } from 'vue';
-  import { useRoute } from 'vue-router';
-  import VLink from '@/components/v-link/VLink.vue';
+<script>
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import VLink from '@/components/v-link/VLink.vue';
 
-  const route = useRoute();
+export default {
+  components: {
+    VLink
+  },
+  setup() {
+    const route = useRoute();
 
-  const classActive = computed(() => {
-    const settingsPaths = [
-      '/settings',
-      '/settings-team',
-      '/settings-notifications',
-      '/settings-invoice',
-      '/settings-calendar',
-      '/settings-billing',
-    ];
-    return settingsPaths.includes(route.path);
-  });
+    const classActive = computed(() => {
+      const settingsPaths = [
+        '/settings',
+        '/settings-team',
+        '/settings-notifications',
+        '/settings-invoice',
+        '/settings-calendar',
+        '/settings-billing',
+      ];
+      return settingsPaths.includes(route.path);
+    });
+
+    return {
+      classActive
+    };
+  }
+};
 </script>

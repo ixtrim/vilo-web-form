@@ -3,6 +3,7 @@
 .tabs-menu {
   width: 100%;
   border-bottom: 1px solid var(--v-gray-200);
+  margin: 0 0 20px;
 
   ul {
     margin: 0;
@@ -26,6 +27,10 @@
 
         span {
           color: var(--v-gray-500);
+        }
+
+        .badge {
+          margin-left: 8px;
         }
 
         &:hover {

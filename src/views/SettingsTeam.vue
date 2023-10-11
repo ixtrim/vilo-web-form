@@ -8,19 +8,19 @@
     </div>
 
     <div class="row">
-      <div class="col-lg-8">
+      <div class="col-lg-9">
         <div class="dashboard__heading">
           <h1>Team management</h1>
           <p>Manage your team members and their account permissions here.</p>
         </div>
       </div>
-      <div class="col-lg-4">
+      <div class="col-lg-3">
         <ul class="settings__team-actions">
           <li>
 
           </li>
           <li>
-            <v-button :block="true" size="md" icon="left" icon-style="add" @click="handleButtonClick" text="Add user"></v-button>
+            <v-button :block="true" size="md" icon="left" icon-style="plus" @click="handleButtonClick" text="Add user"></v-button>
           </li>
         </ul>
       </div>

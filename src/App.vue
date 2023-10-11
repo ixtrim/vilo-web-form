@@ -8,7 +8,7 @@ import Navigation from './modules/Navigation.vue';
 const route = useRoute();
 
 const showInitialContent = computed(() => {
-  return route.path === '/sign-in' || route.path === '/sign-up' || route.path === '/forgot-password' || route.path === '/email-verification' || route.path === '/set-new-password' || route.path === '/password-changed';
+  return route.path === '/sign-in' || route.path === '/sign-up' || route.path === '/forgot-password' || route.path === '/email-verification' || route.path === '/set-new-password' || route.path === '/password-changed' || route.path === '/';
 });
 
 </script>

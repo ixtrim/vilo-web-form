@@ -1,18 +1,15 @@
 <template>
   <div class="container-fluid">
-    
-    <div class="row">
-      <div class="col-lg-12">
-        <TabsSettings />
-      </div>
-    </div>
 
     <div class="row">
-      <div class="col-lg-12">
+      <div class="col-lg-10">
         <div class="dashboard__heading">
-          <h1>Global settings</h1>
-          <p>Your organisation configuration settings.</p>
+          <h1>Client management</h1>
+          <p>Manage your team members and their account permissions here.</p>
         </div>
+      </div>
+      <div class="col-lg-2">
+        <Search />
       </div>
     </div>
 
@@ -47,14 +44,12 @@ import { defineComponent, ref, computed } from 'vue';
 import VButton from '@/components/v-button/VButton.vue';
 import Search   from '@/modules/Navigation/Search.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
-import TabsSettings from '@/modules/TabsSettings.vue';
 
 export default defineComponent({
   components: {
     Search,
     VButton,
-    VPaginationList,
-    TabsSettings
+    VPaginationList
   },
   setup() {
     const itemsPerPage = 10;
@@ -102,6 +97,5 @@ export default defineComponent({
 </script>
 
 <style>
-  @import url(./styles/settings.scss);
   @import url(./styles/dashboard.scss);
 </style>

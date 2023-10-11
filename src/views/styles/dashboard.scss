@@ -5,9 +5,17 @@
   width: 100%;
   padding: 32px 24px;
 
+  .container-fluid {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 64px);
+    padding: 0;
+    margin: 0;
+  }
+  
   &__heading {
     width: 100%;
-    margin: 20px 0 32px;
+    margin: 0 0 32px;
     text-align: left;
 
     h1 {
@@ -23,6 +31,32 @@
       padding: 0;
       font-family: var(--v-font-inter-regular);
       color: var(--v-gray-600);
+    }
+  }
+
+  .bottom-pagination {
+    padding: 14px 0 0;
+    margin: 0 -24px;
+    border-top: 1px solid var(--v-gray-200);
+
+    .align-left {
+      text-align: left;
+
+      button {
+        margin: 0 auto 0 0;
+      }
+    }
+
+    .align-center {
+      text-align: center;
+    }
+
+    .align-right {
+      text-align: right;
+
+      button {
+        margin: 0 0 0 auto;
+      }
     }
   }
 }

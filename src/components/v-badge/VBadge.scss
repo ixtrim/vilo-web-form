@@ -1,0 +1,14 @@
+@import '@/components/styles/variables/fonts.scss';
+@import '@/components/styles/variables/colors.scss';
+
+.badge {
+  border-radius: 16px;
+  padding: 2px 8px;
+  font-size: 12px!important;
+
+  &.bg-primary {
+    border: 1px solid var(--v-primary-indigo-200)!important;
+    background: var(--v-primary-indigo-100)!important;
+    color: var(--v-primary-indigo-700)!important;
+  }
+}

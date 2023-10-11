@@ -34,6 +34,37 @@
     }
   }
 
+  &__users {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+
+    &__head {
+      h5 {
+        font-size: .75rem;
+        margin: 12px 0;
+        padding: 0;
+        text-align: left;
+        font-family: var(--v-font-inter-medium);
+        color: var(--v-gray-600);
+      }
+
+      .first-col {
+        display: flex;
+
+        input[type=checkbox] {
+          margin: 0 12px 0 0;
+        }
+      }
+    }
+
+    &__page {
+      &__item {
+        border-top: 1px solid var(--v-gray-200);
+      }
+    }
+  }
+
   .bottom-pagination {
     padding: 14px 0 0;
     margin: 0 -24px;

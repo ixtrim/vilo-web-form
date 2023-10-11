@@ -15,9 +15,50 @@
 
     <div class="row fill-space">
       <div class="col-lg-12">
-        <div class="dashboard__list">
+        <div class="dashboard__users">
 
-          <div class="">ssss</div>
+          <div class="row dashboard__users__head">
+            <div class="col-lg-2 first-col">
+              <input type="checkbox" id="remember" class="mr-8p">
+              <h5>Name</h5>
+            </div>
+            <div class="col-lg-2">
+              <h5>Phone</h5>
+            </div>
+            <div class="col-lg-2">
+              <h5>Position</h5>
+            </div>
+            <div class="col-lg-2">
+              <h5>Company</h5>
+            </div>
+            <div class="col-lg-2">
+              <h5>Address</h5>
+            </div>
+          </div>
+
+          <div class="dashboard__users__page">
+
+            <div class="row dashboard__list__page__item">
+              <div class="col-lg-2 first-col">
+                <input type="checkbox" id="user1" class="mr-8p">
+                <VUser :userName="userName" :userEmail="userEmail" />
+
+              </div>
+              <div class="col-lg-2">
+                <p>+1 6754 6678 66</p>
+              </div>
+              <div class="col-lg-2">
+                <p>Sales</p>
+              </div>
+              <div class="col-lg-2">
+                <p>Individual</p>
+              </div>
+              <div class="col-lg-2">
+                <p>132, My Street, Kingston, New York 12401, USA</p>
+              </div>
+            </div>
+
+          </div>
           
 
         </div>
@@ -41,15 +82,24 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue';
+import VLink from '@/components/v-link/VLink.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import Search   from '@/modules/Navigation/Search.vue';
+import VUser from '@/components/v-user/v-user.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
 
 export default defineComponent({
   components: {
     Search,
     VButton,
+    VUser,
     VPaginationList
+  },
+  data() {
+    return {
+      userName: 'Olivia Rhye',
+      userEmail: 'olivia@untitledui.com'
+    };
   },
   setup() {
     const itemsPerPage = 10;

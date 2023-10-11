@@ -1,0 +1,28 @@
+.vilo-user {
+  width: 100%;
+  display: flex;
+
+  &__avatar {
+    margin-right: 12px;
+
+    img {
+      border-radius: 55%;
+      border: 1px solid var(--v-gray-900);
+    }
+  }
+
+  &__info {
+    flex-grow: 1;
+
+    span {
+      display: block;
+      text-align: left;
+      color: var(--v-gray-700);
+      font-size: .875rem;
+    }
+
+    &__name {
+      font-weight: 600;
+    }
+  }
+}

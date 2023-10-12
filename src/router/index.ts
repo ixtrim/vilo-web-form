@@ -37,6 +37,11 @@ const router = createRouter({
       component: () => import('../views/EmailVerification.vue')
     },
     {
+      path: '/email-activation',
+      name: 'email-activation',
+      component: () => import('../views/EmailActivation.vue')
+    },
+    {
       path: '/set-new-password',
       name: 'set-new-password',
       component: () => import('../views/SetNewPassword.vue')

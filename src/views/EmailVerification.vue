@@ -1,4 +1,3 @@
-
 <template>
   <div class="forgot-part">
     <v-iconbox class="v-mail-icon" />

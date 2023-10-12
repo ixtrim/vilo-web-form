@@ -1,12 +1,18 @@
 <template>
   <div class="forgot-part">
-    <v-iconbox v-if="emailVerified" class="v-check-circle" />
-    <h2 v-if="emailVerified" class="text-center">Email verified</h2>
-    <h4 v-if="emailVerified" class="text-center">Your email was successfully verified. You can now use it to log in.</h4>
 
-    <v-iconbox v-else-if="error" class="v-error" />
-    <h2 v-else-if="error" class="text-center">Verification Failed</h2>
-    <h4 v-else-if="error" class="text-center">Contact us for more details.</h4>
+    <div v-if="emailVerified">
+      <v-iconbox class="v-check-circle" />
+      <h2 class="text-center">Email verified</h2>
+      <h4 class="text-center">Your email was successfully verified. You can now use it to log in.</h4>
+    </div>
+
+    <div v-if="error">
+      <v-iconbox class="v-error" />
+      <h2 class="text-center">Verification Failed</h2>
+      <h4 class="text-center">Contact us for more details.</h4>
+    </div>
+
 
     <v-button v-if="emailVerified" text="Continue" @click="handleButtonClick" block=true></v-button>
   </div>
@@ -37,7 +43,7 @@
       async verifyEmail() {
         console.log('verifyEmail');
         try {
-          const response = await axios.get('/auth/email-verify', {
+          const response = await axios.get('https://api-vilo.nestvested.co/auth/email-verify', {
             params: {
               token: this.token,
             },

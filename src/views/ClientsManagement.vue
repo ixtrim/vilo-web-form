@@ -56,6 +56,9 @@
               <div class="col-lg-2">
                 <p>132, My Street, Kingston, New York 12401, USA</p>
               </div>
+              <div class="col-lg-1">
+                SSS
+              </div>
             </div>
 
           </div>
@@ -91,6 +94,7 @@ import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vu
 export default defineComponent({
   components: {
     Search,
+    VLink,
     VButton,
     VUser,
     VPaginationList

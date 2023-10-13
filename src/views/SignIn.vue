@@ -97,7 +97,6 @@
 
         if (!this.emailValidationMessage && !this.passwordValidationMessage) {
           try {
-            // Make API request to login
             const response = await axios.post('https://api-vilo.nestvested.co/auth/login/', {
               email: this.email,
               password: this.password,
@@ -108,13 +107,9 @@
               },
             });
 
-            // Handle success response here
-            // For example, you might store the token in local storage and redirect the user
             localStorage.setItem('token', response.data.tokens);
             this.$router.push('/dashboard');
           } catch (error) {
-            // Handle error response here
-            // You might set an error message to display to the user
             this.loginErrorMessage = 'Login failed. Please check your email and password and try again.';
           }
         } else {

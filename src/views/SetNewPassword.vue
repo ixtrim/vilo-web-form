@@ -55,6 +55,7 @@
 </template>
 
 <script>
+  import axios from 'axios';
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VIconbox from '@/components/v-iconbox/VIconbox.vue';
@@ -116,7 +117,7 @@
           'icon--default': this.password === ''
         };
       },
-      handleSubmit() {
+      async handleSubmit() {
         console.log('Button clicked or form submitted'); 
 
         // Check if fields are filled
@@ -139,6 +140,27 @@
           console.log('Password is invalid.');
         }
       },
+    },
+    async mounted() {
+      try {
+        
+        // Extract tokens from the route parameters
+        const { token1: uidb64, token2: token } = this.$route.params;
+
+        // Make API request to verify the tokens
+        await axios.get(`https://api-vilo.nestvested.co/auth/password-reset/${uidb64}/${token}/`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'accept': 'application/json',
+          },
+        });
+        console.log('Component mounted');
+        // If the request is successful, the tokens are valid and the user can stay on the page
+      } catch (error) {
+        console.log('Error occurred');
+        // If the request fails, the tokens are invalid or expired and the user should be redirected
+        //this.$router.push('/sign-in');
+      }
     },
   };
 </script>

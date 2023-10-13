@@ -57,7 +57,9 @@
                 <p>132, My Street, Kingston, New York 12401, USA</p>
               </div>
               <div class="col-lg-1">
-                SSS
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
+      Open Modal
+    </button>
               </div>
             </div>
 
@@ -67,6 +69,10 @@
         </div>
       </div>
     </div>
+
+    <VModalSmall :title="'My Modal Title'">
+      <p>Content for the modal goes here...</p>
+    </VModalSmall>
 
     <div class="row bottom-pagination">
       <div class="col-lg-2 align-left">
@@ -90,6 +96,7 @@ import VButton from '@/components/v-button/VButton.vue';
 import Search   from '@/modules/Navigation/Search.vue';
 import VUser from '@/components/v-user/v-user.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
+import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
 
 export default defineComponent({
   components: {
@@ -97,7 +104,8 @@ export default defineComponent({
     VLink,
     VButton,
     VUser,
-    VPaginationList
+    VPaginationList,
+    VModalSmall,
   },
   data() {
     return {

@@ -113,7 +113,7 @@
             this.loginErrorMessage = 'Login failed. Please check your email and password and try again.';
           }
         } else {
-          console.log('Form is invalid, do not submit');
+          this.loginErrorMessage = 'Login failed. Please try again.';
         }
       },
     },

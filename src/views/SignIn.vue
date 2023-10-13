@@ -20,6 +20,8 @@
       :errorMessage="passwordValidationMessage"
     />
 
+    <p class="error-message" v-if="loginErrorMessage">{{ loginErrorMessage }}</p>
+
     <div class="row v-input-group">
       <div class="col-lg-6">
         <div class="input-group align-items-center ">
@@ -44,6 +46,7 @@
 </template>
 
 <script>
+  import axios from 'axios';
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VLink from '@/components/v-link/VLink.vue';
@@ -60,6 +63,7 @@
         emailValidationMessage: '',
         password: '',
         passwordValidationMessage: '',
+        loginErrorMessage: '',
       };
     },
     methods: {
@@ -79,9 +83,10 @@
           this.passwordValidationMessage = '';
         }
       },
-      handleSubmit() {
+      async handleSubmit() {
         this.emailValidationMessage = '';
         this.passwordValidationMessage = '';
+        this.loginErrorMessage = '';
 
         if (!this.email) {
           this.emailValidationMessage = 'Email is required!';
@@ -91,7 +96,27 @@
         }
 
         if (!this.emailValidationMessage && !this.passwordValidationMessage) {
-          this.$router.push('/dashboard');
+          try {
+            // Make API request to login
+            const response = await axios.post('https://api-vilo.nestvested.co/auth/login/', {
+              email: this.email,
+              password: this.password,
+            }, {
+              headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json',
+              },
+            });
+
+            // Handle success response here
+            // For example, you might store the token in local storage and redirect the user
+            localStorage.setItem('token', response.data.tokens);
+            this.$router.push('/dashboard');
+          } catch (error) {
+            // Handle error response here
+            // You might set an error message to display to the user
+            this.loginErrorMessage = 'Login failed. Please check your email and password and try again.';
+          }
         } else {
           console.log('Form is invalid, do not submit');
         }

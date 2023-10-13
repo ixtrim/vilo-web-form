@@ -29,7 +29,7 @@
     },
     methods: {
       handleButtonClick() {
-        // Handle button click here
+        this.$router.push('/sign-in');
       },
     },
   };

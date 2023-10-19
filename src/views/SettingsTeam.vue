@@ -66,10 +66,10 @@
                 <VUser :userName="userName" :userEmail="userEmail" />
               </div>
               <div class="col col--sett-t-status">
-                <p>+1 6754 6678 66</p>
+                <v-badge variant="success">Activated</v-badge>
               </div>
               <div class="col col--sett-t-position">
-                <p>Sales</p>
+                <p>Client Personal Manager</p>
               </div>
               <div class="col col--sett-t-role">
                 <p>Individual</p>
@@ -92,10 +92,10 @@
                 <VUser :userName="userName" :userEmail="userEmail" />
               </div>
               <div class="col col--sett-t-status">
-                <p>+1 6754 6678 66</p>
+                <v-badge variant="warning">Pending</v-badge>
               </div>
               <div class="col col--sett-t-position">
-                <p>Sales</p>
+                <p>Head of Sales</p>
               </div>
               <div class="col col--sett-t-role">
                 <p>Individual</p>
@@ -118,10 +118,10 @@
                 <VUser :userName="userName" :userEmail="userEmail" />
               </div>
               <div class="col col--sett-t-status">
-                <p>+1 6754 6678 66</p>
+                <v-badge variant="light">Draft</v-badge>
               </div>
               <div class="col col--sett-t-position">
-                <p>Sales</p>
+                <p>CTO</p>
               </div>
               <div class="col col--sett-t-role">
                 <p>Individual</p>
@@ -144,10 +144,10 @@
                 <VUser :userName="userName" :userEmail="userEmail" />
               </div>
               <div class="col col--sett-t-status">
-                <p>+1 6754 6678 66</p>
+                <v-badge variant="danger">Error</v-badge>
               </div>
               <div class="col col--sett-t-position">
-                <p>Sales</p>
+                <p>Client Personal Manager</p>
               </div>
               <div class="col col--sett-t-role">
                 <p>Individual</p>
@@ -185,6 +185,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue';
+import VBadge from '@/components/v-badge/VBadge.vue';
 import TabsSettings from '@/modules/TabsSettings.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import VUser from '@/components/v-user/v-user.vue';
@@ -192,9 +193,11 @@ import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vu
 
 export default defineComponent({
   components: {
+    TabsSettings,
     VButton,
     VUser,
     VPaginationList,
+    VBadge,
   },
   data() {
     return {

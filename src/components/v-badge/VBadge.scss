@@ -3,12 +3,37 @@
 
 .badge {
   border-radius: 16px;
-  padding: 2px 8px;
+  padding: 4px 8px;
   font-size: 12px!important;
+  font-weight: 500!important;
 
   &.bg-primary {
     border: 1px solid var(--v-primary-indigo-200)!important;
     background: var(--v-primary-indigo-100)!important;
     color: var(--v-primary-indigo-700)!important;
+  }
+
+  &.bg-success {
+    border: 1px solid var(--v-green-200)!important;
+    background: var(--v-green-50)!important;
+    color: var(--v-green-700)!important;
+  }
+
+  &.bg-warning {
+    border: 1px solid var(--v-orange-200)!important;
+    background: var(--v-orange-50)!important;
+    color: var(--v-orange-700)!important;
+  }
+
+  &.bg-danger {
+    border: 1px solid var(--v-red-500)!important;
+    background: var(--v-red-400)!important;
+    color: var(--v-white)!important;
+  }
+
+  &.bg-light {
+    border: 1px solid var(--v-gray-200)!important;
+    background: var(--v-gray-100)!important;
+    color: var(--v-gray-700)!important;
   }
 }

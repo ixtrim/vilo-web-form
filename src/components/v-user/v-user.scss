@@ -17,12 +17,18 @@
     span {
       display: block;
       text-align: left;
-      color: var(--v-gray-700);
       font-size: .875rem;
     }
 
     &__name {
       font-weight: 600;
+      color: var(--v-gray-900);
+      font-family: var(--v-font-inter-semi-bold);
+    }
+
+    &__email {
+      color: var(--v-gray-600);
+      font-family: var(--v-font-inter-regular);
     }
   }
 }

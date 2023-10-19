@@ -52,6 +52,41 @@ const router = createRouter({
       component: () => import('../views/Dashboard.vue')
     },
     {
+      path: '/case-boards',
+      name: 'case-boards',
+      component: () => import('../views/CaseBoards.vue')
+    },
+    {
+      path: '/case-board',
+      name: 'case-board',
+      component: () => import('../views/CaseBoardsItem.vue')
+    },
+    {
+      path: '/clients-management',
+      name: 'clients-management',
+      component: () => import('../views/ClientsManagement.vue')
+    },
+    {
+      path: '/library',
+      name: 'library',
+      component: () => import('../views/Library.vue')
+    },
+    {
+      path: '/invoices',
+      name: 'invoices',
+      component: () => import('../views/Invoices.vue')
+    },
+    {
+      path: '/calendar',
+      name: 'calendar',
+      component: () => import('../views/Calendar.vue')
+    },
+    {
+      path: '/chat',
+      name: 'chat',
+      component: () => import('../views/Chat.vue')
+    },
+    {
       path: '/settings',
       name: 'settings',
       component: () => import('../views/Settings.vue')
@@ -80,11 +115,6 @@ const router = createRouter({
       path: '/settings-billing',
       name: 'settings-billing',
       component: () => import('../views/SettingsBilling.vue')
-    },
-    {
-      path: '/clients-management',
-      name: 'clients-management',
-      component: () => import('../views/ClientsManagement.vue')
     }
   ]
 })

@@ -114,6 +114,13 @@
     color: #fff;
   }
 
+  &--simple-icon {
+    border: none;
+    background: none;
+    padding: 5px 10px;
+    position: relative;
+  }
+
   &--icon-left,
   &--icon-right {
     i {
@@ -169,14 +176,30 @@
   }
 
   .edit {
-    /* styles for edit icon */
+    width: 16px;
+    height: 16px;
+    background-image: url(../../assets/icons/icon-quit-edit.svg);
+  }
+
+  .edit--2 {
+    width: 16px;
+    height: 16px;
+    background-image: url(../../assets/icons/icon-edit-2.svg);
   }
 
   .delete {
-    /* styles for delete icon */
+    width: 15px;
+    height: 16px;
+    background-image: url(../../assets/icons/icon-delete.svg);
   }
 
   .add {
+    width: 12px;
+    height: 12px;
+    background-image: url(../../assets/icons/icon-plus.svg);
+  }
+
+  .add-white {
     width: 12px;
     height: 12px;
     background-image: url(../../assets/icons/icon-plus--white.svg);

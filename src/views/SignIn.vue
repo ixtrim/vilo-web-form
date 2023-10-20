@@ -25,7 +25,7 @@
     <div class="row v-input-group">
       <div class="col-lg-6">
         <div class="input-group align-items-center ">
-          <input type="checkbox" id="remember" class="mr-8p">
+          <input type="checkbox" id="remember" v-model="rememberMe" class="mr-8p">
           <label for="remember">Remember me</label>
         </div>
       </div>
@@ -63,6 +63,7 @@
         emailValidationMessage: '',
         password: '',
         passwordValidationMessage: '',
+        rememberMe: false,
         loginErrorMessage: '',
       };
     },
@@ -108,6 +109,13 @@
             });
 
             localStorage.setItem('token', response.data.tokens);
+
+            if (this.rememberMe) {
+              localStorage.setItem('token', response.data.tokens);
+            } else {
+              sessionStorage.setItem('token', response.data.tokens);
+            }
+
             this.$router.push('/dashboard');
           } catch (error) {
             this.loginErrorMessage = 'Login failed. Please check your email and password and try again.';
@@ -117,6 +125,12 @@
         }
       },
     },
+    mounted() {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (token) {
+        this.$router.push('/dashboard');
+      }
+    }
   };
 </script>
 

@@ -8,7 +8,7 @@
     </div>
 
     <div class="row">
-      <div class="col-lg-9">
+      <div class="col-lg-10">
         <div class="dashboard__heading">
           <h1>Team management</h1>
           <p>Manage your team members and their account permissions here.</p>
@@ -17,10 +17,10 @@
       <div class="col-lg-2">
         <ul class="settings__team-actions">
           <li>
-            
+            <VDropdown :title="'Select Action'" :items="dropdownItems" @item-clicked="handleDropdownClick" />
           </li>
           <li>
-            <v-button :block="true" size="md" icon="left" icon-style="add-white" @click="handleButtonClick" text="Add user"></v-button>
+            <VButton :block="true" size="md" icon="left" icon-style="add-white" @click="handleButtonClick" text="Add user"></VButton>
           </li>
         </ul>
       </div>
@@ -66,7 +66,7 @@
                 <VUser :userName="userName" :userEmail="userEmail" />
               </div>
               <div class="col col--sett-t-status">
-                <v-badge variant="success">Activated</v-badge>
+                <VBadge variant="success">Activated</VBadge>
               </div>
               <div class="col col--sett-t-position">
                 <p>Client Personal Manager</p>
@@ -75,10 +75,10 @@
                 <p>Individual</p>
               </div>
               <div class="col col--cm-action">
-                <v-button :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick(user)" text=""></v-button>
+                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
               </div>
               <div class="col col--cm-action">
-                <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick(user)" text=""></v-button>
+                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
               </div>
 
             </div>
@@ -92,7 +92,7 @@
                 <VUser :userName="userName" :userEmail="userEmail" />
               </div>
               <div class="col col--sett-t-status">
-                <v-badge variant="warning">Pending</v-badge>
+                <VBadge variant="warning">Pending</VBadge>
               </div>
               <div class="col col--sett-t-position">
                 <p>Head of Sales</p>
@@ -101,10 +101,10 @@
                 <p>Individual</p>
               </div>
               <div class="col col--cm-action">
-                <v-button :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick(user)" text=""></v-button>
+                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
               </div>
               <div class="col col--cm-action">
-                <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick(user)" text=""></v-button>
+                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
               </div>
               
             </div>
@@ -118,7 +118,7 @@
                 <VUser :userName="userName" :userEmail="userEmail" />
               </div>
               <div class="col col--sett-t-status">
-                <v-badge variant="light">Draft</v-badge>
+                <VBadge variant="light">Draft</VBadge>
               </div>
               <div class="col col--sett-t-position">
                 <p>CTO</p>
@@ -127,10 +127,10 @@
                 <p>Individual</p>
               </div>
               <div class="col col--cm-action">
-                <v-button :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick(user)" text=""></v-button>
+                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
               </div>
               <div class="col col--cm-action">
-                <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick(user)" text=""></v-button>
+                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
               </div>
 
             </div>
@@ -144,7 +144,7 @@
                 <VUser :userName="userName" :userEmail="userEmail" />
               </div>
               <div class="col col--sett-t-status">
-                <v-badge variant="danger">Error</v-badge>
+                <VBadge variant="danger">Error</VBadge>
               </div>
               <div class="col col--sett-t-position">
                 <p>Client Personal Manager</p>
@@ -153,30 +153,29 @@
                 <p>Individual</p>
               </div>
               <div class="col col--cm-action">
-                <v-button :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick(user)" text=""></v-button>
+                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
               </div>
               <div class="col col--cm-action">
-                <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick(user)" text=""></v-button>
+                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
               </div>
 
             </div>
 
           </div>
           
-
         </div>
       </div>
     </div>
 
     <div class="row bottom-pagination">
       <div class="col-lg-2 align-left">
-        <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="handleButtonClick" text="Previous"></v-button>
+        <VButton :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="handleButtonClick" text="Previous"></VButton>
       </div>
       <div class="col-lg-8 align-center">
         <v-pagination-list :total-pages="6" @update:currentPage="updatePage" />
       </div>
       <div class="col-lg-2 align-right">
-        <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="handleButtonClick" text="Next"></v-button>
+        <VButton :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="handleButtonClick" text="Next"></VButton>
       </div>
     </div>
 
@@ -185,6 +184,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue';
+import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import VBadge from '@/components/v-badge/VBadge.vue';
 import TabsSettings from '@/modules/TabsSettings.vue';
 import VButton from '@/components/v-button/VButton.vue';
@@ -198,13 +198,16 @@ export default defineComponent({
     VUser,
     VPaginationList,
     VBadge,
+    VDropdown,
   },
   data() {
     return {
       userName: 'Olivia Rhye',
       userEmail: 'olivia@untitledui.com',
-      selectedItem: null,
-      showModal: false
+      dropdownItems: [
+        { label: 'Action 1' },
+        { label: 'Action 2' },
+      ]
     };
   },
   setup() {
@@ -246,7 +249,10 @@ export default defineComponent({
   },
   methods: {
     handleButtonClick() {
-     
+     console.log('Button clicked');
+    },
+    handleDropdownClick(item) {
+      console.log('Dropdown item clicked:', item.label);
     },
   },
 });

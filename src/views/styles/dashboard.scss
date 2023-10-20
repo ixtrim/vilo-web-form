@@ -69,6 +69,10 @@
         &:nth-child(even) {
           background: var(--v-gray-100);
         }
+
+        &:last-child {
+          border-bottom: 1px solid var(--v-gray-200);
+        }
       }
     }
 

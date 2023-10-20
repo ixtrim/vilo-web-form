@@ -13,7 +13,7 @@
 
 <script>
 export default {
-  name: 'v-dropdown',
+  name: 'VDropdown',
   props: {
     title: {
       type: String,
@@ -33,5 +33,5 @@ export default {
 </script>
 
 <style>
-  @import url(./VDropDown.scss);
+  @import url(./VDropdown.scss);
 </style>

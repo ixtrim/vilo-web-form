@@ -43,8 +43,10 @@
         </li>
       </ul>
 
+      <p class="error-message" v-if="apiErrorMessage">{{ apiErrorMessage }}</p>
+
       <v-button  
-        text="Sign In" 
+        text="Change password" 
         type="submit"
         @click="handleSubmit"
         block=true
@@ -75,6 +77,7 @@
         arePasswordsMatching: false,
         passwordValidationMessage: '',
         confirmPasswordValidationMessage: '',
+        apiErrorMessage: '',
       };
     },
     computed: {
@@ -118,48 +121,69 @@
         };
       },
       async handleSubmit() {
-        console.log('Button clicked or form submitted'); 
 
         // Check if fields are filled
         if (!this.password) {
           this.passwordValidationMessage = 'Password is required!';
+          return;
         } else {
           this.passwordValidationMessage = '';
         }
 
         if (!this.confirmPassword) {
           this.confirmPasswordValidationMessage = 'Confirm password is required!';
+          return;
         } else {
           this.confirmPasswordValidationMessage = '';
         }
 
         // Check if password is valid
         if (this.isPasswordValid && this.password && this.confirmPassword) {
-          this.$router.push('/password-changed');
+          try {
+            const { token1: uidb64, token2: token } = this.$route.params;
+
+            const response = await axios.patch('https://api-vilo.nestvested.co/auth/password-reset-complete/', {
+              password: this.password,
+              uidb64,
+              token
+            }, {
+              headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json',
+              },
+            });
+
+            this.$router.push('/password-changed');
+          } catch (error) {
+            if (error.response && error.response.data && error.response.data.message) {
+              this.apiErrorMessage = error.response.data.message;
+            } else {
+              this.apiErrorMessage = 'An unexpected error occurred. Please try again later.';
+            }
+          }
         } else {
-          console.log('Password is invalid.');
+          
         }
       },
     },
     async mounted() {
       try {
-        
-        // Extract tokens from the route parameters
         const { token1: uidb64, token2: token } = this.$route.params;
 
-        // Make API request to verify the tokens
-        await axios.get(`https://api-vilo.nestvested.co/auth/password-reset/${uidb64}/${token}/`, {
+        const response = await axios.post('https://api-vilo.nestvested.co/auth/password-reset/', {
+          uidb64,
+          token
+        }, {
           headers: {
             'Content-Type': 'application/json',
             'accept': 'application/json',
           },
         });
-        console.log('Component mounted');
-        // If the request is successful, the tokens are valid and the user can stay on the page
+
+        console.log('Response:', response.data);
+
       } catch (error) {
-        console.log('Error occurred');
-        // If the request fails, the tokens are invalid or expired and the user should be redirected
-        //this.$router.push('/sign-in');
+        this.$router.push('/forgot-password');
       }
     },
   };

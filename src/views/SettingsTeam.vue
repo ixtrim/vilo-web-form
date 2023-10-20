@@ -8,16 +8,16 @@
     </div>
 
     <div class="row">
-      <div class="col-lg-10">
+      <div class="col-lg-9">
         <div class="dashboard__heading">
           <h1>Team management</h1>
           <p>Manage your team members and their account permissions here.</p>
         </div>
       </div>
-      <div class="col-lg-2">
+      <div class="col-lg-3">
         <ul class="settings__team-actions">
           <li>
-            <VDropdown :title="'Select Action'" :items="dropdownItems" @item-clicked="handleDropdownClick" />
+            <VDropdown :title="'All users'" :items="dropdownItems" @item-clicked="handleDropdownClick" />
           </li>
           <li>
             <VButton :block="true" size="md" icon="left" icon-style="add-white" @click="handleButtonClick" text="Add user"></VButton>
@@ -72,7 +72,7 @@
                 <p>Client Personal Manager</p>
               </div>
               <div class="col col--sett-t-role">
-                <p>Individual</p>
+                <VDropdown :title="'Client (individual)'" :items="dropdownItems" @item-clicked="handleDropdownClick" />
               </div>
               <div class="col col--cm-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
@@ -98,7 +98,7 @@
                 <p>Head of Sales</p>
               </div>
               <div class="col col--sett-t-role">
-                <p>Individual</p>
+                <VDropdown :title="'Client (company)'" :items="dropdownItems" @item-clicked="handleDropdownClick" />
               </div>
               <div class="col col--cm-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
@@ -124,7 +124,7 @@
                 <p>CTO</p>
               </div>
               <div class="col col--sett-t-role">
-                <p>Individual</p>
+                <VDropdown :title="'Admin'" :items="dropdownItems" @item-clicked="handleDropdownClick" />
               </div>
               <div class="col col--cm-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
@@ -150,7 +150,7 @@
                 <p>Client Personal Manager</p>
               </div>
               <div class="col col--sett-t-role">
-                <p>Individual</p>
+                <VDropdown :title="'Internal user'" :items="dropdownItems" @item-clicked="handleDropdownClick" />
               </div>
               <div class="col col--cm-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
@@ -205,8 +205,10 @@ export default defineComponent({
       userName: 'Olivia Rhye',
       userEmail: 'olivia@untitledui.com',
       dropdownItems: [
-        { label: 'Action 1' },
-        { label: 'Action 2' },
+        { label: 'Internal user' },
+        { label: 'Client (individual)' },
+        { label: 'Client (company)' },
+        { label: 'Admin' },
       ]
     };
   },

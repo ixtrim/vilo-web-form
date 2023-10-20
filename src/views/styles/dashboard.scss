@@ -34,6 +34,89 @@
     }
   }
 
+  &__form {
+    width: 100%;
+    padding: 32px 0;
+
+    &__section {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: start;
+      gap: 65px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--v-gray-200);
+      text-align: left;
+      font-size: 14px;
+
+      &__label {
+        width: 280px;
+
+        h4 {
+          width: 100%;
+          margin: 2px 0 5px;
+          padding: 0;
+          font-family: var(--v-font-inter-medium);
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--v-gray-700);
+        }
+
+        p {
+          width: 100%;
+          margin: 0;
+          padding: 0;
+          color: var(--v-gray-600);
+        }
+      }
+
+      &__input {
+        width: 312px;
+
+        &--width {
+          width: 512px;
+        }
+
+        .form-group {
+          margin: 0;
+
+          &:not(:first-of-type) {
+            margin-top: 10px;
+          }
+        }
+        
+        .dropdown {
+          width: 100%;
+
+          .v-button {
+            width: 100%;
+            position: relative;
+            text-align: left;
+            font-family: var(--v-font-inter-regular);
+            font-size: 16px;
+            color: var(--v-gray-500);
+            margin-bottom: 0;
+
+            &::after {
+              position: absolute;
+              top: 50%;
+              right: 12px;
+              margin-top: -2px;
+            }
+          }
+
+          .dropdown-menu {
+            li {
+              a {
+                color: var(--v-gray-500);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   &__users {
     width: 100%;
     margin: 0;
@@ -57,7 +140,6 @@
     }
 
     &__page {
-      
       &__item {
         display: flex;
         flex-direction: row;
@@ -131,7 +213,38 @@
       }
 
       &--sett-t-role {
-        width: 300px;
+        width: 185px;
+        margin-right: 50px;
+
+        .dropdown {
+          width: 100%;
+
+          .v-button {
+            width: 100%;
+            padding:7px 15px;
+            position: relative;
+            text-align: left;
+            font-family: var(--v-font-inter-regular);
+            font-size: 16px;
+            color: var(--v-gray-500);
+            margin-bottom: 0;
+
+            &::after {
+              position: absolute;
+              top: 50%;
+              right: 12px;
+              margin-top: -2px;
+            }
+          }
+
+          .dropdown-menu {
+            li {
+              a {
+                color: var(--v-gray-500);
+              }
+            }
+          }
+        }
       }
 
       &--sett-t-action {

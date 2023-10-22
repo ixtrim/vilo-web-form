@@ -84,6 +84,22 @@
             margin-top: 10px;
           }
         }
+
+        &--cols {
+          display: flex;
+          flex-direction: row;
+          justify-content: start;
+          gap: 25px;
+
+          .form-group {
+            width: 150px;
+            margin-top: 0;
+
+            &:not(:first-of-type) {
+              margin-top: 0;
+            }
+          }
+        }
         
         .dropdown {
           width: 100%;

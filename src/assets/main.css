@@ -8,3 +8,12 @@
   font-family: var(--v-font-inter-medium);
   cursor: pointer;
 }
+
+body #loom-companion-mv3
+body #shadowMeasureIt,
+body #divCoordMeasureIt,
+body #divRectangleMeasureIt,
+body #ue-sidebar-container,
+body grammarly-desktop-integration {
+  display: none!important;
+}

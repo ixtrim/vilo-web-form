@@ -44,12 +44,12 @@
           </div>
 
           <div class="dashboard__form__section">
-            <div class="dashboard__form__section__label dashboard__form__section__input--width">
+            <div class="dashboard__form__section__label">
               <h4>Email address</h4>
               <p>Invoices will be sent to this email address.</p>
             </div>
-            <div class="dashboard__form__section__input">
-              
+            <div class="dashboard__form__section__input dashboard__form__section__input--width">
+              <VEmailInputGroup />
             </div>
           </div>
 
@@ -83,8 +83,17 @@
             <div class="dashboard__form__section__label">
               <h4>State / Province</h4>
             </div>
-            <div class="dashboard__form__section__input dashboard__form__section__input--width">
-              
+            <div class="dashboard__form__section__input dashboard__form__section__input--cols">
+              <VInput 
+                label="" 
+                placeholder="VIC" 
+                v-model="text"
+              />
+              <VInput 
+                label="" 
+                placeholder="3066" 
+                v-model="text"
+              />
             </div>
           </div>
 
@@ -93,7 +102,7 @@
               <h4>Country</h4>
             </div>
             <div class="dashboard__form__section__input dashboard__form__section__input--width">
-              
+              <VCountryDropdown @country-selected="handleCountrySelected" />
             </div>
           </div>
           
@@ -105,35 +114,40 @@
 </template> 
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
-import VDropdown from '@/components/v-dropdown/VDropdown.vue';
-import VInput from '@/components/v-input/VInput.vue';
-import VButton from '@/components/v-button/VButton.vue';
-import TabsSettings from '@/modules/TabsSettings.vue';
+  import { defineComponent, ref, computed } from 'vue';
+  import VCountryDropdown from '@/components/v-country-dropdown/VCountryDropdown.vue';
+  import VInput from '@/components/v-input/VInput.vue';
+  import VButton from '@/components/v-button/VButton.vue';
+  import TabsSettings from '@/modules/TabsSettings.vue';
+  import VEmailInputGroup from '@/components/v-email-input-group/VEmailInputGroup.vue';
 
-export default defineComponent({
-  components: {
-    VButton,
-    VInput,
-    VDropdown,
-    TabsSettings,
-  },
-  data() {
-    return {
-      dropdownItems: [
-        { label: 'Internal user' },
-        { label: 'Client (individual)' },
-        { label: 'Client (company)' },
-        { label: 'Admin' },
-      ]
-    };
-  },
-  methods: {
-    handleButtonClick() {
-      
+  export default defineComponent({
+    components: {
+      VButton,
+      VInput,
+      VCountryDropdown,
+      TabsSettings,
+      VEmailInputGroup,
     },
-  },
-});
+    data() {
+      return {
+        dropdownItems: [
+          { label: 'Internal user' },
+          { label: 'Client (individual)' },
+          { label: 'Client (company)' },
+          { label: 'Admin' },
+        ]
+      };
+    },
+    methods: {
+      handleButtonClick() {
+        
+      },
+      handleCountrySelected(country) {
+        console.log('Selected Country:', country);
+      },
+    },
+  });
 </script>
 
 <style>

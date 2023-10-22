@@ -26,7 +26,8 @@
               <p>These are notifications for chats with you.</p>
             </div>
             <div class="dashboard__form__section__input">
-              RADIO LIST (PUSH / EMAIL)
+              <VToggleSwitch v-model="toggleChatsPush" :trueLabel="'Push'" :falseLabel="'Push'" />
+              <VToggleSwitch v-model="toggleChatsEmail" :trueLabel="'Email'" :falseLabel="'Email'" />
             </div>
           </div>
 
@@ -74,6 +75,7 @@ import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import VInput from '@/components/v-input/VInput.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import TabsSettings from '@/modules/TabsSettings.vue';
+import VToggleSwitch from '@/components/v-toggle-switch/VToggleSwitch.vue';
 
 export default defineComponent({
   components: {
@@ -81,6 +83,7 @@ export default defineComponent({
     VInput,
     VDropdown,
     TabsSettings,
+    VToggleSwitch,
   },
   data() {
     return {
@@ -89,7 +92,9 @@ export default defineComponent({
         { label: '2min' },
         { label: '3min' },
         { label: '5min' },
-      ]
+      ],
+      toggleChatsPush: true,
+      toggleChatsEmail: false,
     };
   },
   methods: {

@@ -6,7 +6,7 @@
         text=""></VButton>
     </div>
 
-    <VLink @click="addInput" icon="left" icon-style="add-blue">Add Item</VLink>
+    <VLink @click="addInput" styled="secondary" icon="left" icon-style="add">Add Item</VLink>
   </div>
 </template>
 

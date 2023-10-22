@@ -1,0 +1,36 @@
+.toggle-container {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-background {
+  width: 50px;
+  height: 25px;
+  border-radius: 12.5px; /* Half of the height to get circled sides */
+  background-color: #ccc;
+  position: relative;
+  margin-right: 8px;
+  transition: background-color 0.3s;
+  padding: 1px;
+}
+
+.toggle-circle {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: white;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: left 0.3s;
+}
+
+.toggle-circle.is-true {
+  left: 25px;
+}
+
+.toggle-label {
+  font-size: 16px;
+}

@@ -37,7 +37,8 @@
               <p>Choose the type of how you want to see your notifications.</p>
             </div>
             <div class="dashboard__form__section__input">
-              RADIO LIST (Pop-up / Sound)
+              <VToggleSwitch v-model="toggleNotificationPopUp" :trueLabel="'Pop-up'" :falseLabel="'Pop-up'" />
+              <VToggleSwitch v-model="toggleNotificationSound" :trueLabel="'Sound'" :falseLabel="'Sound'" />
             </div>
           </div>
 
@@ -57,7 +58,8 @@
               <p>Choose when you want to mute all the notifications.</p>
             </div>
             <div class="dashboard__form__section__input">
-              RADIO LIST (During meetings / Out of working hours)
+              <VToggleSwitch v-model="toggleMuteMeetings" :trueLabel="'During meetings'" :falseLabel="'During meetings'" />
+              <VToggleSwitch v-model="toggleMuteOutTime" :trueLabel="'Out of working hours'" :falseLabel="'Out of working hours'" />
             </div>
           </div>
           
@@ -95,6 +97,10 @@ export default defineComponent({
       ],
       toggleChatsPush: true,
       toggleChatsEmail: false,
+      toggleNotificationPopUp: false,
+      toggleNotificationSound: false,
+      toggleMuteMeetings: false,
+      toggleMuteOutTime: false,
     };
   },
   methods: {

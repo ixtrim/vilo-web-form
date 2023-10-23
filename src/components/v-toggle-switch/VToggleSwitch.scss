@@ -1,36 +1,48 @@
-.toggle-container {
+.toggle-switch-container {
   display: flex;
   align-items: center;
   cursor: pointer;
   user-select: none;
-}
+  margin-top: 15px;
 
-.toggle-background {
-  width: 50px;
-  height: 25px;
-  border-radius: 12.5px; /* Half of the height to get circled sides */
-  background-color: #ccc;
-  position: relative;
-  margin-right: 8px;
-  transition: background-color 0.3s;
-  padding: 1px;
-}
+  &:first-child {
+    margin-top: 0;
+  }
 
-.toggle-circle {
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background-color: white;
-  position: absolute;
-  top: 0;
-  left: 0;
-  transition: left 0.3s;
-}
+  .toggle-switch-background {
+    width: 36px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: var(--v-gray-200);
+    position: relative;
+    margin-right: 8px;
+    transition: background-color 0.3s;
+    padding: 1px;
 
-.toggle-circle.is-true {
-  left: 25px;
-}
+    &.is-true {
+      background-color: var(--v-primary-indigo-600);
+    }
+  }
 
-.toggle-label {
-  font-size: 16px;
+  .toggle-switch-circle {
+    width: 16px;
+    height: 16px;
+    border-radius: 55%;
+    background-color: white;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: left 0.3s;
+
+    &.is-true {
+      left: 18px;
+    }
+  }
+
+  .toggle-switch-label {
+    font-family: var(--v-font-inter-medium);
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--v-gray-700);
+  }
 }

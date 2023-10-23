@@ -25,7 +25,7 @@
               <h4>Customise Tax labels</h4>
               <p>Choose the Tax label which will displayed in your client invoices.</p>
             </div>
-            <div class="dashboard__form__section__input">
+            <div class="dashboard__form__section__input dashboard__form__section__input--width-xs">
               <VInput 
                 label="" 
                 placeholder="Sales Tax" 
@@ -39,8 +39,8 @@
               <h4>Client Reference Number Format</h4>
               <p>Drag & Drop the fields to configure the client reference number formatting.</p>
             </div>
-            <div class="dashboard__form__section__input">
-              
+            <div class="dashboard__form__section__input dashboard__form__section__input--width-sm">
+              <VTextInputDraggableGroup />
             </div>
           </div>
 
@@ -49,8 +49,8 @@
               <h4>File Reference Number Format</h4>
               <p>Drag & Drop the fields to configure the file reference number formatting.</p>
             </div>
-            <div class="dashboard__form__section__input">
-              
+            <div class="dashboard__form__section__input dashboard__form__section__input--width-sm">
+              <VTextInputDraggableGroup />
             </div>
           </div>
           
@@ -67,12 +67,14 @@ import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import VInput from '@/components/v-input/VInput.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import TabsSettings from '@/modules/TabsSettings.vue';
+import VTextInputDraggableGroup from '@/components/v-text-input-draggable-group/VTextInputDraggableGroup.vue';
 
 export default defineComponent({
   components: {
     VButton,
     VInput,
     VDropdown,
+    VTextInputDraggableGroup,
     TabsSettings,
   },
   data() {

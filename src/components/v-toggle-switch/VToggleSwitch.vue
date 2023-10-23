@@ -1,9 +1,9 @@
 <template>
-  <div class="toggle-container" @click="toggleValue">
-    <div class="toggle-background" :class="{ 'is-true': value }">
-      <div class="toggle-circle" :class="{ 'is-true': value }"></div>
+  <div class="toggle-switch-container" @click="toggleValue">
+    <div class="toggle-switch-background" :class="{ 'is-true': value }">
+      <div class="toggle-switch-circle" :class="{ 'is-true': value }"></div>
     </div>
-    <span class="toggle-label">{{ value ? trueLabel : falseLabel }}</span>
+    <span class="toggle-switch-label">{{ value ? trueLabel : falseLabel }}</span>
   </div>
 </template>
 

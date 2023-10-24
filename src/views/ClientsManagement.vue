@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="col-lg-2">
-        <Search />
+        <Search :value="searchTerm" @input="updateSearchTerm" />
       </div>
     </div>
 
@@ -19,9 +19,6 @@
 
           <div class="dashboard__users__head">
             
-            <div class="col col--checkbox">
-              <input type="checkbox" id="remember" class="mr-8p">
-            </div>
             <div class="col col--cm-user">
               <h5>Name</h5>
             </div>
@@ -44,103 +41,22 @@
 
           <div class="dashboard__users__page">
 
-            <div class="dashboard__users__page__item">
+            <div class="dashboard__users__page__item" v-for="user in paginatedUsers" :key="user.id">
 
-              <div class="col col--checkbox">
-                <input type="checkbox" id="remember" class="mr-8p">
-              </div>
               <div class="col col--cm-user">
-                <VUser :userName="userName" :userEmail="userEmail" />
+                <VUser :userName="user.full_name" :userEmail="user.email" />
               </div>
               <div class="col col--cm-phone">
-                <p>+1 6754 6678 66</p>
+                <p>{{ user.phone_no }}</p>
               </div>
               <div class="col col--cm-position">
-                <p>Sales</p>
+                <p>{{ user.position }}</p>
               </div>
               <div class="col col--cm-company">
-                <p>Individual</p>
+                <p>{{ user.client_type }}</p>
               </div>
               <div class="col col--cm-address">
-                <p>132, My Street, Kingston, New York 12401, USA</p>
-              </div>
-              <div class="col col--cm-action">
-                <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick(user)" text=""></v-button>
-              </div>
-
-            </div>
-
-            <div class="dashboard__users__page__item">
-
-              <div class="col col--checkbox">
-                <input type="checkbox" id="remember" class="mr-8p">
-              </div>
-              <div class="col col--cm-user">
-                <VUser :userName="userName" :userEmail="userEmail" />
-              </div>
-              <div class="col col--cm-phone">
-                <p>+1 6754 6678 66</p>
-              </div>
-              <div class="col col--cm-position">
-                <p>Sales</p>
-              </div>
-              <div class="col col--cm-company">
-                <p>Individual</p>
-              </div>
-              <div class="col col--cm-address">
-                <p>132, My Street, Kingston, New York 12401, USA</p>
-              </div>
-              <div class="col col--cm-action">
-                <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick(user)" text=""></v-button>
-              </div>
-              
-            </div>
-
-            <div class="dashboard__users__page__item">
-
-              <div class="col col--checkbox">
-                <input type="checkbox" id="remember" class="mr-8p">
-              </div>
-              <div class="col col--cm-user">
-                <VUser :userName="userName" :userEmail="userEmail" />
-              </div>
-              <div class="col col--cm-phone">
-                <p>+1 6754 6678 66</p>
-              </div>
-              <div class="col col--cm-position">
-                <p>Sales</p>
-              </div>
-              <div class="col col--cm-company">
-                <p>Individual</p>
-              </div>
-              <div class="col col--cm-address">
-                <p>132, My Street, Kingston, New York 12401, USA</p>
-              </div>
-              <div class="col col--cm-action">
-                <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick(user)" text=""></v-button>
-              </div>
-
-            </div>
-
-            <div class="dashboard__users__page__item">
-
-              <div class="col col--checkbox">
-                <input type="checkbox" id="remember" class="mr-8p">
-              </div>
-              <div class="col col--cm-user">
-                <VUser :userName="userName" :userEmail="userEmail" />
-              </div>
-              <div class="col col--cm-phone">
-                <p>+1 6754 6678 66</p>
-              </div>
-              <div class="col col--cm-position">
-                <p>Sales</p>
-              </div>
-              <div class="col col--cm-company">
-                <p>Individual</p>
-              </div>
-              <div class="col col--cm-address">
-                <p>132, My Street, Kingston, New York 12401, USA</p>
+                <p>{{ user.address }}</p>
               </div>
               <div class="col col--cm-action">
                 <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick(user)" text=""></v-button>
@@ -150,25 +66,24 @@
 
           </div>
           
-
         </div>
       </div>
     </div>
 
     <VModalSmall :title="'My Modal Title'" v-if="showModal">
-      <p>Name: {{ selectedItem?.userName }}</p>
-      <p>Email: {{ selectedItem?.userEmail }}</p>
+      <p>Name:</p>
+      <p>Email:</p>
     </VModalSmall>
 
     <div class="row bottom-pagination">
       <div class="col-lg-2 align-left">
-        <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="handleButtonClick" text="Previous"></v-button>
+        <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="prevPage" text="Previous"></v-button>
       </div>
       <div class="col-lg-8 align-center">
-        <v-pagination-list :total-pages="6" @update:currentPage="updatePage" />
+        <v-pagination-list :total-pages="totalPages" @update:currentPage="updatePage" />
       </div>
       <div class="col-lg-2 align-right">
-        <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="handleButtonClick" text="Next"></v-button>
+        <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="nextPage" text="Next"></v-button>
       </div>
     </div>
 
@@ -176,7 +91,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
+import { defineComponent, ref, computed, onMounted } from 'vue';
+import axios from 'axios';
 import VLink from '@/components/v-link/VLink.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import Search   from '@/modules/Navigation/Search.vue';
@@ -202,46 +118,86 @@ export default defineComponent({
     };
   },
   setup() {
-    const itemsPerPage = 10;
-    const allItems = ref([
-      { id: 1, name: 'Page 1' },
-      { id: 2, name: 'Page 2' },
-      { id: 3, name: 'Page 3' },
-      { id: 4, name: 'Page 4' },
-      { id: 5, name: 'Page 5' },
-      { id: 6, name: 'Page 6' },
-      { id: 7, name: 'Page 7' },
-      { id: 8, name: 'Page 8' },
-      { id: 9, name: 'Page 9' },
-      { id: 10, name: 'Page 10' },
-      { id: 11, name: 'Page 11' },
-      { id: 12, name: 'Page 12' },
-    ]);
+    const users = ref([]);
     const currentPage = ref(1);
+    const itemsPerPage = ref(10);
+    const searchTerm = ref('');
 
-    const totalPages = computed(() => Math.ceil(allItems.value.length / itemsPerPage));
+    const paginatedUsers = computed(() => {
+      let filteredUsers = users.value;
 
-    const paginatedItems = computed(() => {
-      const start = (currentPage.value - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      return allItems.value.slice(start, end);
+      if (searchTerm.value && typeof searchTerm.value === 'string') {
+        filteredUsers = filteredUsers.filter(user => 
+          (user.full_name && typeof user.full_name === 'string' && user.full_name.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
+          (user.email && typeof user.email === 'string' && user.email.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
+          (user.phone_no && typeof user.phone_no === 'string' && user.phone_no.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
+          (user.position && typeof user.position === 'string' && user.position.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
+          (user.client_type && typeof user.client_type === 'string' && user.client_type.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
+          (user.address && typeof user.address === 'string' && user.address.toLowerCase().includes(searchTerm.value.toLowerCase()))
+        );
+      }
+
+      const start = (currentPage.value - 1) * itemsPerPage.value;
+      const end = start + itemsPerPage.value;
+      return filteredUsers.slice(start, end);
     });
 
-    const updatePage = (newPage: number) => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('https://api-vilo.nestvested.co/auth/clients/', {
+          headers: {
+            'accept': 'application/json',
+            'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjk4MDg0OTA5LCJpYXQiOjE2OTgwODEzMDksImp0aSI6IjhjZTI0NDU1Y2ZkMjQ4NjNiMTQ3OTAyMDY2ZTBjYjk0IiwidXNlcl9pZCI6Mjd9.oupQVuP0ZMvVCxL6Nj4rHwXOgw_uyFaa4E1RtVGiz88'
+          }
+        });
+        users.value = response.data;
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    onMounted(fetchUsers);
+
+    const updateSearchTerm = (value: string) => {
+      console.log("updateSearchTerm", value);
+      searchTerm.value = value;
+    };
+
+    const nextPage = () => {
+      if (currentPage.value * itemsPerPage.value < users.value.length) {
+        currentPage.value++;
+      }
+    };
+
+    const totalPages = computed(() => {
+      return Math.ceil(users.value.length / itemsPerPage.value);
+    });
+
+    const updatePage = (newPage) => {
       currentPage.value = newPage;
     };
 
+    const prevPage = () => {
+      if (currentPage.value > 1) {
+        currentPage.value--;
+      }
+    };
+
     return {
-      paginatedItems,
-      totalPages,
+      paginatedUsers,
+      nextPage,
+      updatePage,
+      prevPage,
       currentPage,
-      updatePage
+      totalPages,
+      searchTerm,
+      updateSearchTerm
     };
   },
   methods: {
     handleButtonClick(item: any) {
-      this.selectedItem = item;
-      this.showModal = true;
+      //this.selectedItem = item;
+     // this.showModal = true;
     },
   },
 });

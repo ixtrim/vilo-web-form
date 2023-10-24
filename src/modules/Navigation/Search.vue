@@ -1,31 +1,30 @@
 <template>
   <div class="search-widget">
     <v-input 
-      :label-enabled="false"
+      label=""
       placeholder="Search"
+      v-model="internalSearchTerm"
+      @input="$emit('input', internalSearchTerm)"
     />
   </div>
 </template>
 
 <script>
-  import VInput from '@/components/v-input/VInput.vue';
+import VInput from '@/components/v-input/VInput.vue';
 
-  export default {
-    components: {
-      VInput,
-    },
-    methods: {
-    },
-  };
-</script>
-
-<style lang="scss">
-  .search-widget {
-    width: 100%;
-
-    input {
-      padding-left: 42px;
-      background: url('../../assets/icons/icon-search.svg') no-repeat 15px center;
+export default {
+  components: {
+    VInput,
+  },
+  data() {
+    return {
+      internalSearchTerm: ''
+    };
+  },
+  methods: {
+    emitInput() {
+      this.$emit('input', this.internalSearchTerm);
     }
   }
-</style>
+};
+</script>

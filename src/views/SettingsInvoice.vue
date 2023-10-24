@@ -48,6 +48,7 @@
             <div class="dashboard__form__section__label">
               <h4>File Reference Number Format</h4>
               <p>Drag & Drop the fields to configure the file reference number formatting.</p>
+              <VButton :block="true" size="md" icon="left" icon-style="add-white" @click="handleButtonClick" text="Add user"></VButton>
             </div>
             <div class="dashboard__form__section__input dashboard__form__section__input--width-sm">
               <VTextInputDraggableGroup />
@@ -57,7 +58,14 @@
         </div>
       </div>
     </div>
-
+    <VNotification 
+      ref="notificationRef"
+      :type="notificationType"
+      :header="notificationHeader"
+      :message="notificationMessage"
+      :duration="7000"
+      @closed="handleNotificationClosed"
+    />
   </div>
 </template>
 
@@ -68,6 +76,7 @@ import VInput from '@/components/v-input/VInput.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import TabsSettings from '@/modules/TabsSettings.vue';
 import VTextInputDraggableGroup from '@/components/v-text-input-draggable-group/VTextInputDraggableGroup.vue';
+import VNotification from '@/components/v-notification/VNotification.vue';
 
 export default defineComponent({
   components: {
@@ -76,9 +85,13 @@ export default defineComponent({
     VDropdown,
     VTextInputDraggableGroup,
     TabsSettings,
+    VNotification,
   },
   data() {
     return {
+      notificationType: 'success',
+      notificationHeader: 'Header',
+      notificationMessage: 'This is a message',
       dropdownTimezone: [
         { label: 'GMT +1' },
         { label: 'GMT +2' },
@@ -91,8 +104,18 @@ export default defineComponent({
     };
   },
   methods: {
+    triggerNotification(type, header, message) {
+      this.notificationType = type;
+      this.notificationHeader = header;
+      this.notificationMessage = message;
+      this.$refs.notificationRef.showNotification();
+    },
+    handleNotificationClosed() {
+      // Handle the event when the notification is closed
+      // For example, reset some properties or log an event
+    },
     handleButtonClick() {
-      
+      this.triggerNotification('error', 'Error!', 'Something went wrong.');
     },
   },
 });

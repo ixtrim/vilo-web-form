@@ -12,14 +12,16 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent } from 'vue';
+  import { defineComponent, computed } from 'vue';
 
   export default defineComponent({
     name: 'VUser',
     props: {
       userAvatar: {
         type: String,
-        default: 'https://picsum.photos/40'
+        default: function() {
+          return `https://picsum.photos/40?random=${Date.now()}`;
+        }
       },
       userName: {
         type: String,
@@ -32,6 +34,11 @@
       userAltText: {
         type: String,
         default: 'User avatar'
+      }
+    },
+    computed: {
+      randomAvatar() {
+        return `https://picsum.photos/40?random=${Date.now()}`;
       }
     }
   });

@@ -50,7 +50,7 @@
                 <p>{{ user.phone_no }}</p>
               </div>
               <div class="col col--cm-position">
-                <p>{{ user.position }}</p>
+                <p>{{ getPositionName(user.position) }}</p>
               </div>
               <div class="col col--cm-company">
                 <p>{{ user.client_type }}</p>
@@ -122,6 +122,21 @@ export default defineComponent({
     const currentPage = ref(1);
     const itemsPerPage = ref(10);
     const searchTerm = ref('');
+    const positions = ref([]);
+
+    const fetchPositions = async () => {
+      try {
+        const response = await axios.get('https://api-vilo.nestvested.co/settings/positions/', {
+          headers: {
+            'accept': 'application/json',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjk4MTU4MTY0LCJpYXQiOjE2OTgxNTQ1NjQsImp0aSI6IjBkZTg1ZTg0OTJjZDQ0MGE4N2JkNmU2NzRiMjlmNTZiIiwidXNlcl9pZCI6Mjd9.DQFDSgAoa1n0IzJBHdk8BMBSmxDC5qVyL_6NGlzFXeg'
+          }
+        });
+        positions.value = response.data;
+      } catch (error) {
+        console.error("Error fetching positions:", error);
+      }
+    };
 
     const paginatedUsers = computed(() => {
       let filteredUsers = users.value;
@@ -147,7 +162,7 @@ export default defineComponent({
         const response = await axios.get('https://api-vilo.nestvested.co/auth/clients/', {
           headers: {
             'accept': 'application/json',
-            'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjk4MDg0OTA5LCJpYXQiOjE2OTgwODEzMDksImp0aSI6IjhjZTI0NDU1Y2ZkMjQ4NjNiMTQ3OTAyMDY2ZTBjYjk0IiwidXNlcl9pZCI6Mjd9.oupQVuP0ZMvVCxL6Nj4rHwXOgw_uyFaa4E1RtVGiz88'
+            'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjk4MTU4MTY0LCJpYXQiOjE2OTgxNTQ1NjQsImp0aSI6IjBkZTg1ZTg0OTJjZDQ0MGE4N2JkNmU2NzRiMjlmNTZiIiwidXNlcl9pZCI6Mjd9.DQFDSgAoa1n0IzJBHdk8BMBSmxDC5qVyL_6NGlzFXeg'
           }
         });
         users.value = response.data;
@@ -156,7 +171,15 @@ export default defineComponent({
       }
     };
 
-    onMounted(fetchUsers);
+    onMounted(() => {
+      fetchUsers();
+      fetchPositions();
+    });
+
+    const getPositionName = (positionId) => {
+      const position = positions.value.find(pos => pos.id === positionId);
+      return position ? position.position_name : 'Unknown';
+    };
 
     const updateSearchTerm = (value: string) => {
       console.log("updateSearchTerm", value);
@@ -191,7 +214,8 @@ export default defineComponent({
       currentPage,
       totalPages,
       searchTerm,
-      updateSearchTerm
+      updateSearchTerm,
+      getPositionName,
     };
   },
   methods: {

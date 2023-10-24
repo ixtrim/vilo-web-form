@@ -104,6 +104,22 @@
     }
   }
 
+  &--link {
+    border: none;
+    background-color: transparent;
+    box-shadow: unset;
+    color: var(--v-primary-indigo-700);
+
+    &:hover {
+      background-color: var(--v-gray-100);
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0px 0px 0px 4px #F2F4F7, 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+    }
+  }
+
   &--important {
     background-color: var(--v-important-color);
     color: #fff;
@@ -112,6 +128,23 @@
   &--crucial {
     background-color: var(--v-crucial-color);
     color: #fff;
+  }
+
+  &--simple-icon {
+    border: none;
+    background: none;
+    padding: 5px 10px;
+    position: relative;
+  }
+
+  &--icon-left,
+  &--icon-right {
+    i {
+      display: inline-block;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+    }
   }
 
   // Icon positions
@@ -139,11 +172,15 @@
 
   // Icons
   .arrow-left {
-    /* styles for arrow-left icon */
+    width: 12px;
+    height: 12px;
+    background-image: url(../../assets/icons/icon-arrow-left.svg);
   }
 
   .arrow-right {
-    /* styles for arrow-right icon */
+    width: 12px;
+    height: 12px;
+    background-image: url(../../assets/icons/icon-arrow-right.svg);
   }
 
   .save {
@@ -155,15 +192,39 @@
   }
 
   .edit {
-    /* styles for edit icon */
+    width: 16px;
+    height: 16px;
+    background-image: url(../../assets/icons/icon-quit-edit.svg);
+  }
+
+  .edit--2 {
+    width: 16px;
+    height: 16px;
+    background-image: url(../../assets/icons/icon-edit-2.svg);
   }
 
   .delete {
-    /* styles for delete icon */
+    width: 15px;
+    height: 16px;
+    background-image: url(../../assets/icons/icon-delete.svg);
   }
 
   .add {
-    /* styles for add icon */
+    width: 12px;
+    height: 12px;
+    background-image: url(../../assets/icons/icon-plus.svg);
+  }
+
+  .add-white {
+    width: 12px;
+    height: 12px;
+    background-image: url(../../assets/icons/icon-plus--white.svg);
+  }
+
+  .add-blue {
+    width: 12px;
+    height: 12px;
+    background-image: url(../../assets/icons/icon-plus--blue.svg);
   }
 
   .copy {
@@ -185,11 +246,7 @@
   .google {
     width: 24px;
     height: 24px;
-    display: inline-block;
     background-image: url(../styles/icons/google.svg);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
   }
 
   .v-button-loader {

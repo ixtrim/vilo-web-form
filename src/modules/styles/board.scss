@@ -1,0 +1,60 @@
+@import '@/components/styles/variables/colors.scss';
+
+// Variables
+$card-bg-color: #FFFFFF;
+$card-border-color: #E0E0E0;
+$list-bg-color: #F4F5F7;
+$board-bg-color: #0079BF;
+$card-spacing: 10px;
+$list-padding: 15px;
+$list-width: 272px;
+
+// Board
+.board {
+  display: flex;
+  background-color: $board-bg-color;
+  padding: 20px;
+  overflow-x: auto;
+  height: calc(100vh - 100px); // Adjust based on your header/footer height
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: darken($board-bg-color, 10%);
+  }
+}
+
+// List
+.list {
+  background-color: $list-bg-color;
+  border-radius: 3px;
+  width: $list-width;
+  padding: $list-padding;
+  margin-right: 10px;
+  box-sizing: border-box;
+  min-height: 100px;
+  position: relative;
+
+  h3 {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: $card-spacing;
+  }
+}
+
+// Card
+.card {
+  background-color: $card-bg-color;
+  border: 1px solid $card-border-color;
+  border-radius: 3px;
+  padding: 10px;
+  margin-bottom: $card-spacing;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: lighten($card-bg-color, 5%);
+  }
+}

@@ -1,0 +1,45 @@
+@import '@/components/styles/variables/fonts.scss';
+@import '@/components/styles/variables/colors.scss';
+
+nav {
+  ul.pagination-list {
+    justify-content: center;
+    border: none;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    display: flex;
+    flex-direction: row;
+
+    li {
+      margin: 0 1px;
+
+      a {
+        width: 36px;
+        height: 36px;
+        line-height: 36px;
+        border-radius: 8px;
+        font-size: .875rem;
+        font-family: var(--v-font-inter-medium);
+        color: var(--v-gray-800);
+
+        &:hover {
+          background-color: var(--v-primary-indigo-100);
+        }
+      }
+
+      &:first-child,
+      &:last-child {
+        a {
+          border-radius: 8px!important;
+        }
+      }
+
+      &.active {
+        a {
+          background-color: var(--v-gray-100);
+        }
+      }
+    }
+  }
+}

@@ -1,7 +1,8 @@
 /* Add your custom CSS styles for the component here */
 .form-group {
-    margin-bottom: 16px;
-      label {
+  margin-bottom: 16px;
+
+  label {
     display: block;
     margin-bottom: 4px;
     color: var(--v-gray-700);
@@ -11,19 +12,20 @@
     font-weight: 500;
     line-height: 20px;
   }
+
   input {
     width: 100%;
     padding: 10px 14px;
     border: 1px solid var(--v-gray-300);
     border-radius: 8px;
 
-    &::placeholder{
-       font-family: var(--v-font-inter-regular);
-color: var(--v-gray-500);
-font-size: 16px;
-font-style: normal;
-font-weight: 400;
-line-height: 24px;
+    &::placeholder {
+      font-family: var(--v-font-inter-regular);
+      color: var(--v-gray-500);
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 24px;
     }
   }
-  }
+}

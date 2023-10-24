@@ -1,0 +1,56 @@
+.v-text-input-draggable-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  &__input-area {
+    flex-grow: 1;
+    position: relative;
+  }
+
+  .input-row {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+
+    .input-area {
+      flex-grow: 1;
+      position: relative;
+
+      .drag-handle {
+        width: 16px;
+        height: 28px;
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        cursor: move;
+        cursor: grab;
+        background-image: url('@/assets/icons/icon-input-draggable.svg');
+        background-size: 8px auto;
+        background-position: center 5px;
+        background-repeat: no-repeat;
+
+        &:active {
+          cursor: grabbing;
+        }
+      }
+    }
+
+    .v-button {
+      padding: 0;
+      margin: 0 0 0 15px;
+    }
+  }
+
+  .v-link {
+    text-align: left;
+    justify-content: start;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .dragArea {
+    /* styles */
+  }
+}

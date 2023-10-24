@@ -1,0 +1,123 @@
+@import '@/components/styles/variables/fonts.scss';
+@import '@/components/styles/variables/colors.scss';
+
+.v-hours {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  &__btn-add {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    border: none;
+    background: var(--v-white) url(../../assets/icons/icon-plus--circle.svg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 17px;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--v-white) url(../../assets/icons/icon-plus--circle--blue.svg);
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 17px;
+    }
+  }
+
+  &__btn-remove {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    border: none;
+    background: var(--v-white) url(../../assets/icons/icon-unavailable.svg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 17px;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--v-white) url(../../assets/icons/icon-unavailable--blue.svg);
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 17px;
+    }
+  }
+
+  &__empty {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    gap: 24px;
+
+    span {
+      width: 278px;
+      flex: 0 0 278px;
+      font-family: var(--v-font-inter-medium);
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--v-gray-700);
+      text-align: center;
+    }
+  }
+
+  &__row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    gap: 24px;
+
+    &__inputs {
+      width: 278px;
+      flex: 0 0 278px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+
+      span {
+        font-family: var(--v-font-inter-medium);
+        font-size: 16px;
+        color: var(--v-gray-500);
+      }
+
+      &__select {
+        width: 128px;
+        flex: 0 0 128px;
+      }
+    }
+
+    &__action {
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  .input-row {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+
+    .form-group {
+      flex-grow: 1;
+    }
+
+    .v-button {
+      padding: 0;
+      margin: 0 0 0 15px;
+    }
+  }
+
+  .v-link {
+    text-align: left;
+    justify-content: start;
+    font-size: 14px;
+    cursor: pointer;
+  }
+}

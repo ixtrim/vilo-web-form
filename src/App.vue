@@ -1,11 +1,22 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue';
 import { RouterLink, RouterView } from 'vue-router';
-import HeroSectionVue from './views/HeroSection.vue';
+import { useRoute } from 'vue-router';
+import HeroSectionVue from './modules/UserAuthentication/HeroSection.vue';
+import Navigation from './modules/Navigation.vue';
+
+const route = useRoute();
+
+const showInitialContent = computed(() => {
+  return route.path === '/sign-in' || route.path === '/sign-up' || route.path === '/forgot-password' || route.path === '/email-verification' || route.path === '/set-new-password' || route.path === '/password-changed' || route.path === '/';
+});
 
 </script>
 <template>
   <div class="container-fluid">
-    <div class="row">
+
+    <div v-if="showInitialContent" class="row">
+
       <div class="col-lg-6 p-0">
         <div class="form-container">
           <header>
@@ -31,50 +42,64 @@ import HeroSectionVue from './views/HeroSection.vue';
       <div class="col-lg-6 p-0">
         <HeroSectionVue />
       </div>
+
     </div>
 
-    <!-- <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav> -->
+    <div v-else class="col-lg-12 p-0">
+
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-lg-2 p-0 text-center h-100 min-vh-100">
+            <Navigation />
+          </div>
+          <div class="col-lg-10 p-0 text-center h-100 min-vh-100">
+            <div class="dashboard">
+              <RouterView />
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
   </div>
 </template>
 
 <style lang="scss">
-@import './components/styles/variables/fonts.scss';
+  @import './components/styles/variables/fonts.scss';
 
-.form-container {
-  padding: 32px;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-
-  .logo-wrap {
+  .form-container {
+    padding: 32px;
+    height: 100vh;
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    flex-direction: column;
+    justify-content: space-between;
 
-    h1 {
-      font-family: var(--v-font-inter-semi-bold);
-      font-size: 20px;
-      font-style: normal;
-      font-weight: 600;
-      line-height: 30px;
-      /* 150% */
-      margin-bottom: 0;
-      margin-left: 16px;
+    .logo-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+
+      h1 {
+        font-family: var(--v-font-inter-semi-bold);
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 30px;
+        margin-bottom: 0;
+        margin-left: 16px;
+      }
+    }
+
+    .footer-email-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: center;
+
+      span {
+        margin-left: 8px;
+      }
     }
   }
-
-  .footer-email-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    align-items: center;
-
-    span {
-      margin-left: 8px;
-    }
-  }
-}</style>
+</style>

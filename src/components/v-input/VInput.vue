@@ -1,6 +1,6 @@
 <template>
   <div class="form-group">
-    <label v-if="labelEnabled" :for="inputId">{{ label }}</label>
+    <label v-if="label && label !== ''" :for="inputId">{{ label }}</label>
     <input
       :id="inputId"
       :type="type"
@@ -19,10 +19,6 @@ export default {
     label: {
       type: String,
       default: 'Label'
-    },
-    labelEnabled: {
-      type: Boolean,
-      default: true
     },
     type: {
       type: String,
@@ -47,15 +43,15 @@ export default {
   },
   data() {
     return {
-      localValue: this.modelValue,
+      localValue: this.value,
     };
   },
   watch: {
-    modelValue(newVal) {
+    value(newVal) {
       this.localValue = newVal;
     },
     localValue(newVal) {
-      this.$emit('update:modelValue', newVal);
+      this.$emit('input', newVal);  // Emit the 'input' event for v-model to work
     },
   },
   methods: {

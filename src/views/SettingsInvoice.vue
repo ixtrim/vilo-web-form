@@ -48,7 +48,6 @@
             <div class="dashboard__form__section__label">
               <h4>File Reference Number Format</h4>
               <p>Drag & Drop the fields to configure the file reference number formatting.</p>
-              <VButton :block="true" size="md" icon="left" icon-style="add-white" @click="handleButtonClick" text="Add user"></VButton>
             </div>
             <div class="dashboard__form__section__input dashboard__form__section__input--width-sm">
               <VTextInputDraggableGroup />

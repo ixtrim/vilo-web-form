@@ -70,6 +70,39 @@
         }
       }
 
+      &__days {
+        width: 365px;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+
+        &__item {
+          width: 100%;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 24px;
+
+          &__label {
+            width: 50px;
+            flex: 0 0 50px;
+          
+            h5 {
+              margin: 0;
+              padding: 0;
+              font-family: var(--v-font-inter-medium);
+              font-size: 16px;
+              font-weight: 500;
+              color: var(--v-gray-700);
+            }
+          }
+
+          &__hours {
+            flex: 1 1 0;
+          }
+        }
+      }
+
       &__input {
         width: 312px;
 

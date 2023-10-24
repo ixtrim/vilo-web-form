@@ -25,7 +25,70 @@
               <h4>Working hours</h4>
               <p>Set up your availability during the week.</p>
             </div>
-            <div class="dashboard__form__section__input">
+            <div class="dashboard__form__section__input dashboard__form__section__days">
+
+              <div class="dashboard__form__section__days__item">
+                <div class="dashboard__form__section__days__item__label">
+                  <h5>Sun</h5>
+                </div>
+                <div class="dashboard__form__section__days__item__hours">
+                  <VHours />
+                </div>
+              </div>
+
+              <div class="dashboard__form__section__days__item">
+                <div class="dashboard__form__section__days__item__label">
+                  <h5>Mon</h5>
+                </div>
+                <div class="dashboard__form__section__days__item__hours">
+                  <VHours />
+                </div>
+              </div>
+
+              <div class="dashboard__form__section__days__item">
+                <div class="dashboard__form__section__days__item__label">
+                  <h5>Tue</h5>
+                </div>
+                <div class="dashboard__form__section__days__item__hours">
+                  <VHours />
+                </div>
+              </div>
+
+              <div class="dashboard__form__section__days__item">
+                <div class="dashboard__form__section__days__item__label">
+                  <h5>Wed</h5>
+                </div>
+                <div class="dashboard__form__section__days__item__hours">
+                  <VHours />
+                </div>
+              </div>
+
+              <div class="dashboard__form__section__days__item">
+                <div class="dashboard__form__section__days__item__label">
+                  <h5>Thu</h5>
+                </div>
+                <div class="dashboard__form__section__days__item__hours">
+                  <VHours />
+                </div>
+              </div>
+
+              <div class="dashboard__form__section__days__item">
+                <div class="dashboard__form__section__days__item__label">
+                  <h5>Fri</h5>
+                </div>
+                <div class="dashboard__form__section__days__item__hours">
+                  <VHours />
+                </div>
+              </div>
+
+              <div class="dashboard__form__section__days__item">
+                <div class="dashboard__form__section__days__item__label">
+                  <h5>Sat</h5>
+                </div>
+                <div class="dashboard__form__section__days__item__hours">
+                  <VHours />
+                </div>
+              </div>
               
             </div>
           </div>
@@ -53,12 +116,14 @@ import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import VInput from '@/components/v-input/VInput.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import TabsSettings from '@/modules/TabsSettings.vue';
+import VHours from '@/components/v-hours/VHours.vue';
 
 export default defineComponent({
   components: {
     VButton,
     VInput,
     VDropdown,
+    VHours,
     TabsSettings,
   },
   data() {

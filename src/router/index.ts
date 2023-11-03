@@ -9,14 +9,6 @@ const router = createRouter({
       component: () => import('../views/SignIn.vue')
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue')
-    },
-    {
       path: '/sign-in',
       name: 'sign-in',
       component: () => import('../views/SignIn.vue')
@@ -72,14 +64,39 @@ const router = createRouter({
       component: () => import('../views/Library.vue')
     },
     {
+      path: '/library-templates',
+      name: 'library-templates',
+      component: () => import('../views/LibraryTemplates.vue')
+    },
+    {
+      path: '/library-document',
+      name: 'library-document',
+      component: () => import('../views/LibraryDocument.vue')
+    },
+    {
       path: '/invoices',
       name: 'invoices',
       component: () => import('../views/Invoices.vue')
     },
     {
+      path: '/invoices-reports',
+      name: 'invoices-reports',
+      component: () => import('../views/InvoicesReports.vue')
+    },
+    {
       path: '/calendar',
       name: 'calendar',
       component: () => import('../views/Calendar.vue')
+    },
+    {
+      path: '/calendar-weekly',
+      name: 'calendar-weekly',
+      component: () => import('../views/CalendarWeekly.vue')
+    },
+    {
+      path: '/calendar-shared',
+      name: 'calendar-shared',
+      component: () => import('../views/CalendarShared.vue')
     },
     {
       path: '/chat',

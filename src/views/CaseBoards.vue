@@ -3,70 +3,52 @@
 
     <div class="row">
       <div class="col-lg-10">
-        <div class="dashboard__heading">
-          <h1>Client management</h1>
-          <p>Manage your team members and their account permissions here.</p>
+        <div class="dashboard__heading mb-0">
+          <h1>Case Boards</h1>
+          <p>Manage your boards and tasks.</p>
         </div>
       </div>
-      <div class="col-lg-2">
-        <Search />
+      <div class="col-lg-2 align-right">
+        <VButton :block="true" size="sm" icon="left" icon-style="add" styled="outlined" @click="handleButtonClick" text="Add new case"></VButton>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 dashboard__line">
+        <hr />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="dashboard__filters">
+
+          <div class="row">
+            <div class="col-lg-3">
+              <div class="dashboard__filters">
+                <Search />
+              </div>
+            </div>
+            <div class="col-lg-6"></div>
+            <div class="col-lg-3">
+              <ul class="settings__team-actions">
+                <li>
+                  <VDropdown :title="'Sort by date'" :items="sortTime" @item-clicked="handleDropdownClick" />
+                </li>
+                <li>
+                  <VDropdown :title="'All cases'" :items="sortTime" @item-clicked="handleDropdownClick" />
+                </li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
 
     <div class="row fill-space">
       <div class="col-lg-12">
-        <div class="dashboard__users">
-
-          <div class="row dashboard__users__head">
-            <div class="col-lg-2 first-col">
-              <input type="checkbox" id="remember" class="mr-8p">
-              <h5>Name</h5>
-            </div>
-            <div class="col-lg-2">
-              <h5>Phone</h5>
-            </div>
-            <div class="col-lg-2">
-              <h5>Position</h5>
-            </div>
-            <div class="col-lg-2">
-              <h5>Company</h5>
-            </div>
-            <div class="col-lg-2">
-              <h5>Address</h5>
-            </div>
-          </div>
-
-          <div class="dashboard__users__page">
-
-            <div class="row dashboard__list__page__item">
-              <div class="col-lg-2 first-col">
-                <input type="checkbox" id="user1" class="mr-8p">
-                <VUser :userName="userName" :userEmail="userEmail" />
-
-              </div>
-              <div class="col-lg-2">
-                <p>+1 6754 6678 66</p>
-              </div>
-              <div class="col-lg-2">
-                <p>Sales</p>
-              </div>
-              <div class="col-lg-2">
-                <p>Individual</p>
-              </div>
-              <div class="col-lg-2">
-                <p>132, My Street, Kingston, New York 12401, USA</p>
-              </div>
-              <div class="col-lg-1">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
-      Open Modal
-    </button>
-              </div>
-            </div>
-
-          </div>
-          
-
-        </div>
+        
       </div>
     </div>
 
@@ -97,6 +79,7 @@ import Search   from '@/modules/Navigation/Search.vue';
 import VUser from '@/components/v-user/v-user.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
 import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
+import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 
 export default defineComponent({
   components: {
@@ -106,11 +89,26 @@ export default defineComponent({
     VUser,
     VPaginationList,
     VModalSmall,
+    VDropdown,
   },
   data() {
     return {
       userName: 'Olivia Rhye',
-      userEmail: 'olivia@untitledui.com'
+      userEmail: 'olivia@untitledui.com',
+      sortTime: [
+        { label: 'All' },
+        { label: 'Last year' },
+        { label: 'Last three months' },
+        { label: 'Last two months' },
+        { label: 'Last month' },
+        { label: 'This week' },
+      ],
+      sortCases: [
+        { label: 'Internal user' },
+        { label: 'Client (individual)' },
+        { label: 'Client (company)' },
+        { label: 'Admin' },
+      ],
     };
   },
   setup() {

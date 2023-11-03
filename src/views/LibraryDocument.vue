@@ -1,21 +1,9 @@
 <template>
   <div class="container-fluid">
 
-    <div class="row">
-      <div class="col-lg-10">
-        <div class="dashboard__heading">
-          <h1>Library</h1>
-          <p> Create and manage your team documents and templates.</p>
-        </div>
-      </div>
-      <div class="col-lg-2 align-right">
-        <VButton :block="true" size="sm" icon="left" icon-style="add-white" @click="handleButtonClick" text="Add new document"></VButton>
-      </div>
-    </div>
-
     <div class="row fill-space">
       <div class="col-lg-12">
-        LIBRARY CONTENT .... 
+        LIBRARY DOCUMENT EDITION .... 
       </div>
     </div>
 

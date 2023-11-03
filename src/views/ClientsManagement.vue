@@ -8,7 +8,7 @@
           <p>Manage your team members and their account permissions here.</p>
         </div>
       </div>
-      <div class="col-lg-2">
+      <div class="col-lg-2 align-right">
         <Search :value="searchTerm" @input="updateSearchTerm" />
       </div>
     </div>

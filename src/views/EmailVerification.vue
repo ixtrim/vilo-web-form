@@ -4,7 +4,7 @@
     <h2 class="text-center">Check your email</h2>
     <h4 class="text-center">We sent a verification link to your e-mail.</h4>
 
-    <v-button text="Go to Login" @click="handleButtonClick" block=true></v-button>
+    <v-button text="Go to Login" @click="handleButtonClick" :block="true"></v-button>
 
     <div class="signup-wrap text-center">
       <span>Didn’t receive the email?</span>
@@ -13,7 +13,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VLink from '@/components/v-link/VLink.vue';

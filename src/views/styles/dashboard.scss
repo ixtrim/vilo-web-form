@@ -365,6 +365,140 @@
     }
   }
 
+  &__table {
+    margin: 8px 0 0 0;
+    border-radius: 12px;
+    border: 1px solid var(--v-gray-200);
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+
+    &__head {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: var(--v-gray-100);
+
+      h5 {
+        font-size: .75rem;
+        margin: 12px 0;
+        padding: 0;
+        text-align: left;
+        font-family: var(--v-font-inter-medium);
+        color: var(--v-gray-600);
+      }
+    }
+
+    &__page {
+      &__item {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 13px;
+        border-top: 1px solid var(--v-gray-200);
+
+        &:nth-child(even) {
+          background: var(--v-gray-100);
+        }
+
+        &:last-child {
+          border-bottom: 1px solid var(--v-gray-200);
+        }
+      }
+    }
+
+    &__pagination {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px 18px;
+      border-top: 1px solid var(--v-gray-200);
+
+      button {
+        margin: 0;
+      }
+    }
+
+    .col{
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+      flex: 0 0 auto;
+      position: relative;
+
+      &--checkbox {
+        width: 15px;
+        flex: 0 0 1;
+      }
+
+      &--cm-user {
+        width: 300px;
+      }
+
+      &--cm-phone {
+        width: 200px;
+      }
+
+      border-bottom: 1px solid var(--v-gray-200);
+      &--cm-position {
+        width: 160px;
+      }
+
+      &--cm-company {
+        width: 200px;
+      }
+
+      &--cm-address {
+        flex: 1 1 0;
+      }
+
+      &--cm-action {
+        width: 45px;
+        margin-right: 0;
+
+        button {
+          margin: auto;
+        }
+      }
+
+      &--sett-t-user {
+        flex: 1 1 0;
+      }
+
+      &--sett-t-status {
+        width: 300px;
+        text-align: left;
+      }
+
+      &--sett-t-position {
+        width: 300px;
+      }
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+
+    & > li {
+      margin-left: 20px;
+
+      &:first-child {
+        margin-left: 0;
+      }
+    }
+  }
+
   .bottom-pagination {
     padding: 14px 0 0;
     margin: 0 -24px;

@@ -31,7 +31,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 
 export default {

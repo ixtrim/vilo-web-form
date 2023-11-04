@@ -9,7 +9,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
   import VInput from '@/components/v-input/VInput.vue';
 
   export default {

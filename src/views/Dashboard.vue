@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid">
+  <div class="container-fluid ">
 
     <div class="row">
       <div class="col-lg-10">
@@ -13,8 +13,25 @@
       </div>
     </div>
 
+    <div class="row">
+      <div class="col-lg-12 dashboard__separator">
+        &nbsp;
+      </div>
+    </div>
 
-    <h1>This is an dashboard page</h1>
+    <div class="row">
+      <div class="col-lg-7">
+        <Income />
+      </div>
+      <div class="col-lg-5">
+        <Invoices />
+      </div>
+    </div>
+
+    
+
+    
+
   </div>
 </template>
 
@@ -26,10 +43,16 @@
 import { defineComponent, ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import Search   from '@/modules/Navigation/Search.vue';
+import VLink from '@/components/v-link/VLink.vue';
+import Income from '@/modules/Home/Income/Income.vue';
+import Invoices from '@/modules/Home/Invoices/Invoices.vue';
 
 export default defineComponent({
   components: {
     Search,
+    VLink,
+    Income,
+    Invoices
   },
 });
 </script>

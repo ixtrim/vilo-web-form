@@ -56,7 +56,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
   import axios from 'axios';
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';

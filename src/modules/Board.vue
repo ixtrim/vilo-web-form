@@ -4,7 +4,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { Sortable } from '@shopify/draggable';
 import List from '@/modules/Board/List.vue';
 

@@ -14,7 +14,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import VLink from '@/components/v-link/VLink.vue';

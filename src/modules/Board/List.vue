@@ -5,7 +5,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import Card from '@/modules/Board/Card.vue';
 
 export default {

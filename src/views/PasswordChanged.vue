@@ -5,11 +5,11 @@
     <h2 class="text-center">Password was changed</h2>
     <h4 class="text-center">Your password was successfully changed. You can know use it to log in.</h4>
 
-    <v-button text="Continue" @click="handleButtonClick" block=true></v-button>
+    <v-button text="Continue" @click="handleButtonClick" :block="true"></v-button>
   </div>
 </template>
 
-<script>
+<script lang="ts">
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VLink from '@/components/v-link/VLink.vue';

@@ -1,0 +1,20 @@
+.module-invoices {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid var(--v-gray-200);
+  border-radius: 12px;
+  text-align: left;
+  
+  h3 {
+    margin: 0;
+    padding: 0;
+    font-family: var(--v-font-inter-semi-bold);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--v-gray-700);
+  }
+
+  img {
+    margin: 0 auto;
+  }
+}

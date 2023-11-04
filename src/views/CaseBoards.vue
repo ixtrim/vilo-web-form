@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="col-lg-2 align-right">
-        <VButton :block="true" size="sm" icon="left" icon-style="add" styled="outlined" @click="handleButtonClick" text="Add new case"></VButton>
+        <VButton :block="true" size="md" icon="left" icon-style="add" styled="outlined" @click="handleButtonClick" text="Add new case"></VButton>
       </div>
     </div>
 
@@ -31,7 +31,7 @@
             </div>
             <div class="col-lg-6"></div>
             <div class="col-lg-3">
-              <ul class="settings__team-actions">
+              <ul class="dashboard__actions">
                 <li>
                   <VDropdown :title="'Sort by date'" :items="sortTime" @item-clicked="handleDropdownClick" />
                 </li>
@@ -48,7 +48,69 @@
 
     <div class="row fill-space">
       <div class="col-lg-12">
-        
+
+        <div class="dashboard__table">
+
+          <div class="dashboard__table__head">
+            <div class="col col--checkbox">
+              <input type="checkbox" />
+            </div>
+            <div class="col col--cb-case">
+              <h5>Case</h5>
+            </div>
+            <div class="col col--cb-client">
+              <h5>Client</h5>
+            </div>
+            <div class="col col--cb-about">
+              <h5>About</h5>
+            </div>
+            <div class="col col--cb-users">
+              <h5>Users</h5>
+            </div>
+            <div class="col col--cb-action">
+              &nbsp;
+            </div>
+          </div>
+
+          <div class="dashboard__table__page">
+
+            <div class="dashboard__table__page__item">
+              <div class="col col--checkbox">
+                <input type="checkbox" />
+              </div>
+              <div class="col col--cb-case">
+                <h5>Case</h5>
+              </div>
+              <div class="col col--cb-client">
+                <h5>Client</h5>
+              </div>
+              <div class="col col--cb-about">
+                <h5>About</h5>
+              </div>
+              <div class="col col--cb-users">
+                <h5>Users</h5>
+              </div>
+              <div class="col col--cb-action">
+                <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick(user)" text=""></v-button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="dashboard__table__pagination">
+            <div class="dashboard__table__pagination__prev">
+              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="prevPage" text="Previous"></v-button>
+            </div>
+            <div class="dashboard__table__pagination__pages">
+              <v-pagination-list :total-pages="totalPages" @update:currentPage="updatePage" />
+            </div>
+            <div class="dashboard__table__pagination__next">
+              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="nextPage" text="Next"></v-button>
+            </div>
+          </div>
+
+        </div>
+
       </div>
     </div>
 
@@ -56,17 +118,7 @@
       <p>Content for the modal goes here...</p>
     </VModalSmall>
 
-    <div class="row bottom-pagination">
-      <div class="col-lg-2 align-left">
-        <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="handleButtonClick" text="Previous"></v-button>
-      </div>
-      <div class="col-lg-8 align-center">
-        <v-pagination-list :total-pages="6" @update:currentPage="updatePage" />
-      </div>
-      <div class="col-lg-2 align-right">
-        <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="handleButtonClick" text="Next"></v-button>
-      </div>
-    </div>
+    
 
   </div>
 </template>

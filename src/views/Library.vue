@@ -3,23 +3,132 @@
 
     <div class="row">
       <div class="col-lg-10">
-        <div class="dashboard__heading">
+        <div class="dashboard__heading mb-0">
           <h1>Library</h1>
           <p> Create and manage your team documents and templates.</p>
         </div>
       </div>
       <div class="col-lg-2 align-right">
-        <VButton :block="true" size="sm" icon="left" icon-style="add-white" @click="handleButtonClick" text="Add new document"></VButton>
+        <VButton :block="true" size="md" icon="left" icon-style="add" styled="primary" @click="handleButtonClick" text="Add new document"></VButton>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 dashboard__line">
+        <hr />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="dashboard__filters">
+
+          <div class="row">
+            <div class="col-lg-3">
+              <div class="dashboard__filters">
+                <Search />
+              </div>
+            </div>
+            <div class="col-lg-6"></div>
+            <div class="col-lg-3">
+              <ul class="dashboard__actions">
+                <li>
+                  <VDropdown :title="'Sort by date'" :items="sortTime" @item-clicked="handleDropdownClick" />
+                </li>
+                <li>
+                  <VDropdown :title="'All cases'" :items="sortTime" @item-clicked="handleDropdownClick" />
+                </li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
 
     <div class="row fill-space">
       <div class="col-lg-12">
-        LIBRARY CONTENT .... 
+
+        <div class="dashboard__table">
+
+          <div class="dashboard__table__head">
+            <div class="col col--checkbox">
+              <input type="checkbox" />
+            </div>
+            <div class="col col--l-document">
+              <h5>Document name</h5>
+            </div>
+            <div class="col col--l-status">
+              <h5>Status</h5>
+            </div>
+            <div class="col col--l-uploaded">
+              <h5>Date uploaded</h5>
+            </div>
+            <div class="col col--l-updated">
+              <h5>Last updated</h5>
+            </div>
+            <div class="col col--l-created">
+              <h5>Created by</h5>
+            </div>
+            <div class="col col--l-delete">
+              &nbsp;
+            </div>
+            <div class="col col--l-edit">
+              &nbsp;
+            </div>
+          </div>
+
+          <div class="dashboard__table__page">
+
+            <div class="dashboard__table__page__item">
+              <div class="col col--checkbox">
+                <input type="checkbox" />
+              </div>
+              <div class="col col--l-document">
+                <h5>Document name</h5>
+              </div>
+              <div class="col col--l-status">
+                <h5>Status</h5>
+              </div>
+              <div class="col col--l-uploaded">
+                <h5>Date uploaded</h5>
+              </div>
+              <div class="col col--l-updated">
+                <h5>Last updated</h5>
+              </div>
+              <div class="col col--l-created">
+                <h5>Created by</h5>
+              </div>
+              <div class="col col--l-delete">
+                &nbsp;
+              </div>
+              <div class="col col--l-edit">
+                &nbsp;
+              </div>
+            </div>
+
+          </div>
+
+          <div class="dashboard__table__pagination">
+            <div class="dashboard__table__pagination__prev">
+              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="prevPage" text="Previous"></v-button>
+            </div>
+            <div class="dashboard__table__pagination__pages">
+              <v-pagination-list :total-pages="totalPages" @update:currentPage="updatePage" />
+            </div>
+            <div class="dashboard__table__pagination__next">
+              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="nextPage" text="Next"></v-button>
+            </div>
+          </div>
+
+        </div>
+
       </div>
     </div>
 
-    
+    <VModalSmall :title="'My Modal Title'">
+      <p>Content for the modal goes here...</p>
+    </VModalSmall>
 
     
 
@@ -34,6 +143,7 @@ import Search   from '@/modules/Navigation/Search.vue';
 import VUser from '@/components/v-user/v-user.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
 import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
+import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 
 export default defineComponent({
   components: {
@@ -43,11 +153,26 @@ export default defineComponent({
     VUser,
     VPaginationList,
     VModalSmall,
+    VDropdown,
   },
   data() {
     return {
       userName: 'Olivia Rhye',
-      userEmail: 'olivia@untitledui.com'
+      userEmail: 'olivia@untitledui.com',
+      sortTime: [
+        { label: 'All' },
+        { label: 'Last year' },
+        { label: 'Last three months' },
+        { label: 'Last two months' },
+        { label: 'Last month' },
+        { label: 'This week' },
+      ],
+      sortCases: [
+        { label: 'Internal user' },
+        { label: 'Client (individual)' },
+        { label: 'Client (company)' },
+        { label: 'Admin' },
+      ],
     };
   },
   setup() {

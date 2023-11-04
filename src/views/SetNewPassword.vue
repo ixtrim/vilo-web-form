@@ -54,7 +54,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VIconbox from '@/components/v-iconbox/VIconbox.vue';

@@ -32,7 +32,7 @@
       </div>
     </div>
 
-    <v-button text="Sign In" @click="handleSubmit" block=true></v-button>
+    <v-button text="Sign In" @click="handleSubmit" :block="true"></v-button>
     <v-button :block="true" size="md" icon="left" icon-style="google" styled="outlined" @click="handleButtonClick" text="Sign in with Google"></v-button>
 
     <div class="signup-wrap text-center">
@@ -43,7 +43,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VLink from '@/components/v-link/VLink.vue';

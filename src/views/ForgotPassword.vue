@@ -13,13 +13,13 @@
       :errorMessage="emailValidationMessage"
     />
 
-    <v-button text="Reset password" @click="handleSubmit" block=true></v-button>
+    <v-button text="Reset password" @click="handleSubmit" :block="true"></v-button>
     <VLink to="/sign-in" isRouteLink styled="secondary" icon="left" icon-style="arrow-left" block=true>
       <span>Back to log in</span>
     </VLink>
   </div>
 </template>
-<script>
+<script lang="ts">
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VLink from '@/components/v-link/VLink.vue';

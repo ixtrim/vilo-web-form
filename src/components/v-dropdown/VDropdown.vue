@@ -12,6 +12,10 @@
 </template>
 
 <script lang="ts">
+interface Item {
+  label: string;
+}
+
 export default {
   name: 'VDropdown',
   props: {
@@ -20,12 +24,12 @@ export default {
       required: true
     },
     items: {
-      type: Array,
+      type: Array as PropType<Item[]>,
       required: true
     }
   },
   methods: {
-    itemClicked(item) {
+    itemClicked(item: Item) {
       this.$emit('item-clicked', item);
     }
   }

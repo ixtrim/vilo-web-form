@@ -19,6 +19,11 @@
 </template>
 
 <script lang="ts">
+interface Country {
+  name: string;
+  code: string;
+}
+
 export default {
   name: 'VCountryDropdown',
   data() {
@@ -221,11 +226,11 @@ export default {
         { name: 'Zambia', code: 'zm' },
         { name: 'Zimbabwe', code: 'zw' }
       ],
-      selectedCountry: { name: 'United States', code: 'us' }  // Default selected country
+      selectedCountry: { name: 'United States', code: 'us' }
     }
   },
   methods: {
-    countryClicked(country) {
+    countryClicked(country: Country) {
       this.selectedCountry = country;
       this.$emit('country-selected', country);
     }

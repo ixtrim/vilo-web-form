@@ -21,7 +21,7 @@
   import VLink from '@/components/v-link/VLink.vue';
 
   const links = [
-    { name: 'Home', to: '/', icon: 'left', iconStyle: 'home' },
+    { name: 'Home', to: '/dashboard', icon: 'left', iconStyle: 'home' },
     { name: 'Boards', to: '/case-boards', icon: 'left', iconStyle: 'boards' },
     { name: 'Clients', to: '/clients-management', icon: 'left', iconStyle: 'clients' },
     { name: 'Library', to: '/library', icon: 'left', iconStyle: 'library' },

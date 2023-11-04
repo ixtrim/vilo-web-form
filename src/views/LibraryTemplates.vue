@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="col-lg-2 align-right">
-        <VButton :block="true" size="sm" icon="left" icon-style="add-white" @click="handleButtonClick" text="Add new document"></VButton>
+        <VButton :block="true" size="sm" icon="left" icon-style="add-white" @click="handleButtonClick" text="Add new template"></VButton>
       </div>
     </div>
 

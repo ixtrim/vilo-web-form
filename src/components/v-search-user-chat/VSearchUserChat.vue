@@ -2,7 +2,7 @@
   <div class="search-widget">
     <v-input 
       label=""
-      placeholder="Search"
+      placeholder="New Message to @"
       v-model="internalSearchTerm"
       @input="$emit('input', internalSearchTerm)"
     />
@@ -30,5 +30,5 @@
 </script>
 
 <style>
-  @import url(../styles/search.scss);
+  @import url(./VSearchUserChat.scss);
 </style>

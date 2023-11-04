@@ -8,8 +8,8 @@
           <p> Create and manage your team documents and templates.</p>
         </div>
       </div>
-      <div class="col-lg-2">
-        <v-button :block="false" size="sm" icon="add" icon-style="left" styled="primary" @click="handleButtonClick" text="Add new document"></v-button>
+      <div class="col-lg-2 align-right">
+        <VButton :block="true" size="sm" icon="left" icon-style="add-white" @click="handleButtonClick" text="Add new invoice"></VButton>
       </div>
     </div>
 

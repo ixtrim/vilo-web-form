@@ -12,11 +12,13 @@
 </template>
 
 <script lang="ts">
+import { defineComponent, PropType } from 'vue';
+
 interface Item {
   label: string;
 }
 
-export default {
+export default defineComponent({
   name: 'VDropdown',
   props: {
     title: {
@@ -33,7 +35,7 @@ export default {
       this.$emit('item-clicked', item);
     }
   }
-}
+});
 </script>
 
 <style>

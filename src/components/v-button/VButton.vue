@@ -35,7 +35,7 @@
       icon: {
         type: String,
         default: 'no',
-        validator: value => ['no', 'left', 'right'].includes(value)
+        validator: (value: string): boolean => ['no', 'left', 'right'].includes(value),
       },
       iconStyle: String,
       loading: Boolean,
@@ -45,12 +45,12 @@
       size: {
         type: String,
         default: 'md',
-        validator: value => ['sm', 'md', 'lg', 'xl', 'xxl'].includes(value)
+        validator: (value: string): boolean => ['sm', 'md', 'lg', 'xl', 'xxl'].includes(value),
       },
       styled: {
         type: String,
         default: 'primary',
-        validator: value => ['primary', 'secondary', 'outlined', 'important', 'crucial'].includes(value)
+        validator: (value: string): boolean => ['primary', 'secondary', 'outlined', 'important', 'crucial'].includes(value),
       }
     },
     methods: {

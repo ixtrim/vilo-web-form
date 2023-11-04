@@ -27,7 +27,10 @@
       buttonClass: String,
       text: String,
       disabled: Boolean,
-      type: String,
+      type: {
+        type: String as () => "button" | "reset" | "submit",
+        default: "button",
+      },
       block: Boolean,
       icon: {
         type: String,

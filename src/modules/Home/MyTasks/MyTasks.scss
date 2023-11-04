@@ -1,8 +1,5 @@
-.module-income {
+.module-invoices {
   width: 100%;
-  padding: 16px;
-  border: 1px solid var(--v-gray-200);
-  border-radius: 12px;
   text-align: left;
   
   h3 {
@@ -12,9 +9,5 @@
     font-size: 18px;
     font-weight: 600;
     color: var(--v-gray-700);
-  }
-
-  img {
-    margin: 0 auto;
   }
 }

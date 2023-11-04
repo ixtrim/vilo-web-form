@@ -21,14 +21,57 @@
 
     <div class="row">
       <div class="col-lg-7">
-        <Income />
+        <TotalIncome />
       </div>
       <div class="col-lg-5">
-        <Invoices />
+        <RecentInvoices />
       </div>
     </div>
 
+    <div class="row">
+      <div class="col-lg-12 dashboard__separator">
+        &nbsp;
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <PendingDocuments />
+      </div>
+    </div>
     
+    <div class="row">
+      <div class="col-lg-12 dashboard__separator">
+        &nbsp;
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-6">
+        <MyTasks />
+      </div>
+      <div class="col-lg-6">
+
+        <div class="row">
+          <div class="col-lg-12">
+            <UpcomingMeetings />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-12 dashboard__separator">
+            &nbsp;
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-12">
+            <UnreadMessages />
+          </div>
+        </div>
+
+      </div>
+    </div>
 
     
 
@@ -44,15 +87,23 @@ import { defineComponent, ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import Search   from '@/modules/Navigation/Search.vue';
 import VLink from '@/components/v-link/VLink.vue';
-import Income from '@/modules/Home/Income/Income.vue';
-import Invoices from '@/modules/Home/Invoices/Invoices.vue';
+import TotalIncome from '@/modules/Home/TotalIncome/TotalIncome.vue';
+import RecentInvoices from '@/modules/Home/RecentInvoices/RecentInvoices.vue';
+import PendingDocuments from '@/modules/Home/PendingDocuments/PendingDocuments.vue';
+import MyTasks from '@/modules/Home/MyTasks/MyTasks.vue';
+import UpcomingMeetings from '@/modules/Home/UpcomingMeetings/UpcomingMeetings.vue';
+import UnreadMessages from '@/modules/Home/UnreadMessages/UnreadMessages.vue';
 
 export default defineComponent({
   components: {
     Search,
     VLink,
-    Income,
-    Invoices
+    TotalIncome,
+    RecentInvoices,
+    PendingDocuments,
+    MyTasks,
+    UpcomingMeetings,
+    UnreadMessages
   },
 });
 </script>

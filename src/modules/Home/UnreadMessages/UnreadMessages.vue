@@ -2,7 +2,7 @@
   <div class="module-invoices">
     <div class="row">
       <div class="col-lg-8">
-        <h3>Recent Invoices</h3>
+        <h3>Unread Messages</h3>
       </div>
       <div class="col-lg-4 align-right">
         <VLink @click="" styled="secondary">View all</VLink>
@@ -10,7 +10,7 @@
     </div>
     <div class="row">
       <div class="col-lg-12 align-center">
-        <img src="@/assets/temporary/income-chart.svg" alt="Total income" />
+        
       </div>
     </div>
   </div>
@@ -29,5 +29,5 @@ export default defineComponent({
 </script>
 
 <style>
-  @import url(./Invoices.scss);
+  @import url(./UnreadMessages.scss);
 </style>

@@ -1,10 +1,8 @@
-
 <template>
   <div class="forgot-part">
     <v-iconbox class="v-mail-icon" />
     <h2 class="text-center">Check your email</h2>
-    <h4 class="text-center">We sent a verification link to <a class="normal-link"
-        href="mailto:olivia@untitledui.com">olivia@untitledui.com</a></h4>
+    <h4 class="text-center">We sent a verification link to your e-mail.</h4>
 
     <v-button text="Go to Login" @click="handleButtonClick" :block="true"></v-button>
 
@@ -30,7 +28,7 @@
     },
     methods: {
       handleButtonClick() {
-        // Handle button click here
+        this.$router.push('/sign-in');
       },
     },
   };

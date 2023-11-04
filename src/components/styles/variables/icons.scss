@@ -34,6 +34,10 @@
     background-image: url('@/components/styles/icons/check-circle.svg');
   }
 
+  &.v-error:after {
+    background-image: url('@/components/styles/icons/error-circle.svg');
+  }
+
   &.v-lock-icon:after {
     background-image: url('@/components/styles/icons/lock-icon.svg');
   }

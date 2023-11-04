@@ -1,5 +1,5 @@
 <template>
-  <div class="module-income">
+  <div class="total-income">
     <div class="row">
       <div class="col-lg-12">
         <h3>Total income</h3>
@@ -14,5 +14,5 @@
 </template>
 
 <style>
-  @import url(./Income.scss);
+  @import url(./TotalIncome.scss);
 </style>

@@ -5,10 +5,10 @@
       <VButton
         :block="false"
         size="sm"
-        icon="left"
-        icon-style="delete"
-        styled="simple-icon"
-        @click="() => removeInput(index)"
+        :icon="'left'"
+        :iconStyle="'delete'"
+        :styled="'simple-icon'"
+        @click.native="removeInput(index)"
         text=""
       ></VButton>
     </div>

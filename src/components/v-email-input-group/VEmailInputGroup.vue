@@ -2,8 +2,15 @@
   <div class="v-email-input-group">
     <div v-for="(input, index) in inputs" :key="index" class="input-row">
       <VInput label="" placeholder="" type="email" v-model="input.value" />
-      <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="removeInput(index)"
-        text=""></VButton>
+      <VButton
+        :block="false"
+        size="sm"
+        icon="left"
+        icon-style="delete"
+        styled="simple-icon"
+        @click="() => removeInput(index)"
+        text=""
+      ></VButton>
     </div>
 
     <VLink @click="addInput" styled="secondary" icon="left" icon-style="add">Add Item</VLink>

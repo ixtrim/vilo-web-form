@@ -83,9 +83,8 @@
 </style>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted } from 'vue';
-import axios from 'axios';
-import Search   from '@/modules/Navigation/Search.vue';
+import { defineComponent, ref } from 'vue';
+import Search from '@/modules/Navigation/Search.vue';
 import VLink from '@/components/v-link/VLink.vue';
 import TotalIncome from '@/modules/Home/TotalIncome/TotalIncome.vue';
 import RecentInvoices from '@/modules/Home/RecentInvoices/RecentInvoices.vue';
@@ -104,6 +103,18 @@ export default defineComponent({
     MyTasks,
     UpcomingMeetings,
     UnreadMessages
+  },
+  setup() {
+    const searchTerm = ref('');
+
+    const updateSearchTerm = (value: string) => {
+      searchTerm.value = value;
+    };
+
+    return {
+      searchTerm,
+      updateSearchTerm,
+    };
   },
 });
 </script>

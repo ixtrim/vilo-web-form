@@ -8,7 +8,7 @@
           styled="secondary" 
           :icon="link.icon" 
           :icon-style="link.iconStyle" 
-          block=true
+          :block="true"
         >
           <span>{{ link.name }}</span>
           <VBadge v-if="link.badge && link.name === 'Chat'" :variant="'danger'">{{ link.badge }}</VBadge>

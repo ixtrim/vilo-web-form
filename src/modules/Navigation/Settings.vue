@@ -6,7 +6,7 @@
       styled="secondary" 
       icon="left" 
       icon-style="settings" 
-      block=true
+      :block="true"
       :class="{ active: classActive }"
     >
       <span>Settings</span>

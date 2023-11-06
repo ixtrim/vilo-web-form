@@ -17,7 +17,7 @@
         styled="secondary" 
         icon="left" 
         icon-style="logout" 
-        block=true
+        :block="true"
         :class="{ active: classActive }"
       ></VLink>
     </div>
@@ -26,5 +26,9 @@
 </template>
 
 <script setup lang="ts">
+  import { ref } from 'vue';
   import VLink from '@/components/v-link/VLink.vue';
+
+  // Define a reactive property
+  const classActive = ref(false);
 </script>

@@ -6,7 +6,7 @@
           :to="link.to" 
           isRouteLink 
           styled="secondary" 
-          block=true
+          :block="true"
         >
           <span>{{ link.name }}</span>
           <v-badge v-if="link.name === 'Team'" variant="primary">4</v-badge>

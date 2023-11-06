@@ -18,6 +18,7 @@
       to: {
         type: String,
         required: true,
+        default: null,
       },
       isRouteLink: {
         type: Boolean,
@@ -47,6 +48,15 @@
         validator: (value: unknown): boolean => ['arrow-left', 'arrow-right', 'save', 'preview', 'edit', 'delete', 'add', 'copy', 'upload', 'share'].includes(value as string)
       }
     },
+    methods: {
+      handleClick(event: MouseEvent) {
+        if (this.to) {
+          // Perform navigation
+        } else {
+          this.$emit('click', event);
+        }
+      }
+    }
   };
 </script>
 

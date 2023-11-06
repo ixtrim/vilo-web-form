@@ -382,13 +382,14 @@
       padding: 0 24px;
       background: var(--v-gray-100);
 
-      h5 {
+      h4 {
         font-size: .75rem;
         margin: 12px 0;
         padding: 0;
         text-align: left;
         font-family: var(--v-font-inter-medium);
         color: var(--v-gray-600);
+        border-bottom: none;
       }
     }
 
@@ -398,12 +399,8 @@
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-        padding: 10px 13px;
+        padding: 10px 24px;
         border-top: 1px solid var(--v-gray-200);
-
-        &:nth-child(even) {
-          background: var(--v-gray-100);
-        }
 
         &:last-child {
           border-bottom: 1px solid var(--v-gray-200);
@@ -431,30 +428,72 @@
       flex: 0 0 auto;
       position: relative;
 
+      p {
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+        font-family: var(--v-font-inter-regular);
+        color: var(--v-gray-600);
+      }
+
+      button {
+        margin: 0;
+      }
+
       &--checkbox {
         width: 15px;
         flex: 0 0 1;
       }
 
-      &--cm-user {
-        width: 300px;
+      &--l-sign {
+        width: 56px;
       }
 
-      &--cm-phone {
-        width: 200px;
+      &--l-edit {
+        width: 35px;
       }
 
-      border-bottom: 1px solid var(--v-gray-200);
-      &--cm-position {
-        width: 160px;
+      &--l-delete {
+        width: 56px;
+        margin-left: 48px;
       }
 
-      &--cm-company {
-        width: 200px;
-      }
-
-      &--cm-address {
+      &--l-document {
         flex: 1 1 0;
+      }
+
+      &--l-status {
+        width: 110px;
+        text-align: center;
+
+        h4 {
+          text-align: center;
+        }
+      }
+
+      &--l-uploaded {
+        width: 125px;
+        text-align: center;
+        margin-left: 48px;
+
+        h4 {
+          text-align: center;
+        }
+      }
+
+      &--l-updated {
+        width: 125px;
+        text-align: center;
+        margin-left: 48px;
+
+        h4 {
+          text-align: center;
+        }
+      }
+
+      &--l-created {
+        width: 250px;
+        margin-left: 48px;
       }
 
       &--cm-action {

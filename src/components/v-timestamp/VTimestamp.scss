@@ -1,39 +1,71 @@
 @import '@/components/styles/variables/fonts.scss';
 @import '@/components/styles/variables/colors.scss';
 
-.badge {
-  border-radius: 16px!important;
+.timestamp {
+  border-radius: 6px!important;
   padding: 4px 8px;
   font-size: 12px!important;
   font-weight: 500!important;
+  font-family: var(--v-font-inter-medium);
+
+  &::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 55%;
+    margin-right: 4px;
+    position: relative;
+    top: -2px;
+  }
 
   &.bg-primary {
     border: 1px solid var(--v-primary-indigo-200)!important;
     background: var(--v-primary-indigo-100)!important;
     color: var(--v-primary-indigo-700)!important;
+
+    &::before {
+      background-color: var(--v-primary-indigo-700);
+    }
   }
 
   &.bg-success {
     border: 1px solid var(--v-green-200)!important;
     background: var(--v-green-50)!important;
     color: var(--v-green-700)!important;
+
+    &::before {
+      background-color: var(--v-green-700);
+    }
   }
 
   &.bg-warning {
     border: 1px solid var(--v-orange-200)!important;
     background: var(--v-orange-50)!important;
     color: var(--v-orange-700)!important;
+
+    &::before {
+      background-color: var(--v-orange-700);
+    }
   }
 
   &.bg-danger {
     border: 1px solid var(--v-red-500)!important;
-    background: var(--v-red-400)!important;
-    color: var(--v-white)!important;
+    background: var(--v-red-50)!important;
+    color: var(--v-red-500)!important;
+
+    &::before {
+      background-color: var(--v-red-500);
+    }
   }
 
   &.bg-light {
     border: 1px solid var(--v-gray-200)!important;
     background: var(--v-gray-100)!important;
     color: var(--v-gray-700)!important;
+
+    &::before {
+      background-color: var(--v-gray-700);
+    }
   }
 }

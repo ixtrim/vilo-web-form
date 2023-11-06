@@ -28,17 +28,17 @@
               <VInput 
                 label="Account number" 
                 placeholder="12-1234-123456-12" 
-                v-model="text"
+                v-model="accountNumber"
               />
               <VInput 
                 label="Bank Name" 
                 placeholder="ABC Bank limited" 
-                v-model="text"
+                v-model="bankName"
               />
               <VInput 
                 label="SWIFT/IBAN" 
                 placeholder="NZ0201230012" 
-                v-model="text"
+                v-model="swiftIban"
               />
             </div>
           </div>
@@ -61,7 +61,7 @@
               <VInput 
                 label="" 
                 placeholder="100 Smith Street" 
-                v-model="text"
+                v-model="address"
               />
             </div>
           </div>
@@ -74,7 +74,7 @@
               <VInput 
                 label="" 
                 placeholder="Collingwood" 
-                v-model="text"
+                v-model="city"
               />
             </div>
           </div>
@@ -87,12 +87,12 @@
               <VInput 
                 label="" 
                 placeholder="VIC" 
-                v-model="text"
+                v-model="state"
               />
               <VInput 
                 label="" 
                 placeholder="3066" 
-                v-model="text"
+                v-model="postalCode"
               />
             </div>
           </div>
@@ -114,7 +114,7 @@
 </template> 
 
 <script lang="ts">
-  import { defineComponent, ref, computed } from 'vue';
+  import { defineComponent } from 'vue';
   import VCountryDropdown from '@/components/v-country-dropdown/VCountryDropdown.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VButton from '@/components/v-button/VButton.vue';
@@ -131,6 +131,13 @@
     },
     data() {
       return {
+        accountNumber: '',
+        bankName: '',
+        swiftIban: '',
+        address: '',
+        city: '',
+        state: '',
+        postalCode: '',
         dropdownItems: [
           { label: 'Internal user' },
           { label: 'Client (individual)' },
@@ -141,9 +148,9 @@
     },
     methods: {
       handleButtonClick() {
-        
+        console.log('Click');
       },
-      handleCountrySelected(country) {
+      handleCountrySelected(country: string) {
         console.log('Selected Country:', country);
       },
     },

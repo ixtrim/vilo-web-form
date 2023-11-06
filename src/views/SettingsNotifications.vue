@@ -72,12 +72,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
+import { defineComponent } from 'vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import VInput from '@/components/v-input/VInput.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import TabsSettings from '@/modules/TabsSettings.vue';
 import VToggleSwitch from '@/components/v-toggle-switch/VToggleSwitch.vue';
+
+type DropdownItem = {
+  label: string;
+};
 
 export default defineComponent({
   components: {
@@ -104,8 +108,8 @@ export default defineComponent({
     };
   },
   methods: {
-    handleButtonClick() {
-      
+    handleDropdownClick(item: DropdownItem) {
+      console.log('Dropdown item clicked:', item.label);
     },
   },
 });

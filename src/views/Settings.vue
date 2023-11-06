@@ -80,6 +80,10 @@ import VButton from '@/components/v-button/VButton.vue';
 import TabsSettings from '@/modules/TabsSettings.vue';
 import VTextInputGroup from '@/components/v-text-input-group/VTextInputGroup.vue';
 
+interface DropdownItem {
+  label: string;
+}
+
 export default defineComponent({
   components: {
     VButton,
@@ -90,6 +94,7 @@ export default defineComponent({
   },
   data() {
     return {
+      text: '',
       dropdownTimezone: [
         { label: 'GMT +1' },
         { label: 'GMT +2' },
@@ -103,6 +108,9 @@ export default defineComponent({
   },
   methods: {
     handleButtonClick() {
+    },
+    handleDropdownClick(item: DropdownItem) {
+      console.log(item);
     },
   },
 });

@@ -34,6 +34,11 @@
 <script lang="ts">
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 
+interface HourRange {
+  from: string;
+  to: string;
+}
+
 export default {
   components: {
     VDropdown,
@@ -66,19 +71,21 @@ export default {
         { label: '11 pm' },
         { label: '12 pm' },
       ],
-      hours: []
+      hours: [] as HourRange[],
     };
   },
   methods: {
     addHour() {
       this.hours.push({ from: '', to: '' });
     },
-    removeHour(index) {
+    removeHour(index: number) {
       this.hours.splice(index, 1);
       if (this.hours.length === 0) {
-        // Reset to initial state if no rows are left
         this.hours = [];
       }
+    },
+    handleDropdownClick(item: { label: string }) {
+      console.log(item.label);
     }
   }
 };

@@ -35,7 +35,7 @@
     </div>
 
     <v-button text="Sign In" @click="handleSubmit" :block="true"></v-button>
-    <v-button :block="true" size="md" icon="left" icon-style="google" styled="outlined" @click="handleButtonClick" text="Sign in with Google"></v-button>
+    <v-button :block="true" size="md" icon="left" icon-style="google" styled="outlined" @click="SignInWithGoogle" text="Sign in with Google"></v-button>
 
     <div class="signup-wrap text-center">
       <span>Don’t have an account?</span>
@@ -83,6 +83,9 @@
         } else {
           this.passwordValidationMessage = '';
         }
+      },
+      SignInWithGoogle() {
+        console.log('Sign in with Google button clicked');
       },
       async handleSubmit() {
         this.emailValidationMessage = '';

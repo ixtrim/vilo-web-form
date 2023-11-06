@@ -6,9 +6,9 @@
         :block="false"
         size="sm"
         :icon="'left'"
-        :iconStyle="'delete'"
+        :icon-style="'delete'"
         :styled="'simple-icon'"
-        @click.native="removeInput(index)"
+        @click="removeInput(index)"
         text=""
       ></VButton>
     </div>

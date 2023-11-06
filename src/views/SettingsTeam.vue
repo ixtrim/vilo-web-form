@@ -191,6 +191,10 @@ import VButton from '@/components/v-button/VButton.vue';
 import VUser from '@/components/v-user/v-user.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
 
+interface DropdownItem {
+  label: string;
+}
+
 export default defineComponent({
   components: {
     TabsSettings,
@@ -253,7 +257,7 @@ export default defineComponent({
     handleButtonClick() {
      console.log('Button clicked');
     },
-    handleDropdownClick(item) {
+    handleDropdownClick(item: DropdownItem) {
       console.log('Dropdown item clicked:', item.label);
     },
   },

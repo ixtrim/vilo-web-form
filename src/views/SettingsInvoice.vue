@@ -69,13 +69,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
+import { defineComponent, ref } from 'vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import VInput from '@/components/v-input/VInput.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import TabsSettings from '@/modules/TabsSettings.vue';
 import VTextInputDraggableGroup from '@/components/v-text-input-draggable-group/VTextInputDraggableGroup.vue';
 import VNotification from '@/components/v-notification/VNotification.vue';
+
+interface NotificationRef {
+  showNotification: () => void;
+}
 
 export default defineComponent({
   components: {
@@ -99,15 +103,16 @@ export default defineComponent({
       dropdownDateFormat: [
         { label: 'mm/dd/yyyy' },
         { label: 'mm.dd.yyyy' },
-      ]
+      ],
+      text: '',
     };
   },
   methods: {
-    triggerNotification(type, header, message) {
+    triggerNotification(type: string, header: string, message: string) {
       this.notificationType = type;
       this.notificationHeader = header;
       this.notificationMessage = message;
-      this.$refs.notificationRef.showNotification();
+      (this.$refs.notificationRef as NotificationRef).showNotification();
     },
     handleNotificationClosed() {
       // Handle the event when the notification is closed

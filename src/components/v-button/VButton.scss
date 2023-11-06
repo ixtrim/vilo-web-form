@@ -125,13 +125,6 @@
     color: #fff;
   }
 
-  &--simple-icon {
-    border: none;
-    background: none;
-    padding: 5px 10px;
-    position: relative;
-  }
-
   &--icon-left,
   &--icon-right {
     i {
@@ -165,6 +158,19 @@
     }
   }
 
+  &--simple-icon {
+    border: none;
+    background: none;
+    padding: 5px 10px;
+    position: relative;
+
+    i {
+      margin-left: 0;
+      margin-right: 0;
+      padding: 0;
+    }
+  }
+
   // Icons
   .arrow-left {
     width: 12px;
@@ -178,12 +184,22 @@
     background-image: url(../../assets/icons/icon-arrow-right.svg);
   }
 
-  .save {
-    /* styles for save icon */
+  .tag {
+    width: 12px;
+    height: 12px;
+    background-image: url(../../assets/icons/icon-tag.svg);
   }
 
   .preview {
-    /* styles for preview icon */
+    width: 16px;
+    height: 12px;
+    background-image: url(../../assets/icons/icon-preview.svg);
+  }
+
+  .settings-dots {
+    width: 20px;
+    height: 20px;
+    background-image: url(../../assets/icons/icon-settings-dots.svg);
   }
 
   .wysiwyg-bold {
@@ -246,26 +262,10 @@
     background-image: url(../../assets/icons/icon-plus--blue.svg);
   }
 
-  .copy {
-    /* styles for copy icon */
-  }
-
-  .upload {
-    /* styles for upload icon */
-  }
-
   .download {
     width: 17px;
     height: 15px;
     background-image: url(../../assets/icons/icon-download.svg);
-  }
-
-  .share {
-    /* styles for share icon */
-  }
-
-  .share {
-    /* styles for share icon */
   }
 
   .google {

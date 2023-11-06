@@ -9,13 +9,19 @@
         </div>
       </div>
       <div class="col-lg-2 align-right">
-        <VButton :block="true" size="md" icon="left" icon-style="add" styled="primary" @click="handleButtonClick" text="Add new document"></VButton>
+        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="handleButtonClick" text="Add new document"></VButton>
       </div>
     </div>
 
     <div class="row">
-      <div class="col-lg-12 dashboard__line">
-        <hr />
+      <div class="col-lg-12 dashboard__separator">
+        &nbsp;
+      </div>
+    </div>
+
+    <div class="row mt5">
+      <div class="col-lg-12">
+        <TabsLibrary />
       </div>
     </div>
 
@@ -56,19 +62,19 @@
               <input type="checkbox" />
             </div>
             <div class="col col--l-document">
-              <h5>Document name</h5>
+              <h4>Document name</h4>
             </div>
             <div class="col col--l-status">
-              <h5>Status</h5>
+              <h4>Status</h4>
             </div>
             <div class="col col--l-uploaded">
-              <h5>Date uploaded</h5>
+              <h4>Date uploaded</h4>
             </div>
             <div class="col col--l-updated">
-              <h5>Last updated</h5>
+              <h4>Last updated</h4>
             </div>
             <div class="col col--l-created">
-              <h5>Created by</h5>
+              <h4>Created by</h4>
             </div>
             <div class="col col--l-delete">
               &nbsp;
@@ -80,30 +86,33 @@
 
           <div class="dashboard__table__page">
 
-            <div class="dashboard__table__page__item">
-              <div class="col col--checkbox">
-                <input type="checkbox" />
-              </div>
-              <div class="col col--l-document">
-                <h5>Document name</h5>
-              </div>
-              <div class="col col--l-status">
-                <h5>Status</h5>
-              </div>
-              <div class="col col--l-uploaded">
-                <h5>Date uploaded</h5>
-              </div>
-              <div class="col col--l-updated">
-                <h5>Last updated</h5>
-              </div>
-              <div class="col col--l-created">
-                <h5>Created by</h5>
-              </div>
-              <div class="col col--l-delete">
-                &nbsp;
-              </div>
-              <div class="col col--l-edit">
-                &nbsp;
+            <div class="dashboard__table__page">
+              <div class="dashboard__table__page__item" v-for="document in documents" :key="document.id">
+                <div class="col col--checkbox">
+                  <input type="checkbox" :id="'checkbox-' + document.id" />
+                  <label :for="'checkbox-' + document.id"></label>
+                </div>
+                <div class="col col--l-document">
+                  <VFile :file-extension="document.fileExtension" :file-name="document.fileName" :file-size="document.fileSize" />
+                </div>
+                <div class="col col--l-status">
+                  <VBadge :variant="document.badgeVariant">{{ document.status }}</VBadge>
+                </div>
+                <div class="col col--l-uploaded">
+                  <p>{{ document.uploadedDate }}</p>
+                </div>
+                <div class="col col--l-updated">
+                  <p>{{ document.updatedDate }}</p>
+                </div>
+                <div class="col col--l-created">
+                  <VUser :userName="document.userName" :userEmail="document.userEmail" />
+                </div>
+                <div class="col col--l-delete">
+                  <VLink to="#" styled="secondary">Delete</VLink>
+                </div>
+                <div class="col col--l-edit">
+                  <VLink to="#" styled="primary">Edit</VLink>
+                </div>
               </div>
             </div>
 
@@ -144,6 +153,9 @@ import VUser from '@/components/v-user/v-user.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
 import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
+import VFile from '@/components/v-file/VFile.vue';
+import VBadge from '@/components/v-badge/VBadge.vue';
+import TabsLibrary from '@/modules/TabsLibrary.vue';
 
 export default defineComponent({
   components: {
@@ -154,6 +166,9 @@ export default defineComponent({
     VPaginationList,
     VModalSmall,
     VDropdown,
+    VFile,
+    VBadge,
+    TabsLibrary,
   },
   data() {
     return {
@@ -173,6 +188,92 @@ export default defineComponent({
         { label: 'Client (company)' },
         { label: 'Admin' },
       ],
+      documents: [
+        {
+          id: 1,
+          fileExtension: 'pdf',
+          fileName: 'Mergers_Acquisitions_Report_2022.pdf',
+          fileSize: '5 MB',
+          badgeVariant: 'warning',
+          status: 'Review',
+          uploadedDate: 'Feb 12, 2023',
+          updatedDate: 'Mar 5, 2023',
+          userName: 'Adrian Stone',
+          userEmail: 'adrian@lawfirm.com',
+        },
+        {
+          id: 2,
+          fileExtension: 'docx',
+          fileName: 'Client_Contract_John_Doe.docx',
+          fileSize: '2 MB',
+          badgeVariant: 'success',
+          status: 'Signed',
+          uploadedDate: 'Jan 20, 2023',
+          updatedDate: 'Jan 22, 2023',
+          userName: 'Brenda Walsh',
+          userEmail: 'brenda@lawfirm.com',
+        },
+        {
+          id: 3,
+          fileExtension: 'docx',
+          fileName: 'Case_Expenses_2023.docx',
+          fileSize: '1 MB',
+          badgeVariant: 'primary',
+          status: 'Updated',
+          uploadedDate: 'Mar 1, 2023',
+          updatedDate: 'Mar 1, 2023',
+          userName: 'Carlos Diaz',
+          userEmail: 'carlos@lawfirm.com',
+        },
+        {
+          id: 4,
+          fileExtension: 'doc',
+          fileName: 'Litigation_Strategies_2023.doc',
+          fileSize: '6 MB', 
+          badgeVariant: 'light',
+          status: 'Draft',
+          uploadedDate: 'Apr 10, 2023',
+          updatedDate: 'Apr 15, 2023',
+          userName: 'Diana Reed',
+          userEmail: 'diana@lawfirm.com',
+        },
+        {
+          id: 5,
+          fileExtension: 'pdf',
+          fileName: 'Non_Disclosure_Agreement_Globex.pdf',
+          fileSize: '2.5 MB', 
+          badgeVariant: 'danger',
+          status: 'Urgent',
+          uploadedDate: 'Feb 28, 2023',
+          updatedDate: 'Mar 2, 2023',
+          userName: 'Evan Wright',
+          userEmail: 'evan@lawfirm.com',
+        },
+        {
+          id: 6,
+          fileExtension: 'docx',
+          fileName: 'Settlement_Agreement_Case_4321.docx',
+          fileSize: '3 MB', 
+          badgeVariant: 'success',
+          status: 'Final',
+          uploadedDate: 'Jan 5, 2023',
+          updatedDate: 'Jan 6, 2023',
+          userName: 'Fiona Grant',
+          userEmail: 'fiona@lawfirm.com',
+        },
+        {
+          id: 7,
+          fileExtension: 'pdf',
+          fileName: 'Meeting_Minutes_030323.pdf',
+          fileSize: '512 KB', 
+          badgeVariant: 'success',
+          status: 'Completed',
+          uploadedDate: 'Mar 3, 2023',
+          updatedDate: 'Mar 4, 2023',
+          userName: 'George Hanson',
+          userEmail: 'george@lawfirm.com',
+        }
+      ]
     };
   },
   setup() {

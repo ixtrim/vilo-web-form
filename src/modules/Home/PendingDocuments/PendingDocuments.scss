@@ -1,4 +1,4 @@
-.module-invoices {
+.pending-documents {
   width: 100%;
   text-align: left;
   
@@ -9,5 +9,13 @@
     font-size: 18px;
     font-weight: 600;
     color: var(--v-gray-700);
+  }
+
+  h5 {
+    border-bottom: none;
+  }
+
+  .dashboard__table {
+    margin-top: 16px;
   }
 }

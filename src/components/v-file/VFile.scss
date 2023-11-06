@@ -1,0 +1,24 @@
+.v-file {
+  display: flex;
+  align-items: center;
+  text-align: left;
+
+  &__icon {
+    margin-right: 10px;
+  }
+
+  &__name {
+    margin: 0;
+    padding: 0;
+    font-family: var(--v-font-inter-medium);
+    font-size: 14px;
+    color: var(--v-gray-900);
+  }
+
+  &__size {
+    margin: 0;
+    font-family: var(--v-font-inter-regular);
+    font-size: 14px;
+    color: var(--v-gray-900);
+  }
+}

@@ -9,16 +9,25 @@
         :icon-style="'delete'"
         :styled="'simple-icon'"
         @click="removeInput(index)"
+        :is-route-link="false"
         text=""
+        v-bind="$attrs as any"
       ></VButton>
     </div>
 
-    <VLink @click="addInput" styled="secondary" icon="left" icon-style="add">Add Item</VLink>
+    <VLink
+      @click="addInput"
+      styled="secondary"
+      icon="left"
+      icon-style="add"
+      to="#"
+    >Add Item</VLink>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { defineComponent, ref } from 'vue';
+import type { PropType } from 'vue';
 import VInput from '@/components/v-input/VInput.vue';
 import VLink from '@/components/v-link/VLink.vue';
 import VButton from '@/components/v-button/VButton.vue';

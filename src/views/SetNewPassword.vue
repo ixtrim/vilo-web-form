@@ -4,7 +4,7 @@
     <h2 class="text-center">Set new password</h2>
     <h4 class="text-center">Your new password must be different to previously used passwords.</h4>
 
-    <form @submit.prevent="handleButtonClick">
+    <form @submit.prevent="handleSubmit">
       <v-input 
         type="password" 
         v-model="password" 
@@ -49,7 +49,7 @@
         text="Change password" 
         type="submit"
         @click="handleSubmit"
-        block=true
+        :block="true"
       ></v-button>
     </form>
 
@@ -57,7 +57,8 @@
 </template>
 
 <script lang="ts">
-  import axios from 'axios';
+  import axios, { AxiosError } from 'axios';
+  import { defineComponent } from 'vue';
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VIconbox from '@/components/v-iconbox/VIconbox.vue';
@@ -81,7 +82,7 @@
       };
     },
     computed: {
-      isPasswordValid() {
+      isPasswordValid(): boolean {
         return this.isValidLength && this.hasSpecialCharacter && this.arePasswordsMatching;
       },
     },
@@ -99,21 +100,21 @@
 
         this.confirmPasswordValidationMessage = '';
       },
-      validationClass(isValid) {
+      validationClass(isValid: boolean): Record<string, boolean> {
         return {
           'valid': isValid,
           'invalid': !isValid && this.password !== '',
           'default': this.password === ''
         };
       },
-      iconContainerClass(isValid) {
+      iconContainerClass(isValid: boolean): Record<string, boolean> {
         return {
           'icon-container--valid': isValid,
           'icon-container--invalid': !isValid && this.password !== '',
           'icon-container--default': this.password === ''
         };
       },
-      iconClass(isValid) {
+      iconClass(isValid: boolean): Record<string, boolean> {
         return {
           'icon--check': isValid,
           'icon--cross': !isValid && this.password !== '',
@@ -155,8 +156,12 @@
 
             this.$router.push('/password-changed');
           } catch (error) {
-            if (error.response && error.response.data && error.response.data.message) {
-              this.apiErrorMessage = error.response.data.message;
+            if (axios.isAxiosError(error)) {
+              if (error.response && error.response.data && error.response.data.message) {
+                this.apiErrorMessage = error.response.data.message;
+              } else {
+                this.apiErrorMessage = 'An unexpected error occurred. Please try again later.';
+              }
             } else {
               this.apiErrorMessage = 'An unexpected error occurred. Please try again later.';
             }

@@ -34,17 +34,17 @@
       styled: {
         type: String,
         default: 'primary',
-        validator: value => ['primary', 'secondary', 'important', 'crucial'].includes(value)
+        validator: (value: unknown): boolean => ['primary', 'secondary', 'important', 'crucial'].includes(value as string)
       },
       icon: {
         type: String,
         default: 'no',
-        validator: value => ['no', 'left', 'right'].includes(value)
+        validator: (value: unknown): boolean => ['no', 'left', 'right'].includes(value as string)
       },
       iconStyle: {
         type: String,
         default: '',
-        validator: value => ['arrow-left', 'arrow-right', 'save', 'preview', 'edit', 'delete', 'add', 'copy', 'upload', 'share'].includes(value)
+        validator: (value: unknown): boolean => ['arrow-left', 'arrow-right', 'save', 'preview', 'edit', 'delete', 'add', 'copy', 'upload', 'share'].includes(value as string)
       }
     },
   };

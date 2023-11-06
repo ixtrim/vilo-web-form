@@ -14,57 +14,60 @@
 </template>
 
 <script lang="ts">
-export default {
-  props: {
-    label: {
-      type: String,
-      default: 'Label'
+  import { defineComponent } from 'vue';
+
+  export default defineComponent({
+    props: {
+      label: {
+        type: String,
+        default: 'Label'
+      },
+      type: {
+        type: String,
+        default: 'text'
+      },
+      value: {
+        type: [String, Number],
+        default: ''
+      },
+      placeholder: {
+        type: String,
+        default: ''
+      },
+      disabled: {
+        type: Boolean,
+        default: false
+      },
+      errorMessage: {
+        type: String,
+        default: ''
+      },
     },
-    type: {
-      type: String,
-      default: 'text'
+    data() {
+      return {
+        localValue: this.value as string | number,
+      };
     },
-    value: {
-      type: [String, Number],
-      default: ''
+    watch: {
+      value(newVal: string | number) {
+        this.localValue = newVal;
+      },
+      localValue(newVal: string | number) {
+        this.$emit('input', newVal);
+      },
     },
-    placeholder: {
-      type: String,
-      default: ''
+    methods: {
+      updateValue(event: Event) {
+        const input = event.target as HTMLInputElement;
+        this.localValue = input.value;
+      },
     },
-    disabled: {
-      type: Boolean,
-      default: false
-    },
-    errorMessage: {
-      type: String,
-      default: ''
-    },
-  },
-  data() {
-    return {
-      localValue: this.value,
-    };
-  },
-  watch: {
-    value(newVal) {
-      this.localValue = newVal;
-    },
-    localValue(newVal) {
-      this.$emit('input', newVal);  // Emit the 'input' event for v-model to work
-    },
-  },
-  methods: {
-    updateValue(event) {
-      this.localValue = event.target.value;
-    },
-  },
-  computed: {
-    inputId() {
-      return `input-${this.type}-${Date.now()}`
+    computed: {
+      inputId(): string {
+        return `input-${this.type}-${Date.now()}`
+      }
     }
-  }
-}
+  });
 </script>
 
 <style>

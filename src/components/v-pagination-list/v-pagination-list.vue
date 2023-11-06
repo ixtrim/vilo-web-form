@@ -9,7 +9,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, toRefs, PropType } from 'vue';
+import { defineComponent, ref, watch, toRefs } from 'vue';
+import type { PropType } from 'vue';
 
 export default defineComponent({
   name: 'VPaginationList',

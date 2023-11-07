@@ -58,7 +58,6 @@
 
 <script lang="ts">
   import axios, { AxiosError } from 'axios';
-  import { defineComponent } from 'vue';
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VIconbox from '@/components/v-iconbox/VIconbox.vue';
@@ -82,7 +81,7 @@
       };
     },
     computed: {
-      isPasswordValid(): boolean {
+      isPasswordValid() {
         return this.isValidLength && this.hasSpecialCharacter && this.arePasswordsMatching;
       },
     },
@@ -100,21 +99,21 @@
 
         this.confirmPasswordValidationMessage = '';
       },
-      validationClass(isValid: boolean): Record<string, boolean> {
+      validationClass(isValid: boolean) {
         return {
           'valid': isValid,
           'invalid': !isValid && this.password !== '',
           'default': this.password === ''
         };
       },
-      iconContainerClass(isValid: boolean): Record<string, boolean> {
+      iconContainerClass(isValid: boolean) {
         return {
           'icon-container--valid': isValid,
           'icon-container--invalid': !isValid && this.password !== '',
           'icon-container--default': this.password === ''
         };
       },
-      iconClass(isValid: boolean): Record<string, boolean> {
+      iconClass(isValid: boolean) {
         return {
           'icon--check': isValid,
           'icon--cross': !isValid && this.password !== '',
@@ -155,15 +154,13 @@
             });
 
             this.$router.push('/password-changed');
-          } catch (error) {
+          } catch (error: any) {
             if (axios.isAxiosError(error)) {
               if (error.response && error.response.data && error.response.data.message) {
                 this.apiErrorMessage = error.response.data.message;
               } else {
                 this.apiErrorMessage = 'An unexpected error occurred. Please try again later.';
               }
-            } else {
-              this.apiErrorMessage = 'An unexpected error occurred. Please try again later.';
             }
           }
         } else {

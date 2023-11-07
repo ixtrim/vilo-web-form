@@ -3,7 +3,7 @@
 
     <div class="row fill-space">
       <div class="col-lg-12">
-        LIBRARY DOCUMENT EDITION .... 
+        
       </div>
     </div>
 

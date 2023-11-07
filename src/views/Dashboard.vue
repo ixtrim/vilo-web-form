@@ -84,7 +84,6 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import Search from '@/modules/Navigation/Search.vue';
 import VLink from '@/components/v-link/VLink.vue';
 import TotalIncome from '@/modules/Home/TotalIncome/TotalIncome.vue';
 import RecentInvoices from '@/modules/Home/RecentInvoices/RecentInvoices.vue';
@@ -95,7 +94,6 @@ import UnreadMessages from '@/modules/Home/UnreadMessages/UnreadMessages.vue';
 
 export default defineComponent({
   components: {
-    Search,
     VLink,
     TotalIncome,
     RecentInvoices,
@@ -103,18 +101,6 @@ export default defineComponent({
     MyTasks,
     UpcomingMeetings,
     UnreadMessages
-  },
-  setup() {
-    const searchTerm = ref('');
-
-    const updateSearchTerm = (value: string) => {
-      searchTerm.value = value;
-    };
-
-    return {
-      searchTerm,
-      updateSearchTerm,
-    };
   },
 });
 </script>

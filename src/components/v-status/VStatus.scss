@@ -1,0 +1,95 @@
+@import '@/components/styles/variables/fonts.scss';
+@import '@/components/styles/variables/colors.scss';
+
+.status {
+  border-radius: 16px!important;
+  padding: 4px 8px;
+  font-size: 12px!important;
+  font-weight: 500!important;
+
+  &::before {
+    content: "";
+    margin-right: 6px;
+    display: inline-block;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    position: relative;
+    top: 2px;
+  }
+
+  &--paid {
+    border: 1px solid var(--v-green-700);
+    color: var(--v-green-700);
+
+    &::before {
+      width: 12px;
+      height: 12px;
+      background-image: url(../../assets/icons/icon-check--green.svg);
+    }
+  }
+
+  &--draft {
+    border: 1px solid var(--v-gray-700);
+    color: var(--v-gray-700);
+
+    &::before {
+      width: 12px;
+      height: 12px;
+      background-image: url(../../assets/icons/icon-check.svg);
+    }
+  }
+
+  &--pending {
+    border: 1px solid var(--v-orange-700);
+    color: var(--v-orange-700);
+
+    &::before {
+      width: 12px;
+      height: 12px;
+      background-image: url(../../assets/icons/icon-check--orange.svg);
+    }
+  }
+
+  &--refunded {
+    border: 1px solid var(--v-gray-700);
+    color: var(--v-gray-700);
+
+    &::before {
+      top: 1px;
+      width: 12px;
+      height: 12px;
+      background-image: url(../../assets/icons/icon-return.svg);
+    }
+  }
+
+  &--cancelled {
+    border: 1px solid var(--v-red-500);
+    color: var(--v-red-500);
+
+    &::before {
+      top: 1;
+      width: 11px;
+      height: 11px;
+      background-image: url(../../assets/icons/icon-x--red.svg);
+    }
+  }
+
+  &.bg-warning {
+    border: 1px solid var(--v-orange-200)!important;
+    background: var(--v-orange-50)!important;
+    color: var(--v-orange-700)!important;
+  }
+
+  &.bg-danger {
+    border: 1px solid var(--v-red-500)!important;
+    background: var(--v-red-400)!important;
+    color: var(--v-white)!important;
+  }
+
+  &.bg-light {
+    border: 1px solid var(--v-gray-200)!important;
+    background: var(--v-gray-100)!important;
+    color: var(--v-gray-700)!important;
+  }
+}

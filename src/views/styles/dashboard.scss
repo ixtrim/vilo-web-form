@@ -34,6 +34,29 @@
     }
   }
 
+  .v-reminder {
+    display: inline-block;
+    border: 1px solid var(--v-gray-300);
+    border-radius: 6px;
+    padding: 3px 6px 2px;
+    color: var(--v-gray-700);
+    font-family: var(--v-font-inter-medium);
+    font-size: 12px;
+    font-weight: 500;
+
+    &::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 55%;
+      margin-right: 4px;
+      position: relative;
+      top: -1px;
+      background: var(--v-green-500);
+    }
+  }
+
   .container-fluid {
     display: flex;
     flex-direction: column;
@@ -505,17 +528,221 @@
         }
       }
 
-      &--sett-t-user {
+      &--cb-case {
         flex: 1 1 0;
+        text-align: left;
+        
+
+        ul {
+          margin: 0;
+          padding: 0;
+          display: flex;
+          gap: 8px;
+          justify-self: flex-start;
+          align-items: center;
+          list-style-type: none;
+
+          li {
+            img {
+              width: 40px;
+              height: 40px;
+            }
+
+            h4 {
+              margin: 0;
+              padding: 0;
+              font-family: var(--v-font-inter-medium);
+              font-size: 14px;
+              font-weight: 500;
+              color: var(--v-gray-900);
+            }
+          }
+        }
       }
 
-      &--sett-t-status {
+      &--cb-client {
+        width: 140px;
+        text-align: left;
+        margin-left: 48px;
+        
+        &__general {
+          font-family: var(--v-font-inter-regular);
+          font-size: 14px;
+          color: var(--v-gray-600);
+        }
+
+        .vilo-user {
+          &__avatar {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+
+            img {
+              max-width: 100%;
+              max-height: 100%;
+            }
+          }
+
+          &__info {
+            &__name {
+              font-family: var(--v-font-inter-medium);
+              font-weight: 500;
+              font-size: 14px;
+              color: var(--v-gray-900);
+            }
+          }
+        }
+      }
+
+      &--cb-about {
         width: 300px;
+        text-align: left;
+        margin-left: 48px;
+
+        span {
+          display: block;
+        }
+
+        &__title {
+          font-family: var(--v-font-inter-regular);
+          font-size: 14px;
+          color: var(--v-gray-900);
+        }
+
+        &__description {
+          font-family: var(--v-font-inter-regular);
+          font-size: 14px;
+          color: var(--v-gray-600);
+        }
+      }
+
+      &--cb-users {
+        width: 170px;
+        text-align: left;
+        margin-left: 48px;
+      }
+
+      &--cb-action {
+        width: 20px;
+        margin-right: 0;
+        margin-left: 48px;
+
+        button {
+          margin: auto;
+          padding: 0;
+        }
+      }
+
+      &--inv-invoice {
+        flex: 1 1 0;
+        text-align: left;
+
+        h5 {
+          margin: 0;
+          padding: 0;
+          font-family: var(--v-font-inter-medium);
+          font-weight: 500;
+          font-size: 14px;
+          color: var(--v-gray-900);
+        }
+
+        ul {
+          margin: 0;
+          padding: 0;
+          list-style-type: none;
+          display: flex; 
+          flex-direction: row;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 8px;
+
+          li {
+            button {
+              padding-left: 0;
+            }
+          }
+        }
+      }
+
+      &--inv-case {
+        width: 100px;
+        margin-left: 32px;
+        text-align: left;
+
+        p {
+          margin: 0;
+          padding: 0;
+          font-family: var(--v-font-inter-regular);
+          font-weight: 500;
+          font-size: 14px;
+          color: var(--v-gray-600);
+        }
+      }
+
+      &--inv-date {
+        width: 100px;
+        margin-left: 32px;
+        text-align: left;
+
+        p {
+          margin: 0;
+          padding: 0;
+          font-family: var(--v-font-inter-regular);
+          font-weight: 500;
+          font-size: 14px;
+          color: var(--v-gray-600);
+        }
+      }
+
+      &--inv-status {
+        width: 135px;
+        margin-left: 32px;
         text-align: left;
       }
 
-      &--sett-t-position {
-        width: 300px;
+      &--inv-customer {
+        width: 250px;
+        margin-left: 32px;
+        text-align: left;
+      }
+
+      &--inv-reminder {
+        width: 112px;
+        margin-left: 32px;
+        margin-right: 16px;
+        text-align: center;
+
+        h4 {
+          text-align: center;
+        }
+      }
+
+      &--inv-action {
+        width: 45px;
+        margin-right: 0;
+
+        button {
+          margin: auto;
+          padding: 0;
+        }
+      }
+    }
+  }
+
+  .dashboard__pagination-below-table {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin: 24px 0;
+
+    button {
+      margin: 0;
+    }
+
+    &__pages {
+      .page-link {
+        border-radius: 55%!important;
       }
     }
   }

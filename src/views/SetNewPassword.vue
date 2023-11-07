@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts">
-  import axios, { AxiosError } from 'axios';
+  import axios from 'axios';
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VIconbox from '@/components/v-iconbox/VIconbox.vue';

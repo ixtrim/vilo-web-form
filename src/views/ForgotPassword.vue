@@ -23,7 +23,7 @@
   </div>
 </template>
 <script lang="ts">
-  import axios, { AxiosError } from 'axios';
+  import axios from 'axios';
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VLink from '@/components/v-link/VLink.vue';

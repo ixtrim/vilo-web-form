@@ -102,6 +102,16 @@ export default defineComponent({
     UpcomingMeetings,
     UnreadMessages
   },
+  data() {
+    return {
+      searchTerm: '', // Define the searchTerm data property
+    };
+  },
+  methods: {
+    updateSearchTerm(value: string) {
+      this.searchTerm = value; // Update the searchTerm data property
+    },
+  },
 });
 </script>
 

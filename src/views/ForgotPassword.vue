@@ -12,6 +12,7 @@
       @blur="validateEmail" 
       :errorMessage="emailValidationMessage"
     />
+
     
     <p class="error-message" v-if="resetErrorMessage">{{ resetErrorMessage }}</p>
 
@@ -21,83 +22,72 @@
     </VLink>
   </div>
 </template>
-
 <script lang="ts">
-import axios, { AxiosError } from 'axios';
-import VButton from '@/components/v-button/VButton.vue';
-import VInput from '@/components/v-input/VInput.vue';
-import VLink from '@/components/v-link/VLink.vue';
-import VIconbox from '@/components/v-iconbox/VIconbox.vue';
-import { defineComponent } from 'vue';
-import { useRouter } from 'vue-router';
+  import axios from 'axios';
+  import VButton from '@/components/v-button/VButton.vue';
+  import VInput from '@/components/v-input/VInput.vue';
+  import VLink from '@/components/v-link/VLink.vue';
+  import VIconbox from '@/components/v-iconbox/VIconbox.vue';
 
-export default defineComponent({
-  components: {
-    VButton,
-    VInput,
-    VLink,
-    VIconbox
-  },
-  setup() {
-    const router = useRouter();
-    return { router };
-  },
-  data() {
-    return {
-      email: '',
-      emailValidationMessage: '',
-      resetErrorMessage: '',
-      resetSuccessMessage: '',
-    };
-  },
-  methods: {
-    validateEmail() {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(this.email)) {
-        this.emailValidationMessage = 'Please enter a valid email address';
-      } else {
-        this.emailValidationMessage = '';
-      }
+  export default {
+    components: {
+      VButton,
+      VInput,
+      VLink,
+      VIconbox
     },
-    async handleSubmit() {
-      this.emailValidationMessage = '';
-      this.resetErrorMessage = '';
+    data() {
+      return {
+        email: '',
+        emailValidationMessage: '',
+        resetErrorMessage: '',
+        resetSuccessMessage: '',
+      };
+    },
+    methods: {
+      validateEmail() {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(this.email)) {
+          this.emailValidationMessage = 'Please enter a valid email address';
+        } else {
+          this.emailValidationMessage = '';
+        }
+      },
+      async handleSubmit() {
+        this.emailValidationMessage = '';
+        this.resetErrorMessage = '';
 
-      if (!this.email) {
-        this.emailValidationMessage = 'Email is required!';
-      }
+        if (!this.email) {
+          this.emailValidationMessage = 'Email is required!';
+        }
 
-      if (!this.emailValidationMessage) {
-        try {
-          await axios.post('https://api-vilo.nestvested.co/auth/request-reset-email/', {
-            email: this.email,
-          }, {
-            headers: {
-              'Content-Type': 'application/json',
-              'accept': 'application/json',
-            },
-          });
+        if (!this.emailValidationMessage) {
+          try {
+            await axios.post('https://api-vilo.nestvested.co/auth/request-reset-email/', {
+              email: this.email,
+            }, {
+              headers: {
+                'Content-Type': 'application/json',
+                'accept': 'application/json',
+              },
+            });
 
-          this.router.push('/email-verification');
-        } catch (error) {
-          if (axios.isAxiosError(error)) {
-            if (error.response && error.response.data && error.response.data.email) {
+            this.$router.push('/email-verification');
+          } catch (error: any) {
+            if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.email) {
               this.resetErrorMessage = error.response.data.email[0];
             } else {
               this.resetErrorMessage = 'An error occurred. Please try again later.';
             }
-          } else {
-            this.resetErrorMessage = 'An unexpected error occurred. Please try again later.';
           }
+          
+        } else {
+          console.log('Form is invalid, do not submit');
         }
-      } else {
-        console.log('Form is invalid, do not submit');
-      }
+      },
     },
-  },
-});
+  };
 </script>
-
 <style>
   @import url(./styles/forgot-password.scss);
 </style>

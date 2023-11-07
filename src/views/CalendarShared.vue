@@ -15,7 +15,7 @@
 
     <div class="row fill-space">
       <div class="col-lg-12">
-        CALENDAR ....
+        
       </div>
     </div>
 

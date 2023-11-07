@@ -1,5 +1,163 @@
 <template>
-  
+  <div class="container-fluid">
+
+    <div class="row">
+      <div class="col-lg-10">
+        <div class="dashboard__heading mb-0">
+          <h1>Invoices</h1>
+          <p>Create and manage your team documents and templates.</p>
+        </div>
+      </div>
+      <div class="col-lg-2 align-right">
+        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="handleButtonClick" text="Add new invoice"></VButton>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 dashboard__separator">
+        &nbsp;
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="dashboard__filters">
+
+          <div class="row">
+            <div class="col-lg-3">
+              <div class="dashboard__filters">
+                <Search />
+              </div>
+            </div>
+            <div class="col-lg-6"></div>
+            <div class="col-lg-3">
+              <ul class="dashboard__actions">
+                <li>
+                  <VDropdown :title="'Sort by date'" :items="sortTime" @item-clicked="handleDropdownClick" />
+                </li>
+                <li>
+                  <VDropdown :title="'All invoices'" :items="sortTime" @item-clicked="handleDropdownClick" />
+                </li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="row fill-space">
+      <div class="col-lg-12">
+
+        <div class="dashboard__table mt-2">
+
+          <div class="dashboard__table__head">
+            <div class="col col--checkbox">
+              <input type="checkbox" />
+            </div>
+            <div class="col col--inv-invoice">
+              <ul>
+                <li>
+                  <h4>Invoice</h4>
+                </li>
+                <li>
+                  <VButton :block="false" size="sm" icon="left" icon-style="arrow-down" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
+                </li>
+              </ul>
+            </div>
+            <div class="col col--inv-case">
+              <h4>Case number</h4>
+            </div>
+            <div class="col col--inv-date">
+              <h4>Date</h4>
+            </div>
+            <div class="col col--inv-status">
+              <h4>Status</h4>
+            </div>
+            <div class="col col--inv-customer">
+              <h4>Customer</h4>
+            </div>
+            <div class="col col--inv-reminder">
+              <h4>Reminder</h4>
+            </div>
+            <div class="col col--inv-action">
+              &nbsp;
+            </div>
+            <div class="col col--inv-action">
+              &nbsp;
+            </div>
+            <div class="col col--inv-action">
+              &nbsp;
+            </div>
+            <div class="col col--inv-action">
+              &nbsp;
+            </div>
+          </div>
+
+          <div class="dashboard__table__page">
+
+            <div 
+              class="dashboard__table__page__item"
+              v-for="(item, index) in items"
+              :key="index"
+            >
+              <div class="col col--checkbox">
+                <input type="checkbox" />
+              </div>
+              <div class="col col--inv-invoice">
+                <h5>{{ item.invoice }}</h5>
+              </div>
+              <div class="col col--inv-case">
+                <p>{{ item.case }}</p>
+              </div>
+              <div class="col col--inv-date">
+                <p>{{ item.date }}</p>
+              </div>
+              <div class="col col--inv-status">
+                <VStatus :variant="item.status.toLowerCase()">{{ item.status }}</VStatus>
+              </div>
+              <div class="col col--inv-customer">
+                <VUser :userName="item.customer.name" :userEmail="item.customer.email" />
+              </div>
+              <div class="col col--inv-reminder">
+                <span v-if="item.reminder !== 'Set reminder'" class="v-reminder">{{ item.reminder }}</span>
+                <VButton v-else :block="false" size="sm" styled="link" @click="handleSetReminder" text="Set reminder"></VButton>
+              </div>
+              <!-- Assuming you have different methods for different buttons -->
+              <div class="col col--inv-action">
+                <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="handlePreviewClick" text=""></VButton>
+              </div>
+              <div class="col col--inv-action">
+                <VButton :block="false" size="sm" icon="left" icon-style="download" styled="simple-icon" @click="handleDownloadClick" text=""></VButton>
+              </div>
+              <div class="col col--inv-action">
+                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleDeleteClick" text=""></VButton>
+              </div>
+              <div class="col col--inv-action">
+                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleEditClick" text=""></VButton>
+              </div>
+            </div>
+
+          </div>
+
+          </div>
+
+          <div class="dashboard__pagination-below-table">
+            <div class="dashboard__pagination-below-table__prev">
+              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="link-gray" @click="prevPage" text="Previous"></v-button>
+            </div>
+            <div class="dashboard__pagination-below-table__pages">
+              <v-pagination-list :total-pages="totalPages" @update:currentPage="updatePage" />
+            </div>
+            <div class="dashboard__pagination-below-table__next">
+              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="link-gray" @click="nextPage" text="Next"></v-button>
+            </div>
+          </div>
+
+      </div>
+    </div>
+
+  </div>
 </template>
 
 <script lang="ts">
@@ -8,6 +166,7 @@ import VLink from '@/components/v-link/VLink.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import Search   from '@/modules/Navigation/Search.vue';
 import VUser from '@/components/v-user/v-user.vue';
+import VStatus from '@/components/v-status/VStatus.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
 import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
@@ -21,6 +180,7 @@ export default defineComponent({
     VPaginationList,
     VModalSmall,
     VDropdown,
+    VStatus,
   },
   data() {
     return {
@@ -40,6 +200,20 @@ export default defineComponent({
         { label: 'Client (company)' },
         { label: 'Admin' },
       ],
+      items: [
+        // Generate 10 dummy data items
+        ...Array.from({ length: 10 }, (_, i) => ({
+          invoice: `INV-${3056 + i}`,
+          case: Math.floor(Math.random() * 100),
+          date: new Date(2022, 0, 6 + i).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+          status: ['Paid', 'Draft', 'Refunded', 'Pending payment', 'Cancelled'][Math.floor(Math.random() * 5)],
+          customer: {
+            name: `Customer ${i}`,
+            email: `customer${i}@example.com`
+          },
+          reminder: ['Daily', 'Weekly', 'Monthly', 'Every 2 months', 'Annually', 'Set reminder'][Math.floor(Math.random() * 6)]
+        }))
+      ]
     };
   },
   setup() {
@@ -80,9 +254,37 @@ export default defineComponent({
     };
   },
   methods: {
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
     handleButtonClick() {
       
     },
+    handleDropdownClick() {
+      console.log('Dropdown clicked');
+    },
+    handleSetReminder() {
+      // Handle set reminder click
+    },
+    handlePreviewClick() {
+      // Handle preview click
+    },
+    handleDownloadClick() {
+      // Handle download click
+    },
+    handleDeleteClick() {
+      // Handle delete click
+    },
+    handleEditClick() {
+      // Handle edit click
+    }
   },
 });
 </script>

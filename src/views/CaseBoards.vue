@@ -3,6 +3,5 @@
 </template>
 
 
-<style>
-  @import url(./styles/dashboard.scss);
-</style>
+
+<style>@import url(./styles/dashboard.scss);</style>

@@ -2,8 +2,8 @@
   <div class="v-template-card">
 
     <div class="v-template-card__top">
-      <div class="v-template-card__top__icon">
-        <img :src="icon" />
+      <div :class="['v-template-card__top__icon', `v-template-card__top__icon--${icon}`]">
+        &nbsp;
       </div>
       <div class="v-template-card__top__info">
         <h3 class="v-template-card__top__info__title">{{ title }}</h3>

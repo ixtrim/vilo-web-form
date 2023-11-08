@@ -211,7 +211,7 @@ export default defineComponent({
             name: `Customer ${i}`,
             email: `customer${i}@example.com`
           },
-          reminder: ['Daily', 'Weekly', 'Monthly', 'Every 2 months', 'Annually', 'Set reminder'][Math.floor(Math.random() * 6)]
+          reminder: ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Annually', 'Set reminder'][Math.floor(Math.random() * 6)]
         }))
       ]
     };

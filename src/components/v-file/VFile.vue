@@ -1,7 +1,7 @@
 <template>
   <div class="v-file">
     <div class="v-file__icon">
-      <img :src="`/src/assets/filetypes/${fileExtension}.svg`" :alt="fileName" />
+      <img :src="imageSrc" :alt="fileName" />
     </div>
     <div class="v-file__details">
       <h5 class="v-file__name">{{ fileName }}</h5>
@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, computed } from 'vue';
 import type { PropType } from 'vue';
 
 export default defineComponent({
@@ -31,7 +31,10 @@ export default defineComponent({
     }
   },
   computed: {
-    
+    imageSrc(): string {
+      const imagePath = `../../assets/filetypes/${this.fileExtension}.svg`;
+      return new URL(imagePath, import.meta.url).href;
+    }
   }
 });
 </script>

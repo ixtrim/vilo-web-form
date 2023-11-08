@@ -1,7 +1,7 @@
 <template>
   <div class="v-file">
-    <div class="v-file__icon">
-      <img :src="imageSrc" :alt="fileName" />
+    <div :class="['v-file__icon', `v-file__icon--${fileExtension}`]">
+      &nbsp;
     </div>
     <div class="v-file__details">
       <h5 class="v-file__name">{{ fileName }}</h5>
@@ -28,12 +28,6 @@ export default defineComponent({
     fileSize: {
       type: String as PropType<string>,
       required: true
-    }
-  },
-  computed: {
-    imageSrc(): string {
-      const imagePath = `../../assets/filetypes/${this.fileExtension}.svg`;
-      return new URL(imagePath, import.meta.url).href;
     }
   }
 });

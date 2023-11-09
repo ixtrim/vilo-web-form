@@ -5,7 +5,7 @@
     </div>
 
     <div class="vilo-user__info" v-if="userName || userEmail">
-      <span class="vilo-user__info__name" v-if="userName">{{ userName }}</span>
+      <span class="vilo-user__info__name" v-if="user_name">{{ user_name }}</span>
       <span class="vilo-user__info__email" v-if="userEmail">{{ userEmail }}</span>
     </div>
   </div>
@@ -34,6 +34,10 @@
       userAltText: {
         type: String,
         default: 'User avatar'
+      },
+      user_name:{
+        type: Array,
+       default: () => []
       }
     },
     computed: {

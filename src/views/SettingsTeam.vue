@@ -1,6 +1,6 @@
 <template>
   <div class="container-fluid">
-    
+
     <div class="row">
       <div class="col-lg-12">
         <TabsSettings />
@@ -31,7 +31,7 @@
         <div class="dashboard__users">
 
           <div class="dashboard__users__head">
-            
+
             <div class="col col--checkbox">
               <input type="checkbox" id="remember" class="mr-8p">
             </div>
@@ -57,13 +57,39 @@
 
           <div class="dashboard__users__page">
 
-            <div class="dashboard__users__page__item">
+            <div class="dashboard__users__page__item" v-for="organization in user_name">
 
               <div class="col col--checkbox">
                 <input type="checkbox" id="remember" class="mr-8p">
               </div>
               <div class="col col--sett-t-user">
-                <VUser :userName="userName" :userEmail="userEmail" />
+                <VUser :user_name="organization.full_name" :userEmail="organization.email" />
+              </div>
+              <div class="col col--sett-t-status">
+                <VBadge variant="warning">Pending</VBadge>
+              </div>
+              <div class="col col--sett-t-position">
+                <p>Head of Sales</p>
+              </div>
+              <div class="col col--sett-t-role">
+                <VDropdown :title="'Client (company)'" :items="dropdownItems" @item-clicked="handleDropdownClick" />
+              </div>
+              <div class="col col--cm-action">
+                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
+              </div>
+              <div class="col col--cm-action">
+                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
+              </div>
+
+            </div>
+
+            <!-- <div class="dashboard__users__page__item">
+
+              <div class="col col--checkbox">
+                <input type="checkbox" id="remember" class="mr-8p">
+              </div>
+              <div class="col col--sett-t-user">
+                <VUser :user_name="user_name" :userEmail="userEmail" />
               </div>
               <div class="col col--sett-t-status">
                 <VBadge variant="success">Activated</VBadge>
@@ -89,7 +115,7 @@
                 <input type="checkbox" id="remember" class="mr-8p">
               </div>
               <div class="col col--sett-t-user">
-                <VUser :userName="userName" :userEmail="userEmail" />
+                <VUser :user_name="user_name" :userEmail="userEmail" />
               </div>
               <div class="col col--sett-t-status">
                 <VBadge variant="warning">Pending</VBadge>
@@ -106,7 +132,7 @@
               <div class="col col--cm-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
               </div>
-              
+
             </div>
 
             <div class="dashboard__users__page__item">
@@ -115,7 +141,7 @@
                 <input type="checkbox" id="remember" class="mr-8p">
               </div>
               <div class="col col--sett-t-user">
-                <VUser :userName="userName" :userEmail="userEmail" />
+                <VUser :user_name="user_name" :userEmail="userEmail" />
               </div>
               <div class="col col--sett-t-status">
                 <VBadge variant="light">Draft</VBadge>
@@ -141,7 +167,7 @@
                 <input type="checkbox" id="remember" class="mr-8p">
               </div>
               <div class="col col--sett-t-user">
-                <VUser :userName="userName" :userEmail="userEmail" />
+                <VUser :user_name="user_name" :userEmail="userEmail" />
               </div>
               <div class="col col--sett-t-status">
                 <VBadge variant="danger">Error</VBadge>
@@ -159,10 +185,10 @@
                 <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
               </div>
 
-            </div>
+            </div> -->
 
           </div>
-          
+
         </div>
       </div>
     </div>
@@ -190,6 +216,7 @@ import TabsSettings from '@/modules/TabsSettings.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import VUser from '@/components/v-user/v-user.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
+import SettingsApiServices from '@/services/SettingsApiServices.js'; // Import your API service
 
 interface DropdownItem {
   label: string;
@@ -208,6 +235,13 @@ export default defineComponent({
     return {
       userName: 'Olivia Rhye',
       userEmail: 'olivia@untitledui.com',
+      user_name:[{
+        organization:null,
+      }],
+      organization:[
+        {id:null,
+        }
+      ],
       dropdownItems: [
         { label: 'Internal user' },
         { label: 'Client (individual)' },
@@ -216,6 +250,7 @@ export default defineComponent({
       ]
     };
   },
+
   setup() {
     const itemsPerPage = 10;
     const allItems = ref([
@@ -253,6 +288,20 @@ export default defineComponent({
       updatePage
     };
   },
+
+  created() {
+    this.fetchusers();
+    this.fetchorganizations();
+    this.fetchpositions();
+     Promise.all([this.fetchusers(), this.fetchorganizations(), this.fetchpositions()])
+      .then(() => {
+        console.log('Both users and organizations fetched successfully');
+      })
+      .catch((error) => {
+        console.error('Error fetching users or organizations:', error);
+      });
+  },
+
   methods: {
     handleButtonClick() {
      console.log('Button clicked');
@@ -260,6 +309,34 @@ export default defineComponent({
     handleDropdownClick(item: DropdownItem) {
       console.log('Dropdown item clicked:', item.label);
     },
+     async fetchusers() {
+      try {
+        const response = await SettingsApiServices.fetchusers(); // Use the API service to fetch user names
+        this.user_name = response.data; // Assuming the API returns an array of user names
+
+      } catch (error) {
+        console.error('Error fetching user names:', error);
+      }
+    },
+     async fetchorganizations() {
+      try {
+        const response = await SettingsApiServices.fetchorganizations(); // Use the API service to fetch user names
+        this.user_name = response.data; // Assuming the API returns an array of user names
+
+      } catch (error) {
+        console.error('Error fetching user names:', error);
+      }
+    },
+    async fetchpositions() {
+      try {
+        const response = await SettingsApiServices.fetchpositions(); // Use the API service to fetch user names
+        this.user_name = response.data; // Assuming the API returns an array of user names
+
+      } catch (error) {
+        console.error('Error fetching user names:', error);
+      }
+    },
+
   },
 });
 </script>

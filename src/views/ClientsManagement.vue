@@ -59,7 +59,7 @@
                 <p>{{ user.address }}</p>
               </div>
               <div class="col col--cm-action">
-                <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick(user)" text=""></v-button>
+                <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" text=""></v-button>
               </div>
 
             </div>
@@ -69,11 +69,6 @@
         </div>
       </div>
     </div>
-
-    <VModalSmall :title="'My Modal Title'" v-if="showModal">
-      <p>Name:</p>
-      <p>Email:</p>
-    </VModalSmall>
 
     <div class="row bottom-pagination">
       <div class="col-lg-2 align-left">
@@ -93,12 +88,10 @@
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted } from 'vue';
 import axios from 'axios';
-import VLink from '@/components/v-link/VLink.vue';
 import VButton from '@/components/v-button/VButton.vue';
-import Search   from '@/modules/Navigation/Search.vue';
+import Search from '@/modules/Navigation/Search.vue';
 import VUser from '@/components/v-user/v-user.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
-import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
 
 interface User {
   id: number;
@@ -118,18 +111,14 @@ interface Position {
 export default defineComponent({
   components: {
     Search,
-    VLink,
     VButton,
     VUser,
-    VPaginationList,
-    VModalSmall,
+    VPaginationList
   },
   data() {
     return {
       userName: 'Olivia Rhye',
-      userEmail: 'olivia@untitledui.com',
-      selectedItem: null as User | null,
-      showModal: false
+      userEmail: 'olivia@untitledui.com'
     };
   },
   setup() {
@@ -144,7 +133,7 @@ export default defineComponent({
         const response = await axios.get('https://api-vilo.nestvested.co/settings/positions/', {
           headers: {
             'accept': 'application/json',
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjk4MTU4MTY0LCJpYXQiOjE2OTgxNTQ1NjQsImp0aSI6IjBkZTg1ZTg0OTJjZDQ0MGE4N2JkNmU2NzRiMjlmNTZiIiwidXNlcl9pZCI6Mjd9.DQFDSgAoa1n0IzJBHdk8BMBSmxDC5qVyL_6NGlzFXeg'
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjk5NTM4ODA2LCJpYXQiOjE2OTk1MzUyMDYsImp0aSI6ImI5MWMyMTVkNTMxMzRmMmZhZGVhOWUzYzBlNTA3MTE2IiwidXNlcl9pZCI6MzN9.hZMhqBMSDzN-bGX8qUpC4XtzCmXvLW0DuoPNDeLdc2M'
           }
         });
         positions.value = response.data;
@@ -177,7 +166,7 @@ export default defineComponent({
         const response = await axios.get('https://api-vilo.nestvested.co/auth/clients/', {
           headers: {
             'accept': 'application/json',
-            'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjk4MTU4MTY0LCJpYXQiOjE2OTgxNTQ1NjQsImp0aSI6IjBkZTg1ZTg0OTJjZDQ0MGE4N2JkNmU2NzRiMjlmNTZiIiwidXNlcl9pZCI6Mjd9.DQFDSgAoa1n0IzJBHdk8BMBSmxDC5qVyL_6NGlzFXeg'
+            'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjk5NTM4ODA2LCJpYXQiOjE2OTk1MzUyMDYsImp0aSI6ImI5MWMyMTVkNTMxMzRmMmZhZGVhOWUzYzBlNTA3MTE2IiwidXNlcl9pZCI6MzN9.hZMhqBMSDzN-bGX8qUpC4XtzCmXvLW0DuoPNDeLdc2M'
           }
         });
         users.value = response.data;
@@ -230,14 +219,8 @@ export default defineComponent({
       totalPages,
       searchTerm,
       updateSearchTerm,
-      getPositionName,
+      getPositionName
     };
-  },
-  methods: {
-    handleButtonClick(user: User) {
-      this.selectedItem = user;
-      this.showModal = true;
-    },
   },
 });
 </script>

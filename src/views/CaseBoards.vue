@@ -4,8 +4,8 @@
     <div class="row">
       <div class="col-lg-10">
         <div class="dashboard__heading mb-0">
-          <h1>Case Boards</h1>
-          <p>Manage your boards and tasks.</p>
+          <h1>Cases</h1>
+          <p>Manage your cases boards and tasks.</p>
         </div>
       </div>
       <div class="col-lg-2 align-right">

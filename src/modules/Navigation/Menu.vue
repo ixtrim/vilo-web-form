@@ -27,10 +27,10 @@ import VBadge from '@/components/v-badge/VBadge.vue';
 const chatBadgeNumber = ref(0);
 onMounted(async () => {
   try {
-    const response = await axios.get('/api/chat/notifications');
-    chatBadgeNumber.value = response.data.unreadMessages; 
+    //const response = await axios.get('/api/chat/notifications');
+    //chatBadgeNumber.value = response.data.unreadMessages; 
   } catch (error) {
-    console.error('Failed to fetch chat notifications:', error);
+    //console.error('Failed to fetch chat notifications:', error);
   }
 });
 

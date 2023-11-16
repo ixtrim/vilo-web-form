@@ -1,8 +1,11 @@
 <template>
   <div v-if="show" class="modal-backdrop">
     <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ title }}</h5>
+        <button class="btn-close" @click="closeModal" aria-label="Close"></button>
+      </div>
       <slot></slot>
-      <button @click="closeModal">Close</button>
     </div>
   </div>
 </template>
@@ -13,6 +16,10 @@ export default {
     show: {
       type: Boolean,
       required: true
+    },
+    title: {
+      type: String,
+      default: ''
     }
   },
   methods: {
@@ -24,10 +31,5 @@ export default {
 </script>
 
 <style>
-.modal-backdrop {
-  /* Add your styling for backdrop */
-}
-.modal-content {
-  /* Add your styling for modal content */
-}
+  @import url(@/components/v-modal/v-modal.scss);
 </style>

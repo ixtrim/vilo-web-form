@@ -4,7 +4,7 @@
     <input
       :id="inputId"
       :type="type"
-      :value="localValue"
+      :value="modelValue"
       :placeholder="placeholder"
       @input="updateValue"
       @blur="$emit('blur')"
@@ -18,55 +18,27 @@
 
   export default defineComponent({
     props: {
-      label: {
-        type: String,
-        default: 'Label'
-      },
+      label: String,
       type: {
         type: String,
         default: 'text'
       },
-      value: {
-        type: [String, Number],
-        default: ''
-      },
-      placeholder: {
-        type: String,
-        default: ''
-      },
-      disabled: {
-        type: Boolean,
-        default: false
-      },
-      errorMessage: {
-        type: String,
-        default: ''
-      },
-    },
-    data() {
-      return {
-        localValue: this.value as string | number,
-      };
-    },
-    watch: {
-      value(newVal: string | number) {
-        this.localValue = newVal;
-      },
-      localValue(newVal: string | number) {
-        this.$emit('input', newVal);
-      },
+      modelValue: [String, Number],
+      placeholder: String,
+      disabled: Boolean,
+      errorMessage: String,
     },
     methods: {
       updateValue(event: Event) {
         const input = event.target as HTMLInputElement;
-        this.localValue = input.value;
+        this.$emit('update:modelValue', input.value);
       },
     },
     computed: {
-      inputId(): string {
-        return `input-${this.type}-${Date.now()}`
-      }
-    }
+      inputId() {
+        return `input-${this.type}-${Date.now()}`;
+      },
+    },
   });
 </script>
 

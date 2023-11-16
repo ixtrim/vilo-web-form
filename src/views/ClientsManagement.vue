@@ -59,7 +59,7 @@
                 <p>{{ user.address }}</p>
               </div>
               <div class="col col--cm-action">
-                <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" text=""></v-button>
+                <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="editUserAction(user)" text=""></v-button>
               </div>
 
             </div>
@@ -82,147 +82,186 @@
       </div>
     </div>
 
+    <VModal :show="showModal" :title="modalTitle" @update:show="showModal = $event">
+      <VEditClient :userId="selectedUserId" :userName="selectedUserFullName" :userEmail="selectedUserEmail" :userPhone="selectedUserPhone" :userAddress="selectedUserAddress" :userNotes="selectedUserNotes" @close-modal="showModal = false" />
+    </VModal>
+
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted } from 'vue';
-import axios from 'axios';
-import VButton from '@/components/v-button/VButton.vue';
-import Search from '@/modules/Navigation/Search.vue';
-import VUser from '@/components/v-user/v-user.vue';
-import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
+  import { defineComponent, ref, computed, onMounted } from 'vue';
+  import axios from 'axios';
+  import VButton from '@/components/v-button/VButton.vue';
+  import Search from '@/modules/Navigation/Search.vue';
+  import VUser from '@/components/v-user/v-user.vue';
+  import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
+  import VModal from '@/components/v-modal/v-modal.vue';
+  import VEditClient from '@/modals/ClientManagement/v-edit-client/v-edit-client.vue';
 
-interface User {
-  id: number;
-  full_name: string;
-  email: string;
-  phone_no: string;
-  position: number;
-  client_type: string;
-  address: string;
-}
+  interface User {
+    id: number;
+    full_name: string;
+    email: string;
+    phone_no: string;
+    position: number;
+    client_type: string;
+    address: string;
+  }
 
-interface Position {
-  id: number;
-  position_name: string;
-}
+  interface Position {
+    id: number;
+    position_name: string;
+  }
 
-export default defineComponent({
-  components: {
-    Search,
-    VButton,
-    VUser,
-    VPaginationList
-  },
-  data() {
-    return {
-      userName: 'Olivia Rhye',
-      userEmail: 'olivia@untitledui.com'
-    };
-  },
-  setup() {
-    const users = ref<User[]>([]);
-    const currentPage = ref(1);
-    const itemsPerPage = ref(10);
-    const searchTerm = ref('');
-    const positions = ref<Position[]>([]);
+  export default defineComponent({
+    components: {
+      Search,
+      VButton,
+      VUser,
+      VPaginationList,
+      VModal,
+      VEditClient
+    },
+    data() {
+      return {
+        userName: 'Olivia Rhye',
+        userEmail: 'olivia@untitledui.com'
+      };
+    },
+    setup() {
+      const users = ref<User[]>([]);
+      const currentPage = ref(1);
+      const itemsPerPage = ref(10);
+      const searchTerm = ref('');
+      const positions = ref<Position[]>([]);
+      const modalTitle = ref('');
+      const showModal = ref(false);
 
-    const fetchPositions = async () => {
-      try {
-        const response = await axios.get('https://api-vilo.nestvested.co/settings/positions/', {
-          headers: {
-            'accept': 'application/json',
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjk5NTM4ODA2LCJpYXQiOjE2OTk1MzUyMDYsImp0aSI6ImI5MWMyMTVkNTMxMzRmMmZhZGVhOWUzYzBlNTA3MTE2IiwidXNlcl9pZCI6MzN9.hZMhqBMSDzN-bGX8qUpC4XtzCmXvLW0DuoPNDeLdc2M'
-          }
-        });
-        positions.value = response.data;
-      } catch (error) {
-        console.error("Error fetching positions:", error);
-      }
-    };
+      const selectedUserId = ref(null);
+      const selectedUserFullName = ref(null);
+      const selectedUserEmail = ref(null);
+      const selectedUserRole = ref(null);
+      const selectedUserPhone = ref(null);
+      const selectedUserAddress = ref(null);
+      const selectedUserNotes = ref(null);
+      const selectedUserOrganisation = ref(null);
+      const selectedUserPosition = ref(null);
 
-    const paginatedUsers = computed(() => {
-      let filteredUsers = users.value;
+      const editUserAction = (user) => {
+        modalTitle.value = 'Edit user';
+        selectedUserId.value = user.id;
+        selectedUserFullName.value = user.full_name;
+        selectedUserEmail.value = user.email;
+        selectedUserPhone.value = user.phone_no;
+        selectedUserAddress.value = user.address;
+        selectedUserNotes.value = user.notes;
+        showModal.value = true;
+      };
 
-      if (searchTerm.value && typeof searchTerm.value === 'string') {
-        filteredUsers = filteredUsers.filter(user => 
-          (user.full_name && typeof user.full_name === 'string' && user.full_name.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-          (user.email && typeof user.email === 'string' && user.email.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-          (user.phone_no && typeof user.phone_no === 'string' && user.phone_no.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-          user.position === Number(searchTerm.value) ||
-          (user.client_type && typeof user.client_type === 'string' && user.client_type.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-          (user.address && typeof user.address === 'string' && user.address.toLowerCase().includes(searchTerm.value.toLowerCase()))
-        );
-      }
+      const fetchPositions = async () => {
+        try {
+          const response = await axios.get('https://api-vilo.nestvested.co/settings/positions/', {
+            headers: {
+              'accept': 'application/json',
+              'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzAwMTUyNDI1LCJpYXQiOjE3MDAxNDg4MjUsImp0aSI6IjI5MWE2ZjEyNDJiMjQ5NmRiMGRkNjJlN2JkODI0MGFlIiwidXNlcl9pZCI6MjF9.1WN3HWTvSBukAjqj6pbYlC-1yKe-tQwCZhDCjswvhZ4'
+            }
+          });
+          positions.value = response.data;
+        } catch (error) {
+          console.error("Error fetching positions:", error);
+        }
+      };
 
-      const start = (currentPage.value - 1) * itemsPerPage.value;
-      const end = start + itemsPerPage.value;
-      return filteredUsers.slice(start, end);
-    });
+      const paginatedUsers = computed(() => {
+        let filteredUsers = users.value;
 
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get('https://api-vilo.nestvested.co/auth/clients/', {
-          headers: {
-            'accept': 'application/json',
-            'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjk5NTM4ODA2LCJpYXQiOjE2OTk1MzUyMDYsImp0aSI6ImI5MWMyMTVkNTMxMzRmMmZhZGVhOWUzYzBlNTA3MTE2IiwidXNlcl9pZCI6MzN9.hZMhqBMSDzN-bGX8qUpC4XtzCmXvLW0DuoPNDeLdc2M'
-          }
-        });
-        users.value = response.data;
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
+        if (searchTerm.value && typeof searchTerm.value === 'string') {
+          filteredUsers = filteredUsers.filter(user => 
+            (user.full_name && typeof user.full_name === 'string' && user.full_name.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
+            (user.email && typeof user.email === 'string' && user.email.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
+            (user.phone_no && typeof user.phone_no === 'string' && user.phone_no.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
+            user.position === Number(searchTerm.value) ||
+            (user.client_type && typeof user.client_type === 'string' && user.client_type.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
+            (user.address && typeof user.address === 'string' && user.address.toLowerCase().includes(searchTerm.value.toLowerCase()))
+          );
+        }
 
-    onMounted(() => {
-      fetchUsers();
-      fetchPositions();
-    });
+        const start = (currentPage.value - 1) * itemsPerPage.value;
+        const end = start + itemsPerPage.value;
+        return filteredUsers.slice(start, end);
+      });
 
-    const getPositionName = (positionId: number) => {
-      const position = positions.value.find(pos => pos.id === positionId);
-      return position ? position.position_name : 'Unknown';
-    };
+      const fetchUsers = async () => {
+        try {
+          const response = await axios.get('https://api-vilo.nestvested.co/auth/clients/', {
+            headers: {
+              'accept': 'application/json',
+              'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzAwMTUyNDI1LCJpYXQiOjE3MDAxNDg4MjUsImp0aSI6IjI5MWE2ZjEyNDJiMjQ5NmRiMGRkNjJlN2JkODI0MGFlIiwidXNlcl9pZCI6MjF9.1WN3HWTvSBukAjqj6pbYlC-1yKe-tQwCZhDCjswvhZ4'
+            }
+          });
+          users.value = response.data;
+        } catch (error) {
+          console.error("Error fetching users:", error);
+        }
+      };
 
-    const updateSearchTerm = (value: string) => {
-      console.log("updateSearchTerm", value);
-      searchTerm.value = value;
-    };
+      onMounted(() => {
+        fetchUsers();
+        fetchPositions();
+      });
 
-    const nextPage = () => {
-      if (currentPage.value * itemsPerPage.value < users.value.length) {
-        currentPage.value++;
-      }
-    };
+      const getPositionName = (positionId: number) => {
+        const position = positions.value.find(pos => pos.id === positionId);
+        return position ? position.position_name : 'Unknown';
+      };
 
-    const totalPages = computed(() => {
-      return Math.ceil(users.value.length / itemsPerPage.value);
-    });
+      const updateSearchTerm = (value: string) => {
+        searchTerm.value = value;
+      };
 
-    const updatePage = (newPage: number) => {
-      currentPage.value = newPage;
-    };
+      const nextPage = () => {
+        if (currentPage.value * itemsPerPage.value < users.value.length) {
+          currentPage.value++;
+        }
+      };
 
-    const prevPage = () => {
-      if (currentPage.value > 1) {
-        currentPage.value--;
-      }
-    };
+      const totalPages = computed(() => {
+        return Math.ceil(users.value.length / itemsPerPage.value);
+      });
 
-    return {
-      paginatedUsers,
-      nextPage,
-      updatePage,
-      prevPage,
-      currentPage,
-      totalPages,
-      searchTerm,
-      updateSearchTerm,
-      getPositionName
-    };
-  },
-});
+      const updatePage = (newPage: number) => {
+        currentPage.value = newPage;Email
+      };
+
+      const prevPage = () => {
+        if (currentPage.value > 1) {
+          currentPage.value--;
+        }
+      };
+
+      return {
+        paginatedUsers,
+        nextPage,
+        updatePage,
+        prevPage,
+        currentPage,
+        totalPages,
+        searchTerm,
+        updateSearchTerm,
+        getPositionName,
+        selectedUserId,
+        selectedUserFullName,
+        selectedUserEmail,
+        selectedUserPhone,
+        selectedUserAddress,
+        selectedUserNotes,
+        modalTitle,
+        showModal,
+        editUserAction,
+      };
+    },
+  });
 </script>
 
 <style>

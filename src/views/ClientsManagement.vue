@@ -59,7 +59,7 @@
                 <p>{{ user.address }}</p>
               </div>
               <div class="col col--cm-action">
-                <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick(user)" text=""></v-button>
+                <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="editUserAction(user)" text=""></v-button>
               </div>
 
             </div>
@@ -70,10 +70,7 @@
       </div>
     </div>
 
-    <VModalSmall :title="'My Modal Title'" v-if="showModal">
-      <p>Name:</p>
-      <p>Email:</p>
-    </VModalSmall>
+    <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick()" text="ddddd"></v-button>
 
     <div class="row bottom-pagination">
       <div class="col-lg-2 align-left">
@@ -87,159 +84,208 @@
       </div>
     </div>
 
+    <VModal :show="showModal" :title="modalTitle" @update:show="showModal = $event">
+      <VEditClient :userId="selectedUserId" :userName="selectedUserFullName" :userEmail="selectedUserEmail" :userPhone="selectedUserPhone" :userAddress="selectedUserAddress" :userNotes="selectedUserNotes" @close-modal="showModal = false" @save-clicked="handleSaveClicked" />
+    </VModal>
+
+    <VNotification 
+      ref="notificationRef"
+      :type="notificationType"
+      :header="notificationHeader"
+      :message="notificationMessage"
+      :duration="7000"
+      @closed="handleNotificationClosed"
+      @save-clicked="handleSaveClicked"
+    />
+
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted } from 'vue';
-import axios from 'axios';
-import VLink from '@/components/v-link/VLink.vue';
-import VButton from '@/components/v-button/VButton.vue';
-import Search   from '@/modules/Navigation/Search.vue';
-import VUser from '@/components/v-user/v-user.vue';
-import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
-import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
+  import { defineComponent, ref, computed, onMounted } from 'vue';
+  import axios from 'axios';
+  import VButton from '@/components/v-button/VButton.vue';
+  import Search from '@/modules/Navigation/Search.vue';
+  import VUser from '@/components/v-user/v-user.vue';
+  import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
+  import VModal from '@/components/v-modal/v-modal.vue';
+  import VEditClient from '@/modals/ClientManagement/v-edit-client/v-edit-client.vue';
+  import VNotification from '@/components/v-notification/VNotification.vue';
 
-interface User {
-  id: number;
-  full_name: string;
-  email: string;
-  phone_no: string;
-  position: number;
-  client_type: string;
-  address: string;
-}
+  interface User {
+    id: number;
+    full_name: string;
+    email: string;
+    phone_no: string;
+    position: number;
+    client_type: string;
+    address: string;
+  }
 
-interface Position {
-  id: number;
-  position_name: string;
-}
+  interface Position {
+    id: number;
+    position_name: string;
+  }
 
-export default defineComponent({
-  components: {
-    Search,
-    VLink,
-    VButton,
-    VUser,
-    VPaginationList,
-    VModalSmall,
-  },
-  data() {
-    return {
-      userName: 'Olivia Rhye',
-      userEmail: 'olivia@untitledui.com',
-      selectedItem: null as User | null,
-      showModal: false
-    };
-  },
-  setup() {
-    const users = ref<User[]>([]);
-    const currentPage = ref(1);
-    const itemsPerPage = ref(10);
-    const searchTerm = ref('');
-    const positions = ref<Position[]>([]);
+  interface NotificationRef {
+    showNotification: () => void;
+  }
 
-    const fetchPositions = async () => {
-      try {
-        const response = await axios.get('https://api-vilo.nestvested.co/settings/positions/', {
-          headers: {
-            'accept': 'application/json',
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjk4MTU4MTY0LCJpYXQiOjE2OTgxNTQ1NjQsImp0aSI6IjBkZTg1ZTg0OTJjZDQ0MGE4N2JkNmU2NzRiMjlmNTZiIiwidXNlcl9pZCI6Mjd9.DQFDSgAoa1n0IzJBHdk8BMBSmxDC5qVyL_6NGlzFXeg'
-          }
-        });
-        positions.value = response.data;
-      } catch (error) {
-        console.error("Error fetching positions:", error);
-      }
-    };
-
-    const paginatedUsers = computed(() => {
-      let filteredUsers = users.value;
-
-      if (searchTerm.value && typeof searchTerm.value === 'string') {
-        filteredUsers = filteredUsers.filter(user => 
-          (user.full_name && typeof user.full_name === 'string' && user.full_name.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-          (user.email && typeof user.email === 'string' && user.email.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-          (user.phone_no && typeof user.phone_no === 'string' && user.phone_no.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-          user.position === Number(searchTerm.value) ||
-          (user.client_type && typeof user.client_type === 'string' && user.client_type.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-          (user.address && typeof user.address === 'string' && user.address.toLowerCase().includes(searchTerm.value.toLowerCase()))
-        );
-      }
-
-      const start = (currentPage.value - 1) * itemsPerPage.value;
-      const end = start + itemsPerPage.value;
-      return filteredUsers.slice(start, end);
-    });
-
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get('https://api-vilo.nestvested.co/auth/clients/', {
-          headers: {
-            'accept': 'application/json',
-            'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjk4MTU4MTY0LCJpYXQiOjE2OTgxNTQ1NjQsImp0aSI6IjBkZTg1ZTg0OTJjZDQ0MGE4N2JkNmU2NzRiMjlmNTZiIiwidXNlcl9pZCI6Mjd9.DQFDSgAoa1n0IzJBHdk8BMBSmxDC5qVyL_6NGlzFXeg'
-          }
-        });
-        users.value = response.data;
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-
-    onMounted(() => {
-      fetchUsers();
-      fetchPositions();
-    });
-
-    const getPositionName = (positionId: number) => {
-      const position = positions.value.find(pos => pos.id === positionId);
-      return position ? position.position_name : 'Unknown';
-    };
-
-    const updateSearchTerm = (value: string) => {
-      console.log("updateSearchTerm", value);
-      searchTerm.value = value;
-    };
-
-    const nextPage = () => {
-      if (currentPage.value * itemsPerPage.value < users.value.length) {
-        currentPage.value++;
-      }
-    };
-
-    const totalPages = computed(() => {
-      return Math.ceil(users.value.length / itemsPerPage.value);
-    });
-
-    const updatePage = (newPage: number) => {
-      currentPage.value = newPage;
-    };
-
-    const prevPage = () => {
-      if (currentPage.value > 1) {
-        currentPage.value--;
-      }
-    };
-
-    return {
-      paginatedUsers,
-      nextPage,
-      updatePage,
-      prevPage,
-      currentPage,
-      totalPages,
-      searchTerm,
-      updateSearchTerm,
-      getPositionName,
-    };
-  },
-  methods: {
-    handleButtonClick(user: User) {
-      this.selectedItem = user;
-      this.showModal = true;
+  export default defineComponent({
+    components: {
+      Search,
+      VButton,
+      VUser,
+      VPaginationList,
+      VModal,
+      VEditClient,
+      VNotification,
     },
-  },
-});
+    data() {
+      return {
+        notificationType: 'success',
+        notificationHeader: 'Header',
+        notificationMessage: 'This is a message',
+      };
+    },
+    methods: {
+      triggerNotification(type: string, header: string, message: string) {
+        this.notificationType = type;
+        this.notificationHeader = header;
+        this.notificationMessage = message;
+        (this.$refs.notificationRef as NotificationRef).showNotification();
+      },
+      handleNotificationClosed() {
+        // Handle the event when the notification is closed
+        // For example, reset some properties or log an event
+      },
+      handleSaveClicked() {
+        setTimeout(() => {
+          this.triggerNotification('success', 'Changes saved', 'This account has been successfully edited.');
+        }, 1000);
+      },
+      handleButtonClick() {
+        this.triggerNotification('error', 'Error!', 'Something went wrong.');
+      },
+    },
+    setup() {
+      const users = ref<User[]>([]);
+      const currentPage = ref(1);
+      const itemsPerPage = ref(10);
+      const searchTerm = ref('');
+      const positions = ref<Position[]>([]);
+      const modalTitle = ref('');
+      const showModal = ref(false);
+      const notificationComponentRef = ref(null);
+
+      const selectedUserId = ref(null);
+      const selectedUserFullName = ref(null);
+      const selectedUserEmail = ref(null);
+      const selectedUserRole = ref(null);
+      const selectedUserPhone = ref(null);
+      const selectedUserAddress = ref(null);
+      const selectedUserNotes = ref(null);
+      const selectedUserOrganisation = ref(null);
+      const selectedUserPosition = ref(null);
+
+      const editUserAction = (user) => {
+        modalTitle.value = 'Edit user';
+        selectedUserId.value = user.id;
+        selectedUserFullName.value = user.full_name;
+        selectedUserEmail.value = user.email;
+        selectedUserPhone.value = user.phone_no;
+        selectedUserAddress.value = user.address;
+        selectedUserNotes.value = user.notes;
+        showModal.value = true;
+      };
+      
+      const getPositionName = () => {
+        return Math.random() < 0.5 ? 'Sales' : 'Retainer';
+      };
+
+      const paginatedUsers = computed(() => {
+        let filteredUsers = users.value;
+
+        if (searchTerm.value && typeof searchTerm.value === 'string') {
+          filteredUsers = filteredUsers.filter(user => 
+            (user.full_name && typeof user.full_name === 'string' && user.full_name.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
+            (user.email && typeof user.email === 'string' && user.email.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
+            (user.phone_no && typeof user.phone_no === 'string' && user.phone_no.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
+            user.position === Number(searchTerm.value) ||
+            (user.client_type && typeof user.client_type === 'string' && user.client_type.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
+            (user.address && typeof user.address === 'string' && user.address.toLowerCase().includes(searchTerm.value.toLowerCase()))
+          );
+        }
+
+        const start = (currentPage.value - 1) * itemsPerPage.value;
+        const end = start + itemsPerPage.value;
+        return filteredUsers.slice(start, end);
+      });
+
+      const fetchUsers = async () => {
+        try {
+          const response = await axios.get('https://api-vilo.nestvested.co/auth/clients/', {
+            headers: {
+              'accept': 'application/json',
+              'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzAwNDc1MzA2LCJpYXQiOjE3MDA0NzE3MDYsImp0aSI6IjI4MTQ3ZWVmNTM3MjQ1NTg5ZDFjYjMzYjA3YzZjMmJhIiwidXNlcl9pZCI6MjF9.Imzo6TdQH3qXBJzjOH_Eo5IJXDs7bEchOilg3vo7Cw4'
+            }
+          });
+          users.value = response.data;
+        } catch (error) {
+          console.error("Error fetching users:", error);
+        }
+      };
+
+      onMounted(() => {
+        fetchUsers();
+      });
+      
+      const updateSearchTerm = (value: string) => {
+        searchTerm.value = value;
+      };
+
+      const nextPage = () => {
+        if (currentPage.value * itemsPerPage.value < users.value.length) {
+          currentPage.value++;
+        }
+      };
+
+      const totalPages = computed(() => {
+        return Math.ceil(users.value.length / itemsPerPage.value);
+      });
+
+      const updatePage = (newPage: number) => {
+        currentPage.value = newPage;
+      };
+
+      const prevPage = () => {
+        if (currentPage.value > 1) {
+          currentPage.value--;
+        }
+      };
+
+      return {
+        paginatedUsers,
+        nextPage,
+        updatePage,
+        prevPage,
+        currentPage,
+        totalPages,
+        searchTerm,
+        updateSearchTerm,
+        getPositionName,
+        selectedUserId,
+        selectedUserFullName,
+        selectedUserEmail,
+        selectedUserPhone,
+        selectedUserAddress,
+        selectedUserNotes,
+        modalTitle,
+        showModal,
+        editUserAction
+      };
+    },
+  });
 </script>
 
 <style>

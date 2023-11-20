@@ -1,31 +1,35 @@
 <template>
-  <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">{{ title }}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <slot></slot>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
-        </div>
+  <div v-if="show" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ title }}</h5>
+        <button class="btn-close" @click="closeModal" aria-label="Close"></button>
       </div>
+      <slot></slot>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, defineProps } from 'vue';
-
-const props = defineProps({
-  title: String
-});
+<script>
+export default {
+  props: {
+    show: {
+      type: Boolean,
+      required: true
+    },
+    title: {
+      type: String,
+      default: ''
+    }
+  },
+  methods: {
+    closeModal() {
+      this.$emit('update:show', false);
+    }
+  }
+};
 </script>
 
 <style>
-  @import url(./v-modal.scss);
+  @import url(@/components/v-modal/v-modal.scss);
 </style>

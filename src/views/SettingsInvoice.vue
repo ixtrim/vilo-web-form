@@ -57,6 +57,7 @@
         </div>
       </div>
     </div>
+
     <VNotification 
       ref="notificationRef"
       :type="notificationType"
@@ -65,6 +66,7 @@
       :duration="7000"
       @closed="handleNotificationClosed"
     />
+    
   </div>
 </template>
 

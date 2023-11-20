@@ -70,6 +70,8 @@
       </div>
     </div>
 
+    <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick()" text="ddddd"></v-button>
+
     <div class="row bottom-pagination">
       <div class="col-lg-2 align-left">
         <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="prevPage" text="Previous"></v-button>
@@ -83,8 +85,18 @@
     </div>
 
     <VModal :show="showModal" :title="modalTitle" @update:show="showModal = $event">
-      <VEditClient :userId="selectedUserId" :userName="selectedUserFullName" :userEmail="selectedUserEmail" :userPhone="selectedUserPhone" :userAddress="selectedUserAddress" :userNotes="selectedUserNotes" @close-modal="showModal = false" />
+      <VEditClient :userId="selectedUserId" :userName="selectedUserFullName" :userEmail="selectedUserEmail" :userPhone="selectedUserPhone" :userAddress="selectedUserAddress" :userNotes="selectedUserNotes" @close-modal="showModal = false" @save-clicked="handleSaveClicked" />
     </VModal>
+
+    <VNotification 
+      ref="notificationRef"
+      :type="notificationType"
+      :header="notificationHeader"
+      :message="notificationMessage"
+      :duration="7000"
+      @closed="handleNotificationClosed"
+      @save-clicked="handleSaveClicked"
+    />
 
   </div>
 </template>
@@ -98,6 +110,7 @@
   import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
   import VModal from '@/components/v-modal/v-modal.vue';
   import VEditClient from '@/modals/ClientManagement/v-edit-client/v-edit-client.vue';
+  import VNotification from '@/components/v-notification/VNotification.vue';
 
   interface User {
     id: number;
@@ -114,6 +127,10 @@
     position_name: string;
   }
 
+  interface NotificationRef {
+    showNotification: () => void;
+  }
+
   export default defineComponent({
     components: {
       Search,
@@ -121,13 +138,35 @@
       VUser,
       VPaginationList,
       VModal,
-      VEditClient
+      VEditClient,
+      VNotification,
     },
     data() {
       return {
-        userName: 'Olivia Rhye',
-        userEmail: 'olivia@untitledui.com'
+        notificationType: 'success',
+        notificationHeader: 'Header',
+        notificationMessage: 'This is a message',
       };
+    },
+    methods: {
+      triggerNotification(type: string, header: string, message: string) {
+        this.notificationType = type;
+        this.notificationHeader = header;
+        this.notificationMessage = message;
+        (this.$refs.notificationRef as NotificationRef).showNotification();
+      },
+      handleNotificationClosed() {
+        // Handle the event when the notification is closed
+        // For example, reset some properties or log an event
+      },
+      handleSaveClicked() {
+        setTimeout(() => {
+          this.triggerNotification('success', 'Changes saved', 'This account has been successfully edited.');
+        }, 1000);
+      },
+      handleButtonClick() {
+        this.triggerNotification('error', 'Error!', 'Something went wrong.');
+      },
     },
     setup() {
       const users = ref<User[]>([]);
@@ -137,6 +176,7 @@
       const positions = ref<Position[]>([]);
       const modalTitle = ref('');
       const showModal = ref(false);
+      const notificationComponentRef = ref(null);
 
       const selectedUserId = ref(null);
       const selectedUserFullName = ref(null);
@@ -158,19 +198,9 @@
         selectedUserNotes.value = user.notes;
         showModal.value = true;
       };
-
-      const fetchPositions = async () => {
-        try {
-          const response = await axios.get('https://api-vilo.nestvested.co/settings/positions/', {
-            headers: {
-              'accept': 'application/json',
-              'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzAwMTUyNDI1LCJpYXQiOjE3MDAxNDg4MjUsImp0aSI6IjI5MWE2ZjEyNDJiMjQ5NmRiMGRkNjJlN2JkODI0MGFlIiwidXNlcl9pZCI6MjF9.1WN3HWTvSBukAjqj6pbYlC-1yKe-tQwCZhDCjswvhZ4'
-            }
-          });
-          positions.value = response.data;
-        } catch (error) {
-          console.error("Error fetching positions:", error);
-        }
+      
+      const getPositionName = () => {
+        return Math.random() < 0.5 ? 'Sales' : 'Retainer';
       };
 
       const paginatedUsers = computed(() => {
@@ -197,7 +227,7 @@
           const response = await axios.get('https://api-vilo.nestvested.co/auth/clients/', {
             headers: {
               'accept': 'application/json',
-              'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzAwMTUyNDI1LCJpYXQiOjE3MDAxNDg4MjUsImp0aSI6IjI5MWE2ZjEyNDJiMjQ5NmRiMGRkNjJlN2JkODI0MGFlIiwidXNlcl9pZCI6MjF9.1WN3HWTvSBukAjqj6pbYlC-1yKe-tQwCZhDCjswvhZ4'
+              'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzAwNDc1MzA2LCJpYXQiOjE3MDA0NzE3MDYsImp0aSI6IjI4MTQ3ZWVmNTM3MjQ1NTg5ZDFjYjMzYjA3YzZjMmJhIiwidXNlcl9pZCI6MjF9.Imzo6TdQH3qXBJzjOH_Eo5IJXDs7bEchOilg3vo7Cw4'
             }
           });
           users.value = response.data;
@@ -208,14 +238,8 @@
 
       onMounted(() => {
         fetchUsers();
-        fetchPositions();
       });
-
-      const getPositionName = (positionId: number) => {
-        const position = positions.value.find(pos => pos.id === positionId);
-        return position ? position.position_name : 'Unknown';
-      };
-
+      
       const updateSearchTerm = (value: string) => {
         searchTerm.value = value;
       };
@@ -231,7 +255,7 @@
       });
 
       const updatePage = (newPage: number) => {
-        currentPage.value = newPage;Email
+        currentPage.value = newPage;
       };
 
       const prevPage = () => {
@@ -258,7 +282,7 @@
         selectedUserNotes,
         modalTitle,
         showModal,
-        editUserAction,
+        editUserAction
       };
     },
   });

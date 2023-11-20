@@ -21,17 +21,26 @@
     <div class="row">
       <div class="col-lg-12">
         <div class="form-group">
-          <label>Client type</label>
-          <VDropdown :title="'Client Personal Manager'" />
+          <label>Role</label>
+          <VDropdown :title="dropdownRoleTitle" :items="dropdownRoles" @item-clicked="onRoleChanged" />
         </div>
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="dropdownRoleTitle === 'Client user'">
       <div class="col-lg-12">
         <div class="form-group">
-          <label>Organisation</label>
-          <VDropdown :title="'Client Personal Manager'" />
+          <label>Client type</label>
+          <VDropdown :title="dropdownClientTypeTitle" :items="dropdownClientType" @item-clicked="onClientTypeChanged" />
+        </div>
+      </div>
+    </div>
+
+    <div class="row" v-if="dropdownClientTypeTitle === 'Company' && dropdownRoleTitle === 'Client user'">
+      <div class="col-lg-12">
+        <div class="form-group">
+          <label>Company name</label>
+          <VDropdown :title="dropdownCompanyTitle" :items="dropdownCompany" @item-clicked="onCompanyChanged" />
         </div>
       </div>
     </div>
@@ -56,11 +65,11 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="dropdownRoleTitle === 'Client user'">
       <div class="col-lg-12">
         <div class="form-group">
           <label>Position</label>
-          <VDropdown :title="'Client Personal Manager'" />
+          <VDropdown :title="dropdownPositionTitle" :items="dropdownPositions" @item-clicked="onPositionChanged" />
         </div>
       </div>
     </div>
@@ -82,7 +91,7 @@
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
       </li>
       <li>
-        <v-button :block="false" size="md" styled="Primary" text="Save"></v-button>
+        <v-button :block="false" size="md" styled="Primary" @click="saveAndClose" text="Save"></v-button>
       </li>
     </ul>
   </div>
@@ -104,6 +113,10 @@ const props = defineProps({
   userPhone: String,
   userAddress: String,
   userNotes: String,
+  title: {
+    type: String,
+    required: true
+  },
 });
 
 const userName = ref(props.userName);
@@ -119,9 +132,61 @@ const computedUserNotes = computed({
   set: (val) => userNotes.value = val
 });
 
+const dropdownRoles = ref([
+  { label: 'Admin' },
+  { label: 'Internal user' },
+  { label: 'Client user' }
+]);
+const dropdownRoleTitle = ref('Client user');
+function onRoleChanged(item) {
+  dropdownRoleTitle.value = item.label;
+}
+
+const dropdownClientType = ref([
+  { label: 'Individual' },
+  { label: 'Company' }
+]);
+const dropdownClientTypeTitle = ref('Individual');
+function onClientTypeChanged(item) {
+  dropdownClientTypeTitle.value = item.label;
+}
+
+const dropdownCompany = ref([
+  { label: 'MAXBURST, Inc.' },
+  { label: 'Pardalis and Nohavicka Lawyers' },
+  { label: 'Jeffrey B. Peltz, P.C.' },
+  { label: 'Redmond Accident Lawyers' },
+  { label: 'Leav & Steinberg, LLP' },
+  { label: 'Morelli Law Firm' },
+  { label: 'Meirowitz & Wasserberg, LLP' },
+  { label: 'Mark I. Cohen, ESQ' },
+  { label: 'Antin Ehrlich & Epstein LLP' },
+  { label: 'Law Offices of Lisa Beth' },
+  { label: 'Rudyuk Law Firm' },
+]);
+const dropdownCompanyTitle = ref('Rudyuk Law Firm');
+function onCompanyChanged(item) {
+  dropdownCompanyTitle.value = item.label;
+}
+
+const dropdownPositions = ref([
+  { label: 'Sales' },
+  { label: 'Retainer' },
+]);
+const dropdownPositionTitle = ref('Sales');
+function onPositionChanged(item) {
+  dropdownPositionTitle.value = item.label;
+}
+
 function closeModal() {
   emit('close-modal');
 }
+
+function saveAndClose() {
+  closeModal();
+  emit('save-clicked');
+}
+
 </script>
 
 <style>

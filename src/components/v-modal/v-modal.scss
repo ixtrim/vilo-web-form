@@ -61,19 +61,46 @@
         position: absolute;
         top: 28px;
         right: 0;
-        cursor: pointer;
-        font-size: 0;
-        border: none;
-        outline: none;
-        color: inherit;
       }
     }
 
     .modal-body {
       width: 100%;
-      margin: 24px 0;
-      padding: 0;
+      margin: 24px -10px 24px 0;
+      padding: 0 10px 0 0;
       text-align: left;
+      max-height: calc(90vh - 200px);
+      overflow-y: auto;
+      overflow-x: hidden;
+
+      &::-webkit-scrollbar-track {
+        border-radius: 6px;
+        background-color: var(--v-gray-100);
+      }
+
+      &::-webkit-scrollbar {
+        width: 12px;
+        background: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        border-radius: 6px;
+        background-color: var(--v-gray-200);
+      }
+
+      .form-group {
+        width: 100%;
+
+        .dropdown {
+          width: 100%;
+
+          button {
+            width: 100%;
+            text-align: left;
+            margin-bottom: 0;
+          }
+        }
+      }
     }
 
     .modal-footer {

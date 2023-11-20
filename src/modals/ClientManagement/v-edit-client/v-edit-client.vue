@@ -98,95 +98,99 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
-import { defineEmits, defineProps } from 'vue';
-import VInput from '@/components/v-input/VInput.vue';
-import VTextarea from '@/components/v-textarea/v-textarea.vue';
-import VDropdown from '@/components/v-dropdown/VDropdown.vue';
-import VButton from '@/components/v-button/VButton.vue';
+  import { ref, watch, computed } from 'vue';
+  import { defineEmits, defineProps } from 'vue';
+  import VInput from '@/components/v-input/VInput.vue';
+  import VTextarea from '@/components/v-textarea/v-textarea.vue';
+  import VDropdown from '@/components/v-dropdown/VDropdown.vue';
+  import VButton from '@/components/v-button/VButton.vue';
 
-const emit = defineEmits(['close-modal']);
-const props = defineProps({
-  userId: Number,
-  userName: String,
-  userEmail: String,
-  userPhone: String,
-  userAddress: String,
-  userNotes: String,
-  title: {
-    type: String,
-    required: true
-  },
-});
+  type DropdownItem = {
+    label: string;
+  };
 
-const userName = ref(props.userName);
-watch(() => props.userName, (newVal) => {
-  userName.value = newVal;
-});
-const userEmail = ref(props.userEmail);
-const userPhone = ref(props.userPhone);
-const userAddress = ref(props.userAddress);
-const userNotes = ref(props.userNotes);
-const computedUserNotes = computed({
-  get: () => userNotes.value === 'string' ? '' : userNotes.value,
-  set: (val) => userNotes.value = val
-});
+  const emit = defineEmits(['close-modal', 'save-clicked']);
 
-const dropdownRoles = ref([
-  { label: 'Admin' },
-  { label: 'Internal user' },
-  { label: 'Client user' }
-]);
-const dropdownRoleTitle = ref('Client user');
-function onRoleChanged(item) {
-  dropdownRoleTitle.value = item.label;
-}
+  const props = defineProps({
+    userId: Number,
+    userName: String,
+    userEmail: String,
+    userPhone: String,
+    userAddress: String,
+    userNotes: String,
+    title: {
+      type: String,
+      required: true
+    },
+  });
 
-const dropdownClientType = ref([
-  { label: 'Individual' },
-  { label: 'Company' }
-]);
-const dropdownClientTypeTitle = ref('Individual');
-function onClientTypeChanged(item) {
-  dropdownClientTypeTitle.value = item.label;
-}
+  const userName = ref(props.userName);
+  watch(() => props.userName, (newVal) => {
+    userName.value = newVal;
+  });
+  const userEmail = ref(props.userEmail);
+  const userPhone = ref(props.userPhone);
+  const userAddress = ref(props.userAddress);
+  const userNotes = ref(props.userNotes);
+  const computedUserNotes = computed({
+    get: () => userNotes.value === 'string' ? '' : userNotes.value,
+    set: (val) => userNotes.value = val
+  });
 
-const dropdownCompany = ref([
-  { label: 'MAXBURST, Inc.' },
-  { label: 'Pardalis and Nohavicka Lawyers' },
-  { label: 'Jeffrey B. Peltz, P.C.' },
-  { label: 'Redmond Accident Lawyers' },
-  { label: 'Leav & Steinberg, LLP' },
-  { label: 'Morelli Law Firm' },
-  { label: 'Meirowitz & Wasserberg, LLP' },
-  { label: 'Mark I. Cohen, ESQ' },
-  { label: 'Antin Ehrlich & Epstein LLP' },
-  { label: 'Law Offices of Lisa Beth' },
-  { label: 'Rudyuk Law Firm' },
-]);
-const dropdownCompanyTitle = ref('Rudyuk Law Firm');
-function onCompanyChanged(item) {
-  dropdownCompanyTitle.value = item.label;
-}
+  const dropdownRoles = ref([
+    { label: 'Admin' },
+    { label: 'Internal user' },
+    { label: 'Client user' }
+  ]);
+  const dropdownRoleTitle = ref('Client user');
+  function onRoleChanged(item: DropdownItem) {
+    dropdownRoleTitle.value = item.label;
+  }
 
-const dropdownPositions = ref([
-  { label: 'Sales' },
-  { label: 'Retainer' },
-]);
-const dropdownPositionTitle = ref('Sales');
-function onPositionChanged(item) {
-  dropdownPositionTitle.value = item.label;
-}
+  const dropdownClientType = ref([
+    { label: 'Individual' },
+    { label: 'Company' }
+  ]);
+  const dropdownClientTypeTitle = ref('Individual');
+  function onClientTypeChanged(item: DropdownItem) {
+    dropdownClientTypeTitle.value = item.label;
+  }
 
-function closeModal() {
-  emit('close-modal');
-}
+  const dropdownCompany = ref([
+    { label: 'MAXBURST, Inc.' },
+    { label: 'Pardalis and Nohavicka Lawyers' },
+    { label: 'Jeffrey B. Peltz, P.C.' },
+    { label: 'Redmond Accident Lawyers' },
+    { label: 'Leav & Steinberg, LLP' },
+    { label: 'Morelli Law Firm' },
+    { label: 'Meirowitz & Wasserberg, LLP' },
+    { label: 'Mark I. Cohen, ESQ' },
+    { label: 'Antin Ehrlich & Epstein LLP' },
+    { label: 'Law Offices of Lisa Beth' },
+    { label: 'Rudyuk Law Firm' },
+  ]);
+  const dropdownCompanyTitle = ref('Rudyuk Law Firm');
+  function onCompanyChanged(item: DropdownItem) {
+    dropdownCompanyTitle.value = item.label;
+  }
 
-function saveAndClose() {
-  closeModal();
-  emit('save-clicked');
-}
+  const dropdownPositions = ref([
+    { label: 'Sales' },
+    { label: 'Retainer' },
+  ]);
+  const dropdownPositionTitle = ref('Sales');
+  function onPositionChanged(item: DropdownItem) {
+    dropdownPositionTitle.value = item.label;
+  }
 
+  function closeModal() {
+    emit('close-modal');
+  }
+
+  function saveAndClose() {
+    closeModal();
+    emit('save-clicked');
+  }
 </script>
 
 <style>

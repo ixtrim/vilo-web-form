@@ -192,7 +192,7 @@
         showModal.value = true;
       };
       
-      const getPositionName = (position: number) => {
+      const getPositionName = (position: number): string => {
         return Math.random() < 0.5 ? 'Sales' : 'Retainer';
       };
 

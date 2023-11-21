@@ -40,7 +40,6 @@
           </div>
 
           <div class="dashboard__users__page">
-
             <div class="dashboard__users__page__item" v-for="user in paginatedUsers" :key="user.id">
 
               <div class="col col--cm-user">
@@ -63,14 +62,11 @@
               </div>
 
             </div>
-
           </div>
           
         </div>
       </div>
     </div>
-
-    <v-button :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick()" text="ddddd"></v-button>
 
     <div class="row bottom-pagination">
       <div class="col-lg-2 align-left">
@@ -85,7 +81,7 @@
     </div>
 
     <VModal :show="showModal" :title="modalTitle" @update:show="showModal = $event">
-      <VEditClient :userId="selectedUserId" :userName="selectedUserFullName" :userEmail="selectedUserEmail" :userPhone="selectedUserPhone" :userAddress="selectedUserAddress" :userNotes="selectedUserNotes" @close-modal="showModal = false" @save-clicked="handleSaveClicked" />
+      <VEditClient :title="modalTitle" :userId="selectedUserId" :userName="selectedUserFullName" :userEmail="selectedUserEmail" :userPhone="selectedUserPhone" :userAddress="selectedUserAddress" :userNotes="selectedUserNotes" @close-modal="showModal = false" @save-clicked="handleSaveClicked" />
     </VModal>
 
     <VNotification 
@@ -120,6 +116,7 @@
     position: number;
     client_type: string;
     address: string;
+    notes: string;
   }
 
   interface Position {
@@ -144,8 +141,8 @@
     data() {
       return {
         notificationType: 'success',
-        notificationHeader: 'Header',
-        notificationMessage: 'This is a message',
+        notificationHeader: 'Changes saved',
+        notificationMessage: 'This account has been successfully edited.',
       };
     },
     methods: {
@@ -156,13 +153,12 @@
         (this.$refs.notificationRef as NotificationRef).showNotification();
       },
       handleNotificationClosed() {
-        // Handle the event when the notification is closed
-        // For example, reset some properties or log an event
+        // Handle the event when the notification is closed TO DO
       },
       handleSaveClicked() {
         setTimeout(() => {
           this.triggerNotification('success', 'Changes saved', 'This account has been successfully edited.');
-        }, 1000);
+        }, 500);
       },
       handleButtonClick() {
         this.triggerNotification('error', 'Error!', 'Something went wrong.');
@@ -176,19 +172,16 @@
       const positions = ref<Position[]>([]);
       const modalTitle = ref('');
       const showModal = ref(false);
-      const notificationComponentRef = ref(null);
 
-      const selectedUserId = ref(null);
-      const selectedUserFullName = ref(null);
-      const selectedUserEmail = ref(null);
-      const selectedUserRole = ref(null);
-      const selectedUserPhone = ref(null);
-      const selectedUserAddress = ref(null);
-      const selectedUserNotes = ref(null);
-      const selectedUserOrganisation = ref(null);
-      const selectedUserPosition = ref(null);
+      const selectedUserId = ref<number>(0);
+      const selectedUserFullName = ref<string>('');
+      const selectedUserEmail = ref<string>('');
+      const selectedUserRole = ref<string>('');
+      const selectedUserPhone = ref<string>('');
+      const selectedUserAddress = ref<string>('');
+      const selectedUserNotes = ref<string>('');
 
-      const editUserAction = (user) => {
+      const editUserAction = (user: User) => {
         modalTitle.value = 'Edit user';
         selectedUserId.value = user.id;
         selectedUserFullName.value = user.full_name;
@@ -199,7 +192,7 @@
         showModal.value = true;
       };
       
-      const getPositionName = () => {
+      const getPositionName = (position: number): string => {
         return Math.random() < 0.5 ? 'Sales' : 'Retainer';
       };
 

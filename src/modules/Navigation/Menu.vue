@@ -24,7 +24,7 @@ import axios from 'axios';
 import VLink from '@/components/v-link/VLink.vue';
 import VBadge from '@/components/v-badge/VBadge.vue';
 
-const chatBadgeNumber = ref(0);
+const chatBadgeNumber = ref(20);
 onMounted(async () => {
   try {
     //const response = await axios.get('/api/chat/notifications');

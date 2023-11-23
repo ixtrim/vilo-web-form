@@ -37,7 +37,7 @@
               </div>
 
               <div class="user-messages__bottom">
-                <p>{{ chat.lastMessage }}</p>
+                <p v-html="sanitizeHtml(chat.lastMessage)"></p>
               </div>
 
             </li>
@@ -121,7 +121,7 @@
             <h4 class="v-chat__messages__chat__header__new">Select chat</h4>
           </div>
 
-          <div class="v-chat__messages__chat__feed">
+          <div class="v-chat__messages__chat__feed" ref="chatContainer">
             <div class="v-chat__messages__chat__feed__wrapper">
 
               <div v-for="message in activeMessages" :key="message.id" class="user-message">
@@ -137,7 +137,7 @@
                       <small class="user-message__other__text__info__time">{{ message.timestamp }}</small>
                     </div>
                     <div class="user-message__other__text__bubble">
-                      <p>{{ message.content }}</p>
+                      <p v-html="sanitizeHtml(message.content)"></p>
                     </div>
                   </div>
                 </div>
@@ -148,7 +148,7 @@
                     <small class="user-message__current__info__time">{{ message.timestamp }}</small>
                   </div>
                   <div class="user-message__current__bubble">
-                    <p>{{ message.content }}</p>
+                    <p v-html="sanitizeHtml(message.content)"></p>
                   </div>
                 </div>
                 
@@ -192,8 +192,9 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, computed, onMounted } from 'vue';
   import axios from 'axios';
+  import DOMPurify from 'dompurify';
+  import { defineComponent, ref, computed, onMounted, nextTick } from 'vue';
   import Search from '@/modules/Navigation/Search.vue';
   import VButton from '@/components/v-button/VButton.vue';
   import VIconbox from '@/components/v-iconbox/VIconbox.vue';
@@ -271,7 +272,8 @@
       const isNewChat = ref<boolean>(false);
       const searchUser = ref<string>('');
       const filteredUsers = ref<User[]>([]);
-      const users = ref<User[]>([]); 
+      const users = ref<User[]>([]);
+      const chatContainer = ref<HTMLElement | null>(null);
 
       onMounted(async () => {
         try {
@@ -336,14 +338,42 @@
             timestamp: new Date().toLocaleTimeString(),
             isCurrentUser: true
           });
+
+          // Update the last message and timeAgo in the chat object
           chats.value = chats.value.map(c => {
             if (c.id === activeChat.value?.id) {
-              return { ...c, lastMessage: newMessage.value };
+              // Format the current time as needed
+              const currentTimeFormatted = "Just now"; // This can be more dynamic based on actual time difference
+              return { ...c, lastMessage: newMessage.value, timeAgo: currentTimeFormatted };
             }
             return c;
           });
+
+          // Move the active chat to the top of the list
+          const activeChatIndex = chats.value.findIndex(c => c.id === activeChat.value?.id);
+          if (activeChatIndex > -1) {
+            const activeChatData = chats.value.splice(activeChatIndex, 1)[0];
+            chats.value.unshift(activeChatData);
+          }
+
+          // Clear the WYSIWYG editor
+          if (messageInput.value) {
+            messageInput.value.innerHTML = '';
+          }
+
+          // Also clear the newMessage reactive variable
           newMessage.value = '';
+          scrollToBottom();
         }
+      }
+
+      function scrollToBottom() {
+        nextTick(() => {
+          const chatContainerElement = chatContainer.value as HTMLElement;
+          if (chatContainerElement) {
+            chatContainerElement.scrollTop = chatContainerElement.scrollHeight;
+          }
+        });
       }
 
       const messageInput = ref<HTMLElement | null>(null);
@@ -377,12 +407,16 @@
         selectChat,
         applyFormat,
         updateMessage,
-        sendMessage
+        sendMessage,
+        scrollToBottom,
       };
     },
     methods: {
       handleButtonClick() {
         
+      },
+      sanitizeHtml(htmlContent: string) {
+        return DOMPurify.sanitize(htmlContent);
       },
     },
   });

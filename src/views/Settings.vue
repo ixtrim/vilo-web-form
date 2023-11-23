@@ -23,13 +23,13 @@
           <div class="dashboard__form__section">
             <div class="dashboard__form__section__label">
               <h4>Application name</h4>
-              <p>Choose the name or your organisation which will be displayed throug the app.</p>
+              <p>Choose the name or your organization which will be displayed through the app.</p>
             </div>
             <div class="dashboard__form__section__input">
               <VInput 
                 label="Application Name" 
                 placeholder="Vilo" 
-                v-model="appName"
+                v-model="text"
               />
             </div>
           </div>
@@ -40,7 +40,7 @@
               <p>Choose the timezone for your team.</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VDropdown :title="'GMT +1'" :items="dropdownTimezone" v-model="appName" @item-clicked="handleDropdownClick" />
+              <VDropdown :title="'GMT +1'" :items="dropdownTimezone" @item-clicked="handleDropdownClick" />
             </div>
           </div>
 
@@ -94,7 +94,7 @@ export default defineComponent({
   },
   data() {
     return {
-      appName: '',
+      text: '',
       dropdownTimezone: [
         { label: 'GMT -12', value: 'GMT-12' },
         { label: 'GMT -11', value: 'GMT-11' },
@@ -150,21 +150,11 @@ export default defineComponent({
     };
   },
   methods: {
-    async loadSettingsData() {
-      try {
-        const response = await fetch('src/data/settings.json');
-        const data = await response.json();
-        this.appName = data.settingsMain.appName;
-      } catch (error) {
-        console.error("Failed to load settings data:", error);
-      }
+    handleButtonClick() {
     },
     handleDropdownClick(item: DropdownItem) {
       console.log(item);
     },
-  },
-  mounted() {
-    this.loadSettingsData();
   },
 });
 </script>

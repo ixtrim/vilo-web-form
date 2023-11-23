@@ -369,10 +369,12 @@
 
       function scrollToBottom() {
         nextTick(() => {
-          const chatContainerElement = chatContainer.value as HTMLElement;
-          if (chatContainerElement) {
-            chatContainerElement.scrollTop = chatContainerElement.scrollHeight;
-          }
+          setTimeout(() => {
+            const chatContainerElement = chatContainer.value;
+            if (chatContainerElement) {
+              chatContainerElement.scrollTop = chatContainerElement.scrollHeight;
+            }
+          }, 100);
         });
       }
 

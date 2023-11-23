@@ -4,7 +4,7 @@
       label=""
       placeholder="Search"
       v-model="internalSearchTerm"
-      @input="$emit('input', internalSearchTerm)"
+      @input="emitInput"
     />
   </div>
 </template>
@@ -22,8 +22,10 @@
       };
     },
     methods: {
-      emitInput() {
-        this.$emit('input', this.internalSearchTerm);
+      methods: {
+        emitInput() {
+          this.$emit('input', this.internalSearchTerm);
+        }
       }
     }
   };

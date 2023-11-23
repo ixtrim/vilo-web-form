@@ -29,7 +29,7 @@
               <VInput 
                 label="Application Name" 
                 placeholder="Vilo" 
-                v-model="text"
+                v-model="appName"
               />
             </div>
           </div>
@@ -40,7 +40,7 @@
               <p>Choose the timezone for your team.</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VDropdown :title="'GMT +1'" :items="dropdownTimezone" @item-clicked="handleDropdownClick" />
+              <VDropdown :title="'GMT +1'" :items="dropdownTimezone" v-model="appName" @item-clicked="handleDropdownClick" />
             </div>
           </div>
 
@@ -73,7 +73,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import VInput from '@/components/v-input/VInput.vue';
 import VButton from '@/components/v-button/VButton.vue';
@@ -94,24 +94,77 @@ export default defineComponent({
   },
   data() {
     return {
-      text: '',
+      appName: '',
       dropdownTimezone: [
-        { label: 'GMT +1' },
-        { label: 'GMT +2' },
-        { label: 'GMT +3' },
+        { label: 'GMT -12', value: 'GMT-12' },
+        { label: 'GMT -11', value: 'GMT-11' },
+        { label: 'GMT -10', value: 'GMT-10' },
+        { label: 'GMT -9', value: 'GMT-9' },
+        { label: 'GMT -8', value: 'GMT-8' },
+        { label: 'GMT -7', value: 'GMT-7' },
+        { label: 'GMT -6', value: 'GMT-6' },
+        { label: 'GMT -5', value: 'GMT-5' },
+        { label: 'GMT -4', value: 'GMT-4' },
+        { label: 'GMT -3', value: 'GMT-3' },
+        { label: 'GMT -2', value: 'GMT-2' },
+        { label: 'GMT -1', value: 'GMT-1' },
+        { label: 'GMT', value: 'GMT' },
+        { label: 'GMT +1', value: 'GMT+1' },
+        { label: 'GMT +2', value: 'GMT+2' },
+        { label: 'GMT +3', value: 'GMT+3' },
+        { label: 'GMT +4', value: 'GMT+4' },
+        { label: 'GMT +5', value: 'GMT+5' },
+        { label: 'GMT +5:30', value: 'GMT+5:30' },
+        { label: 'GMT +5:45', value: 'GMT+5:45' },
+        { label: 'GMT +6', value: 'GMT+6' },
+        { label: 'GMT +6:30', value: 'GMT+6:30' },
+        { label: 'GMT +7', value: 'GMT+7' },
+        { label: 'GMT +8', value: 'GMT+8' },
+        { label: 'GMT +9', value: 'GMT+9' },
+        { label: 'GMT +9:30', value: 'GMT+9:30' },
+        { label: 'GMT +10', value: 'GMT+10' },
+        { label: 'GMT +10:30', value: 'GMT+10:30' },
+        { label: 'GMT +11', value: 'GMT+11' },
+        { label: 'GMT +12', value: 'GMT+12' },
+        { label: 'GMT +12:45', value: 'GMT+12:45' },
+        { label: 'GMT +13', value: 'GMT+13' },
+        { label: 'GMT +14', value: 'GMT+14' }
       ],
       dropdownDateFormat: [
-        { label: 'mm/dd/yyyy' },
-        { label: 'mm.dd.yyyy' },
+      { label: 'mm/dd/yyyy', value: 'MM/DD/YYYY' },
+      { label: 'mm.dd.yyyy', value: 'MM.DD.YYYY' },
+      { label: 'dd/mm/yyyy', value: 'DD/MM/YYYY' },
+      { label: 'dd.mm.yyyy', value: 'DD.MM.YYYY' },
+      { label: 'yyyy/mm/dd', value: 'YYYY/MM/DD' },
+      { label: 'yyyy.mm.dd', value: 'YYYY.MM.DD' },
+      { label: 'yyyy-mm-dd', value: 'YYYY-MM-DD' },
+      { label: 'dd-mm-yyyy', value: 'DD-MM-YYYY' },
+      { label: 'mm-dd-yyyy', value: 'MM-DD-YYYY' },
+      { label: 'dd-MMM-yyyy', value: 'DD-MMM-YYYY' },
+      { label: 'MMM dd, yyyy', value: 'MMM DD, YYYY' },
+      { label: 'yyyy, MMM dd', value: 'YYYY, MMM DD' },
+      { label: 'dd MMMM yyyy', value: 'DD MMMM YYYY' },
+      { label: 'MMMM dd, yyyy', value: 'MMMM DD, YYYY' },
+      { label: 'yyyy, MMMM dd', value: 'YYYY, MMMM DD' }
       ]
     };
   },
   methods: {
-    handleButtonClick() {
+    async loadSettingsData() {
+      try {
+        const response = await fetch('src/data/settings.json');
+        const data = await response.json();
+        this.appName = data.settingsMain.appName;
+      } catch (error) {
+        console.error("Failed to load settings data:", error);
+      }
     },
     handleDropdownClick(item: DropdownItem) {
       console.log(item);
     },
+  },
+  mounted() {
+    this.loadSettingsData();
   },
 });
 </script>

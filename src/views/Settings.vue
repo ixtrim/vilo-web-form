@@ -29,7 +29,7 @@
               <VInput 
                 label="Application Name" 
                 placeholder="Vilo" 
-                v-model="text"
+                v-model="appName"
               />
             </div>
           </div>
@@ -73,6 +73,9 @@
 </template>
 
 <script lang="ts">
+import { db } from '@/firebase.js';
+import { collection, getDoc, doc, updateDoc } from 'firebase/firestore';
+import { debounce } from 'lodash';
 import { defineComponent, ref, onMounted } from 'vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import VInput from '@/components/v-input/VInput.vue';
@@ -94,7 +97,11 @@ export default defineComponent({
   },
   data() {
     return {
-      text: '',
+      appName: '',
+      appTimezone: '',
+      appTimeformat: '',
+      appServices: '',
+      debouncedUpdateAppName: null,
       dropdownTimezone: [
         { label: 'GMT -12', value: 'GMT-12' },
         { label: 'GMT -11', value: 'GMT-11' },
@@ -155,7 +162,44 @@ export default defineComponent({
     handleDropdownClick(item: DropdownItem) {
       console.log(item);
     },
+    async fetchSettings() {
+      try {
+        const docRef = doc(db, "settings", "general");
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          this.appName = docSnap.data().app_name;
+        } else {
+          console.log("No such document!");
+        }
+      } catch (error) {
+        console.log("Error getting document:", error);
+      }
+    },
+    async updateAppName() {
+      try {
+        const docRef = doc(db, "settings", "general");
+        await updateDoc(docRef, {
+          app_name: this.appName
+        });
+        alert('Saved');
+      } catch (error) {
+        console.log("Error updating document:", error);
+      }
+    }
   },
+  mounted() {
+    this.fetchSettings();
+    // Initialize the debounced version of updateAppName
+    this.debouncedUpdateAppName = debounce(this.updateAppName, 500);
+  },
+  watch: {
+    appName(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.debouncedUpdateAppName();
+      }
+    }
+  }
 });
 </script>
 

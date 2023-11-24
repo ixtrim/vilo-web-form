@@ -56,7 +56,7 @@
               <p>Add types of services your company provides</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VTextInputGroup />
+              <VTextInputGroup :inputs="appServices" @update-inputs="appServices = $event" />
             </div>
           </div>
 
@@ -87,6 +87,9 @@
     label: string;
     value: string;
   }
+  interface Service {
+    value: string;
+  }
 
   interface NotificationRef {
     showNotification: () => void;
@@ -106,10 +109,11 @@ export default defineComponent({
       appName: '',
       appTimezone: '',
       appTimeFormat: '',
-      appServices: '',
+      appServices: [],
       debouncedUpdateAppName: null as ((...args: any[]) => Promise<void> | undefined) | null,
       debouncedUpdateTimezone: null as ((...args: any[]) => Promise<void> | undefined) | null,
       debouncedUpdateTimeFormat: null as ((...args: any[]) => Promise<void> | undefined) | null,
+      debouncedUpdateAppServices: null as ((...args: any[]) => Promise<void> | undefined) | null,
       initialDataLoaded: false,
       notificationType: 'success',
       notificationHeader: 'Changes saved',
@@ -224,6 +228,7 @@ export default defineComponent({
           this.appName = docSnap.data().app_name;
           this.appTimezone = docSnap.data().app_timezone || 'Select Timezone';
           this.appTimeFormat = docSnap.data().app_timeformat || 'Select Date format';
+          this.appServices = docSnap.data().app_services || [];
         } else {
           console.log("No such document!");
           this.triggerNotification('error', 'Error!', 'Error while connecting with database.');
@@ -248,13 +253,37 @@ export default defineComponent({
         console.error("Error updating document:", error);
         this.triggerNotification('error', 'Error!', 'Something went wrong.');
       }
-    }
+    },
+    async updateAppServices(newServices: any[]) {
+      try {
+        const docRef = doc(db, "settings", "general");
+        await updateDoc(docRef, {
+          app_services: newServices
+        });
+        // Trigger notification for success
+      } catch (error) {
+        // Handle error
+      }
+    },
+    async userInitiatedUpdateAppServices() {
+      try {
+        const docRef = doc(db, "settings", "general");
+        await updateDoc(docRef, {
+          app_services: this.appServices
+        });
+        this.triggerNotification('success', 'Changes saved', 'Services were updated successfully.');
+      } catch (error) {
+        console.error("Error updating document:", error);
+        this.triggerNotification('error', 'Error!', 'Something went wrong.');
+      }
+    },
   },
   mounted() {
     this.fetchSettings();
     this.debouncedUpdateAppName = debounce(this.userInitiatedUpdateAppName, 1000);
-    this.debouncedUpdateTimezone = debounce(this.userInitiatedUpdateTimezone, 1000);
-    this.debouncedUpdateTimeFormat = debounce(this.userInitiatedUpdateTimeFormat, 1000);
+    this.debouncedUpdateTimezone = debounce(this.userInitiatedUpdateTimezone, 600);
+    this.debouncedUpdateTimeFormat = debounce(this.userInitiatedUpdateTimeFormat, 600);
+    this.debouncedUpdateAppServices = debounce(this.userInitiatedUpdateAppServices, 1200);
   },
   watch: {
     appName(newVal, oldVal) {
@@ -270,6 +299,14 @@ export default defineComponent({
     appTimeFormat(newVal, oldVal) {
       if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimeFormat) {
         this.debouncedUpdateTimeFormat()?.catch(e => console.error(e));
+      }
+    },
+    appServices: {
+      deep: true,
+      handler(newServices) {
+        if (this.debouncedUpdateAppServices) {
+          this.debouncedUpdateAppServices()?.catch(e => console.error(e));
+        }
       }
     }
   }

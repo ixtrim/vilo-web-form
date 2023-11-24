@@ -260,9 +260,7 @@ export default defineComponent({
         await updateDoc(docRef, {
           app_services: newServices
         });
-        // Trigger notification for success
       } catch (error) {
-        // Handle error
       }
     },
     async userInitiatedUpdateAppServices() {
@@ -304,7 +302,7 @@ export default defineComponent({
     appServices: {
       deep: true,
       handler(newServices) {
-        if (this.debouncedUpdateAppServices) {
+        if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
           this.debouncedUpdateAppServices()?.catch(e => console.error(e));
         }
       }

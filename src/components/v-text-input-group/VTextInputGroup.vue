@@ -32,12 +32,7 @@
   const emit = defineEmits(['update-inputs']);
   const localInputs = ref(props.inputs.map(input => ({ ...input, id: input.id || generateUniqueId() })));
 
-  watch(() => props.inputs, (newInputs) => {
-    localInputs.value = newInputs.map(input => {
-      const existingInput = localInputs.value.find(localInput => localInput.value === input.value);
-      return { ...input, id: existingInput ? existingInput.id : generateUniqueId() };
-    });
-  }, { deep: true });
+  
 
   watch(localInputs, () => {
     emit('update-inputs', localInputs.value.map(({ id, ...rest }) => rest));

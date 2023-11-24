@@ -1,6 +1,6 @@
 <template>
   <div class="container-fluid">
-    
+
     <div class="row">
       <div class="col-lg-12">
         <TabsSettings />
@@ -26,11 +26,7 @@
               <p>Choose the name or your organization which will be displayed through the app.</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VInput 
-                label="Application Name" 
-                placeholder="Vilo" 
-                v-model="appName"
-              />
+              <VInput label="Application Name" placeholder="Vilo" v-model="appName" />
             </div>
           </div>
 
@@ -63,29 +59,37 @@
               <VTextInputGroup />
             </div>
           </div>
-          
+
 
         </div>
       </div>
     </div>
 
+    <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader"
+      :message="notificationMessage" :duration="7000" />
+
   </div>
 </template>
 
 <script lang="ts">
-import { db } from '@/firebase.js';
-import { collection, getDoc, doc, updateDoc } from 'firebase/firestore';
-import { debounce } from 'lodash';
-import { defineComponent, ref, onMounted } from 'vue';
-import VDropdown from '@/components/v-dropdown/VDropdown.vue';
-import VInput from '@/components/v-input/VInput.vue';
-import VButton from '@/components/v-button/VButton.vue';
-import TabsSettings from '@/modules/TabsSettings.vue';
-import VTextInputGroup from '@/components/v-text-input-group/VTextInputGroup.vue';
+  import { db } from '@/firebase.js';
+  import { doc, getDoc, updateDoc } from 'firebase/firestore';
+  import { debounce } from 'lodash';
+  import { defineComponent, ref, onMounted } from 'vue';
+  import VDropdown from '@/components/v-dropdown/VDropdown.vue';
+  import VInput from '@/components/v-input/VInput.vue';
+  import VButton from '@/components/v-button/VButton.vue';
+  import TabsSettings from '@/modules/TabsSettings.vue';
+  import VTextInputGroup from '@/components/v-text-input-group/VTextInputGroup.vue';
+  import VNotification from '@/components/v-notification/VNotification.vue';
 
-interface DropdownItem {
-  label: string;
-}
+  interface DropdownItem {
+    label: string;
+  }
+
+  interface NotificationRef {
+    showNotification: () => void;
+  }
 
 export default defineComponent({
   components: {
@@ -94,6 +98,7 @@ export default defineComponent({
     VDropdown,
     TabsSettings,
     VTextInputGroup,
+    VNotification,
   },
   data() {
     return {
@@ -101,7 +106,11 @@ export default defineComponent({
       appTimezone: '',
       appTimeformat: '',
       appServices: '',
-      debouncedUpdateAppName: null,
+      debouncedUpdateAppName: null as ((...args: any[]) => Promise<void> | undefined) | null,
+      initialDataLoaded: false,
+      notificationType: 'success',
+      notificationHeader: 'Changes saved',
+      notificationMessage: 'This account has been successfully edited.',
       dropdownTimezone: [
         { label: 'GMT -12', value: 'GMT-12' },
         { label: 'GMT -11', value: 'GMT-11' },
@@ -138,26 +147,35 @@ export default defineComponent({
         { label: 'GMT +14', value: 'GMT+14' }
       ],
       dropdownDateFormat: [
-      { label: 'mm/dd/yyyy', value: 'MM/DD/YYYY' },
-      { label: 'mm.dd.yyyy', value: 'MM.DD.YYYY' },
-      { label: 'dd/mm/yyyy', value: 'DD/MM/YYYY' },
-      { label: 'dd.mm.yyyy', value: 'DD.MM.YYYY' },
-      { label: 'yyyy/mm/dd', value: 'YYYY/MM/DD' },
-      { label: 'yyyy.mm.dd', value: 'YYYY.MM.DD' },
-      { label: 'yyyy-mm-dd', value: 'YYYY-MM-DD' },
-      { label: 'dd-mm-yyyy', value: 'DD-MM-YYYY' },
-      { label: 'mm-dd-yyyy', value: 'MM-DD-YYYY' },
-      { label: 'dd-MMM-yyyy', value: 'DD-MMM-YYYY' },
-      { label: 'MMM dd, yyyy', value: 'MMM DD, YYYY' },
-      { label: 'yyyy, MMM dd', value: 'YYYY, MMM DD' },
-      { label: 'dd MMMM yyyy', value: 'DD MMMM YYYY' },
-      { label: 'MMMM dd, yyyy', value: 'MMMM DD, YYYY' },
-      { label: 'yyyy, MMMM dd', value: 'YYYY, MMMM DD' }
+        { label: 'mm/dd/yyyy', value: 'MM/DD/YYYY' },
+        { label: 'mm.dd.yyyy', value: 'MM.DD.YYYY' },
+        { label: 'dd/mm/yyyy', value: 'DD/MM/YYYY' },
+        { label: 'dd.mm.yyyy', value: 'DD.MM.YYYY' },
+        { label: 'yyyy/mm/dd', value: 'YYYY/MM/DD' },
+        { label: 'yyyy.mm.dd', value: 'YYYY.MM.DD' },
+        { label: 'yyyy-mm-dd', value: 'YYYY-MM-DD' },
+        { label: 'dd-mm-yyyy', value: 'DD-MM-YYYY' },
+        { label: 'mm-dd-yyyy', value: 'MM-DD-YYYY' },
+        { label: 'dd-MMM-yyyy', value: 'DD-MMM-YYYY' },
+        { label: 'MMM dd, yyyy', value: 'MMM DD, YYYY' },
+        { label: 'yyyy, MMM dd', value: 'YYYY, MMM DD' },
+        { label: 'dd MMMM yyyy', value: 'DD MMMM YYYY' },
+        { label: 'MMMM dd, yyyy', value: 'MMMM DD, YYYY' },
+        { label: 'yyyy, MMMM dd', value: 'YYYY, MMMM DD' }
       ]
     };
   },
   methods: {
+    triggerNotification(type: string, header: string, message: string) {
+      if (this.initialDataLoaded) {
+        this.notificationType = type;
+        this.notificationHeader = header;
+        this.notificationMessage = message;
+        (this.$refs.notificationRef as NotificationRef).showNotification();
+      }
+    },
     handleButtonClick() {
+      // Button click handler
     },
     handleDropdownClick(item: DropdownItem) {
       console.log(item);
@@ -171,32 +189,38 @@ export default defineComponent({
           this.appName = docSnap.data().app_name;
         } else {
           console.log("No such document!");
+          this.triggerNotification('error', 'Error!', 'Error while connecting with database.');
         }
       } catch (error) {
         console.log("Error getting document:", error);
+        this.triggerNotification('error', 'Error!', 'Error while connecting with database.');
+      } finally {
+        setTimeout(() => {
+          this.initialDataLoaded = true;
+        }, 750);
       }
     },
-    async updateAppName() {
+    async userInitiatedUpdateAppName() {
       try {
         const docRef = doc(db, "settings", "general");
         await updateDoc(docRef, {
           app_name: this.appName
         });
-        alert('Saved');
+        this.triggerNotification('success', 'Changes saved', 'Application name was changed successfully.');
       } catch (error) {
-        console.log("Error updating document:", error);
+        console.error("Error updating document:", error);
+        this.triggerNotification('error', 'Error!', 'Something went wrong.');
       }
     }
   },
   mounted() {
     this.fetchSettings();
-    // Initialize the debounced version of updateAppName
-    this.debouncedUpdateAppName = debounce(this.updateAppName, 500);
+    this.debouncedUpdateAppName = debounce(this.userInitiatedUpdateAppName, 1000);
   },
   watch: {
     appName(newVal, oldVal) {
-      if (newVal !== oldVal) {
-        this.debouncedUpdateAppName();
+      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateAppName) {
+        this.debouncedUpdateAppName()?.catch(e => console.error(e));
       }
     }
   }
@@ -204,6 +228,6 @@ export default defineComponent({
 </script>
 
 <style>
-  @import url(./styles/settings.scss);
-  @import url(./styles/dashboard.scss);
+@import url(./styles/settings.scss);
+@import url(./styles/dashboard.scss);
 </style>

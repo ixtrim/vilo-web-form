@@ -55,7 +55,9 @@
   };
 
   function generateUniqueId() {
-    return Math.random().toString(36).substr(2, 9);
+    const randomPart = Math.random().toString(36).substr(2, 9);
+    const timePart = Date.now().toString(36);
+    return `${timePart}-${randomPart}`;
   }
 </script>
 

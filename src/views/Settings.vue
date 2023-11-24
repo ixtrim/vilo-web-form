@@ -66,8 +66,7 @@
     </div>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader"
-      :message="notificationMessage" :duration="7000" @closed="handleNotificationClosed"
-      @save-clicked="handleSaveClicked" />
+      :message="notificationMessage" :duration="7000" />
 
   </div>
 </template>
@@ -107,8 +106,8 @@ export default defineComponent({
       appTimezone: '',
       appTimeformat: '',
       appServices: '',
-      debouncedUpdateAppName: null,
-      initialDataLoaded: false, // Flag to indicate when initial data has been loaded
+      debouncedUpdateAppName: null as ((...args: any[]) => Promise<void> | undefined) | null,
+      initialDataLoaded: false,
       notificationType: 'success',
       notificationHeader: 'Changes saved',
       notificationMessage: 'This account has been successfully edited.',
@@ -168,7 +167,7 @@ export default defineComponent({
   },
   methods: {
     triggerNotification(type: string, header: string, message: string) {
-      if (this.initialDataLoaded) { // Only trigger notification if initial data has been loaded
+      if (this.initialDataLoaded) {
         this.notificationType = type;
         this.notificationHeader = header;
         this.notificationMessage = message;
@@ -216,12 +215,12 @@ export default defineComponent({
   },
   mounted() {
     this.fetchSettings();
-    this.debouncedUpdateAppName = debounce(this.userInitiatedUpdateAppName, 600);
+    this.debouncedUpdateAppName = debounce(this.userInitiatedUpdateAppName, 1000);
   },
   watch: {
     appName(newVal, oldVal) {
-      if (this.initialDataLoaded && newVal !== oldVal) {
-        this.debouncedUpdateAppName();
+      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateAppName) {
+        this.debouncedUpdateAppName()?.catch(e => console.error(e));
       }
     }
   }

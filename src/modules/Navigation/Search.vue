@@ -22,10 +22,8 @@
       };
     },
     methods: {
-      methods: {
-        emitInput() {
-          this.$emit('input', this.internalSearchTerm);
-        }
+      emitInput() {
+        this.$emit('input', this.internalSearchTerm);
       }
     }
   };

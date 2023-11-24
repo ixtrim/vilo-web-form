@@ -36,7 +36,7 @@
               <p>Choose the timezone for your team.</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VDropdown :title="'GMT +1'" :items="dropdownTimezone" @item-clicked="handleDropdownClick" />
+              <VDropdown :title="appTimezone" :items="dropdownTimezone" @item-clicked="changeTimezone" />
             </div>
           </div>
 
@@ -46,7 +46,7 @@
               <p>Choose the timezone for your team.</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VDropdown :title="'dd/mm/yyyy'" :items="dropdownDateFormat" @item-clicked="handleDropdownClick" />
+              <VDropdown :title="appTimeFormat" :items="dropdownTimeFormat" @item-clicked="changeTimeFormat" />
             </div>
           </div>
 
@@ -85,6 +85,7 @@
 
   interface DropdownItem {
     label: string;
+    value: string;
   }
 
   interface NotificationRef {
@@ -104,9 +105,11 @@ export default defineComponent({
     return {
       appName: '',
       appTimezone: '',
-      appTimeformat: '',
+      appTimeFormat: '',
       appServices: '',
       debouncedUpdateAppName: null as ((...args: any[]) => Promise<void> | undefined) | null,
+      debouncedUpdateTimezone: null as ((...args: any[]) => Promise<void> | undefined) | null,
+      debouncedUpdateTimeFormat: null as ((...args: any[]) => Promise<void> | undefined) | null,
       initialDataLoaded: false,
       notificationType: 'success',
       notificationHeader: 'Changes saved',
@@ -146,22 +149,16 @@ export default defineComponent({
         { label: 'GMT +13', value: 'GMT+13' },
         { label: 'GMT +14', value: 'GMT+14' }
       ],
-      dropdownDateFormat: [
-        { label: 'mm/dd/yyyy', value: 'MM/DD/YYYY' },
-        { label: 'mm.dd.yyyy', value: 'MM.DD.YYYY' },
-        { label: 'dd/mm/yyyy', value: 'DD/MM/YYYY' },
-        { label: 'dd.mm.yyyy', value: 'DD.MM.YYYY' },
-        { label: 'yyyy/mm/dd', value: 'YYYY/MM/DD' },
-        { label: 'yyyy.mm.dd', value: 'YYYY.MM.DD' },
-        { label: 'yyyy-mm-dd', value: 'YYYY-MM-DD' },
-        { label: 'dd-mm-yyyy', value: 'DD-MM-YYYY' },
-        { label: 'mm-dd-yyyy', value: 'MM-DD-YYYY' },
-        { label: 'dd-MMM-yyyy', value: 'DD-MMM-YYYY' },
-        { label: 'MMM dd, yyyy', value: 'MMM DD, YYYY' },
-        { label: 'yyyy, MMM dd', value: 'YYYY, MMM DD' },
-        { label: 'dd MMMM yyyy', value: 'DD MMMM YYYY' },
-        { label: 'MMMM dd, yyyy', value: 'MMMM DD, YYYY' },
-        { label: 'yyyy, MMMM dd', value: 'YYYY, MMMM DD' }
+      dropdownTimeFormat: [
+        { label: 'mm/dd/yyyy', value: 'mm/dd/yyyy' },
+        { label: 'mm.dd.yyyy', value: 'mm.dd.yyyy' },
+        { label: 'dd/mm/yyyy', value: 'dd/mm/yyyy' },
+        { label: 'dd.mm.yyyy', value: 'dd.mm.yyyy' },
+        { label: 'yyyy/mm/dd', value: 'yyyy/mm/dd' },
+        { label: 'yyyy.mm.dd', value: 'yyyy.mm.dd' },
+        { label: 'yyyy-mm-dd', value: 'yyyy-mm-dd' },
+        { label: 'dd-mm-yyyy', value: 'dd-mm-yyyy' },
+        { label: 'mm-dd-yyyy', value: 'mm-dd-yyyy' }
       ]
     };
   },
@@ -174,11 +171,49 @@ export default defineComponent({
         (this.$refs.notificationRef as NotificationRef).showNotification();
       }
     },
-    handleButtonClick() {
-      // Button click handler
+    async changeTimezone(item: DropdownItem) {
+      this.appTimezone = item.value;
+      if (this.debouncedUpdateTimezone) {
+        try {
+          await this.debouncedUpdateTimezone();
+        } catch (e) {
+          console.error(e);
+        }
+      }
     },
-    handleDropdownClick(item: DropdownItem) {
-      console.log(item);
+    async userInitiatedUpdateTimezone() {
+      try {
+        const docRef = doc(db, "settings", "general");
+        await updateDoc(docRef, {
+          app_timezone: this.appTimezone
+        });
+        this.triggerNotification('success', 'Changes saved', 'Timezone was changed successfully.');
+      } catch (error) {
+        console.error("Error updating document:", error);
+        this.triggerNotification('error', 'Error!', 'Something went wrong.');
+      }
+    },
+    async changeTimeFormat(item: DropdownItem) {
+      this.appTimeFormat = item.value;
+      if (this.debouncedUpdateTimeFormat) {
+        try {
+          await this.debouncedUpdateTimeFormat();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    },
+    async userInitiatedUpdateTimeFormat() {
+      try {
+        const docRef = doc(db, "settings", "general");
+        await updateDoc(docRef, {
+          app_timeformat: this.appTimeFormat
+        });
+        this.triggerNotification('success', 'Changes saved', 'Date format was changed successfully.');
+      } catch (error) {
+        console.error("Error updating document:", error);
+        this.triggerNotification('error', 'Error!', 'Something went wrong.');
+      }
     },
     async fetchSettings() {
       try {
@@ -187,6 +222,8 @@ export default defineComponent({
 
         if (docSnap.exists()) {
           this.appName = docSnap.data().app_name;
+          this.appTimezone = docSnap.data().app_timezone || 'Select Timezone';
+          this.appTimeFormat = docSnap.data().app_timeformat || 'Select Date format';
         } else {
           console.log("No such document!");
           this.triggerNotification('error', 'Error!', 'Error while connecting with database.');
@@ -216,11 +253,23 @@ export default defineComponent({
   mounted() {
     this.fetchSettings();
     this.debouncedUpdateAppName = debounce(this.userInitiatedUpdateAppName, 1000);
+    this.debouncedUpdateTimezone = debounce(this.userInitiatedUpdateTimezone, 1000);
+    this.debouncedUpdateTimeFormat = debounce(this.userInitiatedUpdateTimeFormat, 1000);
   },
   watch: {
     appName(newVal, oldVal) {
       if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateAppName) {
         this.debouncedUpdateAppName()?.catch(e => console.error(e));
+      }
+    },
+    appTimezone(newVal, oldVal) {
+      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimezone) {
+        this.debouncedUpdateTimezone()?.catch(e => console.error(e));
+      }
+    },
+    appTimeFormat(newVal, oldVal) {
+      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimeFormat) {
+        this.debouncedUpdateTimeFormat()?.catch(e => console.error(e));
       }
     }
   }

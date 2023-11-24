@@ -56,7 +56,7 @@
               <p>Add types of services your company provides</p>
             </div>
             <div class="dashboard__form__section__input">
-              
+              <VTextInputGroup :inputs="appServices" @update-inputs="appServices = $event" />
             </div>
           </div>
 

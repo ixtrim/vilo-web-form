@@ -1,8 +1,8 @@
 <template>
   <div class="v-text-input-group">
-    <div v-for="(input, index) in inputs" :key="index" class="input-row">
+    <div v-for="input in localInputs" :key="input.id" class="input-row">
       <VInput label="" placeholder="" v-model="input.value" />
-      <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="removeInput(index)"
+      <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="removeInput(input.id)"
         text=""></VButton>
     </div>
 
@@ -11,22 +11,54 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import VInput from '@/components/v-input/VInput.vue';
-import VLink from '@/components/v-link/VLink.vue';
-import VButton from '@/components/v-button/VButton.vue';
+  import { ref, watch } from 'vue';
+  import type { PropType } from 'vue';
+  import VInput from '@/components/v-input/VInput.vue';
+  import VLink from '@/components/v-link/VLink.vue';
+  import VButton from '@/components/v-button/VButton.vue';
 
-const inputs = ref([{ value: '' }]);
+  interface InputItem {
+    value: string;
+    id?: string;
+  }
 
-const addInput = () => {
-  inputs.value.push({ value: '' });
-};
+  const props = defineProps({
+    inputs: {
+      type: Array as PropType<InputItem[]>,
+      default: () => []
+    }
+  });
 
-const removeInput = (index: number) => {
-  inputs.value.splice(index, 1);
-};
+  const emit = defineEmits(['update-inputs']);
+  const localInputs = ref(props.inputs.map(input => ({ ...input, id: input.id || generateUniqueId() })));
+
+  watch(() => props.inputs, (newInputs) => {
+    localInputs.value = newInputs.map(input => {
+      const existingInput = localInputs.value.find(localInput => localInput.value === input.value);
+      return { ...input, id: existingInput ? existingInput.id : generateUniqueId() };
+    });
+  }, { deep: true });
+
+  watch(localInputs, () => {
+    emit('update-inputs', localInputs.value.map(({ id, ...rest }) => rest));
+  }, { deep: true });
+
+  const addInput = () => {
+    localInputs.value.push({ value: '', id: generateUniqueId() });
+  };
+
+  const removeInput = (id: string) => {
+    const index = localInputs.value.findIndex(input => input.id === id);
+    if (index !== -1) {
+      localInputs.value.splice(index, 1);
+    }
+  };
+
+  function generateUniqueId() {
+    return Math.random().toString(36).substr(2, 9);
+  }
 </script>
 
 <style>
-@import url(./VTextInputGroup.scss);
+  @import url(./VTextInputGroup.scss);
 </style>

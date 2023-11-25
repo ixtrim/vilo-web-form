@@ -257,6 +257,50 @@
           this.triggerNotification('error', 'Error!', 'Something went wrong.');
         }
       },
+      async updateMuteMeetingsInFirestore() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            mute_meeting: this.toggleMuteMeetings
+          });
+        } catch (error) {
+          console.error("Error updating document:", error);
+        }
+      },
+      async userInitiatedUpdateMuteMeetings() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            mute_meeting: this.toggleMuteMeetings
+          });
+          this.triggerNotification('success', 'Changes saved', 'Settings for muting notifications during meetings updated successfully.');
+        } catch (error) {
+          console.error("Error updating document:", error);
+          this.triggerNotification('error', 'Error!', 'Something went wrong.');
+        }
+      },
+      async updateMuteOutTimeInFirestore() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            mute_out: this.toggleMuteOutTime
+          });
+        } catch (error) {
+          console.error("Error updating document:", error);
+        }
+      },
+      async userInitiatedUpdateMuteOutTime() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            mute_out: this.toggleMuteOutTime
+          });
+          this.triggerNotification('success', 'Changes saved', 'Settings for muting notifications after work updated successfully.');
+        } catch (error) {
+          console.error("Error updating document:", error);
+          this.triggerNotification('error', 'Error!', 'Something went wrong.');
+        }
+      },
       handleDropdownClick(item: DropdownItem) {
       },
     },
@@ -281,13 +325,25 @@
           this.debouncedUpdateNotificationSound()?.catch(e => console.error(e));
         }
       },
+      toggleMuteMeetings(newVal, oldVal) {
+        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateMuteMeetings) {
+          this.debouncedUpdateMuteMeetings()?.catch(e => console.error(e));
+        }
+      },
+      toggleMuteOutTime(newVal, oldVal) {
+        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateMuteOutTime) {
+          this.debouncedUpdateMuteOutTime()?.catch(e => console.error(e));
+        }
+      },
     },
     mounted() {
       this.fetchViewData();
-      this.debouncedUpdateChatsPush = debounce(this.userInitiatedUpdateChatsPush, 600);
-      this.debouncedUpdateChatsEmail = debounce(this.userInitiatedUpdateChatsEmail, 600);
+      this.debouncedUpdateChatsPush         = debounce(this.userInitiatedUpdateChatsPush, 600);
+      this.debouncedUpdateChatsEmail        = debounce(this.userInitiatedUpdateChatsEmail, 600);
       this.debouncedUpdateNotificationPopUp = debounce(this.userInitiatedUpdateNotificationPopUp, 600);
       this.debouncedUpdateNotificationSound = debounce(this.userInitiatedUpdateNotificationSound, 600);
+      this.debouncedUpdateMuteMeetings      = debounce(this.userInitiatedUpdateMuteMeetings, 600);
+      this.debouncedUpdateMuteOutTime       = debounce(this.userInitiatedUpdateMuteOutTime, 600);
     }
   });
 </script>

@@ -235,6 +235,28 @@
           this.triggerNotification('error', 'Error!', 'Something went wrong.');
         }
       },
+      async updateNotificationSoundInFirestore() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            type_sound: this.toggleNotificationSound
+          });
+        } catch (error) {
+          console.error("Error updating document:", error);
+        }
+      },
+      async userInitiatedUpdateNotificationSound() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            type_sound: this.toggleNotificationSound
+          });
+          this.triggerNotification('success', 'Changes saved', 'Settings for notifications sound updated successfully.');
+        } catch (error) {
+          console.error("Error updating document:", error);
+          this.triggerNotification('error', 'Error!', 'Something went wrong.');
+        }
+      },
       handleDropdownClick(item: DropdownItem) {
       },
     },
@@ -254,12 +276,18 @@
           this.debouncedUpdateNotificationPopUp()?.catch(e => console.error(e));
         }
       },
+      toggleNotificationSound(newVal, oldVal) {
+        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateNotificationSound) {
+          this.debouncedUpdateNotificationSound()?.catch(e => console.error(e));
+        }
+      },
     },
     mounted() {
       this.fetchViewData();
       this.debouncedUpdateChatsPush = debounce(this.userInitiatedUpdateChatsPush, 600);
       this.debouncedUpdateChatsEmail = debounce(this.userInitiatedUpdateChatsEmail, 600);
       this.debouncedUpdateNotificationPopUp = debounce(this.userInitiatedUpdateNotificationPopUp, 600);
+      this.debouncedUpdateNotificationSound = debounce(this.userInitiatedUpdateNotificationSound, 600);
     }
   });
 </script>

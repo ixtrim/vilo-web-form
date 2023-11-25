@@ -16,10 +16,11 @@
   import VInput from '@/components/v-input/VInput.vue';
   import VLink from '@/components/v-link/VLink.vue';
   import VButton from '@/components/v-button/VButton.vue';
+  import { debounce } from 'lodash';
 
   interface InputItem {
     value: string;
-    id?: string;
+    id: string;
   }
 
   const props = defineProps({
@@ -30,17 +31,18 @@
   });
 
   const emit = defineEmits(['update-inputs']);
-  const localInputs = ref(props.inputs.map(input => ({ ...input, id: input.id || generateUniqueId() })));
+  const localInputs = ref<InputItem[]>(props.inputs.map(input => ({ ...input, id: input.id || generateUniqueId() })));
+
+  const updateLocalInputs = debounce((newInputs: InputItem[]) => {
+    localInputs.value = newInputs.map((input: InputItem) => {
+      const existingInput = localInputs.value.find(localInput => localInput.id === input.id);
+      return existingInput || { ...input, id: generateUniqueId() };
+    });
+  }, 300);
 
   watch(() => props.inputs, (newInputs) => {
-  localInputs.value = newInputs.map(input => {
-    // Find an existing input with a unique identifier instead of value
-    const existingInput = localInputs.value.find(localInput => localInput.id === input.id);
-    // Only generate a new ID if the input is truly new (doesn't have an existing ID)
-    return existingInput ? existingInput : { ...input, id: generateUniqueId() };
-  });
-}, { deep: true });
-
+    updateLocalInputs(newInputs);
+  }, { deep: true });
 
   watch(localInputs, () => {
     emit('update-inputs', localInputs.value.map(({ id, ...rest }) => rest));

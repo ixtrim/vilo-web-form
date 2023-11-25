@@ -48,7 +48,7 @@
               <p>Choose the time range of how long you will be able to see notification.</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VDropdown :title="'1 min'" :items="dropdownNotificationDurations" @item-clicked="handleDropdownClick" />
+              <VDropdown :title="'1 min'" :items="dropdownDisplayTime" @item-clicked="handleDropdownClick" />
             </div>
           </div>
 
@@ -108,21 +108,32 @@
         notificationType: 'success',
         notificationHeader: 'Changes saved',
         notificationMessage: 'This account has been successfully edited.',
-        dropdownNotificationDurations: [
-          { label: '10 second',  value: '10000' },
+        initialDataLoaded: false,
+        dropdownDisplayTime: [
+          { label: '5 seconds',  value: '5000' },
+          { label: '6 seconds',  value: '6000' },
+          { label: '7 seconds',  value: '7000' },
+          { label: '8 seconds',  value: '8000' },
+          { label: '9 seconds',  value: '9000' },
+          { label: '10 seconds',  value: '10000' },
           { label: '20 seconds', value: '20000'  },
           { label: '30 seconds', value: '30000'  },
           { label: '45 seconds', value: '45000'  },
           { label: '60 seconds', value: '60000'  },
         ],
-        initialDataLoaded: false,
         toggleChatsPush: false,
         toggleChatsEmail: false,
         toggleNotificationPopUp: false,
         toggleNotificationSound: false,
+        notificationDisplayTime: '',
         toggleMuteMeetings: false,
         toggleMuteOutTime: false,
         debouncedUpdateChatsPush: null as ((...args: any[]) => Promise<void> | undefined) | null,
+        debouncedUpdateChatsEmail: null as ((...args: any[]) => Promise<void> | undefined) | null,
+        debouncedUpdateNotificationPopUp: null as ((...args: any[]) => Promise<void> | undefined) | null,
+        debouncedUpdateNotificationSound: null as ((...args: any[]) => Promise<void> | undefined) | null,
+        debouncedUpdateMuteMeetings: null as ((...args: any[]) => Promise<void> | undefined) | null,
+        debouncedUpdateMuteOutTime: null as ((...args: any[]) => Promise<void> | undefined) | null,
       };
     },
     methods: {
@@ -134,13 +145,19 @@
           (this.$refs.notificationRef as NotificationRef).showNotification();
         }
       },
-      async fetchSettings() {
+      async fetchViewData() {
         try {
           const docRef = doc(db, "settings", "notifications");
           const docSnap = await getDoc(docRef);
 
           if (docSnap.exists()) {
-            this.toggleChatsPush = docSnap.data().chats_push;
+            this.toggleChatsPush         = docSnap.data().chats_push;
+            this.toggleChatsEmail        = docSnap.data().chats_email;
+            this.toggleNotificationPopUp = docSnap.data().type_popup;
+            this.toggleNotificationSound = docSnap.data().type_sound;
+            this.notificationDisplayTime = docSnap.data().display_time;
+            this.toggleMuteMeetings      = docSnap.data().mute_meeting;
+            this.toggleMuteOutTime       = docSnap.data().mute_out;
           } else {
             console.log("No such document!");
           }
@@ -174,8 +191,73 @@
           this.triggerNotification('error', 'Error!', 'Something went wrong.');
         }
       },
+      async updateChatsEmailInFirestore() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            chats_email: this.toggleChatsEmail
+          });
+        } catch (error) {
+          console.error("Error updating document:", error);
+        }
+      },
+      async userInitiatedUpdateChatsEmail() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            chats_email: this.toggleChatsEmail
+          });
+          this.triggerNotification('success', 'Changes saved', 'Chat e-mail settings updated successfully.');
+        } catch (error) {
+          console.error("Error updating document:", error);
+          this.triggerNotification('error', 'Error!', 'Something went wrong.');
+        }
+      },
+      async updateNotificationPopUpInFirestore() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            type_popup: this.toggleNotificationPopUp
+          });
+        } catch (error) {
+          console.error("Error updating document:", error);
+        }
+      },
+      async userInitiatedUpdateNotificationPopUp() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            type_popup: this.toggleNotificationPopUp
+          });
+          this.triggerNotification('success', 'Changes saved', 'Settings for notifications in pop-up updated successfully.');
+        } catch (error) {
+          console.error("Error updating document:", error);
+          this.triggerNotification('error', 'Error!', 'Something went wrong.');
+        }
+      },
+      async updateNotificationSoundInFirestore() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            type_sound: this.toggleNotificationSound
+          });
+        } catch (error) {
+          console.error("Error updating document:", error);
+        }
+      },
+      async userInitiatedUpdateNotificationSound() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            type_sound: this.toggleNotificationSound
+          });
+          this.triggerNotification('success', 'Changes saved', 'Settings for notifications sound updated successfully.');
+        } catch (error) {
+          console.error("Error updating document:", error);
+          this.triggerNotification('error', 'Error!', 'Something went wrong.');
+        }
+      },
       handleDropdownClick(item: DropdownItem) {
-        console.log('Dropdown item clicked:', item.label);
       },
     },
     watch: {
@@ -184,10 +266,28 @@
           this.debouncedUpdateChatsPush()?.catch(e => console.error(e));
         }
       },
+      toggleChatsEmail(newVal, oldVal) {
+        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateChatsEmail) {
+          this.debouncedUpdateChatsEmail()?.catch(e => console.error(e));
+        }
+      },
+      toggleNotificationPopUp(newVal, oldVal) {
+        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateNotificationPopUp) {
+          this.debouncedUpdateNotificationPopUp()?.catch(e => console.error(e));
+        }
+      },
+      toggleNotificationSound(newVal, oldVal) {
+        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateNotificationSound) {
+          this.debouncedUpdateNotificationSound()?.catch(e => console.error(e));
+        }
+      },
     },
     mounted() {
-      this.fetchSettings();
+      this.fetchViewData();
       this.debouncedUpdateChatsPush = debounce(this.userInitiatedUpdateChatsPush, 600);
+      this.debouncedUpdateChatsEmail = debounce(this.userInitiatedUpdateChatsEmail, 600);
+      this.debouncedUpdateNotificationPopUp = debounce(this.userInitiatedUpdateNotificationPopUp, 600);
+      this.debouncedUpdateNotificationSound = debounce(this.userInitiatedUpdateNotificationSound, 600);
     }
   });
 </script>

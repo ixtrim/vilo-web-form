@@ -220,7 +220,7 @@ export default defineComponent({
         this.triggerNotification('error', 'Error!', 'Something went wrong.');
       }
     },
-    async fetchSettings() {
+    async fetchViewData() {
       try {
         const docRef = doc(db, "settings", "general");
         const docSnap = await getDoc(docRef);
@@ -278,7 +278,7 @@ export default defineComponent({
     },
   },
   mounted() {
-    this.fetchSettings();
+    this.fetchViewData();
     this.debouncedUpdateAppName = debounce(this.userInitiatedUpdateAppName, 1000);
     this.debouncedUpdateTimezone = debounce(this.userInitiatedUpdateTimezone, 600);
     this.debouncedUpdateTimeFormat = debounce(this.userInitiatedUpdateTimeFormat, 600);

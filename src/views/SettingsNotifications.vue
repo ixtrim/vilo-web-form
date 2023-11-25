@@ -48,7 +48,7 @@
               <p>Choose the time range of how long you will be able to see notification.</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VDropdown :title="'1 min'" :items="dropdownNotificationDuration" @item-clicked="handleDropdownClick" />
+              <VDropdown :title="'1 min'" :items="dropdownNotificationDurations" @item-clicked="handleDropdownClick" />
             </div>
           </div>
 
@@ -68,51 +68,128 @@
       </div>
     </div>
 
+    <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
+
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import VDropdown from '@/components/v-dropdown/VDropdown.vue';
-import VInput from '@/components/v-input/VInput.vue';
-import VButton from '@/components/v-button/VButton.vue';
-import TabsSettings from '@/modules/TabsSettings.vue';
-import VToggleSwitch from '@/components/v-toggle-switch/VToggleSwitch.vue';
+  import { db } from '@/firebase.js';
+  import { debounce } from 'lodash';
+  import { doc, getDoc, updateDoc } from 'firebase/firestore';
+  import { defineComponent, ref, onMounted, watch } from 'vue';
+  import VDropdown from '@/components/v-dropdown/VDropdown.vue';
+  import VInput from '@/components/v-input/VInput.vue';
+  import VButton from '@/components/v-button/VButton.vue';
+  import TabsSettings from '@/modules/TabsSettings.vue';
+  import VToggleSwitch from '@/components/v-toggle-switch/VToggleSwitch.vue';
+  import VNotification from '@/components/v-notification/VNotification.vue';
 
-type DropdownItem = {
-  label: string;
-};
+  interface DropdownItem {
+    label: string;
+    value: string;
+  }
 
-export default defineComponent({
-  components: {
-    VButton,
-    VInput,
-    VDropdown,
-    TabsSettings,
-    VToggleSwitch,
-  },
-  data() {
-    return {
-      dropdownNotificationDuration: [
-        { label: '1min' },
-        { label: '2min' },
-        { label: '3min' },
-        { label: '5min' },
-      ],
-      toggleChatsPush: true,
-      toggleChatsEmail: false,
-      toggleNotificationPopUp: false,
-      toggleNotificationSound: false,
-      toggleMuteMeetings: false,
-      toggleMuteOutTime: false,
-    };
-  },
-  methods: {
-    handleDropdownClick(item: DropdownItem) {
-      console.log('Dropdown item clicked:', item.label);
+  interface NotificationRef {
+    showNotification: () => void;
+  }
+
+  export default defineComponent({
+    components: {
+      VButton,
+      VInput,
+      VDropdown,
+      TabsSettings,
+      VToggleSwitch,
+      VNotification,
     },
-  },
-});
+    data() {
+      return {
+        notificationType: 'success',
+        notificationHeader: 'Changes saved',
+        notificationMessage: 'This account has been successfully edited.',
+        dropdownNotificationDurations: [
+          { label: '10 second',  value: '10000' },
+          { label: '20 seconds', value: '20000'  },
+          { label: '30 seconds', value: '30000'  },
+          { label: '45 seconds', value: '45000'  },
+          { label: '60 seconds', value: '60000'  },
+        ],
+        initialDataLoaded: false,
+        toggleChatsPush: false,
+        toggleChatsEmail: false,
+        toggleNotificationPopUp: false,
+        toggleNotificationSound: false,
+        toggleMuteMeetings: false,
+        toggleMuteOutTime: false,
+        debouncedUpdateChatsPush: null as ((...args: any[]) => Promise<void> | undefined) | null,
+      };
+    },
+    methods: {
+      triggerNotification(type: string, header: string, message: string) {
+        if (this.initialDataLoaded) {
+          this.notificationType = type;
+          this.notificationHeader = header;
+          this.notificationMessage = message;
+          (this.$refs.notificationRef as NotificationRef).showNotification();
+        }
+      },
+      async fetchSettings() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          const docSnap = await getDoc(docRef);
+
+          if (docSnap.exists()) {
+            this.toggleChatsPush = docSnap.data().chats_push;
+          } else {
+            console.log("No such document!");
+          }
+        } catch (error) {
+          console.error("Error getting document:", error);
+        } finally {
+          setTimeout(() => {
+            this.initialDataLoaded = true;
+          }, 750);
+        }
+      },
+      async updateChatsPushInFirestore() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            chats_push: this.toggleChatsPush
+          });
+        } catch (error) {
+          console.error("Error updating document:", error);
+        }
+      },
+      async userInitiatedUpdateChatsPush() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            chats_push: this.toggleChatsPush
+          });
+          this.triggerNotification('success', 'Changes saved', 'Chat push settings updated successfully.');
+        } catch (error) {
+          console.error("Error updating document:", error);
+          this.triggerNotification('error', 'Error!', 'Something went wrong.');
+        }
+      },
+      handleDropdownClick(item: DropdownItem) {
+        console.log('Dropdown item clicked:', item.label);
+      },
+    },
+    watch: {
+      toggleChatsPush(newVal, oldVal) {
+        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateChatsPush) {
+          this.debouncedUpdateChatsPush()?.catch(e => console.error(e));
+        }
+      },
+    },
+    mounted() {
+      this.fetchSettings();
+      this.debouncedUpdateChatsPush = debounce(this.userInitiatedUpdateChatsPush, 600);
+    }
+  });
 </script>
 
 <style>

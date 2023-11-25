@@ -48,7 +48,7 @@
               <p>Choose the time range of how long you will be able to see notification.</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VDropdown :title="'1 min'" :items="dropdownDisplayTime" @item-clicked="handleDropdownClick" />
+              <VDropdown :title="notificationDisplayTime.label" :items="dropdownDisplayTime" @item-clicked="changeDisplayTime" />
             </div>
           </div>
 
@@ -115,7 +115,7 @@
           { label: '7 seconds',  value: '7000' },
           { label: '8 seconds',  value: '8000' },
           { label: '9 seconds',  value: '9000' },
-          { label: '10 seconds',  value: '10000' },
+          { label: '10 seconds', value: '10000' },
           { label: '20 seconds', value: '20000'  },
           { label: '30 seconds', value: '30000'  },
           { label: '45 seconds', value: '45000'  },
@@ -125,13 +125,14 @@
         toggleChatsEmail: false,
         toggleNotificationPopUp: false,
         toggleNotificationSound: false,
-        notificationDisplayTime: '',
+        notificationDisplayTime: { label: '', value: '' },
         toggleMuteMeetings: false,
         toggleMuteOutTime: false,
         debouncedUpdateChatsPush: null as ((...args: any[]) => Promise<void> | undefined) | null,
         debouncedUpdateChatsEmail: null as ((...args: any[]) => Promise<void> | undefined) | null,
         debouncedUpdateNotificationPopUp: null as ((...args: any[]) => Promise<void> | undefined) | null,
         debouncedUpdateNotificationSound: null as ((...args: any[]) => Promise<void> | undefined) | null,
+        debouncedUpdateDisplayTime: null as ((...args: any[]) => Promise<void> | undefined) | null,
         debouncedUpdateMuteMeetings: null as ((...args: any[]) => Promise<void> | undefined) | null,
         debouncedUpdateMuteOutTime: null as ((...args: any[]) => Promise<void> | undefined) | null,
       };
@@ -155,9 +156,16 @@
             this.toggleChatsEmail        = docSnap.data().chats_email;
             this.toggleNotificationPopUp = docSnap.data().type_popup;
             this.toggleNotificationSound = docSnap.data().type_sound;
-            this.notificationDisplayTime = docSnap.data().display_time;
             this.toggleMuteMeetings      = docSnap.data().mute_meeting;
             this.toggleMuteOutTime       = docSnap.data().mute_out;
+
+            const displayTimeValue = docSnap.data().display_time;
+            const matchingItem = this.dropdownDisplayTime.find(item => item.value === displayTimeValue);
+            if (matchingItem) {
+              this.notificationDisplayTime = matchingItem;
+            } else {
+              console.log("No matching label found for display time");
+            }
           } else {
             console.log("No such document!");
           }
@@ -257,6 +265,29 @@
           this.triggerNotification('error', 'Error!', 'Something went wrong.');
         }
       },
+      async changeDisplayTime(item: DropdownItem) {
+        this.notificationDisplayTime.label = item.label;
+        this.notificationDisplayTime.value = item.value;
+        if (this.debouncedUpdateDisplayTime) {
+          try {
+            await this.debouncedUpdateDisplayTime();
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      },
+      async userInitiatedUpdateDisplayTime() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            display_time: this.notificationDisplayTime.value
+          });
+          this.triggerNotification('success', 'Changes saved', 'Notification display time changed successfully.');
+        } catch (error) {
+          console.error("Error updating document:", error);
+          this.triggerNotification('error', 'Error!', 'Something went wrong.');
+        }
+      },
       async updateMuteMeetingsInFirestore() {
         try {
           const docRef = doc(db, "settings", "notifications");
@@ -325,6 +356,11 @@
           this.debouncedUpdateNotificationSound()?.catch(e => console.error(e));
         }
       },
+      notificationDisplayTime(newVal, oldVal) {
+        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateDisplayTime) {
+          this.debouncedUpdateDisplayTime()?.catch(e => console.error(e));
+        }
+      },
       toggleMuteMeetings(newVal, oldVal) {
         if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateMuteMeetings) {
           this.debouncedUpdateMuteMeetings()?.catch(e => console.error(e));
@@ -342,6 +378,7 @@
       this.debouncedUpdateChatsEmail        = debounce(this.userInitiatedUpdateChatsEmail, 600);
       this.debouncedUpdateNotificationPopUp = debounce(this.userInitiatedUpdateNotificationPopUp, 600);
       this.debouncedUpdateNotificationSound = debounce(this.userInitiatedUpdateNotificationSound, 600);
+      this.debouncedUpdateDisplayTime       = debounce(this.userInitiatedUpdateDisplayTime, 600);
       this.debouncedUpdateMuteMeetings      = debounce(this.userInitiatedUpdateMuteMeetings, 600);
       this.debouncedUpdateMuteOutTime       = debounce(this.userInitiatedUpdateMuteOutTime, 600);
     }

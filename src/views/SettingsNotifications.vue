@@ -213,6 +213,28 @@
           this.triggerNotification('error', 'Error!', 'Something went wrong.');
         }
       },
+      async updateNotificationPopUpInFirestore() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            type_popup: this.toggleNotificationPopUp
+          });
+        } catch (error) {
+          console.error("Error updating document:", error);
+        }
+      },
+      async userInitiatedUpdateNotificationPopUp() {
+        try {
+          const docRef = doc(db, "settings", "notifications");
+          await updateDoc(docRef, {
+            type_popup: this.toggleNotificationPopUp
+          });
+          this.triggerNotification('success', 'Changes saved', 'Settings for notifications in pop-up updated successfully.');
+        } catch (error) {
+          console.error("Error updating document:", error);
+          this.triggerNotification('error', 'Error!', 'Something went wrong.');
+        }
+      },
       handleDropdownClick(item: DropdownItem) {
       },
     },
@@ -227,11 +249,17 @@
           this.debouncedUpdateChatsEmail()?.catch(e => console.error(e));
         }
       },
+      toggleNotificationPopUp(newVal, oldVal) {
+        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateNotificationPopUp) {
+          this.debouncedUpdateNotificationPopUp()?.catch(e => console.error(e));
+        }
+      },
     },
     mounted() {
       this.fetchViewData();
       this.debouncedUpdateChatsPush = debounce(this.userInitiatedUpdateChatsPush, 600);
       this.debouncedUpdateChatsEmail = debounce(this.userInitiatedUpdateChatsEmail, 600);
+      this.debouncedUpdateNotificationPopUp = debounce(this.userInitiatedUpdateNotificationPopUp, 600);
     }
   });
 </script>

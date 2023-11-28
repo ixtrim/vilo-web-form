@@ -19,13 +19,11 @@
 </template>
 
 <script lang="ts">
-interface Country {
-  name: string;
-  code: string;
-}
-
 export default {
   name: 'VCountryDropdown',
+  props: {
+    selectedCountryCode: String
+  },
   data() {
     return {
       countries: [
@@ -229,12 +227,21 @@ export default {
       selectedCountry: { name: 'United States', code: 'us' }
     }
   },
-  methods: {
-    countryClicked(country: Country) {
-      this.selectedCountry = country;
-      this.$emit('country-selected', country);
+  computed: {
+    selectedCountry(): { name: string, code: string } | undefined {
+      return this.countries.find(country => country.code === this.selectedCountryCode);
     }
-  }
+  },
+  methods: {
+    countryClicked(country: { name: string, code: string }) {
+      this.$emit('country-selected', country);
+    },
+  },
+  watch: {
+    selectedCountryCode(newVal: string) {
+      // Logic to handle changes in selected country code
+    },
+  },
 }
 </script>
 

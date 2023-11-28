@@ -102,7 +102,7 @@
               <h4>Country</h4>
             </div>
             <div class="dashboard__form__section__input dashboard__form__section__input--width">
-              <VCountryDropdown @country-selected="handleCountrySelected" />
+              <VCountryDropdown :selectedCountryCode="selectedCountryCode" @country-selected="handleCountrySelected" />
             </div>
           </div>
           
@@ -153,6 +153,7 @@
         city: '',
         state: '',
         province: '',
+        selectedCountryCode: '',
         debouncedUpdateAccountNumber: null as ((...args: any[]) => Promise<void> | undefined) | null,
         debouncedUpdateBankName: null as ((...args: any[]) => Promise<void> | undefined) | null,
         debouncedUpdateSwiftIban: null as ((...args: any[]) => Promise<void> | undefined) | null,
@@ -184,6 +185,7 @@
             this.city          = docSnap.data().city;
             this.state         = docSnap.data().state;
             this.province      = docSnap.data().province;
+            
           } else {
             console.log("No such document!");
             this.triggerNotification('error', 'Error!', 'Error while connecting with database.');
@@ -281,6 +283,21 @@
           this.triggerNotification('error', 'Error!', 'Something went wrong.');
         }
       },
+      handleCountrySelected(country: { code: string }) {
+        this.updateCountry(country.code);
+      },
+      async updateCountry(countryCode: string) {
+        try {
+          const docRef = doc(db, "settings", "billing");
+          await updateDoc(docRef, {
+            country: countryCode
+          });
+          this.triggerNotification('success', 'Changes saved', 'Country was changed successfully.');
+        } catch (error) {
+          console.error("Error updating document:", error);
+          this.triggerNotification('error', 'Error!', 'Something went wrong.');
+        }
+      }
     },
     mounted() {
       this.fetchViewData();

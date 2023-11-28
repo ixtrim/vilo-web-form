@@ -223,8 +223,7 @@ export default {
         { name: 'Yemen', code: 'ye' },
         { name: 'Zambia', code: 'zm' },
         { name: 'Zimbabwe', code: 'zw' }
-      ],
-      selectedCountry: { name: 'United States', code: 'us' }
+      ]
     }
   },
   computed: {

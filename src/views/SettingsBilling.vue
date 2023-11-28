@@ -183,8 +183,9 @@
             this.swiftIban     = docSnap.data().swift_iban;
             this.streetAddress = docSnap.data().street_address;
             this.city          = docSnap.data().city;
-            this.state         = docSnap.data().state;
-            this.province      = docSnap.data().province;
+            this.state               = docSnap.data().state;
+            this.province            = docSnap.data().province;
+            this.selectedCountryCode = docSnap.data().country;
             
           } else {
             console.log("No such document!");
@@ -292,6 +293,7 @@
           await updateDoc(docRef, {
             country: countryCode
           });
+          this.selectedCountryCode = countryCode;
           this.triggerNotification('success', 'Changes saved', 'Country was changed successfully.');
         } catch (error) {
           console.error("Error updating document:", error);

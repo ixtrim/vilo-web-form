@@ -17,7 +17,7 @@
       <div class="col-lg-3">
         <ul class="settings__team-actions">
           <li>
-            <VDropdown :title="'All users'" :items="dropdownItems" @item-clicked="handleDropdownClick" />
+            <VDropdown :title="'All users'" :items="dropdownItems" @item-clicked="dropdownRoleChange" />
           </li>
           <li>
             <VButton :block="true" size="md" icon="left" icon-style="add-white" @click="handleButtonClick" text="Add user"></VButton>
@@ -74,7 +74,7 @@
                 <p>{{ user.position }}</p>
               </div>
               <div class="col col--sett-t-role">
-                <VDropdown :title="getRoleLabel(user.role)" :items="dropdownItems" @item-clicked="handleDropdownClick" />
+                <VDropdown :title="getRoleLabel(user.role)" :items="dropdownItems" @item-clicked="item => dropdownRoleChange(user.id, item)" />
               </div>
               <div class="col col--cm-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
@@ -122,6 +122,15 @@ interface DropdownItem {
   label: string;
 }
 
+interface User {
+  id: string;
+  full_name: string;
+  email: string;
+  status: number;
+  position: string;
+  role: number;
+}
+
 export default defineComponent({
   components: {
     TabsSettings,
@@ -144,7 +153,7 @@ export default defineComponent({
     };
   },
   setup() {
-    const users = ref([]);
+    const users = ref<User[]>([]);
     const itemsPerPage = 10;
     const allItems = ref([
       { id: 1, name: 'Page 1' },
@@ -164,7 +173,10 @@ export default defineComponent({
 
     const fetchUsers = async () => {
       const querySnapshot = await getDocs(collection(db, "users"));
-      users.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      users.value = querySnapshot.docs.map(doc => ({
+        ...doc.data() as User,
+        id: doc.id,
+      }));
     };
 
     onMounted(fetchUsers);
@@ -190,8 +202,8 @@ export default defineComponent({
     };
   },
   methods: {
-    getStatusLabelAndVariant(statusCode) {
-      const statusMapping = {
+    getStatusLabelAndVariant(statusCode: number) {
+      const statusMapping: { [key: number]: { label: string; variant: string } } = {
         0: { label: 'Draft', variant: 'light' },
         1: { label: 'Pending', variant: 'warning' },
         2: { label: 'Activated', variant: 'success' },
@@ -199,23 +211,50 @@ export default defineComponent({
 
       return statusMapping[statusCode] || { label: 'Unknown', variant: 'error' };
     },
-    getRoleLabel(roleCode) {
-      const roleMapping = {
+    getRoleLabel(roleCode: number) {
+      const roleMapping: { [key: number]: string } = {
         0: 'Admin',
         1: 'Internal user',
         2: 'Client (individual)',
         3: 'Client (company)',
-        // Add more role codes and their corresponding labels here if needed
       };
 
       return roleMapping[roleCode] || 'Unknown';
     },
+    async dropdownRoleChange(userId: string, item: DropdownItem) {
+      console.log('Dropdown item clicked:', item.label);
+
+      const roleCodeMapping: { [key: string]: number } = {
+        'Admin': 0,
+        'Internal user': 1,
+        'Client (individual)': 2,
+        'Client (company)': 3,
+      };
+      const newRoleCode = roleCodeMapping[item.label];
+
+      if (newRoleCode !== undefined) {
+        try {
+          const userRef = doc(db, "users", userId);
+          await updateDoc(userRef, {
+            role: newRoleCode
+          });
+          console.log('Role updated successfully');
+
+          // Find the user in the local state and update their role
+          const userIndex = this.users.findIndex(user => user.id === userId);
+          if (userIndex !== -1) {
+            this.users[userIndex].role = newRoleCode;
+          }
+        } catch (error) {
+          console.error('Error updating role:', error);
+        }
+      } else {
+        console.error('Invalid role selected');
+      }
+    },
     handleButtonClick() {
      console.log('Button clicked');
-    },
-    handleDropdownClick(item: DropdownItem) {
-      console.log('Dropdown item clicked:', item.label);
-    },
+    }
   },
 });
 </script>

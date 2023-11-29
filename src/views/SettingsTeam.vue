@@ -77,7 +77,7 @@
                 <VDropdown :title="getRoleLabel(user.role)" :items="dropdownItems" @item-clicked="item => dropdownRoleChange(user.id, item)" />
               </div>
               <div class="col col--cm-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="() => deleteUser(user.id)" text=""></VButton>
               </div>
               <div class="col col--cm-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
@@ -103,12 +103,14 @@
       </div>
     </div>
 
+    <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
+
   </div>
 </template>
 
 <script lang="ts">
   import { db } from '@/firebase.js';
-  import { doc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
+  import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
   import { debounce } from 'lodash';
   import { defineComponent, ref, computed, onMounted } from 'vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
@@ -117,9 +119,14 @@
   import VButton from '@/components/v-button/VButton.vue';
   import VUser from '@/components/v-user/v-user.vue';
   import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
+  import VNotification from '@/components/v-notification/VNotification.vue';
 
 interface DropdownItem {
   label: string;
+}
+
+interface NotificationRef {
+  showNotification: () => void;
 }
 
 interface User {
@@ -139,11 +146,13 @@ export default defineComponent({
     VPaginationList,
     VBadge,
     VDropdown,
+    VNotification,
   },
   data() {
     return {
-      userName: 'Olivia Rhye',
-      userEmail: 'olivia@untitledui.com',
+      notificationType: 'success',
+      notificationHeader: 'Changes saved',
+      notificationMessage: 'This account has been successfully edited.',
       dropdownItems: [
         { label: 'Internal user' },
         { label: 'Client (individual)' },
@@ -202,6 +211,12 @@ export default defineComponent({
     };
   },
   methods: {
+    triggerNotification(type: string, header: string, message: string) {
+      this.notificationType = type;
+      this.notificationHeader = header;
+      this.notificationMessage = message;
+      (this.$refs.notificationRef as NotificationRef).showNotification();
+    },
     getStatusLabelAndVariant(statusCode: number) {
       const statusMapping: { [key: number]: { label: string; variant: string } } = {
         0: { label: 'Draft', variant: 'light' },
@@ -250,6 +265,19 @@ export default defineComponent({
         }
       } else {
         console.error('Invalid role selected');
+      }
+    },
+    async deleteUser(userId: string) {
+      try {
+        await deleteDoc(doc(db, "users", userId));
+        console.log('User deleted successfully');
+
+        // Remove the user from the local state
+        this.users = this.users.filter(user => user.id !== userId);
+        this.triggerNotification('success', 'Changes saved', 'User deleted successfully.');
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        this.triggerNotification('error', 'Error!', 'Couldnt delete user.');
       }
     },
     handleButtonClick() {

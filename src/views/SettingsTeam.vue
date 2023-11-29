@@ -57,100 +57,24 @@
 
           <div class="dashboard__users__page">
 
-            <div class="dashboard__users__page__item">
+            <div class="dashboard__users__page__item" v-for="user in users" :key="user.id">
 
               <div class="col col--checkbox">
                 <input type="checkbox" id="remember" class="mr-8p">
               </div>
               <div class="col col--sett-t-user">
-                <VUser :userName="userName" :userEmail="userEmail" />
+                <VUser :userName="user.full_name" :userEmail="user.email" />
               </div>
               <div class="col col--sett-t-status">
-                <VBadge variant="success">Activated</VBadge>
+                <VBadge :variant="getStatusLabelAndVariant(user.status).variant">
+                  {{ getStatusLabelAndVariant(user.status).label }}
+                </VBadge>
               </div>
               <div class="col col--sett-t-position">
-                <p>Client Personal Manager</p>
+                <p>{{ user.position }}</p>
               </div>
               <div class="col col--sett-t-role">
-                <VDropdown :title="'Client (individual)'" :items="dropdownItems" @item-clicked="handleDropdownClick" />
-              </div>
-              <div class="col col--cm-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
-              </div>
-              <div class="col col--cm-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
-              </div>
-
-            </div>
-
-            <div class="dashboard__users__page__item">
-
-              <div class="col col--checkbox">
-                <input type="checkbox" id="remember" class="mr-8p">
-              </div>
-              <div class="col col--sett-t-user">
-                <VUser :userName="userName" :userEmail="userEmail" />
-              </div>
-              <div class="col col--sett-t-status">
-                <VBadge variant="warning">Pending</VBadge>
-              </div>
-              <div class="col col--sett-t-position">
-                <p>Head of Sales</p>
-              </div>
-              <div class="col col--sett-t-role">
-                <VDropdown :title="'Client (company)'" :items="dropdownItems" @item-clicked="handleDropdownClick" />
-              </div>
-              <div class="col col--cm-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
-              </div>
-              <div class="col col--cm-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
-              </div>
-              
-            </div>
-
-            <div class="dashboard__users__page__item">
-
-              <div class="col col--checkbox">
-                <input type="checkbox" id="remember" class="mr-8p">
-              </div>
-              <div class="col col--sett-t-user">
-                <VUser :userName="userName" :userEmail="userEmail" />
-              </div>
-              <div class="col col--sett-t-status">
-                <VBadge variant="light">Draft</VBadge>
-              </div>
-              <div class="col col--sett-t-position">
-                <p>CTO</p>
-              </div>
-              <div class="col col--sett-t-role">
-                <VDropdown :title="'Admin'" :items="dropdownItems" @item-clicked="handleDropdownClick" />
-              </div>
-              <div class="col col--cm-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
-              </div>
-              <div class="col col--cm-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
-              </div>
-
-            </div>
-
-            <div class="dashboard__users__page__item">
-
-              <div class="col col--checkbox">
-                <input type="checkbox" id="remember" class="mr-8p">
-              </div>
-              <div class="col col--sett-t-user">
-                <VUser :userName="userName" :userEmail="userEmail" />
-              </div>
-              <div class="col col--sett-t-status">
-                <VBadge variant="danger">Error</VBadge>
-              </div>
-              <div class="col col--sett-t-position">
-                <p>Client Personal Manager</p>
-              </div>
-              <div class="col col--sett-t-role">
-                <VDropdown :title="'Internal user'" :items="dropdownItems" @item-clicked="handleDropdownClick" />
+                <VDropdown :title="getRoleLabel(user.role)" :items="dropdownItems" @item-clicked="handleDropdownClick" />
               </div>
               <div class="col col--cm-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
@@ -183,13 +107,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
-import VDropdown from '@/components/v-dropdown/VDropdown.vue';
-import VBadge from '@/components/v-badge/VBadge.vue';
-import TabsSettings from '@/modules/TabsSettings.vue';
-import VButton from '@/components/v-button/VButton.vue';
-import VUser from '@/components/v-user/v-user.vue';
-import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
+  import { db } from '@/firebase.js';
+  import { doc, getDoc, updateDoc, collection, getDocs } from 'firebase/firestore';
+  import { debounce } from 'lodash';
+  import { defineComponent, ref, computed, onMounted } from 'vue';
+  import VDropdown from '@/components/v-dropdown/VDropdown.vue';
+  import VBadge from '@/components/v-badge/VBadge.vue';
+  import TabsSettings from '@/modules/TabsSettings.vue';
+  import VButton from '@/components/v-button/VButton.vue';
+  import VUser from '@/components/v-user/v-user.vue';
+  import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
 
 interface DropdownItem {
   label: string;
@@ -217,6 +144,7 @@ export default defineComponent({
     };
   },
   setup() {
+    const users = ref([]);
     const itemsPerPage = 10;
     const allItems = ref([
       { id: 1, name: 'Page 1' },
@@ -234,6 +162,13 @@ export default defineComponent({
     ]);
     const currentPage = ref(1);
 
+    const fetchUsers = async () => {
+      const querySnapshot = await getDocs(collection(db, "users"));
+      users.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    };
+
+    onMounted(fetchUsers);
+
     const totalPages = computed(() => Math.ceil(allItems.value.length / itemsPerPage));
 
     const paginatedItems = computed(() => {
@@ -247,6 +182,7 @@ export default defineComponent({
     };
 
     return {
+      users,
       paginatedItems,
       totalPages,
       currentPage,
@@ -254,6 +190,26 @@ export default defineComponent({
     };
   },
   methods: {
+    getStatusLabelAndVariant(statusCode) {
+      const statusMapping = {
+        0: { label: 'Draft', variant: 'light' },
+        1: { label: 'Pending', variant: 'warning' },
+        2: { label: 'Activated', variant: 'success' },
+      };
+
+      return statusMapping[statusCode] || { label: 'Unknown', variant: 'error' };
+    },
+    getRoleLabel(roleCode) {
+      const roleMapping = {
+        0: 'Admin',
+        1: 'Internal user',
+        2: 'Client (individual)',
+        3: 'Client (company)',
+        // Add more role codes and their corresponding labels here if needed
+      };
+
+      return roleMapping[roleCode] || 'Unknown';
+    },
     handleButtonClick() {
      console.log('Button clicked');
     },

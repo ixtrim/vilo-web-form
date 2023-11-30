@@ -36,7 +36,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="userRole === 3">
       <div class="col-lg-12">
         <div class="form-group">
           <VInput 
@@ -48,7 +48,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="userRole === 2 || userRole === 3">
       <div class="col-lg-12">
         <VInput 
           label="Phone" 
@@ -58,7 +58,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="userRole === 2 || userRole === 3">
       <div class="col-lg-12">
         <VInput 
           label="Address" 

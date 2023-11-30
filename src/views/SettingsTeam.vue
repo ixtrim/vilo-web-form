@@ -80,7 +80,7 @@
                 <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="() => deleteUser(user.id)" text=""></VButton>
               </div>
               <div class="col col--cm-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal(user)" text=""></VButton>
               </div>
 
             </div>
@@ -103,6 +103,19 @@
       </div>
     </div>
 
+    <VModal :show="showModal" :title="modalTitle" @update:show="(value: boolean) => showModal = value">
+      <VEditUser
+        :userId="selectedUserId"
+        :userName="selectedUserFullName"
+        :userEmail="selectedUserEmail"
+        :userPhone="selectedUserPhone"
+        :userAddress="selectedUserAddress"
+        :userNotes="selectedUserNotes"
+        @close-modal="showModal = false"
+        @save-clicked="handleSaveClicked"
+      />
+    </VModal>
+
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
 
   </div>
@@ -120,6 +133,8 @@
   import VUser from '@/components/v-user/v-user.vue';
   import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
   import VNotification from '@/components/v-notification/VNotification.vue';
+  import VModal from '@/components/v-modal/v-modal.vue';
+  import VEditUser from '@/modals/Team/v-edit-user/v-edit-user.vue';
 
 interface DropdownItem {
   label: string;
@@ -131,11 +146,15 @@ interface NotificationRef {
 
 interface User {
   id: string;
+  userId: String,
   full_name: string;
   email: string;
   status: number;
+  address: string;
+  phone: string;
   position: string;
   role: number;
+  notes: string;
 }
 
 export default defineComponent({
@@ -147,9 +166,19 @@ export default defineComponent({
     VBadge,
     VDropdown,
     VNotification,
+    VModal,
+    VEditUser,
   },
   data() {
     return {
+      showModal: false,
+      modalTitle: '',
+      selectedUserId: '',
+      selectedUserFullName: '',
+      selectedUserEmail: '',
+      selectedUserPhone: '',
+      selectedUserAddress: '',
+      selectedUserNotes: '',
       notificationType: 'success',
       notificationHeader: 'Changes saved',
       notificationMessage: 'This account has been successfully edited.',
@@ -279,6 +308,21 @@ export default defineComponent({
         console.error('Error deleting user:', error);
         this.triggerNotification('error', 'Error!', 'Couldnt delete user.');
       }
+    },
+    handleSaveClicked() {
+      // Implementation of what should happen when save is clicked
+    },
+    openEditModal(user: User) {
+      // Set the data for the selected user
+      this.selectedUserId = user.id.toString();
+      this.selectedUserFullName = user.full_name;
+      this.selectedUserEmail = user.email;
+      this.selectedUserPhone = user.phone;
+      this.selectedUserAddress = user.address;
+      this.selectedUserNotes = user.notes; // Assuming you have a notes field
+
+      // Open the modal
+      this.showModal = true;
     },
     handleButtonClick() {
      console.log('Button clicked');

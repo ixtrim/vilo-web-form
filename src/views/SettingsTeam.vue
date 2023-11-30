@@ -254,6 +254,7 @@ export default defineComponent({
       paginatedItems,
       totalPages,
       currentPage,
+      fetchUsers,
       updatePage
     };
   },
@@ -263,6 +264,9 @@ export default defineComponent({
       this.notificationHeader = header;
       this.notificationMessage = message;
       (this.$refs.notificationRef as NotificationRef).showNotification();
+    },
+    async refreshData() {
+      await this.fetchUsers();
     },
     getStatusLabelAndVariant(statusCode: number) {
       const statusMapping: { [key: number]: { label: string; variant: string } } = {
@@ -346,6 +350,9 @@ export default defineComponent({
           this.users[userIndex] = { ...this.users[userIndex], ...updatedUserData };
         }
         this.triggerNotification('success', 'Changes saved', 'User updated successfully.');
+        setTimeout(() => {
+          this.refreshData();
+        }, 1000);
       } catch (error) {
         this.triggerNotification('error', 'Error!', 'Could not update user.');
       }

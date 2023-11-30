@@ -115,6 +115,8 @@
         :userCompany="selectedUserCompany"
         :dropdownRoleItems="dropdownRoleItems"
         :userRole="Number(selectedUserRole)"
+        :dropdownStatusItems="dropdownStatusItems"
+        :userStatus="Number(selectedUserStatus)"
         :userNotes="selectedUserNotes"
         @close-modal="showModal = false"
         @save-clicked="handleSaveClicked"
@@ -186,6 +188,7 @@ export default defineComponent({
       selectedUserCompany: '',
       selectedUserPosition: '',
       selectedUserRole: '',
+      selectedUserStatus: '',
       selectedUserNotes: '',
       notificationType: 'success',
       notificationHeader: 'Changes saved',
@@ -195,7 +198,12 @@ export default defineComponent({
         { label: 'Client (individual)' },
         { label: 'Client (company)' },
         { label: 'Admin' },
-      ]
+      ],
+      dropdownStatusItems: [
+        { label: 'Draft' },
+        { label: 'Pending' },
+        { label: 'Activated' }
+      ],
     };
   },
   setup() {
@@ -318,6 +326,7 @@ export default defineComponent({
       this.selectedUserPosition = user.position;
       this.selectedUserCompany = user.company;
       this.selectedUserRole = user.role.toString();
+      this.selectedUserStatus = user.status.toString();
       this.selectedUserNotes = user.notes;
       this.showModal = true;
     },

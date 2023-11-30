@@ -328,8 +328,6 @@ export default defineComponent({
       }
     },
     async handleSaveClicked(updatedUserData: UpdatedUserData) {
-      alert(updatedUserData.userId);
-      alert(updatedUserData.userAddress);
       try {
         const userRef = doc(db, "users", updatedUserData.userId);
         await updateDoc(userRef, {

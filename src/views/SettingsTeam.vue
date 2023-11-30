@@ -308,24 +308,20 @@ export default defineComponent({
           }
           this.triggerNotification('success', 'Changes saved', 'User role updated successfully.');
         } catch (error) {
-          console.error('Error updating role:', error);
           this.triggerNotification('error', 'Error!', 'Error updating role.');
         }
       } else {
-        console.error('Invalid role selected');
         this.triggerNotification('error', 'Error!', 'Invalid role selected.');
       }
     },
     async deleteUser(userId: string) {
       try {
         await deleteDoc(doc(db, "users", userId));
-        console.log('User deleted successfully');
 
         // Remove the user from the local state
         this.users = this.users.filter(user => user.id !== userId);
         this.triggerNotification('success', 'Changes saved', 'User deleted successfully.');
       } catch (error) {
-        console.error('Error deleting user:', error);
         this.triggerNotification('error', 'Error!', 'Couldnt delete user.');
       }
     },
@@ -343,7 +339,6 @@ export default defineComponent({
           status: updatedUserData.userStatus,
           notes: updatedUserData.userNotes,
         });
-        console.log('User updated successfully');
 
         // Update the user in the local state
         const userIndex = this.users.findIndex(user => user.id === updatedUserData.userId);
@@ -352,7 +347,6 @@ export default defineComponent({
         }
         this.triggerNotification('success', 'Changes saved', 'User updated successfully.');
       } catch (error) {
-        console.error('Error updating user:', error);
         this.triggerNotification('error', 'Error!', 'Could not update user.');
       }
     },

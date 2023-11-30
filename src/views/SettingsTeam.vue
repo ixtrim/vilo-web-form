@@ -105,6 +105,7 @@
 
     <VModal :show="showModal" :title="modalTitle" @update:show="(value: boolean) => showModal = value">
       <VEditUser
+        :title="modalTitle"
         :userId="selectedUserId"
         :userName="selectedUserFullName"
         :userEmail="selectedUserEmail"
@@ -146,7 +147,6 @@ interface NotificationRef {
 
 interface User {
   id: string;
-  userId: String,
   full_name: string;
   email: string;
   status: number;

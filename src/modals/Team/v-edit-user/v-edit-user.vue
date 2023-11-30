@@ -112,7 +112,7 @@
   const emit = defineEmits(['close-modal', 'save-clicked']);
 
   const props = defineProps({
-    userId: Number,
+    userId: String,
     userName: String,
     userEmail: String,
     userPhone: String,

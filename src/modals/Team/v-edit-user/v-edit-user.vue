@@ -22,7 +22,7 @@
       <div class="col-lg-12">
         <div class="form-group">
           <label>Status</label>
-
+          <VDropdown :title="getStatusLabel(userStatus ?? 0)" :items="dropdownStatusItems" @item-clicked="item => dropdownStatusChange(userId ?? '', item)" />
         </div>
       </div>
     </div>
@@ -119,7 +119,7 @@
     label: string;
   };
 
-  const emit = defineEmits(['close-modal', 'save-clicked', 'role-changed']);
+  const emit = defineEmits(['close-modal', 'save-clicked', 'role-changed', 'status-changed']);
 
   const props = defineProps({
     userId: String,
@@ -134,6 +134,11 @@
       default: () => []
     },
     userRole: Number,
+    dropdownStatusItems: {
+      type: Array as PropType<DropdownItem[]>,
+      default: () => []
+    },
+    userStatus: Number,
     userNotes: String,
     title: {
       type: String,
@@ -152,6 +157,7 @@
   const userPosition = ref(props.userPosition);
   const userCompany = ref(props.userCompany);
   const userRole = ref(props.userRole);
+  const userStatus = ref(props.userStatus);
   const userNotes = ref(props.userNotes);
 
   const dropdownRoleChange = async (userId: string, item: DropdownItem) => {
@@ -189,6 +195,41 @@
     };
 
     return roleMapping[roleCode] ?? 'Unknown';
+  };
+
+  const dropdownStatusChange = async (userId: string, item: DropdownItem) => {
+    const statusCodeMapping = {
+      'Draft': 0,
+      'Pending': 1,
+      'Activated': 2,
+    };
+    const newStatusCode = statusCodeMapping[item.label as keyof typeof statusCodeMapping];
+
+    if (newStatusCode !== undefined && props.userId) {
+      try {
+        const userRef = doc(db, "users", props.userId);
+        await updateDoc(userRef, {
+          status: newStatusCode
+        });
+        console.log('Status updated successfully');
+        userStatus.value = newStatusCode;
+        emit('status-changed', newStatusCode);
+      } catch (error) {
+        console.error('Error updating role:', error);
+      }
+    } else {
+      console.error('Invalid status selected or User ID is undefined');
+    }
+  };
+
+  const getStatusLabel = (statusCode: number) => {
+    const statusMapping: { [key: number]: string } = {
+      0: 'Draft',
+      1: 'Pending',
+      2: 'Activated',
+    };
+
+    return statusMapping[statusCode] ?? 'Unknown';
   };
 
   const computedUserNotes = computed({

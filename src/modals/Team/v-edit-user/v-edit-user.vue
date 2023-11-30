@@ -6,14 +6,14 @@
         <VInput 
           label="Full Name" 
           placeholder="John Kowalski" 
-          v-model="userName"
+          v-model="localUserName"
         />
       </div>
       <div class="col-lg-6">
         <VInput 
           label="Email address" 
           placeholder="john@example.com" 
-          v-model="userEmail"
+          v-model="localUserEmail"
         />
       </div>
     </div>
@@ -22,7 +22,7 @@
       <div class="col-lg-12">
         <div class="form-group">
           <label>Status</label>
-          <VDropdown :title="getStatusLabel(userStatus ?? 0)" :items="dropdownStatusItems" @item-clicked="item => dropdownStatusChange(userId ?? '', item)" />
+          <VDropdown :title="getStatusLabel(localUserStatus ?? 0)" :items="dropdownStatusItems" @item-clicked="item => dropdownStatusChange(userId ?? '', item)" />
         </div>
       </div>
     </div>
@@ -31,39 +31,39 @@
       <div class="col-lg-12">
         <div class="form-group">
           <label>Role</label>
-            <VDropdown :title="getRoleLabel(userRole ?? 0)" :items="dropdownRoleItems" @item-clicked="item => dropdownRoleChange(userId ?? '', item)" />
+            <VDropdown :title="getRoleLabel(localUserRole ?? 0)" :items="dropdownRoleItems" @item-clicked="item => dropdownRoleChange(userId ?? '', item)" />
         </div>
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="localUserRole === 3">
       <div class="col-lg-12">
         <div class="form-group">
           <VInput 
           label="Company" 
           placeholder="ex. Vilo" 
-          v-model="userCompany"
+          v-model="localUserCompany"
         />
         </div>
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="localUserRole === 2 || localUserRole === 3">
       <div class="col-lg-12">
         <VInput 
           label="Phone" 
           placeholder="+1 23 456 789" 
-          v-model="userPhone"
+          v-model="localUserPhone"
         />
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="localUserRole === 2 || localUserRole === 3">
       <div class="col-lg-12">
         <VInput 
           label="Address" 
           placeholder="+1 23 456 789" 
-          v-model="userAddress"
+          v-model="localUserAddress"
         />
       </div>
     </div>
@@ -75,7 +75,7 @@
           <VInput 
             label="Position" 
             placeholder="ex. Sales" 
-            v-model="userPosition"
+            v-model="localUserPosition"
           />
         </div>
       </div>
@@ -160,6 +160,26 @@
   const userStatus = ref(props.userStatus);
   const userNotes = ref(props.userNotes);
 
+  const localUserName = ref(props.userName);
+  const localUserEmail = ref(props.userEmail);
+  const localUserPhone = ref(props.userPhone);
+  const localUserAddress = ref(props.userAddress);
+  const localUserPosition = ref(props.userPosition);
+  const localUserCompany = ref(props.userCompany);
+  const localUserRole = ref(props.userRole);
+  const localUserStatus = ref(props.userStatus);
+  const localUserNotes = ref(props.userNotes);
+
+  watch(() => props.userName, (newVal) => localUserName.value = newVal);
+  watch(() => props.userEmail, (newVal) => localUserEmail.value = newVal);
+  watch(() => props.userPhone, (newVal) => localUserPhone.value = newVal);
+  watch(() => props.userAddress, (newVal) => localUserAddress.value = newVal);
+  watch(() => props.userPosition, (newVal) => localUserPosition.value = newVal);
+  watch(() => props.userCompany, (newVal) => localUserCompany.value = newVal);
+  watch(() => props.userRole, (newVal) => localUserRole.value = newVal);
+  watch(() => props.userStatus, (newVal) => localUserStatus.value = newVal);
+  watch(() => props.userNotes, (newVal) => localUserNotes.value = newVal);
+
   const dropdownRoleChange = async (userId: string, item: DropdownItem) => {
     const roleCodeMapping = {
       'Admin': 0,
@@ -242,8 +262,26 @@
   }
 
   function saveAndClose() {
+    console.log("Emitting updated data:", {
+      // Log the data being emitted
+      userId: props.userId,
+      userName: localUserName.value,
+      userEmail: localUserEmail.value,
+      // ... other fields
+    });
+    emit('save-clicked', {
+      userId: props.userId,
+      userName: localUserName.value,
+      userEmail: localUserEmail.value,
+      userPhone: localUserPhone.value,
+      userAddress: localUserAddress.value,
+      userPosition: localUserPosition.value,
+      userCompany: localUserCompany.value,
+      userRole: localUserRole.value,
+      userStatus: localUserStatus.value,
+      userNotes: localUserNotes.value,
+    });
     closeModal();
-    emit('save-clicked');
   }
 </script>
 

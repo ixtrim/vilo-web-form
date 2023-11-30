@@ -155,14 +155,27 @@ interface User {
   id: string;
   full_name: string;
   email: string;
-  status: number;
-  address: string;
   phone: string;
+  address: string;
   position: string;
   company: string;
   role: number;
+  status: number;
   notes: string;
 }
+
+interface UpdatedUserData {
+    userId: string;
+    userName: string;
+    userEmail: string;
+    userPhone: string;
+    userAddress: string;
+    userPosition: string;
+    userCompany: string;
+    userRole: number;
+    userStatus: number;
+    userNotes: string;
+  }
 
 export default defineComponent({
   components: {
@@ -314,8 +327,34 @@ export default defineComponent({
         this.triggerNotification('error', 'Error!', 'Couldnt delete user.');
       }
     },
-    handleSaveClicked() {
-      // Implementation of what should happen when save is clicked
+    async handleSaveClicked(updatedUserData: UpdatedUserData) {
+      alert(updatedUserData.userId);
+      alert(updatedUserData.userName);
+      try {
+        const userRef = doc(db, "users", updatedUserData.userId);
+        await updateDoc(userRef, {
+          full_name: updatedUserData.userName,
+          email: updatedUserData.userEmail,
+          phone: updatedUserData.userPhone,
+          address: updatedUserData.userAddress,
+          position: updatedUserData.userPosition,
+          company: updatedUserData.userCompany,
+          role: updatedUserData.userRole,
+          status: updatedUserData.userStatus,
+          notes: updatedUserData.userNotes,
+        });
+        console.log('User updated successfully');
+
+        // Update the user in the local state
+        const userIndex = this.users.findIndex(user => user.id === updatedUserData.userId);
+        if (userIndex !== -1) {
+          this.users[userIndex] = { ...this.users[userIndex], ...updatedUserData };
+        }
+        this.triggerNotification('success', 'Changes saved', 'User updated successfully.');
+      } catch (error) {
+        console.error('Error updating user:', error);
+        this.triggerNotification('error', 'Error!', 'Could not update user.');
+      }
     },
     openEditModal(user: User) {
       this.selectedUserId = user.id.toString();

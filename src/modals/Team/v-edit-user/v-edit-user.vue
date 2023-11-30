@@ -254,7 +254,7 @@
 
   const computedUserNotes = computed({
     get: () => userNotes.value === 'string' ? '' : userNotes.value,
-    set: (val) => userNotes.value = val
+    set: (val) => localUserNotes.value = val
   });
 
   function closeModal() {

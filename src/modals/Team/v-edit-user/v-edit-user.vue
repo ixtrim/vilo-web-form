@@ -22,7 +22,7 @@
       <div class="col-lg-12">
         <div class="form-group">
           <label>Status</label>
-          <VDropdown :title="getStatusLabel(localUserStatus ?? 0)" :items="dropdownStatusItems" @item-clicked="item => dropdownStatusChange(userId ?? '', item)" />
+          <VDropdown :title="getStatusLabel(localUserStatus ?? 0)" :items="dropdownStatusItems" @item-clicked="dropdownStatusChange" />
         </div>
       </div>
     </div>
@@ -31,7 +31,7 @@
       <div class="col-lg-12">
         <div class="form-group">
           <label>Role</label>
-            <VDropdown :title="getRoleLabel(localUserRole ?? 0)" :items="dropdownRoleItems" @item-clicked="item => dropdownRoleChange(userId ?? '', item)" />
+          <VDropdown :title="getRoleLabel(localUserRole ?? 0)" :items="dropdownRoleItems" @item-clicked="dropdownRoleChange" />
         </div>
       </div>
     </div>
@@ -180,7 +180,7 @@
   watch(() => props.userStatus, (newVal) => localUserStatus.value = newVal);
   watch(() => props.userNotes, (newVal) => localUserNotes.value = newVal);
 
-  const dropdownRoleChange = async (userId: string, item: DropdownItem) => {
+  const dropdownRoleChange = (item: DropdownItem) => {
     const roleCodeMapping = {
       'Admin': 0,
       'Internal user': 1,
@@ -188,21 +188,10 @@
       'Client (company)': 3,
     };
     const newRoleCode = roleCodeMapping[item.label as keyof typeof roleCodeMapping];
-
-    if (newRoleCode !== undefined && props.userId) {
-      try {
-        const userRef = doc(db, "users", props.userId);
-        await updateDoc(userRef, {
-          role: newRoleCode
-        });
-        console.log('Role updated successfully');
-        userRole.value = newRoleCode;
-        emit('role-changed', newRoleCode);
-      } catch (error) {
-        console.error('Error updating role:', error);
-      }
+    if (newRoleCode !== undefined) {
+      localUserRole.value = newRoleCode;
     } else {
-      console.error('Invalid role selected or User ID is undefined');
+      console.error('Invalid role selected');
     }
   };
 
@@ -217,28 +206,17 @@
     return roleMapping[roleCode] ?? 'Unknown';
   };
 
-  const dropdownStatusChange = async (userId: string, item: DropdownItem) => {
+  const dropdownStatusChange = (item: DropdownItem) => {
     const statusCodeMapping = {
       'Draft': 0,
       'Pending': 1,
       'Activated': 2,
     };
     const newStatusCode = statusCodeMapping[item.label as keyof typeof statusCodeMapping];
-
-    if (newStatusCode !== undefined && props.userId) {
-      try {
-        const userRef = doc(db, "users", props.userId);
-        await updateDoc(userRef, {
-          status: newStatusCode
-        });
-        console.log('Status updated successfully');
-        userStatus.value = newStatusCode;
-        emit('status-changed', newStatusCode);
-      } catch (error) {
-        console.error('Error updating role:', error);
-      }
+    if (newStatusCode !== undefined) {
+      localUserStatus.value = newStatusCode;
     } else {
-      console.error('Invalid status selected or User ID is undefined');
+      console.error('Invalid status selected');
     }
   };
 
@@ -262,13 +240,6 @@
   }
 
   function saveAndClose() {
-    console.log("Emitting updated data:", {
-      // Log the data being emitted
-      userId: props.userId,
-      userName: localUserName.value,
-      userEmail: localUserEmail.value,
-      // ... other fields
-    });
     emit('save-clicked', {
       userId: props.userId,
       userName: localUserName.value,

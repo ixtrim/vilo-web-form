@@ -300,18 +300,20 @@ export default defineComponent({
           await updateDoc(userRef, {
             role: newRoleCode
           });
-          console.log('Role updated successfully');
-
+          
           // Find the user in the local state and update their role
           const userIndex = this.users.findIndex(user => user.id === userId);
           if (userIndex !== -1) {
             this.users[userIndex].role = newRoleCode;
           }
+          this.triggerNotification('success', 'Changes saved', 'User role updated successfully.');
         } catch (error) {
           console.error('Error updating role:', error);
+          this.triggerNotification('error', 'Error!', 'Error updating role.');
         }
       } else {
         console.error('Invalid role selected');
+        this.triggerNotification('error', 'Error!', 'Invalid role selected.');
       }
     },
     async deleteUser(userId: string) {
@@ -328,8 +330,6 @@ export default defineComponent({
       }
     },
     async handleSaveClicked(updatedUserData: UpdatedUserData) {
-      alert(updatedUserData.userId);
-      alert(updatedUserData.userAddress);
       try {
         const userRef = doc(db, "users", updatedUserData.userId);
         await updateDoc(userRef, {

@@ -17,7 +17,7 @@
       <div class="col-lg-3">
         <ul class="settings__team-actions">
           <li>
-            <VDropdown :title="'All users'" :items="dropdownItems" @item-clicked="dropdownRoleChange" />
+            <VDropdown :title="'All users'" :items="dropdownRoleItems" @item-clicked="dropdownRoleChange" />
           </li>
           <li>
             <VButton :block="true" size="md" icon="left" icon-style="add-white" @click="handleButtonClick" text="Add user"></VButton>
@@ -74,7 +74,7 @@
                 <p>{{ user.position }}</p>
               </div>
               <div class="col col--sett-t-role">
-                <VDropdown :title="getRoleLabel(user.role)" :items="dropdownItems" @item-clicked="item => dropdownRoleChange(user.id, item)" />
+                <VDropdown :title="getRoleLabel(user.role)" :items="dropdownRoleItems" @item-clicked="item => dropdownRoleChange(user.id, item)" />
               </div>
               <div class="col col--cm-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="() => deleteUser(user.id)" text=""></VButton>
@@ -111,6 +111,10 @@
         :userEmail="selectedUserEmail"
         :userPhone="selectedUserPhone"
         :userAddress="selectedUserAddress"
+        :userPosition="selectedUserPosition"
+        :userCompany="selectedUserCompany"
+        :dropdownRoleItems="dropdownRoleItems"
+        :userRole="Number(selectedUserRole)"
         :userNotes="selectedUserNotes"
         @close-modal="showModal = false"
         @save-clicked="handleSaveClicked"
@@ -153,6 +157,7 @@ interface User {
   address: string;
   phone: string;
   position: string;
+  company: string;
   role: number;
   notes: string;
 }
@@ -178,11 +183,14 @@ export default defineComponent({
       selectedUserEmail: '',
       selectedUserPhone: '',
       selectedUserAddress: '',
+      selectedUserCompany: '',
+      selectedUserPosition: '',
+      selectedUserRole: '',
       selectedUserNotes: '',
       notificationType: 'success',
       notificationHeader: 'Changes saved',
       notificationMessage: 'This account has been successfully edited.',
-      dropdownItems: [
+      dropdownRoleItems: [
         { label: 'Internal user' },
         { label: 'Client (individual)' },
         { label: 'Client (company)' },
@@ -195,17 +203,6 @@ export default defineComponent({
     const itemsPerPage = 10;
     const allItems = ref([
       { id: 1, name: 'Page 1' },
-      { id: 2, name: 'Page 2' },
-      { id: 3, name: 'Page 3' },
-      { id: 4, name: 'Page 4' },
-      { id: 5, name: 'Page 5' },
-      { id: 6, name: 'Page 6' },
-      { id: 7, name: 'Page 7' },
-      { id: 8, name: 'Page 8' },
-      { id: 9, name: 'Page 9' },
-      { id: 10, name: 'Page 10' },
-      { id: 11, name: 'Page 11' },
-      { id: 12, name: 'Page 12' },
     ]);
     const currentPage = ref(1);
 
@@ -313,15 +310,15 @@ export default defineComponent({
       // Implementation of what should happen when save is clicked
     },
     openEditModal(user: User) {
-      // Set the data for the selected user
       this.selectedUserId = user.id.toString();
       this.selectedUserFullName = user.full_name;
       this.selectedUserEmail = user.email;
       this.selectedUserPhone = user.phone;
       this.selectedUserAddress = user.address;
-      this.selectedUserNotes = user.notes; // Assuming you have a notes field
-
-      // Open the modal
+      this.selectedUserPosition = user.position;
+      this.selectedUserCompany = user.company;
+      this.selectedUserRole = user.role.toString();
+      this.selectedUserNotes = user.notes;
       this.showModal = true;
     },
     handleButtonClick() {

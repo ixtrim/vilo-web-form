@@ -21,26 +21,29 @@
     <div class="row">
       <div class="col-lg-12">
         <div class="form-group">
+          <label>Status</label>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="form-group">
           <label>Role</label>
-          <VDropdown :title="dropdownRoleTitle" :items="dropdownRoles" @item-clicked="onRoleChanged" />
+            <VDropdown :title="getRoleLabel(userRole ?? 0)" :items="dropdownRoleItems" @item-clicked="item => dropdownRoleChange(userId ?? '', item)" />
         </div>
       </div>
     </div>
 
-    <div class="row" v-if="dropdownRoleTitle === 'Client user'">
+    <div class="row">
       <div class="col-lg-12">
         <div class="form-group">
-          <label>Client type</label>
-          <VDropdown :title="dropdownClientTypeTitle" :items="dropdownClientType" @item-clicked="onClientTypeChanged" />
-        </div>
-      </div>
-    </div>
-
-    <div class="row" v-if="dropdownClientTypeTitle === 'Company' && dropdownRoleTitle === 'Client user'">
-      <div class="col-lg-12">
-        <div class="form-group">
-          <label>Company name</label>
-          <VDropdown :title="dropdownCompanyTitle" :items="dropdownCompany" @item-clicked="onCompanyChanged" />
+          <VInput 
+          label="Company" 
+          placeholder="ex. Vilo" 
+          v-model="userCompany"
+        />
         </div>
       </div>
     </div>
@@ -65,11 +68,15 @@
       </div>
     </div>
 
-    <div class="row" v-if="dropdownRoleTitle === 'Client user'">
+    <div class="row">
       <div class="col-lg-12">
         <div class="form-group">
-          <label>Position</label>
-          <VDropdown :title="dropdownPositionTitle" :items="dropdownPositions" @item-clicked="onPositionChanged" />
+          <label></label>
+          <VInput 
+            label="Position" 
+            placeholder="ex. Sales" 
+            v-model="userPosition"
+          />
         </div>
       </div>
     </div>
@@ -98,7 +105,10 @@
 </template>
 
 <script setup lang="ts">
+  import { db } from '@/firebase.js';
+  import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
   import { ref, watch, computed } from 'vue';
+  import type { PropType } from 'vue';
   import { defineEmits, defineProps } from 'vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VTextarea from '@/components/v-textarea/v-textarea.vue';
@@ -109,7 +119,7 @@
     label: string;
   };
 
-  const emit = defineEmits(['close-modal', 'save-clicked']);
+  const emit = defineEmits(['close-modal', 'save-clicked', 'role-changed']);
 
   const props = defineProps({
     userId: String,
@@ -117,6 +127,13 @@
     userEmail: String,
     userPhone: String,
     userAddress: String,
+    userPosition: String,
+    userCompany: String,
+    dropdownRoleItems: {
+      type: Array as PropType<DropdownItem[]>,
+      default: () => []
+    },
+    userRole: Number,
     userNotes: String,
     title: {
       type: String,
@@ -128,60 +145,56 @@
   watch(() => props.userName, (newVal) => {
     userName.value = newVal;
   });
+
   const userEmail = ref(props.userEmail);
   const userPhone = ref(props.userPhone);
   const userAddress = ref(props.userAddress);
+  const userPosition = ref(props.userPosition);
+  const userCompany = ref(props.userCompany);
+  const userRole = ref(props.userRole);
   const userNotes = ref(props.userNotes);
+
+  const dropdownRoleChange = async (userId: string, item: DropdownItem) => {
+    const roleCodeMapping = {
+      'Admin': 0,
+      'Internal user': 1,
+      'Client (individual)': 2,
+      'Client (company)': 3,
+    };
+    const newRoleCode = roleCodeMapping[item.label as keyof typeof roleCodeMapping];
+
+    if (newRoleCode !== undefined && props.userId) {
+      try {
+        const userRef = doc(db, "users", props.userId);
+        await updateDoc(userRef, {
+          role: newRoleCode
+        });
+        console.log('Role updated successfully');
+        userRole.value = newRoleCode;
+        emit('role-changed', newRoleCode);
+      } catch (error) {
+        console.error('Error updating role:', error);
+      }
+    } else {
+      console.error('Invalid role selected or User ID is undefined');
+    }
+  };
+
+  const getRoleLabel = (roleCode: number) => {
+    const roleMapping: { [key: number]: string } = {
+      0: 'Admin',
+      1: 'Internal user',
+      2: 'Client (individual)',
+      3: 'Client (company)',
+    };
+
+    return roleMapping[roleCode] ?? 'Unknown';
+  };
+
   const computedUserNotes = computed({
     get: () => userNotes.value === 'string' ? '' : userNotes.value,
     set: (val) => userNotes.value = val
   });
-
-  const dropdownRoles = ref([
-    { label: 'Admin' },
-    { label: 'Internal user' },
-    { label: 'Client user' }
-  ]);
-  const dropdownRoleTitle = ref('Client user');
-  function onRoleChanged(item: DropdownItem) {
-    dropdownRoleTitle.value = item.label;
-  }
-
-  const dropdownClientType = ref([
-    { label: 'Individual' },
-    { label: 'Company' }
-  ]);
-  const dropdownClientTypeTitle = ref('Individual');
-  function onClientTypeChanged(item: DropdownItem) {
-    dropdownClientTypeTitle.value = item.label;
-  }
-
-  const dropdownCompany = ref([
-    { label: 'MAXBURST, Inc.' },
-    { label: 'Pardalis and Nohavicka Lawyers' },
-    { label: 'Jeffrey B. Peltz, P.C.' },
-    { label: 'Redmond Accident Lawyers' },
-    { label: 'Leav & Steinberg, LLP' },
-    { label: 'Morelli Law Firm' },
-    { label: 'Meirowitz & Wasserberg, LLP' },
-    { label: 'Mark I. Cohen, ESQ' },
-    { label: 'Antin Ehrlich & Epstein LLP' },
-    { label: 'Law Offices of Lisa Beth' },
-    { label: 'Rudyuk Law Firm' },
-  ]);
-  const dropdownCompanyTitle = ref('Rudyuk Law Firm');
-  function onCompanyChanged(item: DropdownItem) {
-    dropdownCompanyTitle.value = item.label;
-  }
-
-  const dropdownPositions = ref([
-    { label: 'Sales' },
-    { label: 'Retainer' },
-  ]);
-  const dropdownPositionTitle = ref('Sales');
-  function onPositionChanged(item: DropdownItem) {
-    dropdownPositionTitle.value = item.label;
-  }
 
   function closeModal() {
     emit('close-modal');

@@ -161,6 +161,7 @@
   }
 
   function saveAndClose() {
+    emit('save-clicked');
     closeModal();
   }
 </script>

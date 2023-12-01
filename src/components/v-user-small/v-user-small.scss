@@ -1,0 +1,31 @@
+.vilo-user-small {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin: 16px 0 -15px 0;
+
+  &__avatar {
+    margin-right: 8px;
+
+    img {
+      border-radius: 55%;
+      width: 24px;
+    }
+  }
+
+  &__info {
+    flex-grow: 1;
+
+    span {
+      display: block;
+      text-align: left;
+      font-size: .875rem;
+    }
+
+    &__name {
+      font-weight: 600;
+      color: var(--v-gray-900);
+      font-family: var(--v-font-inter-semi-bold);
+    }
+  }
+}

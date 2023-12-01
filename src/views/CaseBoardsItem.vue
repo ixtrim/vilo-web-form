@@ -12,6 +12,7 @@
         <div class="dashboard__heading">
           <h1>Vilo Board</h1>
           <p>Time tracking, invoicing and expenses.</p>
+          <VUserSmall userName="Phoenix Baker" />
         </div>
       </div>
       <div class="col-lg-2 align-right">
@@ -20,8 +21,8 @@
     </div>
 
     <div class="row">
-      <div class="col-lg-12">
-        
+      <div class="col-lg-12 dashboard__line mt-0">
+        <hr />
       </div>
     </div>
 
@@ -49,6 +50,7 @@
   import VNotification from '@/components/v-notification/VNotification.vue';
   import VModal from '@/components/v-modal/v-modal.vue';
   import VEditCaseBoard from '@/modals/CaseBoards/v-edit-case-board/v-edit-case-board.vue';
+  import VUserSmall from '@/components/v-user-small/v-user-small.vue';
 
   interface NotificationRef {
     showNotification: () => void;
@@ -62,6 +64,7 @@
       VNotification,
       VModal,
       VEditCaseBoard,
+      VUserSmall,
       Board
     },
     data() {

@@ -20,7 +20,7 @@
             <VDropdown :title="'All users'" :items="dropdownRoleItems" @item-clicked="dropdownRoleChange" />
           </li>
           <li>
-            <VButton :block="true" size="md" icon="left" icon-style="add-white" @click="handleButtonClick" text="Add user"></VButton>
+            <VButton :block="true" size="md" icon="left" icon-style="add-white" @click="openAddModal" text="Add user"></VButton>
           </li>
         </ul>
       </div>
@@ -103,9 +103,10 @@
       </div>
     </div>
 
-    <VModal :show="showModal" :title="modalTitle" @update:show="(value: boolean) => showModal = value">
+    <VModal :show="showModal || showAddModal" :title="modalTitleEdit || modalTitle" @update:show="handleModalClose">
       <VEditUser
-        :title="modalTitle"
+        v-if="showModal"
+        :title="modalTitleEdit"
         :userId="selectedUserId"
         :userName="selectedUserFullName"
         :userEmail="selectedUserEmail"
@@ -119,8 +120,9 @@
         :userStatus="Number(selectedUserStatus)"
         :userNotes="selectedUserNotes"
         @close-modal="showModal = false"
-        @save-clicked="handleSaveClicked"
+        @save-clicked="handleSaveChanges"
       />
+      <VAddUser v-if="showAddModal" :title="modalTitle" :nextUserId="nextUserId" @close-modal="showAddModal = false" @save-clicked="handleAddUser" />
     </VModal>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
@@ -142,6 +144,7 @@
   import VNotification from '@/components/v-notification/VNotification.vue';
   import VModal from '@/components/v-modal/v-modal.vue';
   import VEditUser from '@/modals/Team/v-edit-user/v-edit-user.vue';
+  import VAddUser from '@/modals/Team/v-add-user/v-add-user.vue';
 
 interface DropdownItem {
   label: string;
@@ -188,11 +191,14 @@ export default defineComponent({
     VNotification,
     VModal,
     VEditUser,
+    VAddUser,
   },
   data() {
     return {
       showModal: false,
+      showAddModal: false,
       modalTitle: '',
+      modalTitleEdit: '',
       selectedUserId: '',
       selectedUserFullName: '',
       selectedUserEmail: '',
@@ -217,6 +223,7 @@ export default defineComponent({
         { label: 'Pending' },
         { label: 'Activated' }
       ],
+      nextUserId: 0,
     };
   },
   setup() {
@@ -226,6 +233,7 @@ export default defineComponent({
       { id: 1, name: 'Page 1' },
     ]);
     const currentPage = ref(1);
+    const nextUserId = ref(0); 
 
     const fetchUsers = async () => {
       const querySnapshot = await getDocs(collection(db, "users"));
@@ -233,6 +241,12 @@ export default defineComponent({
         ...doc.data() as User,
         id: doc.id,
       }));
+
+      const maxUserId = users.value
+        .map(user => Number(user.id))
+        .reduce((max, id) => id > max ? id : max, 0);
+
+      nextUserId.value = maxUserId + 1;
     };
 
     onMounted(fetchUsers);
@@ -254,6 +268,7 @@ export default defineComponent({
       paginatedItems,
       totalPages,
       currentPage,
+      nextUserId,
       fetchUsers,
       updatePage
     };
@@ -329,7 +344,7 @@ export default defineComponent({
         this.triggerNotification('error', 'Error!', 'Couldnt delete user.');
       }
     },
-    async handleSaveClicked(updatedUserData: UpdatedUserData) {
+    async handleSaveChanges(updatedUserData: UpdatedUserData) {
       try {
         const userRef = doc(db, "users", updatedUserData.userId);
         await updateDoc(userRef, {
@@ -358,6 +373,7 @@ export default defineComponent({
       }
     },
     openEditModal(user: User) {
+      this.modalTitleEdit = 'Edit user data';
       this.selectedUserId = user.id.toString();
       this.selectedUserFullName = user.full_name;
       this.selectedUserEmail = user.email;
@@ -369,6 +385,19 @@ export default defineComponent({
       this.selectedUserStatus = user.status.toString();
       this.selectedUserNotes = user.notes;
       this.showModal = true;
+    },
+    openAddModal() {
+      this.modalTitle = 'Add New User';
+      this.showAddModal = true;
+    },
+    handleAddUser(newUser: User) {
+      console.log('New User:', newUser);
+      this.showAddModal = false;
+      this.triggerNotification('success', 'Changes saved', 'User added successfully.');
+    },
+    handleModalClose(value: boolean) {
+      this.showModal = false;
+      this.showAddModal = false;
     },
     handleButtonClick() {
      console.log('Button clicked');

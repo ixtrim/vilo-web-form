@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="col-lg-2 align-right">
-        <VButton :block="true" size="md" icon="left" icon-style="add" styled="outlined" @click="handleButtonClick"
+        <VButton :block="true" size="md" icon="left" icon-style="add" styled="outlined" @click="openAddModal"
           text="Add new case"></VButton>
       </div>
     </div>
@@ -247,6 +247,12 @@
       </div>
     </div>
 
+    <VModal :show="showAddModal" :title="modalAddTitle" @update:show="handleModalClose">
+      <VAddCaseBoard v-if="showAddModal" :title="modalAddTitle" @close-modal="showAddModal = false" @save-clicked="handleAddCase" />
+    </VModal>
+
+    <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
+
   </div>
 </template>
 
@@ -259,11 +265,17 @@ import VUser from '@/components/v-user/v-user.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
 import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
+import VNotification from '@/components/v-notification/VNotification.vue';
+import VModal from '@/components/v-modal/v-modal.vue';
+import VAddCaseBoard from '@/modals/CaseBoards/v-add-case-board/v-add-case-board.vue';
 
 interface DropdownItem {
   label: string;
 }
 
+interface NotificationRef {
+  showNotification: () => void;
+}
 
 export default defineComponent({
   components: {
@@ -274,9 +286,17 @@ export default defineComponent({
     VPaginationList,
     VModalSmall,
     VDropdown,
+    VNotification,
+    VModal,
+    VAddCaseBoard,
   },
   data() {
     return {
+      showAddModal: false,
+      modalAddTitle: '',
+      notificationType: 'success',
+      notificationHeader: 'Changes saved',
+      notificationMessage: 'This account has been successfully edited.',
       userName: 'Olivia Rhye',
       userEmail: 'olivia@untitledui.com',
       sortTime: [
@@ -334,6 +354,12 @@ export default defineComponent({
     };
   },
   methods: {
+    triggerNotification(type: string, header: string, message: string) {
+      this.notificationType = type;
+      this.notificationHeader = header;
+      this.notificationMessage = message;
+      (this.$refs.notificationRef as NotificationRef).showNotification();
+    },
     handleDropdownClick(item: any) {
       console.log('Dropdown item clicked', item);
     },
@@ -346,6 +372,17 @@ export default defineComponent({
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
       }
+    },
+    openAddModal() {
+      this.modalAddTitle = 'Create New Case';
+      this.showAddModal = true;
+    },
+    handleAddCase() {
+      this.showAddModal = false;
+      this.triggerNotification('success', 'Changes saved', 'Case board added successfully.');
+    },
+    handleModalClose(value: boolean) {
+      this.showAddModal = false;
     },
     handleButtonClick() {
     },

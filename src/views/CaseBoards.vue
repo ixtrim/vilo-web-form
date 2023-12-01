@@ -54,9 +54,6 @@
         <div class="dashboard__table">
 
           <div class="dashboard__table__head">
-            <div class="col col--checkbox">
-              <input type="checkbox" />
-            </div>
             <div class="col col--cb-case">
               <h4>Case</h4>
             </div>
@@ -77,9 +74,6 @@
           <div class="dashboard__table__page">
 
             <div class="dashboard__table__page__item">
-              <div class="col col--checkbox">
-                <input type="checkbox" />
-              </div>
               <div class="col col--cb-case">
                 <ul>
                   <li>
@@ -101,15 +95,11 @@
                 <img src="@/assets/temporary/case-boards-users.png" alt="" />
               </div>
               <div class="col col--cb-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon"
-                  @click="handleButtonClick" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal" text=""></VButton>
               </div>
             </div>
 
             <div class="dashboard__table__page__item">
-              <div class="col col--checkbox">
-                <input type="checkbox" />
-              </div>
               <div class="col col--cb-case">
                 <ul>
                   <li>
@@ -131,22 +121,18 @@
                 <img src="@/assets/temporary/case-boards-users.png" alt="" />
               </div>
               <div class="col col--cb-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon"
-                  @click="handleButtonClick" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal" text=""></VButton>
               </div>
             </div>
 
             <div class="dashboard__table__page__item">
-              <div class="col col--checkbox">
-                <input type="checkbox" />
-              </div>
               <div class="col col--cb-case">
                 <ul>
                   <li>
                     <img src="@/assets/temporary/Avatar-3.svg" alt="" />
                   </li>
                   <li>
-                    <h4>Command+R</h4>
+                    <h4>Smith v. Jones, New York State Court</h4>
                   </li>
                 </ul>
               </div>
@@ -161,15 +147,11 @@
                 <img src="@/assets/temporary/case-boards-users.png" alt="" />
               </div>
               <div class="col col--cb-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon"
-                  @click="handleButtonClick" tMara Doeext=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal" text=""></VButton>
               </div>
             </div>
 
             <div class="dashboard__table__page__item">
-              <div class="col col--checkbox">
-                <input type="checkbox" />
-              </div>
               <div class="col col--cb-case">
                 <ul>
                   <li>
@@ -191,15 +173,11 @@
                 <img src="@/assets/temporary/case-boards-users.png" alt="" />
               </div>
               <div class="col col--cb-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon"
-                  @click="handleButtonClick" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal" text=""></VButton>
               </div>
             </div>
 
             <div class="dashboard__table__page__item">
-              <div class="col col--checkbox">
-                <input type="checkbox" />
-              </div>
               <div class="col col--cb-case">
                 <ul>
                   <li>
@@ -221,8 +199,7 @@
                 <img src="@/assets/temporary/case-boards-users.png" alt="" />
               </div>
               <div class="col col--cb-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon"
-                  @click="handleButtonClick" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal" text=""></VButton>
               </div>
             </div>
 
@@ -247,7 +224,8 @@
       </div>
     </div>
 
-    <VModal :show="showAddModal" :title="modalAddTitle" @update:show="handleModalClose">
+    <VModal :show="showEditModal || showAddModal" :title="modalEditTitle || modalAddTitle" @update:show="handleModalClose">
+      <VEditCaseBoard v-if="showEditModal" :title="modalEditTitle" @close-modal="showEditModal = false" @save-clicked="handleEditCase" />
       <VAddCaseBoard v-if="showAddModal" :title="modalAddTitle" @close-modal="showAddModal = false" @save-clicked="handleAddCase" />
     </VModal>
 
@@ -267,6 +245,7 @@ import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import VNotification from '@/components/v-notification/VNotification.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
+import VEditCaseBoard from '@/modals/CaseBoards/v-edit-case-board/v-edit-case-board.vue';
 import VAddCaseBoard from '@/modals/CaseBoards/v-add-case-board/v-add-case-board.vue';
 
 interface DropdownItem {
@@ -288,11 +267,14 @@ export default defineComponent({
     VDropdown,
     VNotification,
     VModal,
+    VEditCaseBoard,
     VAddCaseBoard,
   },
   data() {
     return {
+      showEditModal: false,
       showAddModal: false,
+      modalEditTitle: '',
       modalAddTitle: '',
       notificationType: 'success',
       notificationHeader: 'Changes saved',
@@ -373,6 +355,14 @@ export default defineComponent({
         this.currentPage++;
       }
     },
+    openEditModal() {
+      this.modalEditTitle = 'Edit case board';
+      this.showEditModal = true;
+    },
+    handleEditCase() {
+      this.showEditModal = false;
+      this.triggerNotification('success', 'Changes saved', 'Case board modified successfully.');
+    },
     openAddModal() {
       this.modalAddTitle = 'Create New Case';
       this.showAddModal = true;
@@ -382,6 +372,7 @@ export default defineComponent({
       this.triggerNotification('success', 'Changes saved', 'Case board added successfully.');
     },
     handleModalClose(value: boolean) {
+      this.showEditModal = false;
       this.showAddModal = false;
     },
     handleButtonClick() {

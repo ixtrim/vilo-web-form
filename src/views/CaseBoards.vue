@@ -80,7 +80,7 @@
                     <img src="@/assets/temporary/Avatar.svg" alt="" />
                   </li>
                   <li>
-                    <h4>Catalog</h4>
+                    <h4 class="active" @click="navigateToCaseBoard(1)">Catalog</h4>
                   </li>
                 </ul>
               </div>
@@ -106,7 +106,7 @@
                     <img src="@/assets/temporary/Avatar-2.svg" alt="" />
                   </li>
                   <li>
-                    <h4>Capsule</h4>
+                    <h4 class="active" @click="navigateToCaseBoard(1)">Capsule</h4>
                   </li>
                 </ul>
               </div>
@@ -132,7 +132,7 @@
                     <img src="@/assets/temporary/Avatar-3.svg" alt="" />
                   </li>
                   <li>
-                    <h4>Smith v. Jones, New York State Court</h4>
+                    <h4 class="active" @click="navigateToCaseBoard(1)">Smith v. Jones, New York State Court</h4>
                   </li>
                 </ul>
               </div>
@@ -158,7 +158,7 @@
                     <img src="@/assets/temporary/Avatar-4.svg" alt="" />
                   </li>
                   <li>
-                    <h4>Hourglass</h4>
+                    <h4 class="active" @click="navigateToCaseBoard(1)">Hourglass</h4>
                   </li>
                 </ul>
               </div>
@@ -184,7 +184,7 @@
                     <img src="@/assets/temporary/Avatar-5.svg" alt="" />
                   </li>
                   <li>
-                    <h4>Layers</h4>
+                    <h4 class="active" @click="navigateToCaseBoard(1)">Layers</h4>
                   </li>
                 </ul>
               </div>
@@ -236,6 +236,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import VLink from '@/components/v-link/VLink.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import Search from '@/modules/Navigation/Search.vue';
@@ -316,6 +317,12 @@ export default defineComponent({
     ]);
     const currentPage = ref(1);
 
+    const router = useRouter();
+    const navigateToCaseBoard = (caseId: number) => {
+      //router.push(`/case-board/${caseId}`);
+      router.push(`/case-board`);
+    };
+
     const totalPages = computed(() => Math.ceil(allItems.value.length / itemsPerPage));
 
     const paginatedItems = computed(() => {
@@ -332,6 +339,7 @@ export default defineComponent({
       paginatedItems,
       totalPages,
       currentPage,
+      navigateToCaseBoard,
       updatePage
     };
   },

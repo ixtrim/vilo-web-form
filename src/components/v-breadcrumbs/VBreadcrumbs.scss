@@ -1,0 +1,49 @@
+@import '@/components/styles/variables/fonts.scss';
+@import '@/components/styles/variables/colors.scss';
+
+.breadcrumb {
+  font-family: var(--v-font-inter-medium);
+  font-weight: 500;
+  font-size: 14px;
+
+  .breadcrumb-item {
+    line-height: 28px;
+
+    a {
+      color: var(--v-gray-600);
+      text-decoration: none;
+      transition: color 0.3s ease-in-out;
+  
+      &:hover {
+        color: var(--v-gray-700);
+        text-decoration: underline;
+      }
+    }
+
+    span {
+      display: inline-block;
+      background: var(--v-gray-100);
+      color: var(--v-gray-700);
+      padding: 0 8px;
+      border-radius: 6px;
+    }
+  }
+
+  .breadcrumb-item + .breadcrumb-item {
+    padding-left: 0;
+
+    &::before {
+      content: "";
+      color: var(--v-gray-500);
+      margin: 10px 8px;
+      width: 4px;
+      height: 8px;
+      background-image: url('@/assets/icons/icon-chevron-right.svg');
+        background-size: contain;
+        background-position: center center;
+        background-repeat: no-repeat;
+    }
+  }
+
+  
+}

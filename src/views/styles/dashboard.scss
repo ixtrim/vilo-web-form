@@ -428,6 +428,10 @@
         &:last-child {
           border-bottom: 1px solid var(--v-gray-200);
         }
+
+        h4.active {
+          cursor: pointer;
+        }
       }
     }
 

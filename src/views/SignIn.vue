@@ -77,12 +77,12 @@
         }
       },
       validatePassword() {
-        const passwordRegex = /^(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+        /*const passwordRegex = /^(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
         if (!passwordRegex.test(this.password)) {
           this.passwordValidationMessage = 'Password must be at least 8 characters and contain one special character';
         } else {
           this.passwordValidationMessage = '';
-        }
+        }*/
       },
       SignInWithGoogle() {
         console.log('Sign in with Google button clicked');

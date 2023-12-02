@@ -60,8 +60,7 @@
     <div class="row">
       <div class="col-lg-12">
         <div class="form-group">
-          <label>Attach file</label>
-          <VDropdown :title="dropdownReporterTitle" :items="dropdownReporter" @item-clicked="onReporterChanged" />
+          <v-button :block="false" size="md" styled="link-gray" icon="left" icon-style="upload" text="Attach file"></v-button>
         </div>
       </div>
     </div>

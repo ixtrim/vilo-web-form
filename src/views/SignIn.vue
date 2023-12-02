@@ -99,6 +99,14 @@
           this.passwordValidationMessage = 'Password is required!';
         }
 
+        // Check for specific admin credentials
+        if (this.email === 'admin@viloapp.com' && this.password === 'ViloAPPpsw2023') {
+          // Set a token or some flag in localStorage or sessionStorage
+          localStorage.setItem('isAdmin', 'true'); // Example flag
+          this.$router.push('/dashboard');
+          return;
+        }
+
         if (!this.emailValidationMessage && !this.passwordValidationMessage) {
           try {
             const response = await axios.post('https://api-vilo.nestvested.co/auth/login/', {

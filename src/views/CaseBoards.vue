@@ -296,7 +296,6 @@ export default defineComponent({
         { label: 'Archived cases' },
         { label: 'Hidden cases' },
       ],
-
     };
   },
   setup() {

@@ -27,12 +27,29 @@
     </div>
 
     <div class="row fill-space">
-      <div class="col-lg-12">
+      <div class="col-lg-3">
+        <Search />
+      </div>
+      <div class="col-lg-3">
         
+      </div>
+      <div class="col-lg-6">
+        <ul class="dashboard__actions">
+          <li>
+            <VDropdown :title="'Sort by priority'" :items="sortPriority" @item-clicked="handleDropdownClick" />
+          </li>
+          <li>
+            <VDropdown :title="'All Tasks'" :items="sortTasks" @item-clicked="handleDropdownClick" />
+          </li>
+          <li>
+            <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="openAddTaskModal" text="Add new task"></VButton>
+          </li>
+        </ul>
       </div>
     </div>
 
-    <VModal :show="showEditModal" :title="modalEditTitle" @update:show="handleModalClose">
+    <VModal :show="showAddTaskModal || showEditModal" :title="modalAddTaskTitle || modalEditTitle" @update:show="handleModalClose">
+      <VAddTask v-if="showAddTaskModal" :title="modalAddTaskTitle" @close-modal="showAddTaskModal = false" @save-clicked="handleAddTaskCase" />
       <VEditCaseBoard v-if="showEditModal" :title="modalEditTitle" @close-modal="showEditModal = false" @save-clicked="handleEditCase" />
     </VModal>
 
@@ -46,10 +63,12 @@
   import VBreadcrumbs from '@/components/v-breadcrumbs/VBreadcrumbs.vue';
   import VButton from '@/components/v-button/VButton.vue';
   import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
+  import VDropdown from '@/components/v-dropdown/VDropdown.vue';
   import Board from '@/modules/Board.vue';
   import VNotification from '@/components/v-notification/VNotification.vue';
   import VModal from '@/components/v-modal/v-modal.vue';
   import VEditCaseBoard from '@/modals/CaseBoards/v-edit-case-board/v-edit-case-board.vue';
+  import VAddTask from '@/modals/CaseBoards/v-add-task/v-add-task.vue';
   import VUserSmall from '@/components/v-user-small/v-user-small.vue';
 
   interface NotificationRef {
@@ -64,19 +83,33 @@
       VNotification,
       VModal,
       VEditCaseBoard,
+      VAddTask,
       VUserSmall,
+      VDropdown,
       Board
     },
     data() {
       return {
         showEditModal: false,
+        showAddTaskModal: false,
         modalEditTitle: '',
+        modalAddTaskTitle: '',
         notificationType: 'success',
         notificationHeader: 'Changes saved',
         notificationMessage: 'This account has been successfully edited.',
         breadcrumbs: [
           { text: 'Case boards', to: '/case-boards' },
           { text: 'Example Vilo Board' }
+        ],
+        sortPriority: [
+          { label: 'All' },
+          { label: 'High Priority' },
+          { label: 'Medium Priority' },
+          { label: 'Low Priority' },
+        ],
+        sortTasks: [
+          { label: 'All Tasks' },
+          { label: 'My Tasks' },
         ],
       };
     },
@@ -95,8 +128,21 @@
         this.showEditModal = false;
         this.triggerNotification('success', 'Changes saved', 'Case board modified successfully.');
       },
+      openAddTaskModal() {
+        this.modalAddTaskTitle = 'Create task';
+        this.showAddTaskModal = true;
+      },
+      handleAddTaskCase() {
+        this.showAddTaskModal = false;
+        this.triggerNotification('success', 'You successfully created new task', 'Your task will be added to Vilo board.');
+      },
       handleModalClose(value: boolean) {
         this.showEditModal = false;
+        this.showAddTaskModal = false;
+      },
+      handleDropdownClick() {
+      },
+      handleButtonClick() {
       },
     },
   });

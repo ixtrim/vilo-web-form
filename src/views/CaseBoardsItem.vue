@@ -26,7 +26,7 @@
       </div>
     </div>
 
-    <div class="row fill-space">
+    <div class="row">
       <div class="col-lg-3">
         <Search />
       </div>
@@ -48,6 +48,12 @@
       </div>
     </div>
 
+    <div class="row fill-space">
+      <div class="col-lg-12">
+        <Board />
+      </div>
+    </div>
+
     <VModal :show="showAddTaskModal || showEditModal" :title="modalAddTaskTitle || modalEditTitle" @update:show="handleModalClose">
       <VAddTask v-if="showAddTaskModal" :title="modalAddTaskTitle" @close-modal="showAddTaskModal = false" @save-clicked="handleAddTaskCase" />
       <VEditCaseBoard v-if="showEditModal" :title="modalEditTitle" @close-modal="showEditModal = false" @save-clicked="handleEditCase" />
@@ -64,6 +70,7 @@
   import VButton from '@/components/v-button/VButton.vue';
   import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
+  import Search from '@/modules/Navigation/Search.vue';
   import Board from '@/modules/Board.vue';
   import VNotification from '@/components/v-notification/VNotification.vue';
   import VModal from '@/components/v-modal/v-modal.vue';
@@ -86,7 +93,8 @@
       VAddTask,
       VUserSmall,
       VDropdown,
-      Board
+      Board,
+      Search
     },
     data() {
       return {

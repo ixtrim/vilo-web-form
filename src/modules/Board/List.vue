@@ -1,6 +1,6 @@
 <template>
   <div class="list">
-    <h3>{{ list.title }}</h3>
+    <h3>{{ list.title }} <span>{{ list.cards.length }}</span></h3>
     <Card v-for="card in list.cards" :key="card.id" :card="card" />
   </div>
 </template>

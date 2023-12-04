@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="col-lg-2 align-right">
-        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="handleButtonClick" text="Add new template"></VButton>
+        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="addDocument" text="Add new template"></VButton>
       </div>
     </div>
 
@@ -196,13 +196,18 @@ export default defineComponent({
     };
   },
   methods: {
+    addDocument() {
+      this.$router.push('/library-document');
+    },
     handleButtonClick() {
     },
     handleDropdownClick(item: any) { 
     },
     handlePreview(id: number) {
+      this.$router.push('/library-document');
     },
     handleCreateNewDocument(id: number) {
+      this.$router.push('/library-document');
     },
     handleDelete(id: number) {
     },

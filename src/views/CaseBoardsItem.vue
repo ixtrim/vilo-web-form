@@ -10,7 +10,7 @@
     <div class="row">
       <div class="col-lg-10">
         <div class="dashboard__heading">
-          <h1>Vilo Board</h1>
+          <h1>Baker INC / 0212</h1>
           <p>Time tracking, invoicing and expenses.</p>
           <VUserSmall userName="Phoenix Baker" />
         </div>
@@ -107,7 +107,7 @@
         notificationMessage: 'This account has been successfully edited.',
         breadcrumbs: [
           { text: 'Case boards', to: '/case-boards' },
-          { text: 'Example Vilo Board' }
+          { text: 'Baker INC 0212' }
         ],
         sortPriority: [
           { label: 'All' },

@@ -2,6 +2,15 @@
   <div class="modal-body">
 
     <div class="row">
+      <div class="col-lg-8">
+        <h4>Invoice <span>#3066</span></h4>
+      </div>
+      <div class="col-lg-4">
+        
+      </div>
+    </div>
+
+    <div class="row">
       <div class="col-lg-12">
         <VInput 
           label="Title" 
@@ -15,6 +24,15 @@
       <div class="col-lg-12">
         <div class="form-group">
           <label>Client</label>
+          <VDropdown :title="dropdownClientTitle" :items="dropdownClient" @item-clicked="onClientChanged" />
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="form-group">
+          <label>Case No.</label>
           <VDropdown :title="dropdownClientTitle" :items="dropdownClient" @item-clicked="onClientChanged" />
         </div>
       </div>

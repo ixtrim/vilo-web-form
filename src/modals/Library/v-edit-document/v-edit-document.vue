@@ -1,6 +1,5 @@
 <template>
   <div class="modal-body temporary-img">
-    
     <img src="@/assets/logo-icon.svg" alt="Vilo Icon">
   </div>
   <div class="modal-footer">

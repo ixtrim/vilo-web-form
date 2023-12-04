@@ -1,6 +1,14 @@
 .modal-backdrop {
   background-color:rgba(0, 0, 0, 0.5);
 
+  .temporary-img {
+    img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+  }
+
   .modal-content {
     width: 90%;
     max-width: 640px;

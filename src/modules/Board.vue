@@ -55,6 +55,14 @@ export default {
     };
   },
   mounted() {
+    const boardElement = this.$refs.board as HTMLElement;
+    if (boardElement) {
+      new Sortable(boardElement, {
+        draggable: '.list',
+        handle: '.list__drag'
+      });
+    }
+
     const sortable = new Sortable(document.querySelectorAll('.list'), {
       draggable: '.card'
     });

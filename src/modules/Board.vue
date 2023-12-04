@@ -55,8 +55,8 @@ export default {
     };
   },
   mounted() {
-    if (this.$refs.board) {
-      const boardElement = this.$refs.board as HTMLElement;
+    const boardElement = this.$refs.board as HTMLElement;
+    if (boardElement) {
       new Sortable(boardElement, {
         draggable: '.list',
         handle: '.list__drag'

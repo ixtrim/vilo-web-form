@@ -50,7 +50,7 @@
 
     <div class="row fill-space">
       <div class="col-lg-12">
-        <Board />
+        <Board @addTask="openAddTaskModal" />
       </div>
     </div>
 

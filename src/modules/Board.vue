@@ -1,6 +1,6 @@
 <template>
   <div class="board">
-    <List v-for="list in lists" :key="list.id" :list="list" />
+    <List v-for="list in lists" :key="list.id" :list="list" @addTask="$emit('addTask')" />
   </div>
 </template>
 

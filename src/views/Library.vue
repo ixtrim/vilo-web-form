@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="col-lg-2 align-right">
-        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="handleButtonClick" text="Add new document"></VButton>
+        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="addDocument" text="Add new document"></VButton>
       </div>
     </div>
 
@@ -111,7 +111,7 @@
                   <VLink to="#" styled="secondary">Delete</VLink>
                 </div>
                 <div class="col col--l-edit">
-                  <VLink to="#" styled="primary">Edit</VLink>
+                  <VLink to="#" @click="addDocument" styled="primary">Edit</VLink>
                 </div>
               </div>
             </div>
@@ -140,7 +140,12 @@
     </VModalSmall>
 
     
+    <VModal :show="showAddDocumentModal || showEditDocumentModal" :title="modalAddDocumentTitle || modalEditDocumentTitle" @update:show="handleModalClose">
+      <VAddDocument v-if="showAddDocumentModal" :title="modalAddDocumentTitle" @close-modal="showAddDocumentModal = false" @save-clicked="handleAddDocument" />
+      <VEditDocument v-if="showEditDocumentModal" :title="modalEditDocumentTitle" @close-modal="showEditDocumentModal = false" @save-clicked="handleEditDocument" />
+    </VModal>
 
+    <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
   </div>
 </template>
 
@@ -156,9 +161,17 @@ import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import VFile from '@/components/v-file/VFile.vue';
 import VBadge from '@/components/v-badge/VBadge.vue';
 import TabsLibrary from '@/modules/TabsLibrary.vue';
+import VNotification from '@/components/v-notification/VNotification.vue';
+import VModal from '@/components/v-modal/v-modal.vue';
+import VAddDocument from '@/modals/Library/v-add-document/v-add-document.vue';
+import VEditDocument from '@/modals/Library/v-edit-document/v-edit-document.vue';
 
 interface DropdownItem {
   label: string;
+}
+
+interface NotificationRef {
+  showNotification: () => void;
 }
 
 export default defineComponent({
@@ -173,9 +186,19 @@ export default defineComponent({
     VFile,
     VBadge,
     TabsLibrary,
+    VModal,
+    VAddDocument,
+    VEditDocument,
   },
   data() {
     return {
+      showAddDocumentModal: false,
+      showEditDocumentModal: false,
+      modalAddDocumentTitle: '',
+      modalEditDocumentTitle: '',
+      notificationType: 'success',
+      notificationHeader: 'Changes saved',
+      notificationMessage: 'This account has been successfully edited.',
       userName: 'Olivia Rhye',
       userEmail: 'olivia@untitledui.com',
       sortTime: [
@@ -292,6 +315,12 @@ export default defineComponent({
     },
   },
   methods: {
+    triggerNotification(type: string, header: string, message: string) {
+      this.notificationType = type;
+      this.notificationHeader = header;
+      this.notificationMessage = message;
+      (this.$refs.notificationRef as NotificationRef).showNotification();
+    },
     handleDropdownClick(item: DropdownItem) {
       console.log('Dropdown item clicked:', item);
     },
@@ -311,6 +340,25 @@ export default defineComponent({
     },
     updatePage(newPage: number) {
       this.currentPage = newPage;
+    },
+    addDocument() {
+      this.$router.push('/library-document');
+    },
+    handleAddDocument() {
+      this.showAddDocumentModal = false;
+      this.triggerNotification('success', 'Changes saved', 'Case board modified successfully.');
+    },
+    openEditDocumentModal() {
+      this.modalEditDocumentTitle = 'Create task';
+      this.showEditDocumentModal = true;
+    },
+    handleEditDocument() {
+      this.showEditDocumentModal = false;
+      this.triggerNotification('success', 'You successfully created new task', 'Your task will be added to Vilo board.');
+    },
+    handleModalClose(value: boolean) {
+      this.showAddDocumentModal = false;
+      this.showEditDocumentModal = false;
     },
   },
 });

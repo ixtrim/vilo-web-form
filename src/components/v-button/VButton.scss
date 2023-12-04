@@ -8,7 +8,7 @@
   background-color: var(--v-primary-indigo-600);
   font-family: var(--v-font-inter-semi-bold);
   line-height: 24px;
-  color: #fff;
+  color: var(--v-white);
   font-size: 16px;
   border: none;
   cursor: pointer;
@@ -56,7 +56,7 @@
   // Styles
   &--primary {
     background-color: var(--v-primary-indigo-600);
-    color: #fff;
+    color: var(--v-white);
 
     &:hover {
       background-color: var(--v-primary-indigo-700);
@@ -133,12 +133,22 @@
 
   &--important {
     background-color: var(--v-important-color);
-    color: #fff;
+    color: var(--v-white);
   }
 
   &--crucial {
     background-color: var(--v-crucial-color);
-    color: #fff;
+    color: var(--v-white);
+  }
+
+  &--green {
+    border: 1px solid var(--v-primary-indigo-600);
+    background-color: var(--v-green-600);
+    color: var(--v-white);
+
+    &:hover {
+      background-color: var(--v-green-700);
+    }
   }
 
   &--icon-left,

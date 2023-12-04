@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="col-lg-2 align-right">
-        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="handleButtonClick" text="Add new invoice"></VButton>
+        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="openAddInvoiceModal" text="Add new invoice"></VButton>
       </div>
     </div>
 
@@ -125,7 +125,7 @@
               </div>
               <!-- Assuming you have different methods for different buttons -->
               <div class="col col--inv-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="handlePreviewClick" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="openPreviewInvoiceModal" text=""></VButton>
               </div>
               <div class="col col--inv-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="download" styled="simple-icon" @click="handleDownloadClick" text=""></VButton>
@@ -157,6 +157,13 @@
       </div>
     </div>
 
+    <VModal :show="showAddInvoiceModal || showPreviewInvoiceModal" :title="modalAddInvoiceTitle || modalPreviewInvoiceTitle" @update:show="handleModalClose">
+      <VAddInvoice v-if="showAddInvoiceModal" :title="modalAddInvoiceTitle" @close-modal="showAddInvoiceModal = false" @save-clicked="handleAddInvoiceCase" />
+      <VPreviewInvoice v-if="showPreviewInvoiceModal" :title="modalPreviewInvoiceTitle" @close-modal="showPreviewInvoiceModal = false" @save-clicked="handlePreviewInvoiceCase" />
+    </VModal>
+
+    <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
+
   </div>
 </template>
 
@@ -170,6 +177,13 @@ import VStatus from '@/components/v-status/VStatus.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
 import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
+import VModal from '@/components/v-modal/v-modal.vue';
+import VAddInvoice from '@/modals/Invoices/v-add-invoice/v-add-invoice.vue';
+import VPreviewInvoice from '@/modals/Invoices/v-preview-invoice/v-preview-invoice.vue';
+
+  interface NotificationRef {
+    showNotification: () => void;
+  }
 
 export default defineComponent({
   components: {
@@ -181,9 +195,19 @@ export default defineComponent({
     VModalSmall,
     VDropdown,
     VStatus,
+    VModal,
+    VAddInvoice,
+    VPreviewInvoice,
   },
   data() {
     return {
+      showAddInvoiceModal: false,
+      showPreviewInvoiceModal: false,
+      modalAddInvoiceTitle: '',
+      modalPreviewInvoiceTitle: '',
+      notificationType: 'success',
+      notificationHeader: 'Changes saved',
+      notificationMessage: 'This account has been successfully edited.',
       userName: 'Olivia Rhye',
       userEmail: 'olivia@untitledui.com',
       sortTime: [
@@ -211,7 +235,7 @@ export default defineComponent({
             name: `Customer ${i}`,
             email: `customer${i}@example.com`
           },
-          reminder: ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Annually', 'Set reminder'][Math.floor(Math.random() * 6)]
+          reminder: ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Annually'][Math.floor(Math.random() * 5)]
         }))
       ]
     };
@@ -254,6 +278,12 @@ export default defineComponent({
     };
   },
   methods: {
+    triggerNotification(type: string, header: string, message: string) {
+      this.notificationType = type;
+      this.notificationHeader = header;
+      this.notificationMessage = message;
+      (this.$refs.notificationRef as NotificationRef).showNotification();
+    },
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
@@ -263,6 +293,26 @@ export default defineComponent({
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
       }
+    },
+    openAddInvoiceModal() {
+      this.modalAddInvoiceTitle = 'Create new Invoice';
+      this.showAddInvoiceModal = true;
+    },
+    handleAddInvoiceCase() {
+      this.showAddInvoiceModal = false;
+      this.triggerNotification('success', 'Changes saved', 'Case board modified successfully.');
+    },
+    openPreviewInvoiceModal() {
+      this.modalPreviewInvoiceTitle = 'INVOICE';
+      this.showPreviewInvoiceModal = true;
+    },
+    handlePreviewInvoiceCase() {
+      this.showPreviewInvoiceModal = false;
+      this.triggerNotification('success', 'You successfully created new task', 'Your task will be added to Vilo board.');
+    },
+    handleModalClose(value: boolean) {
+      this.showAddInvoiceModal = false;
+      this.showPreviewInvoiceModal = false;
     },
     handleButtonClick() {
       

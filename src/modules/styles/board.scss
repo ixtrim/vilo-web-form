@@ -2,15 +2,6 @@
 @import '../../components/styles/variables/fonts.scss';
 @import '../../components/styles/variables/icons.scss';
 
-// Variables
-$card-bg-color: #FFFFFF;
-$card-border-color: #E0E0E0;
-$list-bg-color: #F4F5F7;
-$board-bg-color: #0079BF;
-$card-spacing: 10px;
-$list-padding: 15px;
-$list-width: 272px;
-
 // Board
 .board {
   margin-top: 8px;
@@ -52,6 +43,60 @@ $list-width: 272px;
 
     &:last-child {
       margin-right: 0;
+    }
+
+    &__drag {
+      cursor: pointer;
+      position: absolute;
+      width: 11px;
+      height: 5px;
+      top: 25px;
+      right: 20px;
+
+      span {
+        width: 165px;
+        display: none;
+        position: absolute;
+        top: 10px;
+        right: 50%;
+        transform: translateX(50%);
+        background: var(--v-white);
+        border-radius: 8px;
+        padding: 8px 12px;
+        border: 1px solid var(--v-gray-200);
+        z-index: 999;
+        font-size: 12px;
+        font-family: var(--v-font-inter-semi-bold);
+        font-weight: 600;
+        color: var(--v-gray-700);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      &:hover {
+        span {
+          display: block;
+        }
+      }
+
+      &::before,
+      &::after {
+        content: '';
+        display: inline-block;
+        width: 11px;
+        height: 2px;
+        background-color: var(--v-gray-900);
+        margin: 0;
+        border-radius: 3px;
+      }
+
+      &::before {
+        margin-bottom: 2px;
+      }
+    }
+    
+    .list__drag:active {
+      opacity: 0.7;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
   }
 

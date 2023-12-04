@@ -1,9 +1,9 @@
 <template>
-  <div class="modal-body">
+  <div class="modal-body add-invoice">
 
     <div class="row">
       <div class="col-lg-8">
-        <h4>Invoice <span>#3066</span></h4>
+        <h4 class="add-invoice__nr">Invoice <span>#3066</span></h4>
       </div>
       <div class="col-lg-4">
         
@@ -11,10 +11,17 @@
     </div>
 
     <div class="row">
-      <div class="col-lg-12">
+      <div class="col-lg-6">
         <VInput 
-          label="Title" 
-          placeholder="Vilo" 
+          label="Recipient Name*" 
+          placeholder="John Doe" 
+          v-model="localUserName"
+        />
+      </div>
+      <div class="col-lg-6">
+        <VInput 
+          label="Recipient email" 
+          placeholder="johndoe@vilo.com" 
           v-model="localUserName"
         />
       </div>
@@ -22,38 +29,66 @@
 
     <div class="row">
       <div class="col-lg-12">
-        <div class="form-group">
-          <label>Client</label>
-          <VDropdown :title="dropdownClientTitle" :items="dropdownClient" @item-clicked="onClientChanged" />
-        </div>
+        <VInput 
+          label="Billing Address" 
+          placeholder="132, My Street, Kingston, New York 12401, USA" 
+          v-model="localUserName"
+        />
       </div>
     </div>
 
     <div class="row">
-      <div class="col-lg-12">
-        <div class="form-group">
-          <label>Case No.</label>
-          <VDropdown :title="dropdownClientTitle" :items="dropdownClient" @item-clicked="onClientChanged" />
-        </div>
+      <div class="col-lg-6">
+        <h4>Invoice Items</h4>
+      </div>
+      <div class="col-lg-6">
+        
       </div>
     </div>
 
     <div class="row">
-      <div class="col-lg-12">
-        <VTextarea 
-          label="Description" 
-          placeholder="e.g. I joined Stripe’s Customer Success team to help them scale their checkout product. I focused mainly on onboarding new customers and resolving complaints." 
-          v-model="computedUserNotes"
+      <div class="col-lg-6">
+        <VInput 
+          label="Project Description" 
+          placeholder="Legal Consulting" 
+          v-model="localUserName"
+        />
+      </div>
+      <div class="col-lg-6">
+        <VInput 
+          label="Due Date" 
+          placeholder="21.10.2023" 
+          v-model="localUserName"
         />
       </div>
     </div>
 
     <div class="row">
       <div class="col-lg-12">
-        <div class="form-group">
-          <label>Add team members</label>
-          <VDropdown :title="dropdownTeamTitle" :items="dropdownTeam" @item-clicked="onTeamChanged" />
-        </div>
+        <p>Subtotal: <strong>$1400</strong></p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-6">
+        <VInput 
+          label="Taxes" 
+          placeholder="6%" 
+          v-model="localUserName"
+        />
+      </div>
+      <div class="col-lg-6">
+        <VInput 
+          label="Total discount" 
+          placeholder="0%" 
+          v-model="localUserName"
+        />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <p>Total: <strong>$1400</strong></p>
       </div>
     </div>
 
@@ -61,10 +96,10 @@
   <div class="modal-footer">
     <ul class="modal-footer__actions">
       <li>
-        <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
+        <v-button :block="false" size="md" icon="left" icon-style="add" styled="outlined" @click="closeModal" text="Save as draft"></v-button>
       </li>
       <li>
-        <v-button :block="false" size="md" styled="Primary" @click="saveAndClose" text="Save"></v-button>
+        <v-button :block="false" size="md" styled="Primary" @click="saveAndClose" text="Send to client"></v-button>
       </li>
     </ul>
   </div>

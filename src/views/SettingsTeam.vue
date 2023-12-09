@@ -31,10 +31,6 @@
         <div class="dashboard__users">
 
           <div class="dashboard__users__head">
-            
-            <div class="col col--checkbox">
-              <input type="checkbox" id="remember" class="mr-8p">
-            </div>
             <div class="col col--sett-t-user">
               <h5>Name</h5>
             </div>
@@ -58,10 +54,6 @@
           <div class="dashboard__users__page">
 
             <div class="dashboard__users__page__item" v-for="user in paginatedUsers" :key="user.id">
-
-              <div class="col col--checkbox">
-                <input type="checkbox" id="remember" class="mr-8p">
-              </div>
               <div class="col col--sett-t-user">
                 <VUser :userName="user.full_name" :userEmail="user.email" />
               </div>
@@ -82,7 +74,6 @@
               <div class="col col--cm-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal(user)" text=""></VButton>
               </div>
-
             </div>
 
           </div>
@@ -94,14 +85,14 @@
     <div class="row bottom-pagination">
       <div class="col-lg-2 align-left">
         <VButton 
+          v-if="currentPage > 1"
           :block="false" 
           size="sm" 
           icon="left" 
           icon-style="arrow-left" 
           styled="outlined" 
           @click="changePage(-1)" 
-          text="Previous"
-          :disabled="currentPage <= 1">
+          text="Previous">
         </VButton>
       </div>
       <div class="col-lg-8 align-center">
@@ -109,14 +100,14 @@
       </div>
       <div class="col-lg-2 align-right">
         <VButton 
+          v-if="currentPage < totalPages"
           :block="false" 
           size="sm" 
           icon="right" 
           icon-style="arrow-right" 
           styled="outlined" 
           @click="changePage(1)" 
-          text="Next"
-          :disabled="currentPage >= totalPages">
+          text="Next">
         </VButton>
       </div>
     </div>
@@ -247,7 +238,7 @@ export default defineComponent({
   setup() {
     const users = ref<User[]>([]);
     const currentPage = ref(1);
-    const itemsPerPage = 3;
+    const itemsPerPage = 10;
     const totalUsers = ref(0);
     const nextUserId = ref(0); 
 
@@ -365,6 +356,10 @@ export default defineComponent({
         // Remove the user from the local state
         this.users = this.users.filter(user => user.id !== userId);
         this.triggerNotification('success', 'Changes saved', 'User deleted successfully.');
+
+        setTimeout(() => {
+          this.refreshData();
+        }, 1000);
       } catch (error) {
         this.triggerNotification('error', 'Error!', 'Couldnt delete user.');
       }
@@ -390,6 +385,7 @@ export default defineComponent({
           this.users[userIndex] = { ...this.users[userIndex], ...updatedUserData };
         }
         this.triggerNotification('success', 'Changes saved', 'User updated successfully.');
+
         setTimeout(() => {
           this.refreshData();
         }, 1000);
@@ -420,14 +416,15 @@ export default defineComponent({
       this.nextUserId++;
       this.showAddModal = false;
       this.triggerNotification('success', 'Changes saved', 'User added successfully.');
+      
+      setTimeout(() => {
+        this.refreshData();
+      }, 1000);
     },
     handleModalClose(value: boolean) {
       this.showModal = false;
       this.showAddModal = false;
     },
-    handleButtonClick() {
-     console.log('Button clicked');
-    }
   },
 });
 </script>

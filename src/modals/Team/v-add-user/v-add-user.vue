@@ -106,7 +106,7 @@
 
 <script setup lang="ts">
   import { db } from '@/firebase.js';
-  import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
+  import { doc, setDoc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
   import { ref, watch, computed } from 'vue';
   import type { PropType } from 'vue';
   import { defineEmits, defineProps } from 'vue';
@@ -121,6 +121,11 @@
   const localUserPhone = ref('');
   const localUserAddress = ref('');
   const localUserPosition = ref('');
+
+  const props = defineProps({
+    title: String,
+    nextUserId: Number
+  });
 
   type DropdownItem = {
     label: string;
@@ -160,10 +165,36 @@
     emit('close-modal');
   }
 
-  function saveAndClose() {
-    emit('save-clicked');
+  async function saveAndClose() {
+    if (props.nextUserId === undefined) {
+      console.error("nextUserId is undefined");
+      return;
+    }
+
+    const formattedId = props.nextUserId.toString().padStart(4, '0');
+
+    const newUser = {
+      full_name: localUserName.value,
+      email: localUserEmail.value,
+      phone: localUserPhone.value || '',
+      address: localUserAddress.value || '',
+      position: localUserPosition.value || '',
+      company: localUserCompany.value || '',
+      role: dropdownRoles.value.findIndex(role => role.label === dropdownRoleTitle.value),
+      status: dropdownStatus.value.findIndex(status => status.label === dropdownStatusTitle.value),
+      notes: userNotes.value || ''
+    };
+
+    try {
+      await setDoc(doc(db, "users", formattedId), newUser);
+      emit('save-clicked', newUser);
+    } catch (error) {
+      console.error("Error adding new user: ", error);
+    }
+
     closeModal();
   }
+
 </script>
 
 <style>

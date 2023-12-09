@@ -57,7 +57,7 @@
 
           <div class="dashboard__users__page">
 
-            <div class="dashboard__users__page__item" v-for="user in users" :key="user.id">
+            <div class="dashboard__users__page__item" v-for="user in paginatedUsers" :key="user.id">
 
               <div class="col col--checkbox">
                 <input type="checkbox" id="remember" class="mr-8p">
@@ -93,13 +93,31 @@
 
     <div class="row bottom-pagination">
       <div class="col-lg-2 align-left">
-        <VButton :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="handleButtonClick" text="Previous"></VButton>
+        <VButton 
+          :block="false" 
+          size="sm" 
+          icon="left" 
+          icon-style="arrow-left" 
+          styled="outlined" 
+          @click="changePage(-1)" 
+          text="Previous"
+          :disabled="currentPage <= 1">
+        </VButton>
       </div>
       <div class="col-lg-8 align-center">
-        <v-pagination-list :total-pages="6" @update:currentPage="updatePage" />
+        <v-pagination-list :total-pages="totalPages" @update:currentPage="updatePage" />
       </div>
       <div class="col-lg-2 align-right">
-        <VButton :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="handleButtonClick" text="Next"></VButton>
+        <VButton 
+          :block="false" 
+          size="sm" 
+          icon="right" 
+          icon-style="arrow-right" 
+          styled="outlined" 
+          @click="changePage(1)" 
+          text="Next"
+          :disabled="currentPage >= totalPages">
+        </VButton>
       </div>
     </div>
 
@@ -228,11 +246,9 @@ export default defineComponent({
   },
   setup() {
     const users = ref<User[]>([]);
-    const itemsPerPage = 10;
-    const allItems = ref([
-      { id: 1, name: 'Page 1' },
-    ]);
     const currentPage = ref(1);
+    const itemsPerPage = 3;
+    const totalUsers = ref(0);
     const nextUserId = ref(0); 
 
     const fetchUsers = async () => {
@@ -247,30 +263,39 @@ export default defineComponent({
         .reduce((max, id) => id > max ? id : max, 0);
 
       nextUserId.value = maxUserId + 1;
+      totalUsers.value = users.value.length;
     };
 
     onMounted(fetchUsers);
 
-    const totalPages = computed(() => Math.ceil(allItems.value.length / itemsPerPage));
+    const totalPages = computed(() => Math.ceil(totalUsers.value / itemsPerPage));
 
-    const paginatedItems = computed(() => {
+    const paginatedUsers = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage;
       const end = start + itemsPerPage;
-      return allItems.value.slice(start, end);
+      return users.value.slice(start, end);
     });
 
     const updatePage = (newPage: number) => {
       currentPage.value = newPage;
     };
 
+    const changePage = (step: number) => {
+      const newPage = currentPage.value + step;
+      if (newPage >= 1 && newPage <= totalPages.value) {
+        currentPage.value = newPage;
+      }
+    };
+
     return {
       users,
-      paginatedItems,
+      paginatedUsers,
       totalPages,
       currentPage,
+      updatePage,
+      changePage,
       nextUserId,
       fetchUsers,
-      updatePage
     };
   },
   methods: {

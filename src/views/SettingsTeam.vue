@@ -391,7 +391,8 @@ export default defineComponent({
       this.showAddModal = true;
     },
     handleAddUser(newUser: User) {
-      console.log('New User:', newUser);
+      this.users.push(newUser);
+      this.nextUserId++;
       this.showAddModal = false;
       this.triggerNotification('success', 'Changes saved', 'User added successfully.');
     },

@@ -53,7 +53,7 @@
 
           <div class="dashboard__users__page">
 
-            <div class="dashboard__users__page__item" v-for="user in paginatedUsers" :key="user.id">
+            <div :class="{ 'dashboard__users__page__item': true, ['dashboard__users__page__item--' + user.role]: true }" v-for="user in paginatedUsers" :key="user.id">
               <div class="col col--sett-t-user">
                 <VUser :userName="user.full_name" :userEmail="user.email" />
               </div>
@@ -222,10 +222,11 @@ export default defineComponent({
       notificationHeader: 'Changes saved',
       notificationMessage: 'This account has been successfully edited.',
       dropdownRoleItems: [
-        { label: 'Internal user' },
+        { label: 'Admin' },
+        { label: 'General' },
+        { label: 'Finance' },
         { label: 'Client (individual)' },
         { label: 'Client (company)' },
-        { label: 'Admin' },
       ],
       dropdownStatusItems: [
         { label: 'Draft' },
@@ -311,9 +312,10 @@ export default defineComponent({
     getRoleLabel(roleCode: number) {
       const roleMapping: { [key: number]: string } = {
         0: 'Admin',
-        1: 'Internal user',
-        2: 'Client (individual)',
-        3: 'Client (company)',
+        1: 'General',
+        2: 'Finance',
+        3: 'Client (individual)',
+        4: 'Client (company)',
       };
 
       return roleMapping[roleCode] || 'Unknown';
@@ -323,9 +325,10 @@ export default defineComponent({
 
       const roleCodeMapping: { [key: string]: number } = {
         'Admin': 0,
-        'Internal user': 1,
-        'Client (individual)': 2,
-        'Client (company)': 3,
+        'General': 1,
+        'Finance': 2,
+        'Client (individual)': 3,
+        'Client (company)': 4,
       };
       const newRoleCode = roleCodeMapping[item.label];
 

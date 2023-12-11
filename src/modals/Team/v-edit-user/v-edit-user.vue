@@ -36,7 +36,7 @@
       </div>
     </div>
 
-    <div class="row" v-if="localUserRole === 3">
+    <div class="row" v-if="localUserRole === 4">
       <div class="col-lg-12">
         <div class="form-group">
           <VInput 
@@ -48,7 +48,7 @@
       </div>
     </div>
 
-    <div class="row" v-if="localUserRole === 2 || localUserRole === 3">
+    <div class="row" v-if="localUserRole === 3 || localUserRole === 4">
       <div class="col-lg-12">
         <VInput 
           label="Phone" 
@@ -58,7 +58,7 @@
       </div>
     </div>
 
-    <div class="row" v-if="localUserRole === 2 || localUserRole === 3">
+    <div class="row" v-if="localUserRole === 3 || localUserRole === 4">
       <div class="col-lg-12">
         <VInput 
           label="Address" 
@@ -183,9 +183,10 @@
   const dropdownRoleChange = (item: DropdownItem) => {
     const roleCodeMapping = {
       'Admin': 0,
-      'Internal user': 1,
-      'Client (individual)': 2,
-      'Client (company)': 3,
+      'General': 1,
+      'Finance': 2,
+      'Client (individual)': 3,
+      'Client (company)': 4,
     };
     const newRoleCode = roleCodeMapping[item.label as keyof typeof roleCodeMapping];
     if (newRoleCode !== undefined) {
@@ -198,9 +199,10 @@
   const getRoleLabel = (roleCode: number) => {
     const roleMapping: { [key: number]: string } = {
       0: 'Admin',
-      1: 'Internal user',
-      2: 'Client (individual)',
-      3: 'Client (company)',
+      1: 'General',
+      2: 'Finance',
+      3: 'Client (individual)',
+      4: 'Client (company)',
     };
 
     return roleMapping[roleCode] ?? 'Unknown';

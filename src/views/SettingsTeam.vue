@@ -31,10 +31,6 @@
         <div class="dashboard__users">
 
           <div class="dashboard__users__head">
-            
-            <div class="col col--checkbox">
-              <input type="checkbox" id="remember" class="mr-8p">
-            </div>
             <div class="col col--sett-t-user">
               <h5>Name</h5>
             </div>
@@ -57,11 +53,7 @@
 
           <div class="dashboard__users__page">
 
-            <div class="dashboard__users__page__item" v-for="user in users" :key="user.id">
-
-              <div class="col col--checkbox">
-                <input type="checkbox" id="remember" class="mr-8p">
-              </div>
+            <div :class="{ 'dashboard__users__page__item': true, ['dashboard__users__page__item--' + user.role]: true }" v-for="user in paginatedUsers" :key="user.id">
               <div class="col col--sett-t-user">
                 <VUser :userName="user.full_name" :userEmail="user.email" />
               </div>
@@ -82,7 +74,6 @@
               <div class="col col--cm-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal(user)" text=""></VButton>
               </div>
-
             </div>
 
           </div>
@@ -93,13 +84,31 @@
 
     <div class="row bottom-pagination">
       <div class="col-lg-2 align-left">
-        <VButton :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="handleButtonClick" text="Previous"></VButton>
+        <VButton 
+          v-if="currentPage > 1"
+          :block="false" 
+          size="sm" 
+          icon="left" 
+          icon-style="arrow-left" 
+          styled="outlined" 
+          @click="changePage(-1)" 
+          text="Previous">
+        </VButton>
       </div>
       <div class="col-lg-8 align-center">
-        <v-pagination-list :total-pages="6" @update:currentPage="updatePage" />
+        <v-pagination-list :total-pages="totalPages" @update:currentPage="updatePage" />
       </div>
       <div class="col-lg-2 align-right">
-        <VButton :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="handleButtonClick" text="Next"></VButton>
+        <VButton 
+          v-if="currentPage < totalPages"
+          :block="false" 
+          size="sm" 
+          icon="right" 
+          icon-style="arrow-right" 
+          styled="outlined" 
+          @click="changePage(1)" 
+          text="Next">
+        </VButton>
       </div>
     </div>
 
@@ -213,10 +222,11 @@ export default defineComponent({
       notificationHeader: 'Changes saved',
       notificationMessage: 'This account has been successfully edited.',
       dropdownRoleItems: [
-        { label: 'Internal user' },
+        { label: 'Admin' },
+        { label: 'General' },
+        { label: 'Finance' },
         { label: 'Client (individual)' },
         { label: 'Client (company)' },
-        { label: 'Admin' },
       ],
       dropdownStatusItems: [
         { label: 'Draft' },
@@ -228,11 +238,9 @@ export default defineComponent({
   },
   setup() {
     const users = ref<User[]>([]);
-    const itemsPerPage = 10;
-    const allItems = ref([
-      { id: 1, name: 'Page 1' },
-    ]);
     const currentPage = ref(1);
+    const itemsPerPage = 10;
+    const totalUsers = ref(0);
     const nextUserId = ref(0); 
 
     const fetchUsers = async () => {
@@ -247,30 +255,39 @@ export default defineComponent({
         .reduce((max, id) => id > max ? id : max, 0);
 
       nextUserId.value = maxUserId + 1;
+      totalUsers.value = users.value.length;
     };
 
     onMounted(fetchUsers);
 
-    const totalPages = computed(() => Math.ceil(allItems.value.length / itemsPerPage));
+    const totalPages = computed(() => Math.ceil(totalUsers.value / itemsPerPage));
 
-    const paginatedItems = computed(() => {
+    const paginatedUsers = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage;
       const end = start + itemsPerPage;
-      return allItems.value.slice(start, end);
+      return users.value.slice(start, end);
     });
 
     const updatePage = (newPage: number) => {
       currentPage.value = newPage;
     };
 
+    const changePage = (step: number) => {
+      const newPage = currentPage.value + step;
+      if (newPage >= 1 && newPage <= totalPages.value) {
+        currentPage.value = newPage;
+      }
+    };
+
     return {
       users,
-      paginatedItems,
+      paginatedUsers,
       totalPages,
       currentPage,
+      updatePage,
+      changePage,
       nextUserId,
       fetchUsers,
-      updatePage
     };
   },
   methods: {
@@ -295,9 +312,10 @@ export default defineComponent({
     getRoleLabel(roleCode: number) {
       const roleMapping: { [key: number]: string } = {
         0: 'Admin',
-        1: 'Internal user',
-        2: 'Client (individual)',
-        3: 'Client (company)',
+        1: 'General',
+        2: 'Finance',
+        3: 'Client (individual)',
+        4: 'Client (company)',
       };
 
       return roleMapping[roleCode] || 'Unknown';
@@ -307,9 +325,10 @@ export default defineComponent({
 
       const roleCodeMapping: { [key: string]: number } = {
         'Admin': 0,
-        'Internal user': 1,
-        'Client (individual)': 2,
-        'Client (company)': 3,
+        'General': 1,
+        'Finance': 2,
+        'Client (individual)': 3,
+        'Client (company)': 4,
       };
       const newRoleCode = roleCodeMapping[item.label];
 
@@ -340,6 +359,10 @@ export default defineComponent({
         // Remove the user from the local state
         this.users = this.users.filter(user => user.id !== userId);
         this.triggerNotification('success', 'Changes saved', 'User deleted successfully.');
+
+        setTimeout(() => {
+          this.refreshData();
+        }, 1000);
       } catch (error) {
         this.triggerNotification('error', 'Error!', 'Couldnt delete user.');
       }
@@ -365,6 +388,7 @@ export default defineComponent({
           this.users[userIndex] = { ...this.users[userIndex], ...updatedUserData };
         }
         this.triggerNotification('success', 'Changes saved', 'User updated successfully.');
+
         setTimeout(() => {
           this.refreshData();
         }, 1000);
@@ -395,14 +419,15 @@ export default defineComponent({
       this.nextUserId++;
       this.showAddModal = false;
       this.triggerNotification('success', 'Changes saved', 'User added successfully.');
+      
+      setTimeout(() => {
+        this.refreshData();
+      }, 1000);
     },
     handleModalClose(value: boolean) {
       this.showModal = false;
       this.showAddModal = false;
     },
-    handleButtonClick() {
-     console.log('Button clicked');
-    }
   },
 });
 </script>

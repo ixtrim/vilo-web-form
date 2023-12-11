@@ -140,7 +140,8 @@
 
   const dropdownRoles = ref([
     { label: 'Admin' },
-    { label: 'Internal user' },
+    { label: 'General' },
+    { label: 'Finance' },
     { label: 'Client (individual)'  },
     { label: 'Client (company)'  },
     

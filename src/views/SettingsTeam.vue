@@ -17,7 +17,7 @@
       <div class="col-lg-3">
         <ul class="settings__team-actions">
           <li>
-            <VDropdown :title="'All users'" :items="dropdownRoleItems" @item-clicked="dropdownRoleChange" />
+            <VDropdown :title="'All users'" :items="dropdownRoleItems" @item-clicked="filterUsersByRole" />
           </li>
           <li>
             <VButton :block="true" size="md" icon="left" icon-style="add-white" @click="openAddModal" text="Add user"></VButton>
@@ -143,7 +143,7 @@
   import { db } from '@/firebase.js';
   import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
   import { debounce } from 'lodash';
-  import { defineComponent, ref, computed, onMounted } from 'vue';
+  import { defineComponent, ref, computed, onMounted, reactive, } from 'vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
   import VBadge from '@/components/v-badge/VBadge.vue';
   import TabsSettings from '@/modules/TabsSettings.vue';
@@ -234,6 +234,7 @@ export default defineComponent({
         { label: 'Activated' }
       ],
       nextUserId: 0,
+      selectedRoleFilter: null as number | null,
     };
   },
   setup() {
@@ -242,13 +243,19 @@ export default defineComponent({
     const itemsPerPage = 10;
     const totalUsers = ref(0);
     const nextUserId = ref(0); 
+    const selectedRoleFilter = ref<number | null>(null);
 
     const fetchUsers = async () => {
       const querySnapshot = await getDocs(collection(db, "users"));
-      users.value = querySnapshot.docs.map(doc => ({
+      let allUsers = querySnapshot.docs.map(doc => ({
         ...doc.data() as User,
         id: doc.id,
       }));
+
+      if (selectedRoleFilter.value !== null) {
+        allUsers = allUsers.filter(user => user.role === selectedRoleFilter.value);
+      }
+      users.value = allUsers;
 
       const maxUserId = users.value
         .map(user => Number(user.id))
@@ -288,6 +295,7 @@ export default defineComponent({
       changePage,
       nextUserId,
       fetchUsers,
+      selectedRoleFilter,
     };
   },
   methods: {
@@ -427,6 +435,22 @@ export default defineComponent({
     handleModalClose(value: boolean) {
       this.showModal = false;
       this.showAddModal = false;
+    },
+    filterUsersByRole(item: DropdownItem) {
+      const roleCodeMapping: { [key: string]: number } = {
+        'Admin': 0,
+        'General': 1,
+        'Finance': 2,
+        'Client (individual)': 3,
+        'Client (company)': 4,
+      };
+      const roleValue = roleCodeMapping[item.label as keyof typeof roleCodeMapping];
+      if (roleValue !== undefined) {
+        this.selectedRoleFilter = roleValue;
+      } else {
+        this.selectedRoleFilter = null;
+      }
+      this.fetchUsers();
     },
   },
 });

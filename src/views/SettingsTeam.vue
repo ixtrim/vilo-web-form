@@ -100,7 +100,11 @@
         </VButton>
       </div>
       <div class="col-lg-8 align-center">
-        <v-pagination-list :total-pages="totalPages" :current-page="currentPage" @update:currentPage="updatePage" />
+        <v-pagination-list
+          :total-pages="totalPages"
+          :initial-page="currentPage"
+          @update:currentPage="updatePage"
+        />
       </div>
       <div class="col-lg-2 align-right">
         <VButton 
@@ -299,6 +303,16 @@ export default defineComponent({
       }
     };
 
+    const filterUsersByRole = (item: DropdownItem) => {
+      if (item.value !== null) {
+        selectedRoleFilter.value = item.value;
+      } else {
+        selectedRoleFilter.value = null;
+      }
+      currentPage.value = 1;
+      fetchUsers();
+    };
+
     return {
       users,
       paginatedUsers,
@@ -309,6 +323,7 @@ export default defineComponent({
       nextUserId,
       fetchUsers,
       selectedRoleFilter,
+      filterUsersByRole,
     };
   },
   methods: {
@@ -448,18 +463,6 @@ export default defineComponent({
     handleModalClose(value: boolean) {
       this.showModal = false;
       this.showAddModal = false;
-    },
-    filterUsersByRole(item: DropdownItem) {
-      if (item.value !== null) {
-        this.selectedRoleFilter = item.value;
-      } else {
-        this.selectedRoleFilter = null;
-      }
-      this.currentPage = 1;
-      this.fetchUsers();
-    },
-    updatePage(newPage: number) {
-      this.currentPage = newPage;
     },
   },
 });

@@ -9,8 +9,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, toRefs } from 'vue';
-import type { PropType } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 
 export default defineComponent({
   name: 'VPaginationList',
@@ -33,12 +32,17 @@ export default defineComponent({
       emit('update:currentPage', pageNumber);
     };
 
+    // Watch for changes in initialPage prop and update currentPage
     watch(() => props.initialPage, (newVal) => {
       currentPage.value = newVal;
     });
 
+    // Emit update:currentPage event when currentPage changes
+    watch(currentPage, (newVal) => {
+      emit('update:currentPage', newVal);
+    });
+
     return {
-      ...toRefs(props),
       currentPage,
       changePage
     };

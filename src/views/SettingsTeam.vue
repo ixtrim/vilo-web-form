@@ -17,7 +17,11 @@
       <div class="col-lg-3">
         <ul class="settings__team-actions">
           <li>
-            <VDropdown :title="'All users'" :items="dropdownRoleItems" @item-clicked="filterUsersByRole" />
+            <VDropdown 
+              :title="selectedRoleFilter !== null ? getRoleLabel(selectedRoleFilter) : 'All users'" 
+              :items="dropdownRoleFilters" 
+              @item-clicked="filterUsersByRole" 
+            />
           </li>
           <li>
             <VButton :block="true" size="md" icon="left" icon-style="add-white" @click="openAddModal" text="Add user"></VButton>
@@ -228,6 +232,14 @@ export default defineComponent({
         { label: 'Client (individual)' },
         { label: 'Client (company)' },
       ],
+      dropdownRoleFilters: [
+        { label: 'All users', value: null },
+        { label: 'Admin', value: 0 },
+        { label: 'General', value: 1 },
+        { label: 'Finance', value: 2 },
+        { label: 'Client (individual)', value: 3 },
+        { label: 'Client (company)', value: 4 },
+      ],
       dropdownStatusItems: [
         { label: 'Draft' },
         { label: 'Pending' },
@@ -437,18 +449,10 @@ export default defineComponent({
       this.showAddModal = false;
     },
     filterUsersByRole(item: DropdownItem) {
-      const roleCodeMapping: { [key: string]: number } = {
-        'Admin': 0,
-        'General': 1,
-        'Finance': 2,
-        'Client (individual)': 3,
-        'Client (company)': 4,
-      };
-      const roleValue = roleCodeMapping[item.label as keyof typeof roleCodeMapping];
-      if (roleValue !== undefined) {
-        this.selectedRoleFilter = roleValue;
+      if (item.value !== null) {
+        this.selectedRoleFilter = item.value;
       } else {
-        this.selectedRoleFilter = null;
+        this.selectedRoleFilter = null; // Reset to show all users
       }
       this.fetchUsers();
     },

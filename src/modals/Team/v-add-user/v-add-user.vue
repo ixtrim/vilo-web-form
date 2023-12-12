@@ -146,7 +146,7 @@
     { label: 'Client (company)'  },
     
   ]);
-  const dropdownRoleTitle = ref('Internal user');
+  const dropdownRoleTitle = ref('General');
   function onRoleChanged(item: DropdownItem) {
     dropdownRoleTitle.value = item.label;
   }

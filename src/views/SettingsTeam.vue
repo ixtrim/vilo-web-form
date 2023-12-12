@@ -100,7 +100,7 @@
         </VButton>
       </div>
       <div class="col-lg-8 align-center">
-        <v-pagination-list :total-pages="totalPages" @update:currentPage="updatePage" />
+        <v-pagination-list :total-pages="totalPages" :current-page="currentPage" @update:currentPage="updatePage" />
       </div>
       <div class="col-lg-2 align-right">
         <VButton 
@@ -161,6 +161,7 @@
 
 interface DropdownItem {
   label: string;
+  value: number | null;
 }
 
 interface NotificationRef {
@@ -452,9 +453,13 @@ export default defineComponent({
       if (item.value !== null) {
         this.selectedRoleFilter = item.value;
       } else {
-        this.selectedRoleFilter = null; // Reset to show all users
+        this.selectedRoleFilter = null;
       }
+      this.currentPage = 1;
       this.fetchUsers();
+    },
+    updatePage(newPage: number) {
+      this.currentPage = newPage;
     },
   },
 });

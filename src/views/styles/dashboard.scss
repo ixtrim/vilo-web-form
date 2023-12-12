@@ -34,6 +34,16 @@
     }
   }
 
+  .error-message {
+    color: var(--v-red-500);
+    font-size: 0.875rem;
+    margin-top: 0.35rem;
+  }
+
+  .form-group + .error-message {
+    margin-top: -10px;
+  }
+
   .v-reminder {
     display: inline-block;
     border: 1px solid var(--v-gray-300);

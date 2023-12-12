@@ -8,6 +8,7 @@
           placeholder="John Kowalski" 
           v-model="localUserName"
         />
+        <p v-if="errorUserName" class="error-message">{{ errorUserName }}</p>
       </div>
       <div class="col-lg-6">
         <VInput 
@@ -15,6 +16,7 @@
           placeholder="john@example.com" 
           v-model="localUserEmail"
         />
+        <p v-if="errorUserEmail" class="error-message">{{ errorUserEmail }}</p>
       </div>
     </div>
 
@@ -77,6 +79,7 @@
             placeholder="ex. Sales" 
             v-model="localUserPosition"
           />
+          <p v-if="errorUserPosition" class="error-message">{{ errorUserPosition }}</p>
         </div>
       </div>
     </div>
@@ -122,6 +125,10 @@
   const localUserAddress = ref('');
   const localUserPosition = ref('');
 
+  const errorUserName = ref('');
+  const errorUserEmail = ref('');
+  const errorUserPosition = ref('');
+
   const props = defineProps({
     title: String,
     nextUserId: Number
@@ -157,7 +164,7 @@
     { label: 'Activated'  },
     
   ]);
-  const dropdownStatusTitle = ref('Draft');
+  const dropdownStatusTitle = ref('Pending');
   function onStatusChanged(item: DropdownItem) {
     dropdownStatusTitle.value = item.label;
   }
@@ -167,6 +174,38 @@
   }
 
   async function saveAndClose() {
+
+    errorUserName.value = '';
+    errorUserEmail.value = '';
+    errorUserPosition.value = '';
+
+    let isValid = true;
+
+    if (!localUserName.value.trim()) {
+      errorUserName.value = 'Full Name is required!';
+      isValid = false;
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    if (!localUserEmail.value.trim()) {
+      errorUserEmail.value = 'Email is required!';
+      isValid = false;
+    } else if (!emailRegex.test(localUserEmail.value)) {
+      errorUserEmail.value = 'Invalid email format!';
+      isValid = false;
+    }
+    
+    if (!localUserPosition.value.trim()) {
+      errorUserPosition.value = 'Position is required!';
+      isValid = false;
+    }
+
+    if (!isValid) {
+      return;
+    }
+
+    // Validation done, proceed to save
+
     if (props.nextUserId === undefined) {
       console.error("nextUserId is undefined");
       return;

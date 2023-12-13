@@ -44,8 +44,13 @@ function initializeCropper() {
         aspectRatio: 1,
         viewMode: 1,
         crop(event) {
-          // When cropping is done, emit the cropped image data
-          cropper.getCroppedCanvas().toBlob((blob) => {
+          const canvas = cropper.getCroppedCanvas({
+            width: 150,
+            height: 150
+          });
+
+          // Convert the canvas to a Blob and emit the cropped image data
+          canvas.toBlob((blob) => {
             emit('image-cropped', blob);
           });
         },
@@ -53,6 +58,7 @@ function initializeCropper() {
     }
   });
 }
+
 </script>
 
 <style>

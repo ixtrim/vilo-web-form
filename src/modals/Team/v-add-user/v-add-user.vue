@@ -42,10 +42,11 @@
       <div class="col-lg-12">
         <div class="form-group">
           <VInput 
-          label="Company" 
-          placeholder="ex. Vilo" 
-          v-model="localUserCompany"
-        />
+            label="Company" 
+            placeholder="ex. Vilo" 
+            v-model="localUserCompany"
+          />
+          <p v-if="errorUserCompany" class="error-message">{{ errorUserCompany }}</p>
         </div>
       </div>
     </div>
@@ -57,6 +58,7 @@
           placeholder="+1 23 456 789" 
           v-model="localUserPhone"
         />
+        <p v-if="errorUserPhone" class="error-message">{{ errorUserPhone }}</p>
       </div>
     </div>
 
@@ -67,6 +69,7 @@
           placeholder="ex. 123 Main St, New York, NY 10001, USA" 
           v-model="localUserAddress"
         />
+        <p v-if="errorUserAddress" class="error-message">{{ errorUserAddress }}</p>
       </div>
     </div>
 
@@ -128,6 +131,9 @@
   const errorUserName = ref('');
   const errorUserEmail = ref('');
   const errorUserPosition = ref('');
+  const errorUserPhone = ref('');
+  const errorUserAddress = ref('');
+  const errorUserCompany = ref('');
 
   const props = defineProps({
     title: String,
@@ -178,6 +184,9 @@
     errorUserName.value = '';
     errorUserEmail.value = '';
     errorUserPosition.value = '';
+    errorUserPhone.value = '';
+    errorUserAddress.value = '';
+    errorUserCompany.value = '';
 
     let isValid = true;
 
@@ -197,6 +206,22 @@
     
     if (!localUserPosition.value.trim()) {
       errorUserPosition.value = 'Position is required!';
+      isValid = false;
+    }
+
+    if (dropdownRoleTitle.value === 'Client (individual)' || dropdownRoleTitle.value === 'Client (company)') {
+      if (!localUserPhone.value.trim()) {
+        errorUserPhone.value = 'Phone is required!';
+        isValid = false;
+      }
+      if (!localUserAddress.value.trim()) {
+        errorUserAddress.value = 'Address is required!';
+        isValid = false;
+      }
+    }
+
+    if (dropdownRoleTitle.value === 'Client (company)' && !localUserCompany.value.trim()) {
+      errorUserCompany.value = 'Company name is required!';
       isValid = false;
     }
 

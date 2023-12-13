@@ -20,6 +20,17 @@
       </div>
     </div>
 
+    
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="form-group">
+          <label>Avatar</label>
+          <VImageUploader @image-cropped="handleImageCropped" />
+        </div>
+      </div>
+    </div>
+
     <div class="row">
       <div class="col-lg-12">
         <div class="form-group">
@@ -42,10 +53,11 @@
       <div class="col-lg-12">
         <div class="form-group">
           <VInput 
-          label="Company" 
-          placeholder="ex. Vilo" 
-          v-model="localUserCompany"
-        />
+            label="Company" 
+            placeholder="ex. Vilo" 
+            v-model="localUserCompany"
+          />
+          <p v-if="errorUserCompany" class="error-message">{{ errorUserCompany }}</p>
         </div>
       </div>
     </div>
@@ -57,6 +69,7 @@
           placeholder="+1 23 456 789" 
           v-model="localUserPhone"
         />
+        <p v-if="errorUserPhone" class="error-message">{{ errorUserPhone }}</p>
       </div>
     </div>
 
@@ -67,6 +80,7 @@
           placeholder="ex. 123 Main St, New York, NY 10001, USA" 
           v-model="localUserAddress"
         />
+        <p v-if="errorUserAddress" class="error-message">{{ errorUserAddress }}</p>
       </div>
     </div>
 
@@ -108,12 +122,14 @@
 </template>
 
 <script setup lang="ts">
-  import { db } from '@/firebase.js';
-  import { doc, setDoc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
+  import { db, storage } from '@/firebase.js';
+  import { doc, setDoc } from 'firebase/firestore';
   import { ref, watch, computed } from 'vue';
+  import { uploadBytes, ref as storageRef, getDownloadURL } from 'firebase/storage';
   import type { PropType } from 'vue';
   import { defineEmits, defineProps } from 'vue';
   import VInput from '@/components/v-input/VInput.vue';
+  import VImageUploader from '@/components/v-image-uploader/VImageUploader.vue';
   import VTextarea from '@/components/v-textarea/v-textarea.vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
   import VButton from '@/components/v-button/VButton.vue';
@@ -128,6 +144,11 @@
   const errorUserName = ref('');
   const errorUserEmail = ref('');
   const errorUserPosition = ref('');
+  const errorUserPhone = ref('');
+  const errorUserAddress = ref('');
+  const errorUserCompany = ref('');
+
+  const avatarUrl = ref('');
 
   const props = defineProps({
     title: String,
@@ -164,9 +185,26 @@
     { label: 'Activated'  },
     
   ]);
+
   const dropdownStatusTitle = ref('Pending');
   function onStatusChanged(item: DropdownItem) {
     dropdownStatusTitle.value = item.label;
+  }
+
+  async function handleImageCropped(blob: Blob) {
+    if (props.nextUserId === undefined) {
+      console.error("nextUserId is undefined");
+      return;
+    }
+
+    try {
+      const userId = props.nextUserId.toString().padStart(4, '0');
+      const imageRef = storageRef(storage, `users/${userId}.jpg`);
+      await uploadBytes(imageRef, blob);
+      avatarUrl.value = await getDownloadURL(imageRef);
+    } catch (error) {
+      console.error("Error uploading image: ", error);
+    }
   }
 
   function closeModal() {
@@ -178,6 +216,9 @@
     errorUserName.value = '';
     errorUserEmail.value = '';
     errorUserPosition.value = '';
+    errorUserPhone.value = '';
+    errorUserAddress.value = '';
+    errorUserCompany.value = '';
 
     let isValid = true;
 
@@ -200,6 +241,22 @@
       isValid = false;
     }
 
+    if (dropdownRoleTitle.value === 'Client (individual)' || dropdownRoleTitle.value === 'Client (company)') {
+      if (!localUserPhone.value.trim()) {
+        errorUserPhone.value = 'Phone is required!';
+        isValid = false;
+      }
+      if (!localUserAddress.value.trim()) {
+        errorUserAddress.value = 'Address is required!';
+        isValid = false;
+      }
+    }
+
+    if (dropdownRoleTitle.value === 'Client (company)' && !localUserCompany.value.trim()) {
+      errorUserCompany.value = 'Company name is required!';
+      isValid = false;
+    }
+
     if (!isValid) {
       return;
     }
@@ -211,6 +268,7 @@
       return;
     }
 
+    // 4-digit user ID formatted with leading zeros
     const formattedId = props.nextUserId.toString().padStart(4, '0');
 
     const newUser = {
@@ -222,17 +280,43 @@
       company: localUserCompany.value || '',
       role: dropdownRoles.value.findIndex(role => role.label === dropdownRoleTitle.value),
       status: dropdownStatus.value.findIndex(status => status.label === dropdownStatusTitle.value),
-      notes: userNotes.value || ''
+      notes: userNotes.value || '',
+      avatar: avatarUrl.value,
     };
 
     try {
       await setDoc(doc(db, "users", formattedId), newUser);
       emit('save-clicked', newUser);
+      // Reset the form and close the modal
+      resetForm();
+      closeModal();
     } catch (error) {
       console.error("Error adding new user: ", error);
     }
 
-    closeModal();
+    function resetForm() {
+      // Reset all form fields
+      localUserName.value = '';
+      localUserEmail.value = '';
+      localUserCompany.value = '';
+      localUserPhone.value = '';
+      localUserAddress.value = '';
+      localUserPosition.value = '';
+      avatarUrl.value = '';
+
+      // Reset all dropdowns to their default values
+      dropdownRoleTitle.value = 'General'; // Assuming 'General' is the default
+      dropdownStatusTitle.value = 'Pending'; // Assuming 'Pending' is the default
+
+      // Reset all error messages
+      errorUserName.value = '';
+      errorUserEmail.value = '';
+      errorUserPosition.value = '';
+      errorUserPhone.value = '';
+      errorUserAddress.value = '';
+      errorUserCompany.value = '';
+    }
+
   }
 
 </script>

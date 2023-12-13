@@ -19,9 +19,7 @@
     props: {
       userAvatar: {
         type: String,
-        default: function() {
-          return `https://picsum.photos/40?random=${Date.now()}`;
-        }
+        default: 'https://firebasestorage.googleapis.com/v0/b/vilo-ebc86.appspot.com/o/users%2Favatar.png?alt=media&token=47406968-8bed-4e90-807e-af163bb9e8be'
       },
       userName: {
         type: String,

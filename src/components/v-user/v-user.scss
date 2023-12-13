@@ -8,6 +8,9 @@
     img {
       border-radius: 55%;
       border: 1px solid var(--v-gray-900);
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
     }
   }
 

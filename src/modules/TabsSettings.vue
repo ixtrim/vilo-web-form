@@ -9,16 +9,17 @@
           :block="true"
         >
           <span>{{ link.name }}</span>
-          <v-badge v-if="link.name === 'Team'" variant="primary">4</v-badge>
+          <v-badge v-if="link.name === 'Team'" variant="primary">{{ pendingUsersCount }}</v-badge>
         </v-link>
-      </li>
-      <li>
       </li>
     </ul>
   </nav>
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref } from 'vue';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/firebase.js';
 import VLink from '@/components/v-link/VLink.vue';
 import VBadge from '@/components/v-badge/VBadge.vue';
 
@@ -30,6 +31,18 @@ const links = [
   { name: 'Calendar', to: '/settings-calendar', },
   { name: 'Billing', to: '/settings-billing', },
 ];
+
+const pendingUsersCount = ref(0);
+
+onMounted(async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "users"));
+    const users = querySnapshot.docs.map(doc => doc.data());
+    pendingUsersCount.value = users.filter(user => user.status === 1).length; // Assuming status 1 is for 'Pending'
+  } catch (error) {
+    console.error("Error fetching users:", error);
+  }
+});
 </script>
 
 <style>

@@ -108,6 +108,22 @@
             margin-bottom: 0;
           }
         }
+
+        &--edit-avatar {
+          .current-avatar {
+            max-width: 100%;
+            height: auto;
+
+            img {
+              max-width: 100%;
+              width: 100%;
+              height: auto;
+              object-fit: cover;
+              border-radius: 55%;
+              border: 1px solid var(--v-gray-900);
+            }
+          }
+        }
       }
     }
 

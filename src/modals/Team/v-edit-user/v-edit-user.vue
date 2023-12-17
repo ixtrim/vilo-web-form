@@ -20,6 +20,26 @@
 
     <div class="row">
       <div class="col-lg-12">
+        <div class="form-group form-group--edit-avatar">
+          <label>Avatar</label>
+
+          <div class="row">
+            <div class="col-lg-2">
+              <div v-if="localUserAvatar" class="current-avatar">
+                <img :src="localUserAvatar" :alt="localUserName" />
+              </div>
+            </div>
+            <div class="col-lg-10">
+              <VImageUploader @image-cropped="handleImageCropped" />
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
         <div class="form-group">
           <label>Status</label>
           <VDropdown :title="getStatusLabel(localUserStatus ?? 0)" :items="dropdownStatusItems" @item-clicked="dropdownStatusChange" />
@@ -107,6 +127,8 @@
 <script setup lang="ts">
   import { db } from '@/firebase.js';
   import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
+  import { uploadBytes, ref as storageRef, getDownloadURL } from 'firebase/storage';
+  import { storage } from '@/firebase.js';
   import { ref, watch, computed } from 'vue';
   import type { PropType } from 'vue';
   import { defineEmits, defineProps } from 'vue';
@@ -114,6 +136,7 @@
   import VTextarea from '@/components/v-textarea/v-textarea.vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
   import VButton from '@/components/v-button/VButton.vue';
+  import VImageUploader from '@/components/v-image-uploader/VImageUploader.vue';
 
   type DropdownItem = {
     label: string;
@@ -140,6 +163,7 @@
     },
     userStatus: Number,
     userNotes: String,
+    userAvatar: String,
     title: {
       type: String,
       required: true
@@ -159,6 +183,7 @@
   const userRole = ref(props.userRole);
   const userStatus = ref(props.userStatus);
   const userNotes = ref(props.userNotes);
+  const userAvatar = ref(props.userAvatar);
 
   const localUserName = ref(props.userName);
   const localUserEmail = ref(props.userEmail);
@@ -169,6 +194,7 @@
   const localUserRole = ref(props.userRole);
   const localUserStatus = ref(props.userStatus);
   const localUserNotes = ref(props.userNotes);
+  const localUserAvatar = ref(props.userAvatar);
 
   watch(() => props.userName, (newVal) => localUserName.value = newVal);
   watch(() => props.userEmail, (newVal) => localUserEmail.value = newVal);
@@ -179,6 +205,14 @@
   watch(() => props.userRole, (newVal) => localUserRole.value = newVal);
   watch(() => props.userStatus, (newVal) => localUserStatus.value = newVal);
   watch(() => props.userNotes, (newVal) => localUserNotes.value = newVal);
+  watch(() => props.userAvatar, (newVal) => localUserAvatar.value = newVal);
+
+  async function handleImageCropped(blob: Blob) {
+    const userId = props.userId;
+    const imageRef = storageRef(storage, `users/${userId}.jpg`);
+    await uploadBytes(imageRef, blob);
+    localUserAvatar.value = await getDownloadURL(imageRef);
+  }
 
   const dropdownRoleChange = (item: DropdownItem) => {
     const roleCodeMapping = {
@@ -244,6 +278,7 @@
   function saveAndClose() {
     emit('save-clicked', {
       userId: props.userId,
+      userAvatar: localUserAvatar.value,
       userName: localUserName.value,
       userEmail: localUserEmail.value,
       userPhone: localUserPhone.value,

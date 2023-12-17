@@ -59,7 +59,7 @@
 
             <div :class="{ 'dashboard__users__page__item': true, ['dashboard__users__page__item--' + user.role]: true }" v-for="user in paginatedUsers" :key="user.id">
               <div class="col col--sett-t-user">
-                <VUser :userName="user.full_name" :userEmail="user.email" />
+                <VUser :userName="user.full_name" :userEmail="user.email" :userAvatar="user.avatar" />
               </div>
               <div class="col col--sett-t-status">
                 <VBadge :variant="getStatusLabelAndVariant(user.status).variant">
@@ -136,6 +136,7 @@
         :dropdownStatusItems="dropdownStatusItems"
         :userStatus="Number(selectedUserStatus)"
         :userNotes="selectedUserNotes"
+        :userAvatar="selectedUserAvatar"
         @close-modal="showModal = false"
         @save-clicked="handleSaveChanges"
       />
@@ -174,6 +175,7 @@ interface NotificationRef {
 
 interface User {
   id: string;
+  avatar: string;
   full_name: string;
   email: string;
   phone: string;
@@ -187,6 +189,7 @@ interface User {
 
 interface UpdatedUserData {
     userId: string;
+    userAvatar: string;
     userName: string;
     userEmail: string;
     userPhone: string;
@@ -218,6 +221,7 @@ export default defineComponent({
       modalTitle: '',
       modalTitleEdit: '',
       selectedUserId: '',
+      selectedUserAvatar: '',
       selectedUserFullName: '',
       selectedUserEmail: '',
       selectedUserPhone: '',
@@ -407,6 +411,7 @@ export default defineComponent({
       try {
         const userRef = doc(db, "users", updatedUserData.userId);
         await updateDoc(userRef, {
+          avatar: updatedUserData.userAvatar,
           full_name: updatedUserData.userName,
           email: updatedUserData.userEmail,
           phone: updatedUserData.userPhone,
@@ -435,6 +440,7 @@ export default defineComponent({
     openEditModal(user: User) {
       this.modalTitleEdit = 'Edit user data';
       this.selectedUserId = user.id.toString();
+      this.selectedUserAvatar = user.avatar;
       this.selectedUserFullName = user.full_name;
       this.selectedUserEmail = user.email;
       this.selectedUserPhone = user.phone;

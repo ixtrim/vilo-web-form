@@ -2,7 +2,13 @@
   /* Your styles here */
 }
 
-.image-preview img {
-  max-width: 150px;
-  max-height: 150px;
+.image-preview {
+  margin: 10px 0 0 0;
+  border-radius: 8px;
+  overflow: hidden;
+
+  img {
+    max-width: 150px;
+    max-height: 150px;
+  }
 }

@@ -136,6 +136,7 @@
         :dropdownStatusItems="dropdownStatusItems"
         :userStatus="Number(selectedUserStatus)"
         :userNotes="selectedUserNotes"
+        :userAvatar="selectedUserAvatar"
         @close-modal="showModal = false"
         @save-clicked="handleSaveChanges"
       />

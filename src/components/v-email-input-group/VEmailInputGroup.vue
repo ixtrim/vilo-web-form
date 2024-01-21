@@ -26,18 +26,21 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, watch, toRefs } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import type { PropType } from 'vue';
 import VInput from '@/components/v-input/VInput.vue';
 import VLink from '@/components/v-link/VLink.vue';
 import VButton from '@/components/v-button/VButton.vue';
 
 const props = defineProps({
-  inputs: Array
+  inputs: {
+    type: Array as PropType<string[]>,
+    default: () => []
+  }
 });
 
 const emit = defineEmits(['update:emails']);
-const inputs = ref(props.inputs || []);
+const inputs = ref([...props.inputs]);
 
 watch(() => props.inputs, (newInputs) => {
   inputs.value = newInputs || [];
@@ -48,7 +51,7 @@ watch(inputs, (newInputs) => {
 }, { deep: true });
 
 const addInput = () => {
-  inputs.value.push({ value: '' });
+  inputs.value.push('');
 };
 
 const removeInput = (index: number) => {

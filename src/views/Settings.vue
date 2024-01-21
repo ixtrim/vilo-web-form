@@ -110,7 +110,7 @@ export default defineComponent({
       appName: '',
       appTimezone: '',
       appTimeFormat: '',
-      appServices: [],
+      appServices: [] as Array<{ value: string }>,
       debouncedUpdateAppName: null as ((...args: any[]) => Promise<void> | undefined) | null,
       debouncedUpdateTimezone: null as ((...args: any[]) => Promise<void> | undefined) | null,
       debouncedUpdateTimeFormat: null as ((...args: any[]) => Promise<void> | undefined) | null,
@@ -229,7 +229,7 @@ export default defineComponent({
           this.appName = docSnap.data().app_name;
           this.appTimezone = docSnap.data().app_timezone || 'Select Timezone';
           this.appTimeFormat = docSnap.data().app_timeformat || 'Select Date format';
-          this.appServices = docSnap.data().app_services || [];
+          this.appServices = (docSnap.data().app_services as string[]).map(service => ({ value: service }));
         } else {
           console.log("No such document!");
           this.triggerNotification('error', 'Error!', 'Error while connecting with database.');
@@ -268,7 +268,7 @@ export default defineComponent({
       try {
         const docRef = doc(db, "settings", "general");
         await updateDoc(docRef, {
-          app_services: this.appServices
+          app_services: this.appServices.map(service => service.value)
         });
         this.triggerNotification('success', 'Changes saved', 'Services were updated successfully.');
       } catch (error) {
@@ -283,6 +283,11 @@ export default defineComponent({
     this.debouncedUpdateTimezone = debounce(this.userInitiatedUpdateTimezone, 600);
     this.debouncedUpdateTimeFormat = debounce(this.userInitiatedUpdateTimeFormat, 600);
     this.debouncedUpdateAppServices = debounce(this.userInitiatedUpdateAppServices, 1200);
+    this.$watch(() => this.appServices, () => {
+      if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
+        this.debouncedUpdateAppServices();
+      }
+    }, { deep: true });
   },
   watch: {
     appName(newVal, oldVal) {

@@ -28,7 +28,6 @@ const links = [
   { name: 'Team', to: '/settings-team', },
   { name: 'Notifications', to: '/settings-notifications', },
   { name: 'Invoice', to: '/settings-invoice', },
-  { name: 'Calendar', to: '/settings-calendar', },
   { name: 'Billing', to: '/settings-billing', },
 ];
 

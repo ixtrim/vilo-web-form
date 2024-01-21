@@ -1,7 +1,7 @@
 <template>
   <div class="v-email-input-group">
-    <div v-for="(input, index) in inputs" :key="index" class="input-row">
-      <VInput label="" placeholder="" type="email" v-model="input.value" />
+    <div v-for="(email, index) in inputs" :key="index" class="input-row">
+      <VInput label="" placeholder="" type="email" v-model="inputs[index]" />
       <VButton
         :block="false"
         size="sm"
@@ -37,10 +37,14 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:emails']);
-const inputs = ref([{ value: '' }]);
+const inputs = ref(props.inputs || []);
+
+watch(() => props.inputs, (newInputs) => {
+  inputs.value = newInputs || [];
+}, { deep: true });
 
 watch(inputs, (newInputs) => {
-  emit('update:emails', newInputs.map(input => input.value));
+  emit('update:emails', newInputs);
 }, { deep: true });
 
 const addInput = () => {

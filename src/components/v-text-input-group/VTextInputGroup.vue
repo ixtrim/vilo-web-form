@@ -1,7 +1,7 @@
 <template>
   <div class="v-text-input-group">
     <div v-for="input in localInputs" :key="input.id" class="input-row">
-      <VInput label="" placeholder="" v-model="input.value" />
+      <VInput label="" placeholder="" v-model="input.value" @blur="handleInputBlur" />
       <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="removeInput(input.id)"
         text=""></VButton>
     </div>

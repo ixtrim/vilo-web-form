@@ -56,7 +56,7 @@
               <p>Add types of services your company provides</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VTextInputGroup :inputs="appServices" @update-inputs="appServices = $event" />
+              <VTextInputGroup :inputs="appServices" @update-inputs="appServices = $event" @input-blur="handleServicesUpdate" />
             </div>
           </div>
 
@@ -255,15 +255,6 @@ export default defineComponent({
         this.triggerNotification('error', 'Error!', 'Something went wrong.');
       }
     },
-    async updateAppServices(newServices: any[]) {
-      try {
-        const docRef = doc(db, "settings", "general");
-        await updateDoc(docRef, {
-          app_services: newServices
-        });
-      } catch (error) {
-      }
-    },
     async userInitiatedUpdateAppServices() {
       try {
         const docRef = doc(db, "settings", "general");
@@ -276,6 +267,11 @@ export default defineComponent({
         this.triggerNotification('error', 'Error!', 'Something went wrong.');
       }
     },
+    handleServicesUpdate() {
+      if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
+        this.debouncedUpdateAppServices();
+      }
+    },
   },
   mounted() {
     this.fetchViewData();
@@ -283,11 +279,6 @@ export default defineComponent({
     this.debouncedUpdateTimezone = debounce(this.userInitiatedUpdateTimezone, 600);
     this.debouncedUpdateTimeFormat = debounce(this.userInitiatedUpdateTimeFormat, 600);
     this.debouncedUpdateAppServices = debounce(this.userInitiatedUpdateAppServices, 1200);
-    this.$watch(() => this.appServices, () => {
-      if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
-        this.debouncedUpdateAppServices();
-      }
-    }, { deep: true });
   },
   watch: {
     appName(newVal, oldVal) {
@@ -299,7 +290,11 @@ export default defineComponent({
       if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimezone) {
         this.debouncedUpdateTimezone()?.catch(e => console.error(e));
       }
-    },
+    },handleServicesUpdate() {
+    if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
+      this.debouncedUpdateAppServices();
+    }
+  },
     appTimeFormat(newVal, oldVal) {
       if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimeFormat) {
         this.debouncedUpdateTimeFormat()?.catch(e => console.error(e));

@@ -239,6 +239,8 @@
         }
       },
       async updateEmailAddresses(emails: string[]) {
+        if (!this.initialDataLoaded) return;
+
         try {
           const docRef = doc(db, "settings", "billing");
           await updateDoc(docRef, {

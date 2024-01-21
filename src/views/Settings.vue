@@ -290,11 +290,7 @@ export default defineComponent({
       if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimezone) {
         this.debouncedUpdateTimezone()?.catch(e => console.error(e));
       }
-    },handleServicesUpdate() {
-    if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
-      this.debouncedUpdateAppServices();
-    }
-  },
+    },
     appTimeFormat(newVal, oldVal) {
       if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimeFormat) {
         this.debouncedUpdateTimeFormat()?.catch(e => console.error(e));

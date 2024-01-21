@@ -49,7 +49,7 @@
               <p>Invoices will be sent to this email address.</p>
             </div>
             <div class="dashboard__form__section__input dashboard__form__section__input--width">
-              <VEmailInputGroup />
+              <VEmailInputGroup :inputs="emails" @update:emails="updateEmailAddresses" />
             </div>
           </div>
 
@@ -149,6 +149,7 @@
         accountNumber: '',
         bankName: '',
         swiftIban: '',
+        emails: [],
         streetAddress: '',
         city: '',
         state: '',
@@ -181,6 +182,7 @@
             this.accountNumber = docSnap.data().account_number;
             this.bankName      = docSnap.data().bank_name;
             this.swiftIban     = docSnap.data().swift_iban;
+            this.emails        = docSnap.data().email_addresses || [];
             this.streetAddress = docSnap.data().street_address;
             this.city          = docSnap.data().city;
             this.state               = docSnap.data().state;
@@ -234,6 +236,18 @@
         } catch (error) {
           console.error("Error updating document:", error);
           this.triggerNotification('error', 'Error!', 'Something went wrong.');
+        }
+      },
+      async updateEmailAddresses(emails: string[]) {
+        try {
+          const docRef = doc(db, "settings", "billing");
+          await updateDoc(docRef, {
+            email_addresses: emails.filter(email => email.trim() !== '')
+          });
+          this.triggerNotification('success', 'Changes saved', 'Email addresses updated successfully.');
+        } catch (error) {
+          console.error("Error updating document:", error);
+          this.triggerNotification('error', 'Error!', 'Something went wrong updating email addresses.');
         }
       },
       async userInitiatedUpdateStreetAddress() {

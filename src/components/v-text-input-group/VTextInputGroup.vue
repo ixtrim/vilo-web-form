@@ -1,7 +1,7 @@
 <template>
   <div class="v-text-input-group">
     <div v-for="input in localInputs" :key="input.id" class="input-row">
-      <VInput label="" placeholder="" v-model="input.value" />
+      <VInput label="" placeholder="" v-model="input.value" @blur="handleInputBlur" />
       <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="removeInput(input.id)"
         text=""></VButton>
     </div>
@@ -32,17 +32,13 @@
   const emit = defineEmits(['update-inputs']);
   const localInputs = ref(props.inputs.map(input => ({ ...input, id: input.id || generateUniqueId() })));
 
-  /* watch(() => props.inputs, (newInputs) => {
-    localInputs.value = newInputs.map(input => {
-      const existingInput = localInputs.value.find(localInput => localInput.value === input.value);
-      return { ...input, id: existingInput ? existingInput.id : generateUniqueId() };
-    });
+  watch(() => props.inputs, (newInputs) => {
+    localInputs.value = newInputs.map(input => ({ ...input, id: input.id || generateUniqueId() }));
   }, { deep: true });
-
 
   watch(localInputs, () => {
     emit('update-inputs', localInputs.value.map(({ id, ...rest }) => rest));
-  }, { deep: true }); */
+  }, { deep: true });
 
   const addInput = () => {
     localInputs.value.push({ value: '', id: generateUniqueId() });

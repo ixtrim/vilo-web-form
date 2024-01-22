@@ -82,7 +82,7 @@
       <div class="col-lg-12">
         <VInput 
           label="Address" 
-          placeholder="+1 23 456 789" 
+          placeholder="132, My Street, Kingston, New York 12401, USA" 
           v-model="localUserAddress"
         />
       </div>

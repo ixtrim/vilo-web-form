@@ -46,7 +46,7 @@
                 <VUser :userName="user.full_name" :userEmail="user.email" />
               </div>
               <div class="col col--cm-phone">
-                <p>{{ user.phone_no }}</p>
+                <p>{{ user.phone }}</p>
               </div>
               <div class="col col--cm-position">
                 <p>{{ getPositionName(user.position) }}</p>
@@ -99,7 +99,8 @@
 
 <script lang="ts">
   import { defineComponent, ref, computed, onMounted } from 'vue';
-  import axios from 'axios';
+  import { db } from '@/firebase.js';
+  import { collection, query, where, getDocs } from 'firebase/firestore';
   import VButton from '@/components/v-button/VButton.vue';
   import Search from '@/modules/Navigation/Search.vue';
   import VUser from '@/components/v-user/v-user.vue';
@@ -109,10 +110,10 @@
   import VNotification from '@/components/v-notification/VNotification.vue';
 
   interface User {
-    id: number;
+    id: string;
     full_name: string;
     email: string;
-    phone_no: string;
+    phone: string;
     position: number;
     client_type: string;
     address: string;
@@ -173,7 +174,7 @@
       const modalTitle = ref('');
       const showModal = ref(false);
 
-      const selectedUserId = ref<number>(0);
+      const selectedUserId = ref<string>('');
       const selectedUserFullName = ref<string>('');
       const selectedUserEmail = ref<string>('');
       const selectedUserRole = ref<string>('');
@@ -183,10 +184,10 @@
 
       const editUserAction = (user: User) => {
         modalTitle.value = 'Edit user';
-        selectedUserId.value = user.id;
+        selectedUserId.value = user.id; 
         selectedUserFullName.value = user.full_name;
         selectedUserEmail.value = user.email;
-        selectedUserPhone.value = user.phone_no;
+        selectedUserPhone.value = user.phone;
         selectedUserAddress.value = user.address;
         selectedUserNotes.value = user.notes;
         showModal.value = true;
@@ -195,7 +196,7 @@
       const getPositionName = (position: number): string => {
         return Math.random() < 0.5 ? 'Sales' : 'Retainer';
       };
-
+      
       const paginatedUsers = computed(() => {
         let filteredUsers = users.value;
 
@@ -203,7 +204,7 @@
           filteredUsers = filteredUsers.filter(user => 
             (user.full_name && typeof user.full_name === 'string' && user.full_name.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
             (user.email && typeof user.email === 'string' && user.email.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-            (user.phone_no && typeof user.phone_no === 'string' && user.phone_no.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
+            (user.phone && typeof user.phone === 'string' && user.phone.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
             user.position === Number(searchTerm.value) ||
             (user.client_type && typeof user.client_type === 'string' && user.client_type.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
             (user.address && typeof user.address === 'string' && user.address.toLowerCase().includes(searchTerm.value.toLowerCase()))
@@ -217,21 +218,22 @@
 
       const fetchUsers = async () => {
         try {
-          const response = await axios.get('https://api-vilo.nestvested.co/auth/clients/', {
-            headers: {
-              'accept': 'application/json',
-              'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzAwNDc1MzA2LCJpYXQiOjE3MDA0NzE3MDYsImp0aSI6IjI4MTQ3ZWVmNTM3MjQ1NTg5ZDFjYjMzYjA3YzZjMmJhIiwidXNlcl9pZCI6MjF9.Imzo6TdQH3qXBJzjOH_Eo5IJXDs7bEchOilg3vo7Cw4'
-            }
-          });
-          users.value = response.data;
+          const usersCol = collection(db, "users");
+          const q = query(usersCol, 
+            where("status", "==", 2), // Assuming '2' is the code for 'Activated'
+            where("role", "in", [3, 4]) // Assuming '3' and '4' are the codes for 'Client (individual)' and 'Client (company)'
+          );
+          const querySnapshot = await getDocs(q);
+          users.value = querySnapshot.docs.map(doc => ({
+            ...doc.data() as User,
+            id: doc.id // id is a string
+          }));
         } catch (error) {
           console.error("Error fetching users:", error);
         }
       };
 
-      onMounted(() => {
-        fetchUsers();
-      });
+      onMounted(fetchUsers);
       
       const updateSearchTerm = (value: string) => {
         searchTerm.value = value;
@@ -275,7 +277,8 @@
         selectedUserNotes,
         modalTitle,
         showModal,
-        editUserAction
+        editUserAction,
+        fetchUsers,
       };
     },
   });

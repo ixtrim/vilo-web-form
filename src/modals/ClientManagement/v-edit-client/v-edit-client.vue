@@ -39,7 +39,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="userRole === 4">
       <div class="col-lg-12">
         <div class="form-group">
           <VInput 

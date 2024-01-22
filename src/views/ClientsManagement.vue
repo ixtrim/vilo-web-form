@@ -43,7 +43,7 @@
             <div class="dashboard__users__page__item" v-for="user in paginatedUsers" :key="user.id">
 
               <div class="col col--cm-user">
-                <VUser :userName="user.full_name" :userEmail="user.email" />
+                <VUser :userName="user.full_name" :userEmail="user.email" :userAvatar="user.avatar" />
               </div>
               <div class="col col--cm-phone">
                 <p>{{ user.phone }}</p>
@@ -119,6 +119,7 @@
     client_type: string;
     address: string;
     notes: string;
+    avatar: string;
   }
 
   interface Position {

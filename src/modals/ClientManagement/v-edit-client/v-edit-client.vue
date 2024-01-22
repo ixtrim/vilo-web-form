@@ -30,8 +30,11 @@
     <div class="row">
       <div class="col-lg-12">
         <div class="form-group">
-          <label>Position</label>
-          <VDropdown :title="dropdownPositionTitle" :items="dropdownPositions" @item-clicked="onPositionChanged" />
+          <VInput 
+            label="Position" 
+            placeholder="ex. Lawyer" 
+            v-model="userPosition"
+          />
         </div>
       </div>
     </div>
@@ -112,6 +115,7 @@
     userName: String,
     userEmail: String,
     userPhone: String,
+    userPosition: String,
     userCompany: String,
     userAddress: String,
     userNotes: String,
@@ -127,6 +131,7 @@
   });
   const userEmail = ref(props.userEmail);
   const userPhone = ref(props.userPhone);
+  const userPosition = ref(props.userPosition);
   const userCompany = ref(props.userCompany);
   const userAddress = ref(props.userAddress);
   const userNotes = ref(props.userNotes);
@@ -164,6 +169,7 @@
         full_name: userName.value,
         email: userEmail.value,
         phone: userPhone.value,
+        position: userPosition.value,
         company: userCompany.value,
         address: userAddress.value,
         notes: userNotes.value,

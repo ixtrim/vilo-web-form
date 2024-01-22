@@ -81,7 +81,7 @@
     </div>
 
     <VModal :show="showModal" :title="modalTitle" @update:show="showModal = $event">
-      <VEditClient :title="modalTitle" :userId="selectedUserId" :userName="selectedUserFullName" :userEmail="selectedUserEmail" :userPhone="selectedUserPhone" :userCompany="selectedUserCompany" :userAddress="selectedUserAddress" :userNotes="selectedUserNotes" @close-modal="showModal = false" @save-clicked="handleSaveClicked" />
+      <VEditClient :title="modalTitle" :userId="selectedUserId" :userName="selectedUserFullName" :userEmail="selectedUserEmail" :userPhone="selectedUserPhone" :userPosition="selectedUserPosition" :userCompany="selectedUserCompany" :userAddress="selectedUserAddress" :userNotes="selectedUserNotes" @close-modal="showModal = false" @save-clicked="handleSaveClicked" />
     </VModal>
 
     <VNotification 
@@ -115,7 +115,7 @@
     email: string;
     phone: string;
     company: string;
-    position: number;
+    position: string;
     client_type: string;
     address: string;
     notes: string;
@@ -171,16 +171,15 @@
       const currentPage = ref(1);
       const itemsPerPage = ref(10);
       const searchTerm = ref('');
-      const positions = ref<Position[]>([]);
       const modalTitle = ref('');
       const showModal = ref(false);
 
       const selectedUserId = ref<string>('');
       const selectedUserFullName = ref<string>('');
       const selectedUserEmail = ref<string>('');
-      const selectedUserRole = ref<string>('');
       const selectedUserPhone = ref<string>('');
-        const selectedUserCompany = ref<string>('');
+      const selectedUserPosition = ref<string>('');
+      const selectedUserCompany = ref<string>('');
       const selectedUserAddress = ref<string>('');
       const selectedUserNotes = ref<string>('');
 
@@ -190,6 +189,7 @@
         selectedUserFullName.value = user.full_name;
         selectedUserEmail.value = user.email;
         selectedUserPhone.value = user.phone;
+        selectedUserPosition.value = user.position;
         selectedUserCompany.value = user.company;
         selectedUserAddress.value = user.address;
         selectedUserNotes.value = user.notes;
@@ -271,6 +271,7 @@
         selectedUserFullName,
         selectedUserEmail,
         selectedUserPhone,
+        selectedUserPosition,
         selectedUserCompany,
         selectedUserAddress,
         selectedUserNotes,

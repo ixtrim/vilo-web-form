@@ -49,10 +49,10 @@
                 <p>{{ user.phone }}</p>
               </div>
               <div class="col col--cm-position">
-                <p>{{ getPositionName(user.position) }}</p>
+                <p>{{ user.position }}</p>
               </div>
               <div class="col col--cm-company">
-                <p>{{ user.client_type }}</p>
+                <p>{{ user.company || 'Individual Client' }}</p>
               </div>
               <div class="col col--cm-address">
                 <p>{{ user.address }}</p>
@@ -114,6 +114,7 @@
     full_name: string;
     email: string;
     phone: string;
+    company: string;
     position: number;
     client_type: string;
     address: string;
@@ -193,10 +194,6 @@
         showModal.value = true;
       };
       
-      const getPositionName = (position: number): string => {
-        return Math.random() < 0.5 ? 'Sales' : 'Retainer';
-      };
-      
       const paginatedUsers = computed(() => {
         let filteredUsers = users.value;
 
@@ -220,13 +217,13 @@
         try {
           const usersCol = collection(db, "users");
           const q = query(usersCol, 
-            where("status", "==", 2), // Assuming '2' is the code for 'Activated'
-            where("role", "in", [3, 4]) // Assuming '3' and '4' are the codes for 'Client (individual)' and 'Client (company)'
+            where("status", "==", 2),
+            where("role", "in", [3, 4])
           );
           const querySnapshot = await getDocs(q);
           users.value = querySnapshot.docs.map(doc => ({
             ...doc.data() as User,
-            id: doc.id // id is a string
+            id: doc.id
           }));
         } catch (error) {
           console.error("Error fetching users:", error);
@@ -268,7 +265,6 @@
         totalPages,
         searchTerm,
         updateSearchTerm,
-        getPositionName,
         selectedUserId,
         selectedUserFullName,
         selectedUserEmail,

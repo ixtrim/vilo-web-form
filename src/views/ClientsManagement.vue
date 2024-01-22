@@ -81,7 +81,7 @@
     </div>
 
     <VModal :show="showModal" :title="modalTitle" @update:show="showModal = $event">
-      <VEditClient :title="modalTitle" :userId="selectedUserId" :userName="selectedUserFullName" :userEmail="selectedUserEmail" :userPhone="selectedUserPhone" :userPosition="selectedUserPosition" :userCompany="selectedUserCompany" :userAddress="selectedUserAddress" :userNotes="selectedUserNotes" @close-modal="showModal = false" @save-clicked="handleSaveClicked" />
+      <VEditClient :title="modalTitle" :userId="selectedUserId" :userName="selectedUserFullName" :userEmail="selectedUserEmail" :userPhone="selectedUserPhone" :userPosition="selectedUserPosition"  :userRole="selectedUserRole" :userCompany="selectedUserCompany" :userAddress="selectedUserAddress" :userNotes="selectedUserNotes" @close-modal="showModal = false" @save-clicked="handleSaveClicked" />
     </VModal>
 
     <VNotification 
@@ -115,6 +115,7 @@
     email: string;
     phone: string;
     company: string;
+    role: string;
     position: string;
     client_type: string;
     address: string;
@@ -179,6 +180,7 @@
       const selectedUserEmail = ref<string>('');
       const selectedUserPhone = ref<string>('');
       const selectedUserPosition = ref<string>('');
+      const selectedUserRole = ref<number | undefined>(undefined);
       const selectedUserCompany = ref<string>('');
       const selectedUserAddress = ref<string>('');
       const selectedUserNotes = ref<string>('');
@@ -190,6 +192,7 @@
         selectedUserEmail.value = user.email;
         selectedUserPhone.value = user.phone;
         selectedUserPosition.value = user.position;
+        selectedUserRole.value = user.role !== undefined ? Number(user.role) : undefined;
         selectedUserCompany.value = user.company;
         selectedUserAddress.value = user.address;
         selectedUserNotes.value = user.notes;
@@ -204,7 +207,6 @@
             (user.full_name && typeof user.full_name === 'string' && user.full_name.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
             (user.email && typeof user.email === 'string' && user.email.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
             (user.phone && typeof user.phone === 'string' && user.phone.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-            user.position === Number(searchTerm.value) ||
             (user.client_type && typeof user.client_type === 'string' && user.client_type.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
             (user.address && typeof user.address === 'string' && user.address.toLowerCase().includes(searchTerm.value.toLowerCase()))
           );
@@ -271,6 +273,7 @@
         selectedUserFullName,
         selectedUserEmail,
         selectedUserPhone,
+        selectedUserRole,
         selectedUserPosition,
         selectedUserCompany,
         selectedUserAddress,

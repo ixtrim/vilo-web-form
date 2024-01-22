@@ -22,7 +22,7 @@
       <div class="col-lg-12">
         <div class="form-group">
           <label>Client type</label>
-          <VDropdown :title="dropdownClientTypeTitle" :items="dropdownClientType" @item-clicked="onClientTypeChanged" />
+          <VDropdown :title="getRoleLabel(userRole ?? 0)" :items="dropdownRoleItems" @item-clicked="dropdownRoleChange" />
         </div>
       </div>
     </div>
@@ -95,10 +95,10 @@
 </template>
 
 <script setup lang="ts">
+  import { ref, watch, computed, defineEmits, defineProps } from 'vue';
+  import type { PropType } from 'vue';
   import { doc, updateDoc } from 'firebase/firestore';
   import { db } from '@/firebase.js';
-  import { ref, watch, computed } from 'vue';
-  import { defineEmits, defineProps } from 'vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VTextarea from '@/components/v-textarea/v-textarea.vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
@@ -106,24 +106,37 @@
 
   type DropdownItem = {
     label: string;
+    value: number;
   };
 
   const emit = defineEmits(['close-modal', 'save-clicked']);
 
   const props = defineProps({
-    userId: Number,
+    userId: String,
     userName: String,
     userEmail: String,
     userPhone: String,
+    userRole: Number,
     userPosition: String,
     userCompany: String,
     userAddress: String,
     userNotes: String,
-    title: {
-      type: String,
-      required: true
+    title: String,
+    dropdownRoleItems: {
+      type: Array as PropType<DropdownItem[]>,
+      default: () => []
     },
   });
+
+  // Define userRole as a reactive property
+  const userRole = ref(props.userRole);
+
+  // Now set up the watcher
+  watch(() => props.userRole, (newRole) => {
+    if (newRole !== undefined) {
+      userRole.value = newRole;
+    }
+  }, { immediate: true });
 
   const userName = ref(props.userName);
   watch(() => props.userName, (newVal) => {
@@ -140,29 +153,38 @@
     set: (val) => userNotes.value = val
   });
 
-  const dropdownClientType = ref([
-    { label: 'Individual' },
-    { label: 'Company' }
-  ]);
-  const dropdownClientTypeTitle = ref('Individual');
-  function onClientTypeChanged(item: DropdownItem) {
-    dropdownClientTypeTitle.value = item.label;
-  }
+  const dropdownRoleItems: DropdownItem[] = [
+    { label: 'Client (individual)', value: 3 },
+    { label: 'Client (company)', value: 4 },
+  ];
 
-  const dropdownPositions = ref([
-    { label: 'Sales' },
-    { label: 'Retainer' },
-  ]);
-  const dropdownPositionTitle = ref('Sales');
-  function onPositionChanged(item: DropdownItem) {
-    dropdownPositionTitle.value = item.label;
-  }
+  const dropdownRoleChange = (item: DropdownItem) => {
+    const roleCodeMapping = {
+      'Client (individual)': 3,
+      'Client (company)': 4,
+    };
+    const newRoleCode = roleCodeMapping[item.label as keyof typeof roleCodeMapping];
+    if (newRoleCode !== undefined) {
+      userRole.value = newRoleCode;
+    } else {
+      console.error('Invalid role selected');
+    }
+  };
+
+  const getRoleLabel = (roleCode: number) => {
+    const roleItem = dropdownRoleItems.find(item => item.value === roleCode);
+    return roleItem ? roleItem.label : 'Unknown';
+  };
 
   function closeModal() {
     emit('close-modal');
   }
 
   async function saveAndClose() {
+    if (!props.userId) {
+      console.error("User ID is undefined");
+      return;
+    }
     try {
       const userRef = doc(db, "users", props.userId);
       await updateDoc(userRef, {
@@ -170,6 +192,7 @@
         email: userEmail.value,
         phone: userPhone.value,
         position: userPosition.value,
+        role: userRole.value,
         company: userCompany.value,
         address: userAddress.value,
         notes: userNotes.value,

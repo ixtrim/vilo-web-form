@@ -202,16 +202,16 @@
       const paginatedUsers = computed(() => {
         let filteredUsers = users.value;
 
-        if (searchTerm.value && typeof searchTerm.value === 'string') {
-          filteredUsers = filteredUsers.filter(user => 
-            (user.full_name && typeof user.full_name === 'string' && user.full_name.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-            (user.email && typeof user.email === 'string' && user.email.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-            (user.phone && typeof user.phone === 'string' && user.phone.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-            (user.client_type && typeof user.client_type === 'string' && user.client_type.toLowerCase().includes(searchTerm.value.toLowerCase())) ||
-            (user.address && typeof user.address === 'string' && user.address.toLowerCase().includes(searchTerm.value.toLowerCase()))
+        // Filter users based on the searchTerm for both user name and company name
+        if (searchTerm.value && searchTerm.value.trim().length > 0) {
+          const lowerCaseSearchTerm = searchTerm.value.toLowerCase();
+          filteredUsers = filteredUsers.filter(user =>
+            user.full_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+            (user.company && user.company.toLowerCase().includes(lowerCaseSearchTerm))
           );
         }
 
+        // Calculate pagination
         const start = (currentPage.value - 1) * itemsPerPage.value;
         const end = start + itemsPerPage.value;
         return filteredUsers.slice(start, end);

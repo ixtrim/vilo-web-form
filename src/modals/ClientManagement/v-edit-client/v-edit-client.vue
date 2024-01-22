@@ -21,26 +21,29 @@
     <div class="row">
       <div class="col-lg-12">
         <div class="form-group">
-          <label>Role</label>
-          <VDropdown :title="dropdownRoleTitle" :items="dropdownRoles" @item-clicked="onRoleChanged" />
-        </div>
-      </div>
-    </div>
-
-    <div class="row" v-if="dropdownRoleTitle === 'Client user'">
-      <div class="col-lg-12">
-        <div class="form-group">
           <label>Client type</label>
           <VDropdown :title="dropdownClientTypeTitle" :items="dropdownClientType" @item-clicked="onClientTypeChanged" />
         </div>
       </div>
     </div>
 
-    <div class="row" v-if="dropdownClientTypeTitle === 'Company' && dropdownRoleTitle === 'Client user'">
+    <div class="row">
       <div class="col-lg-12">
         <div class="form-group">
-          <label>Company name</label>
-          <VDropdown :title="dropdownCompanyTitle" :items="dropdownCompany" @item-clicked="onCompanyChanged" />
+          <label>Position</label>
+          <VDropdown :title="dropdownPositionTitle" :items="dropdownPositions" @item-clicked="onPositionChanged" />
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="form-group">
+          <VInput 
+          label="Company" 
+          placeholder="ex. Vilo" 
+          v-model="userCompany"
+        />
         </div>
       </div>
     </div>
@@ -62,15 +65,6 @@
           placeholder="+1 23 456 789" 
           v-model="userAddress"
         />
-      </div>
-    </div>
-
-    <div class="row" v-if="dropdownRoleTitle === 'Client user'">
-      <div class="col-lg-12">
-        <div class="form-group">
-          <label>Position</label>
-          <VDropdown :title="dropdownPositionTitle" :items="dropdownPositions" @item-clicked="onPositionChanged" />
-        </div>
       </div>
     </div>
 
@@ -98,6 +92,8 @@
 </template>
 
 <script setup lang="ts">
+  import { doc, updateDoc } from 'firebase/firestore';
+  import { db } from '@/firebase.js';
   import { ref, watch, computed } from 'vue';
   import { defineEmits, defineProps } from 'vue';
   import VInput from '@/components/v-input/VInput.vue';
@@ -116,6 +112,7 @@
     userName: String,
     userEmail: String,
     userPhone: String,
+    userCompany: String,
     userAddress: String,
     userNotes: String,
     title: {
@@ -130,22 +127,13 @@
   });
   const userEmail = ref(props.userEmail);
   const userPhone = ref(props.userPhone);
+  const userCompany = ref(props.userCompany);
   const userAddress = ref(props.userAddress);
   const userNotes = ref(props.userNotes);
   const computedUserNotes = computed({
     get: () => userNotes.value === 'string' ? '' : userNotes.value,
     set: (val) => userNotes.value = val
   });
-
-  const dropdownRoles = ref([
-    { label: 'Admin' },
-    { label: 'Internal user' },
-    { label: 'Client user' }
-  ]);
-  const dropdownRoleTitle = ref('Client user');
-  function onRoleChanged(item: DropdownItem) {
-    dropdownRoleTitle.value = item.label;
-  }
 
   const dropdownClientType = ref([
     { label: 'Individual' },
@@ -154,24 +142,6 @@
   const dropdownClientTypeTitle = ref('Individual');
   function onClientTypeChanged(item: DropdownItem) {
     dropdownClientTypeTitle.value = item.label;
-  }
-
-  const dropdownCompany = ref([
-    { label: 'MAXBURST, Inc.' },
-    { label: 'Pardalis and Nohavicka Lawyers' },
-    { label: 'Jeffrey B. Peltz, P.C.' },
-    { label: 'Redmond Accident Lawyers' },
-    { label: 'Leav & Steinberg, LLP' },
-    { label: 'Morelli Law Firm' },
-    { label: 'Meirowitz & Wasserberg, LLP' },
-    { label: 'Mark I. Cohen, ESQ' },
-    { label: 'Antin Ehrlich & Epstein LLP' },
-    { label: 'Law Offices of Lisa Beth' },
-    { label: 'Rudyuk Law Firm' },
-  ]);
-  const dropdownCompanyTitle = ref('Rudyuk Law Firm');
-  function onCompanyChanged(item: DropdownItem) {
-    dropdownCompanyTitle.value = item.label;
   }
 
   const dropdownPositions = ref([
@@ -187,9 +157,22 @@
     emit('close-modal');
   }
 
-  function saveAndClose() {
-    closeModal();
-    emit('save-clicked');
+  async function saveAndClose() {
+    try {
+      const userRef = doc(db, "users", props.userId);
+      await updateDoc(userRef, {
+        full_name: userName.value,
+        email: userEmail.value,
+        phone: userPhone.value,
+        company: userCompany.value,
+        address: userAddress.value,
+        notes: userNotes.value,
+      });
+      emit('save-clicked');
+      closeModal();
+    } catch (error) {
+      console.error("Error updating user:", error);
+    }
   }
 </script>
 

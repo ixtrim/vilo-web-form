@@ -81,7 +81,7 @@
     </div>
 
     <VModal :show="showModal" :title="modalTitle" @update:show="showModal = $event">
-      <VEditClient :title="modalTitle" :userId="selectedUserId" :userName="selectedUserFullName" :userEmail="selectedUserEmail" :userPhone="selectedUserPhone" :userAddress="selectedUserAddress" :userNotes="selectedUserNotes" @close-modal="showModal = false" @save-clicked="handleSaveClicked" />
+      <VEditClient :title="modalTitle" :userId="selectedUserId" :userName="selectedUserFullName" :userEmail="selectedUserEmail" :userPhone="selectedUserPhone" :userCompany="selectedUserCompany" :userAddress="selectedUserAddress" :userNotes="selectedUserNotes" @close-modal="showModal = false" @save-clicked="handleSaveClicked" />
     </VModal>
 
     <VNotification 
@@ -158,10 +158,9 @@
       handleNotificationClosed() {
         // Handle the event when the notification is closed TO DO
       },
-      handleSaveClicked() {
-        setTimeout(() => {
-          this.triggerNotification('success', 'Changes saved', 'This account has been successfully edited.');
-        }, 500);
+      async handleSaveClicked() {
+        await this.fetchUsers();
+        this.triggerNotification('success', 'Changes saved', 'Client updated successfully.');
       },
       handleButtonClick() {
         this.triggerNotification('error', 'Error!', 'Something went wrong.');
@@ -181,6 +180,7 @@
       const selectedUserEmail = ref<string>('');
       const selectedUserRole = ref<string>('');
       const selectedUserPhone = ref<string>('');
+        const selectedUserCompany = ref<string>('');
       const selectedUserAddress = ref<string>('');
       const selectedUserNotes = ref<string>('');
 
@@ -190,6 +190,7 @@
         selectedUserFullName.value = user.full_name;
         selectedUserEmail.value = user.email;
         selectedUserPhone.value = user.phone;
+        selectedUserCompany.value = user.company;
         selectedUserAddress.value = user.address;
         selectedUserNotes.value = user.notes;
         showModal.value = true;
@@ -270,6 +271,7 @@
         selectedUserFullName,
         selectedUserEmail,
         selectedUserPhone,
+        selectedUserCompany,
         selectedUserAddress,
         selectedUserNotes,
         modalTitle,

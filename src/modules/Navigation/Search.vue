@@ -22,8 +22,10 @@
       };
     },
     methods: {
-      emitInput() {
-        this.$emit('input', this.internalSearchTerm);
+      emitInput(event: Event) {
+        const target = event.target as HTMLInputElement;
+        this.internalSearchTerm = target.value;
+        this.$emit('update-search', this.internalSearchTerm);
       }
     }
   };

@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="col-lg-2 align-right">
-        <Search :value="searchTerm" @input="updateSearchTerm" />
+        <Search :value="searchTerm" @update-search="updateSearchTerm" />
       </div>
     </div>
 
@@ -203,11 +203,12 @@
         let filteredUsers = users.value;
 
         // Filter users based on the searchTerm for both user name and company name
-        if (searchTerm.value && searchTerm.value.trim().length > 0) {
-          const lowerCaseSearchTerm = searchTerm.value.toLowerCase();
+        if (searchTerm.value && String(searchTerm.value).trim().length > 0) {
+          const lowerCaseSearchTerm = String(searchTerm.value).toLowerCase();
+          console.log('Search Query: ' + lowerCaseSearchTerm);
           filteredUsers = filteredUsers.filter(user =>
-            user.full_name.toLowerCase().includes(lowerCaseSearchTerm) ||
-            (user.company && user.company.toLowerCase().includes(lowerCaseSearchTerm))
+          String(user.full_name).toLowerCase().includes(lowerCaseSearchTerm) ||
+            (user.company && String(user.company).toLowerCase().includes(lowerCaseSearchTerm))
           );
         }
 

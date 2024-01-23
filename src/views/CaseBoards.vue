@@ -73,23 +73,25 @@
 
           <div class="dashboard__table__page">
 
-            <div class="dashboard__table__page__item">
+            <div class="dashboard__table__page__item" v-for="caseItem in cases" :key="caseItem.id">
               <div class="col col--cb-case">
                 <ul>
                   <li>
-                    <img src="@/assets/temporary/Avatar.svg" alt="" />
+                    <img :src="caseItem.icon" :alt="caseItem.title" />
                   </li>
                   <li>
-                    <h4 class="active" @click="navigateToCaseBoard(1)">Catalog</h4>
+                    <h4 class="active" @click="navigateToCaseBoard(1)">{{ caseItem.title }}</h4>
                   </li>
                 </ul>
               </div>
               <div class="col col--cb-client">
-                <span class="col--cb-client__general">General</span>
+                <template v-if="caseItem.client_id && usersMap[caseItem.client_id]">
+                  <VUser :userName="usersMap[caseItem.client_id].full_name" :userAvatar="usersMap[caseItem.client_id].avatar" />
+                </template>
+                <span v-else class="col--cb-client__general">General {{ caseItem.client_id }}</span>
               </div>
               <div class="col col--cb-about">
-                <span class="col--cb-about__title">Content curating app</span>
-                <span class="col--cb-about__description">Brings all your news into one place</span>
+                <span class="col--cb-about__description">{{ caseItem.description }}</span>
               </div>
               <div class="col col--cb-users">
                 <img src="@/assets/temporary/case-boards-users.png" alt="" />
@@ -235,11 +237,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
+import { defineComponent, ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { db } from '@/firebase.js';
+import firebase from 'firebase/app';
 import VLink from '@/components/v-link/VLink.vue';
 import VButton from '@/components/v-button/VButton.vue';
-import Search from '@/modules/Navigation/Search.vue';
+import Search from '@/modules/Cases/Search.vue';
 import VUser from '@/components/v-user/v-user.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
 import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
@@ -248,6 +253,17 @@ import VNotification from '@/components/v-notification/VNotification.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
 import VEditCaseBoard from '@/modals/CaseBoards/v-edit-case-board/v-edit-case-board.vue';
 import VAddCaseBoard from '@/modals/CaseBoards/v-add-case-board/v-add-case-board.vue';
+
+interface Case {
+  id: string;
+  title: string;
+  description: string;
+  client_id: string;
+  icon: string;
+  owner: string;
+  team_members: string[];
+  time_added: firebase.firestore.Timestamp; // Use Firestore Timestamp
+}
 
 interface DropdownItem {
   label: string;
@@ -299,6 +315,43 @@ export default defineComponent({
     };
   },
   setup() {
+    const cases = ref<Case[]>([]);
+    const usersMap = ref<{ [key: string]: User }>({});
+
+    const fetchCases = async () => {
+      const querySnapshot = await getDocs(collection(db, "cases"));
+      cases.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Case);
+      cases.value.forEach(caseItem => {
+        if (caseItem.client_id) {
+          fetchUser(caseItem.client_id);
+        }
+      });
+    };
+
+    const fetchUser = async (userId: string) => {
+      if (!usersMap.value[userId]) {
+        const userDoc = await getDoc(doc(db, "users", userId));
+        if (userDoc.exists()) {
+          // Using Vue.set for reactivity in Vue 3
+          usersMap.value = { ...usersMap.value, [userId]: userDoc.data() as User };
+        }
+      }
+    };
+
+    onMounted(fetchCases);
+
+    watch(cases, (newCases) => {
+      newCases.forEach(caseItem => {
+        if (caseItem.client_id && !usersMap.value[caseItem.client_id]) {
+          fetchUser(caseItem.client_id);
+        }
+      });
+    });
+
+    const formatDate = (timestamp: firebase.firestore.Timestamp): string => {
+      return timestamp.toDate().toLocaleDateString();
+    };
+
     const itemsPerPage = 10;
     const allItems = ref([
       { id: 1, name: 'Page 1' },
@@ -335,6 +388,10 @@ export default defineComponent({
     };
 
     return {
+      cases,
+      usersMap,
+      fetchUser,
+      formatDate,
       paginatedItems,
       totalPages,
       currentPage,

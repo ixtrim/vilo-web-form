@@ -628,6 +628,66 @@
         width: 170px;
         text-align: left;
         margin-left: 48px;
+
+        ul {
+          margin: 0;
+          padding: 0;
+          list-style-type: none;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: flex-start;
+          gap: -5px;
+
+          li {
+            margin: 0 0 0 -5px;
+            padding: 0;
+
+            .vilo-user {
+              &__avatar {
+                width: 28px;
+                height: 28px;
+                margin: 0;
+                padding: 0;
+
+                img {
+                  max-width: 100%;
+                  max-height: 100%;
+                  margin: 0;
+                  padding: 0;
+                  border: 2px solid var(--v-white);
+                }
+              }
+
+              &__info {
+                &__name {
+                  font-family: var(--v-font-inter-medium);
+                  font-weight: 500;
+                  font-size: 14px;
+                  color: var(--v-gray-900);
+                }
+              }
+            
+            }
+
+            &.users-rest {
+              span {
+                width: 28px;
+                height: 28px;
+                display: inline-block;
+                text-align: center;
+                line-height: 24px;
+                background: var(--v-gray-200);
+                color: var(--v-gray-600);
+                border: 2px solid var(--v-white);
+                border-radius: 55%;
+                font-size: 12px;
+                font-weight: 500;
+                margin: -2px;
+              }
+            }
+          }
+        }
       }
 
       &--cb-action {

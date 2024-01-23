@@ -73,7 +73,7 @@
 
           <div class="dashboard__table__page">
 
-            <div class="dashboard__table__page__item" v-for="caseItem in cases" :key="caseItem.id">
+            <div class="dashboard__table__page__item" v-for="caseItem in paginatedCases" :key="caseItem.id">
               <div class="col col--cb-case">
                 <ul>
                   <li>
@@ -94,111 +94,16 @@
                 <span class="col--cb-about__description">{{ caseItem.description }}</span>
               </div>
               <div class="col col--cb-users">
-                <img src="@/assets/temporary/case-boards-users.png" alt="" />
-              </div>
-              <div class="col col--cb-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal" text=""></VButton>
-              </div>
-            </div>
-
-            <div class="dashboard__table__page__item">
-              <div class="col col--cb-case">
                 <ul>
-                  <li>
-                    <img src="@/assets/temporary/Avatar-2.svg" alt="" />
+                  <li v-for="memberId in caseItem.team_members" :key="memberId">
+                    <template v-if="usersMap[memberId]">
+                      <VUser :userAvatar="usersMap[memberId].avatar" />
+                    </template>
                   </li>
-                  <li>
-                    <h4 class="active" @click="navigateToCaseBoard(1)">Capsule</h4>
+                  <li class="users-rest">
+                    <span>+5</span>
                   </li>
                 </ul>
-              </div>
-              <div class="col col--cb-client">
-                <VUser userName="Olivia Rhye" />
-              </div>
-              <div class="col col--cb-about">
-                <span class="col--cb-about__title">Design software</span>
-                <span class="col--cb-about__description">Super lightweight design app</span>
-              </div>
-              <div class="col col--cb-users">
-                <img src="@/assets/temporary/case-boards-users.png" alt="" />
-              </div>
-              <div class="col col--cb-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal" text=""></VButton>
-              </div>
-            </div>
-
-            <div class="dashboard__table__page__item">
-              <div class="col col--cb-case">
-                <ul>
-                  <li>
-                    <img src="@/assets/temporary/Avatar-3.svg" alt="" />
-                  </li>
-                  <li>
-                    <h4 class="active" @click="navigateToCaseBoard(1)">Smith v. Jones, New York State Court</h4>
-                  </li>
-                </ul>
-              </div>
-              <div class="col col--cb-client">
-                <VUser userName="John Norbit" />
-              </div>
-              <div class="col col--cb-about">
-                <span class="col--cb-about__title">Data prediction</span>
-                <span class="col--cb-about__description">AI and machine learning data</span>
-              </div>
-              <div class="col col--cb-users">
-                <img src="@/assets/temporary/case-boards-users.png" alt="" />
-              </div>
-              <div class="col col--cb-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal" text=""></VButton>
-              </div>
-            </div>
-
-            <div class="dashboard__table__page__item">
-              <div class="col col--cb-case">
-                <ul>
-                  <li>
-                    <img src="@/assets/temporary/Avatar-4.svg" alt="" />
-                  </li>
-                  <li>
-                    <h4 class="active" @click="navigateToCaseBoard(1)">Hourglass</h4>
-                  </li>
-                </ul>
-              </div>
-              <div class="col col--cb-client">
-                <span class="col--cb-client__general">General</span>
-              </div>
-              <div class="col col--cb-about">
-                <span class="col--cb-about__title">Productivity app</span>
-                <span class="col--cb-about__description">Time management and productivity</span>
-              </div>
-              <div class="col col--cb-users">
-                <img src="@/assets/temporary/case-boards-users.png" alt="" />
-              </div>
-              <div class="col col--cb-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal" text=""></VButton>
-              </div>
-            </div>
-
-            <div class="dashboard__table__page__item">
-              <div class="col col--cb-case">
-                <ul>
-                  <li>
-                    <img src="@/assets/temporary/Avatar-5.svg" alt="" />
-                  </li>
-                  <li>
-                    <h4 class="active" @click="navigateToCaseBoard(1)">Layers</h4>
-                  </li>
-                </ul>
-              </div>
-              <div class="col col--cb-client">
-                <VUser userName="Ben Konopsky" />
-              </div>
-              <div class="col col--cb-about">
-                <span class="col--cb-about__title">Web app integrations</span>
-                <span class="col--cb-about__description">Connect web apps seamlessly</span>
-              </div>
-              <div class="col col--cb-users">
-                <img src="@/assets/temporary/case-boards-users.png" alt="" />
               </div>
               <div class="col col--cb-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal" text=""></VButton>
@@ -209,15 +114,13 @@
 
           <div class="dashboard__table__pagination">
             <div class="dashboard__table__pagination__prev">
-              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="prevPage"
-                text="Previous"></v-button>
+              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="prevPage" text="Previous"></v-button>
             </div>
             <div class="dashboard__table__pagination__pages">
               <v-pagination-list :total-pages="totalPages" @update:currentPage="updatePage" />
             </div>
             <div class="dashboard__table__pagination__next">
-              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="nextPage"
-                text="Next"></v-button>
+              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="nextPage" text="Next"></v-button>
             </div>
           </div>
 
@@ -323,6 +226,9 @@ export default defineComponent({
     const cases = ref<Case[]>([]);
     const usersMap = ref<{ [key: string]: User }>({});
 
+    const currentPage = ref(1);
+    const itemsPerPage = ref(10);
+
     const fetchCases = async () => {
       const querySnapshot = await getDocs(collection(db, "cases"));
       cases.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Case);
@@ -330,6 +236,9 @@ export default defineComponent({
         if (caseItem.client_id) {
           fetchUser(caseItem.client_id);
         }
+        caseItem.team_members.forEach(memberId => {
+          fetchUser(memberId);
+        });
       });
     };
 
@@ -357,39 +266,36 @@ export default defineComponent({
       return timestamp.toDate().toLocaleDateString();
     };
 
-    const itemsPerPage = 10;
-    const allItems = ref([
-      { id: 1, name: 'Page 1' },
-      { id: 2, name: 'Page 2' },
-      { id: 3, name: 'Page 3' },
-      { id: 4, name: 'Page 4' },
-      { id: 5, name: 'Page 5' },
-      { id: 6, name: 'Page 6' },
-      { id: 7, name: 'Page 7' },
-      { id: 8, name: 'Page 8' },
-      { id: 9, name: 'Page 9' },
-      { id: 10, name: 'Page 10' },
-      { id: 11, name: 'Page 11' },
-      { id: 12, name: 'Page 12' },
-    ]);
-    const currentPage = ref(1);
-
     const router = useRouter();
     const navigateToCaseBoard = (caseId: number) => {
       //router.push(`/case-board/${caseId}`);
       router.push(`/case-board`);
     };
 
-    const totalPages = computed(() => Math.ceil(allItems.value.length / itemsPerPage));
+    const paginatedCases = computed(() => {
+      const start = (currentPage.value - 1) * itemsPerPage.value;
+      const end = start + itemsPerPage.value;
+      return cases.value.slice(start, end);
+    });
 
-    const paginatedItems = computed(() => {
-      const start = (currentPage.value - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      return allItems.value.slice(start, end);
+    const totalPages = computed(() => {
+      return Math.ceil(cases.value.length / itemsPerPage.value);
     });
 
     const updatePage = (newPage: number) => {
       currentPage.value = newPage;
+    };
+
+    const nextPage = () => {
+      if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+      }
+    };
+
+    const prevPage = () => {
+      if (currentPage.value > 1) {
+        currentPage.value--;
+      }
     };
 
     return {
@@ -397,11 +303,13 @@ export default defineComponent({
       usersMap,
       fetchUser,
       formatDate,
-      paginatedItems,
+      paginatedCases,
       totalPages,
       currentPage,
+      updatePage,
+      nextPage,
+      prevPage,
       navigateToCaseBoard,
-      updatePage
     };
   },
   methods: {

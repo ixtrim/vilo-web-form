@@ -73,7 +73,7 @@
 
           <div class="dashboard__table__page">
 
-            <div class="dashboard__table__page__item" v-for="caseItem in cases" :key="caseItem.id">
+            <div class="dashboard__table__page__item" v-for="caseItem in paginatedCases" :key="caseItem.id">
               <div class="col col--cb-case">
                 <ul>
                   <li>
@@ -105,15 +105,13 @@
 
           <div class="dashboard__table__pagination">
             <div class="dashboard__table__pagination__prev">
-              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="prevPage"
-                text="Previous"></v-button>
+              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="prevPage" text="Previous"></v-button>
             </div>
             <div class="dashboard__table__pagination__pages">
               <v-pagination-list :total-pages="totalPages" @update:currentPage="updatePage" />
             </div>
             <div class="dashboard__table__pagination__next">
-              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="nextPage"
-                text="Next"></v-button>
+              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="nextPage" text="Next"></v-button>
             </div>
           </div>
 
@@ -219,6 +217,9 @@ export default defineComponent({
     const cases = ref<Case[]>([]);
     const usersMap = ref<{ [key: string]: User }>({});
 
+    const currentPage = ref(1);
+    const itemsPerPage = ref(10);
+
     const fetchCases = async () => {
       const querySnapshot = await getDocs(collection(db, "cases"));
       cases.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Case);
@@ -253,39 +254,36 @@ export default defineComponent({
       return timestamp.toDate().toLocaleDateString();
     };
 
-    const itemsPerPage = 10;
-    const allItems = ref([
-      { id: 1, name: 'Page 1' },
-      { id: 2, name: 'Page 2' },
-      { id: 3, name: 'Page 3' },
-      { id: 4, name: 'Page 4' },
-      { id: 5, name: 'Page 5' },
-      { id: 6, name: 'Page 6' },
-      { id: 7, name: 'Page 7' },
-      { id: 8, name: 'Page 8' },
-      { id: 9, name: 'Page 9' },
-      { id: 10, name: 'Page 10' },
-      { id: 11, name: 'Page 11' },
-      { id: 12, name: 'Page 12' },
-    ]);
-    const currentPage = ref(1);
-
     const router = useRouter();
     const navigateToCaseBoard = (caseId: number) => {
       //router.push(`/case-board/${caseId}`);
       router.push(`/case-board`);
     };
 
-    const totalPages = computed(() => Math.ceil(allItems.value.length / itemsPerPage));
+    const paginatedCases = computed(() => {
+      const start = (currentPage.value - 1) * itemsPerPage.value;
+      const end = start + itemsPerPage.value;
+      return cases.value.slice(start, end);
+    });
 
-    const paginatedItems = computed(() => {
-      const start = (currentPage.value - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      return allItems.value.slice(start, end);
+    const totalPages = computed(() => {
+      return Math.ceil(cases.value.length / itemsPerPage.value);
     });
 
     const updatePage = (newPage: number) => {
       currentPage.value = newPage;
+    };
+
+    const nextPage = () => {
+      if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+      }
+    };
+
+    const prevPage = () => {
+      if (currentPage.value > 1) {
+        currentPage.value--;
+      }
     };
 
     return {
@@ -293,11 +291,13 @@ export default defineComponent({
       usersMap,
       fetchUser,
       formatDate,
-      paginatedItems,
+      paginatedCases,
       totalPages,
       currentPage,
+      updatePage,
+      nextPage,
+      prevPage,
       navigateToCaseBoard,
-      updatePage
     };
   },
   methods: {

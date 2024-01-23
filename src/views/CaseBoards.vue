@@ -239,7 +239,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/firebase.js';
 import firebase from 'firebase/app';
 import VLink from '@/components/v-link/VLink.vue';
@@ -262,7 +262,12 @@ interface Case {
   icon: string;
   owner: string;
   team_members: string[];
-  time_added: firebase.firestore.Timestamp; // Use Firestore Timestamp
+  time_added: Timestamp; // Use Firestore Timestamp
+}
+
+interface User {
+  full_name: string;
+  avatar: string;
 }
 
 interface DropdownItem {
@@ -348,7 +353,7 @@ export default defineComponent({
       });
     });
 
-    const formatDate = (timestamp: firebase.firestore.Timestamp): string => {
+    const formatDate = (timestamp: Timestamp): string => {
       return timestamp.toDate().toLocaleDateString();
     };
 

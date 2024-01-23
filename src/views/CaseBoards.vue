@@ -94,7 +94,16 @@
                 <span class="col--cb-about__description">{{ caseItem.description }}</span>
               </div>
               <div class="col col--cb-users">
-                <img src="@/assets/temporary/case-boards-users.png" alt="" />
+                <ul>
+                  <li v-for="memberId in caseItem.team_members" :key="memberId">
+                    <template v-if="usersMap[memberId]">
+                      <VUser :userAvatar="usersMap[memberId].avatar" />
+                    </template>
+                  </li>
+                  <li class="users-rest">
+                    <span>+5</span>
+                  </li>
+                </ul>
               </div>
               <div class="col col--cb-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal" text=""></VButton>
@@ -227,6 +236,9 @@ export default defineComponent({
         if (caseItem.client_id) {
           fetchUser(caseItem.client_id);
         }
+        caseItem.team_members.forEach(memberId => {
+          fetchUser(memberId);
+        });
       });
     };
 

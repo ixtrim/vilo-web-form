@@ -102,7 +102,7 @@
   import { db } from '@/firebase.js';
   import { collection, query, where, getDocs } from 'firebase/firestore';
   import VButton from '@/components/v-button/VButton.vue';
-  import Search from '@/modules/Navigation/Search.vue';
+  import Search from '@/modules/Clients/Search.vue';
   import VUser from '@/components/v-user/v-user.vue';
   import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
   import VModal from '@/components/v-modal/v-modal.vue';
@@ -205,7 +205,6 @@
         // Filter users based on the searchTerm for both user name and company name
         if (searchTerm.value && String(searchTerm.value).trim().length > 0) {
           const lowerCaseSearchTerm = String(searchTerm.value).toLowerCase();
-          console.log('Search Query: ' + lowerCaseSearchTerm);
           filteredUsers = filteredUsers.filter(user =>
           String(user.full_name).toLowerCase().includes(lowerCaseSearchTerm) ||
             (user.company && String(user.company).toLowerCase().includes(lowerCaseSearchTerm))

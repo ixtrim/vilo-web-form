@@ -73,7 +73,7 @@
 
           <div class="dashboard__table__page">
 
-            <div class="dashboard__table__page__item" v-for="caseItem in paginatedCases" :key="caseItem.id">
+            <div class="dashboard__table__page__item" v-for="caseItem in processedCases" :key="caseItem.id">
               <div class="col col--cb-case">
                 <ul>
                   <li>
@@ -95,13 +95,13 @@
               </div>
               <div class="col col--cb-users">
                 <ul>
-                  <li v-for="memberId in caseItem.team_members" :key="memberId">
+                  <li v-for="memberId in caseItem.displayedMembers" :key="memberId">
                     <template v-if="usersMap[memberId]">
                       <VUser :userAvatar="usersMap[memberId].avatar" />
                     </template>
                   </li>
-                  <li class="users-rest">
-                    <span>+5</span>
+                  <li class="users-rest" v-if="caseItem.extraMembersCount > 0">
+                    <span>+{{ caseItem.extraMembersCount }}</span>
                   </li>
                 </ul>
               </div>
@@ -171,6 +171,11 @@ interface Case {
 interface User {
   full_name: string;
   avatar: string;
+}
+
+interface ProcessedCase extends Case {
+  displayedMembers: string[];
+  extraMembersCount: number;
 }
 
 interface DropdownItem {
@@ -278,6 +283,17 @@ export default defineComponent({
       return cases.value.slice(start, end);
     });
 
+    const processedCases = computed(() => {
+      return cases.value.map(caseItem => {
+        const extraMembersCount = caseItem.team_members.length > 5 ? caseItem.team_members.length - 5 : 0;
+        return {
+          ...caseItem,
+          displayedMembers: caseItem.team_members.slice(0, 5),
+          extraMembersCount
+        };
+      });
+    });
+
     const totalPages = computed(() => {
       return Math.ceil(cases.value.length / itemsPerPage.value);
     });
@@ -310,6 +326,7 @@ export default defineComponent({
       nextPage,
       prevPage,
       navigateToCaseBoard,
+      processedCases,
     };
   },
   methods: {

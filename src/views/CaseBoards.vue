@@ -34,7 +34,7 @@
             <div class="col-lg-3">
               <ul class="dashboard__actions">
                 <li>
-                  <VDropdown :title="'Sort by date'" :items="sortTime" @item-clicked="handleDropdownClick" />
+                  <VDropdown :title="'Filter by date'" :items="filterTime" @item-clicked="handleFilterTime" />
                 </li>
                 <li>
                   <VDropdown :title="currentDropdownTitle" :items="sortCases" @item-clicked="handleFilterStatus" />
@@ -212,14 +212,6 @@ export default defineComponent({
       notificationMessage: 'This account has been successfully edited.',
       userName: 'Olivia Rhye',
       userEmail: 'olivia@untitledui.com',
-      sortTime: [
-        { label: 'All' },
-        { label: 'Last year' },
-        { label: 'Last three months' },
-        { label: 'Last two months' },
-        { label: 'Last month' },
-        { label: 'This week' },
-      ],
       sortCases: [
         { label: 'All cases' },
         { label: 'Active cases' },
@@ -232,8 +224,18 @@ export default defineComponent({
     };
   },
   setup() {
+    const originalCases = ref<Case[]>([]);
     const cases = ref<Case[]>([]);
     const usersMap = ref<{ [key: string]: User }>({});
+
+    const filterTime = ref([
+      { label: 'All' },
+      { label: 'Last year' },
+      { label: 'Last three months' },
+      { label: 'Last two months' },
+      { label: 'Last month' },
+      { label: 'This week' },
+    ]);
 
     const currentPage = ref(1);
     const itemsPerPage = ref(10);
@@ -242,7 +244,8 @@ export default defineComponent({
 
     const fetchCases = async () => {
       const querySnapshot = await getDocs(collection(db, "cases"));
-      cases.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Case);
+      originalCases.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Case);
+      cases.value = [...originalCases.value];
       cases.value.forEach(caseItem => {
         if (caseItem.client_id) {
           fetchUser(caseItem.client_id);
@@ -251,6 +254,60 @@ export default defineComponent({
           fetchUser(memberId);
         });
       });
+    };
+
+    const sortCasesByTimeAdded = (days: number) => {
+      const currentTime = new Date().getTime();
+      const cutoffTime = currentTime - days * 24 * 60 * 60 * 1000;
+
+      cases.value.sort((a, b) => {
+        const aTime = a.time_added.toMillis();
+        const bTime = b.time_added.toMillis();
+
+        if (aTime > cutoffTime && bTime > cutoffTime) {
+          // Both cases are within the specified time range, use the original order
+          return aTime - bTime;
+        } else if (aTime > cutoffTime) {
+          // Only case a is within the time range
+          return -1;
+        } else if (bTime > cutoffTime) {
+          // Only case b is within the time range
+          return 1;
+        } else {
+          // Both cases are outside the time range, use the original order
+          return aTime - bTime;
+        }
+      });
+    };
+
+    const handleFilterTime = (item: any) => {
+      const currentTime = new Date().getTime();
+
+      switch (item.label) {
+        case 'All':
+          cases.value = [...originalCases.value]; // Restore original unfiltered data
+          break;
+        case 'Last year':
+          cases.value = originalCases.value.filter(caseItem => caseItem.time_added.toMillis() > currentTime - 365 * 24 * 60 * 60 * 1000);
+          break;
+        case 'Last three months':
+          cases.value = originalCases.value.filter(caseItem => caseItem.time_added.toMillis() > currentTime - 90 * 24 * 60 * 60 * 1000);
+          break;
+        case 'Last two months':
+          cases.value = originalCases.value.filter(caseItem => caseItem.time_added.toMillis() > currentTime - 60 * 24 * 60 * 60 * 1000);
+          break;
+        case 'Last month':
+          cases.value = originalCases.value.filter(caseItem => caseItem.time_added.toMillis() > currentTime - 30 * 24 * 60 * 60 * 1000);
+          break;
+        case 'This week':
+          cases.value = originalCases.value.filter(caseItem => caseItem.time_added.toMillis() > currentTime - 7 * 24 * 60 * 60 * 1000);
+          break;
+        default:
+          break;
+      }
+
+      // Other logic you may need to perform when the dropdown is clicked
+      console.log('Dropdown item clicked', item.label);
     };
 
     const handleFilterStatus = (item: DropdownItem) => {
@@ -280,7 +337,6 @@ export default defineComponent({
       if (!usersMap.value[userId]) {
         const userDoc = await getDoc(doc(db, "users", userId));
         if (userDoc.exists()) {
-          // Using Vue.set for reactivity in Vue 3
           usersMap.value = { ...usersMap.value, [userId]: userDoc.data() as User };
         }
       }
@@ -367,6 +423,9 @@ export default defineComponent({
       selectedStatus,
       currentDropdownTitle,
       handleFilterStatus,
+      sortCasesByTimeAdded,
+      handleFilterTime,
+      filterTime,
     };
   },
   methods: {
@@ -375,9 +434,6 @@ export default defineComponent({
       this.notificationHeader = header;
       this.notificationMessage = message;
       (this.$refs.notificationRef as NotificationRef).showNotification();
-    },
-    handleDropdownClick(item: any) {
-      console.log('Dropdown item clicked', item);
     },
     prevPage() {
       if (this.currentPage > 1) {

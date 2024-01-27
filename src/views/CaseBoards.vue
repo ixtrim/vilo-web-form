@@ -37,7 +37,7 @@
                   <VDropdown :title="'Sort by date'" :items="sortTime" @item-clicked="handleDropdownClick" />
                 </li>
                 <li>
-                  <VDropdown :title="'All cases'" :items="sortCases" @item-clicked="handleDropdownClick" />
+                  <VDropdown :title="currentDropdownTitle" :items="sortCases" @item-clicked="handleFilterStatus" />
                 </li>
               </ul>
             </div>
@@ -165,7 +165,8 @@ interface Case {
   icon: string;
   owner: string;
   team_members: string[];
-  time_added: Timestamp; // Use Firestore Timestamp
+  time_added: Timestamp;
+  status: number; 
 }
 
 interface User {
@@ -220,11 +221,13 @@ export default defineComponent({
         { label: 'This week' },
       ],
       sortCases: [
-        { label: 'My cases' },
+        { label: 'Active cases' },
         { label: 'Drafts cases' },
         { label: 'Archived cases' },
         { label: 'Hidden cases' },
       ],
+      selectedStatus: null,
+      currentDropdownTitle: 'All cases',
     };
   },
   setup() {
@@ -233,6 +236,8 @@ export default defineComponent({
 
     const currentPage = ref(1);
     const itemsPerPage = ref(10);
+    const selectedStatus = ref<number | null>(null);
+    const currentDropdownTitle = ref('All cases');
 
     const fetchCases = async () => {
       const querySnapshot = await getDocs(collection(db, "cases"));
@@ -245,6 +250,26 @@ export default defineComponent({
           fetchUser(memberId);
         });
       });
+    };
+
+    const handleFilterStatus = (item: DropdownItem) => {
+      switch (item.label) {
+        case 'Drafts cases':
+          selectedStatus.value = 0;
+          break;
+        case 'Active cases':
+          selectedStatus.value = 1;
+          break;
+        case 'Hidden cases':
+          selectedStatus.value = 2;
+          break;
+        case 'Archived cases':
+          selectedStatus.value = 3;
+          break;
+        default:
+          selectedStatus.value = null;
+      }
+      currentDropdownTitle.value = item.label;
     };
 
     const fetchUser = async (userId: string) => {
@@ -267,6 +292,10 @@ export default defineComponent({
       });
     });
 
+    watch(selectedStatus, () => {
+      currentPage.value = 1;
+    });
+
     const formatDate = (timestamp: Timestamp): string => {
       return timestamp.toDate().toLocaleDateString();
     };
@@ -284,18 +313,22 @@ export default defineComponent({
     });
 
     const processedCases = computed(() => {
-      return cases.value.map(caseItem => {
-        const extraMembersCount = caseItem.team_members.length > 5 ? caseItem.team_members.length - 5 : 0;
-        return {
-          ...caseItem,
-          displayedMembers: caseItem.team_members.slice(0, 5),
-          extraMembersCount
-        };
-      });
+      return cases.value
+        .filter(caseItem => {
+          return selectedStatus.value === null || caseItem.status === selectedStatus.value;
+        })
+        .map(caseItem => {
+          const extraMembersCount = caseItem.team_members.length > 5 ? caseItem.team_members.length - 5 : 0;
+          return {
+            ...caseItem,
+            displayedMembers: caseItem.team_members.slice(0, 5),
+            extraMembersCount
+          };
+        });
     });
 
     const totalPages = computed(() => {
-      return Math.ceil(cases.value.length / itemsPerPage.value);
+      return Math.ceil(processedCases.value.length / itemsPerPage.value);
     });
 
     const updatePage = (newPage: number) => {
@@ -327,6 +360,9 @@ export default defineComponent({
       prevPage,
       navigateToCaseBoard,
       processedCases,
+      selectedStatus,
+      currentDropdownTitle,
+      handleFilterStatus,
     };
   },
   methods: {

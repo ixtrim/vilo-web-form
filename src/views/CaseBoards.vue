@@ -221,6 +221,7 @@ export default defineComponent({
         { label: 'This week' },
       ],
       sortCases: [
+        { label: 'All cases' },
         { label: 'Active cases' },
         { label: 'Drafts cases' },
         { label: 'Archived cases' },
@@ -254,6 +255,9 @@ export default defineComponent({
 
     const handleFilterStatus = (item: DropdownItem) => {
       switch (item.label) {
+        case 'All cases':
+          selectedStatus.value = null;
+          break;
         case 'Drafts cases':
           selectedStatus.value = 0;
           break;

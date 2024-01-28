@@ -28,7 +28,6 @@
             <div class="col-lg-3">
               <div class="dashboard__filters">
                 <Search :value="searchTerm" @update-search="updateSearchTerm" />
-<p>Search Term: {{ searchTerm }}</p>
               </div>
             </div>
             <div class="col-lg-6"></div>

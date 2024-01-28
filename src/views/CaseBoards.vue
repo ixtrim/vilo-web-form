@@ -27,7 +27,7 @@
           <div class="row">
             <div class="col-lg-3">
               <div class="dashboard__filters">
-                <Search />
+                <Search :value="searchTerm" @update-search="updateSearchTerm" />
               </div>
             </div>
             <div class="col-lg-6"></div>
@@ -141,6 +141,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted, watch } from 'vue';
+import type { Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { collection, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/firebase.js';
@@ -221,12 +222,14 @@ export default defineComponent({
       ],
       selectedStatus: null,
       currentDropdownTitle: 'All cases',
+      searchTerm: '',
     };
   },
   setup() {
     const originalCases = ref<Case[]>([]);
     const cases = ref<Case[]>([]);
     const usersMap = ref<{ [key: string]: User }>({});
+    const searchTerm = ref<string>('');
 
     const filterTime = ref([
       { label: 'All' },
@@ -333,6 +336,22 @@ export default defineComponent({
       currentDropdownTitle.value = item.label;
     };
 
+    const updateSearchTerm = (value: string) => {
+      searchTerm.value = value;
+    };
+
+    const handleFilterSearch = () => {
+      cases.value = originalCases.value.filter(caseItem => {
+        const caseTitle = caseItem.title.toLowerCase();
+        const caseDescription = caseItem.description.toLowerCase();
+        const searchTermValue = searchTerm.value.toLowerCase();
+
+        return caseTitle.includes(searchTermValue) || caseDescription.includes(searchTermValue);
+      });
+    };
+
+    watch(searchTerm, handleFilterSearch);
+
     const fetchUser = async (userId: string) => {
       if (!usersMap.value[userId]) {
         const userDoc = await getDoc(doc(db, "users", userId));
@@ -375,7 +394,12 @@ export default defineComponent({
     const processedCases = computed(() => {
       return cases.value
         .filter(caseItem => {
+          // Filter by selectedStatus (if applicable)
           return selectedStatus.value === null || caseItem.status === selectedStatus.value;
+        })
+        .filter(caseItem => {
+          // Filter by search term
+          return caseItem.title.toLowerCase().includes(searchTerm.value.toLowerCase());
         })
         .map(caseItem => {
           const extraMembersCount = caseItem.team_members.length > 5 ? caseItem.team_members.length - 5 : 0;
@@ -426,6 +450,9 @@ export default defineComponent({
       sortCasesByTimeAdded,
       handleFilterTime,
       filterTime,
+      handleFilterSearch,
+      searchTerm,
+      updateSearchTerm,
     };
   },
   methods: {

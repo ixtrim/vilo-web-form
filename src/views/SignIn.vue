@@ -71,70 +71,15 @@
         }
       },
       validatePassword() {
-        /*const passwordRegex = /^(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
-        if (!passwordRegex.test(this.password)) {
-          this.passwordValidationMessage = 'Password must be at least 8 characters and contain one special character';
-        } else {
-          this.passwordValidationMessage = '';
-        }*/
       },
       SignInWithGoogle() {
         console.log('Sign in with Google button clicked');
       },
       async handleSubmit() {
-        this.emailValidationMessage = '';
-        this.passwordValidationMessage = '';
-        this.loginErrorMessage = '';
-
-        if (!this.email) {
-          this.emailValidationMessage = 'Email is required!';
-        }
-        if (!this.password) {
-          this.passwordValidationMessage = 'Password is required!';
-        }
-
-        // Check for specific admin credentials
-        if (this.email === 'admin@viloapp.com' && this.password === 'ViloAPPpsw2023') {
-          // Set a token or some flag in localStorage or sessionStorage
-          localStorage.setItem('isAdmin', 'true'); // Example flag
-          this.$router.push('/dashboard');
-          return;
-        }
-
-        if (!this.emailValidationMessage && !this.passwordValidationMessage) {
-          try {
-            const response = await axios.post('https://api-vilo.nestvested.co/auth/login/', {
-              email: this.email,
-              password: this.password,
-            }, {
-              headers: {
-                'Content-Type': 'application/json',
-                'accept': 'application/json',
-              },
-            });
-
-            localStorage.setItem('token', response.data.tokens);
-
-            if (this.rememberMe) {
-              localStorage.setItem('token', response.data.tokens);
-            } else {
-              sessionStorage.setItem('token', response.data.tokens);
-            }
-
-            this.$router.push('/dashboard');
-          } catch (error) {
-            this.loginErrorMessage = 'Login failed. Please check your email and password and try again.';
-          }
-        } else {
-          this.loginErrorMessage = 'Login failed. Please try again.';
-        }
       },
     },
     mounted() {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      if (token) {
-        this.$router.push('/dashboard');
-      }
+      
     }
   };
 </script>

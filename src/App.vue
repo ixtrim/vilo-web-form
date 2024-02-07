@@ -11,6 +11,8 @@ const showInitialContent = computed(() => {
   return route.path === '/sign-in' || route.path === '/sign-up' || route.path === '/forgot-password' || route.path === '/email-verification' || route.path === '/set-new-password' || route.path === '/password-changed' || route.path === '/';
 });
 
+const currentYear = computed(() => new Date().getFullYear());
+
 </script>
 <template>
   <div class="container-fluid">
@@ -31,9 +33,9 @@ const showInitialContent = computed(() => {
           <RouterView />
           <footer>
             <div class="row">
-              <div class="col-lg-6">© Vilo Inc. 2023</div>
+              <div class="col-lg-6">© Vilo Inc. {{ currentYear }}</div>
               <div class="col-lg-6 text-end">
-                <div class="footer-email-wrap"><img src="@/assets/mail.svg" /><span>help@vilo.com</span></div>
+                <div class="footer-email-wrap"><img src="@/assets/mail.svg" /><a href="mailto:help@vilo.com">help@vilo.com</a></div>
               </div>
             </div>
           </footer>
@@ -97,8 +99,15 @@ const showInitialContent = computed(() => {
       justify-content: flex-end;
       align-items: center;
 
-      span {
+      a {
         margin-left: 8px;
+        display: inline-block;
+        color: var(--v-color-primary);
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
       }
     }
   }

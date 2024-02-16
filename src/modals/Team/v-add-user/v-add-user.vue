@@ -2,7 +2,7 @@
   <div class="modal-body">
 
     <div class="row">
-      <div class="col-lg-6">
+      <div class="col-lg-12">
         <VInput 
           label="Full Name" 
           placeholder="John Kowalski" 
@@ -10,6 +10,9 @@
         />
         <p v-if="errorUserName" class="error-message">{{ errorUserName }}</p>
       </div>
+    </div>
+
+    <div class="row">
       <div class="col-lg-6">
         <VInput 
           label="Email address" 
@@ -18,9 +21,16 @@
         />
         <p v-if="errorUserEmail" class="error-message">{{ errorUserEmail }}</p>
       </div>
+      <div class="col-lg-6">
+        <VInput 
+          label="Password" 
+          placeholder="Enter password" 
+          type="password" 
+          v-model="localUserPassword"
+        />
+        <p v-if="errorUserPassword" class="error-message">{{ errorUserPassword }}</p>
+      </div>
     </div>
-
-    
 
     <div class="row">
       <div class="col-lg-12">
@@ -107,9 +117,12 @@
         />
       </div>
     </div>
-
   </div>
+
   <div class="modal-footer">
+    <div v-if="errorMessage" class="modal-footer__error-container">
+      <p class="error-message">{{ errorMessage }}</p>
+    </div>
     <ul class="modal-footer__actions">
       <li>
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
@@ -123,10 +136,12 @@
 
 <script setup lang="ts">
   import { db, storage } from '@/firebase.js';
-  import { doc, setDoc } from 'firebase/firestore';
-  import { ref, watch, computed } from 'vue';
-  import { uploadBytes, ref as storageRef, getDownloadURL } from 'firebase/storage';
   import type { PropType } from 'vue';
+  import { ref, watch, computed } from 'vue';
+  import { doc, setDoc } from 'firebase/firestore';
+  import { uploadBytes, ref as storageRef, getDownloadURL } from 'firebase/storage';
+  import { createUserWithEmailAndPassword } from 'firebase/auth';
+  import { getAuth } from 'firebase/auth';
   import { defineEmits, defineProps } from 'vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VImageUploader from '@/components/v-image-uploader/VImageUploader.vue';
@@ -136,6 +151,7 @@
 
   const localUserName = ref('');
   const localUserEmail = ref('');
+  const localUserPassword = ref('');
   const localUserCompany = ref('');
   const localUserPhone = ref('');
   const localUserAddress = ref('');
@@ -143,16 +159,19 @@
 
   const errorUserName = ref('');
   const errorUserEmail = ref('');
+  const errorUserPassword = ref('');
   const errorUserPosition = ref('');
   const errorUserPhone = ref('');
   const errorUserAddress = ref('');
   const errorUserCompany = ref('');
 
+  const errorMessage = ref('');
+
   const avatarUrl = ref('');
+  let croppedImageBlob = ref<Blob | null>(null);
 
   const props = defineProps({
-    title: String,
-    nextUserId: Number
+    title: String
   });
 
   type DropdownItem = {
@@ -191,20 +210,8 @@
     dropdownStatusTitle.value = item.label;
   }
 
-  async function handleImageCropped(blob: Blob) {
-    if (props.nextUserId === undefined) {
-      console.error("nextUserId is undefined");
-      return;
-    }
-
-    try {
-      const userId = props.nextUserId.toString().padStart(4, '0');
-      const imageRef = storageRef(storage, `users/${userId}.jpg`);
-      await uploadBytes(imageRef, blob);
-      avatarUrl.value = await getDownloadURL(imageRef);
-    } catch (error) {
-      console.error("Error uploading image: ", error);
-    }
+  function handleImageCropped(blob: Blob) {
+    croppedImageBlob.value = blob;
   }
 
   function closeModal() {
@@ -215,6 +222,7 @@
 
     errorUserName.value = '';
     errorUserEmail.value = '';
+    errorUserPassword.value = '';
     errorUserPosition.value = '';
     errorUserPhone.value = '';
     errorUserAddress.value = '';
@@ -224,6 +232,11 @@
 
     if (!localUserName.value.trim()) {
       errorUserName.value = 'Full Name is required!';
+      isValid = false;
+    }
+
+    if (!localUserPassword.value.trim() || localUserPassword.value.length < 6) {
+      errorUserPassword.value = 'Password is required and must be at least 6 characters!';
       isValid = false;
     }
 
@@ -261,41 +274,49 @@
       return;
     }
 
-    // Validation done, proceed to save
-
-    if (props.nextUserId === undefined) {
-      console.error("nextUserId is undefined");
-      return;
-    }
-
-    // 4-digit user ID formatted with leading zeros
-    const formattedId = props.nextUserId.toString().padStart(4, '0');
-
-    const newUser = {
-      full_name: localUserName.value,
-      email: localUserEmail.value,
-      phone: localUserPhone.value || '',
-      address: localUserAddress.value || '',
-      position: localUserPosition.value || '',
-      company: localUserCompany.value || '',
-      role: dropdownRoles.value.findIndex(role => role.label === dropdownRoleTitle.value),
-      status: dropdownStatus.value.findIndex(status => status.label === dropdownStatusTitle.value),
-      notes: userNotes.value || '',
-      avatar: avatarUrl.value,
-    };
-
+    // Saving datas to Firebase Authentication and Firestore
     try {
-      await setDoc(doc(db, "users", formattedId), newUser);
-      emit('save-clicked', newUser);
-      // Reset the form and close the modal
+      const auth = getAuth();
+      const userCredential = await createUserWithEmailAndPassword(auth, localUserEmail.value, localUserPassword.value);
+      const user = userCredential.user;
+      let avatarUrlValue = '';
+
+      if (croppedImageBlob.value) {
+        const avatarUploadPath = `avatars/${user.uid}.jpg`;
+        const imageRef = storageRef(storage, avatarUploadPath);
+        await uploadBytes(imageRef, croppedImageBlob.value);
+        avatarUrlValue = await getDownloadURL(imageRef);
+      }
+
+      // Use the UID from Firebase Authentication as the document ID in Firestore
+      const newUserDetails = {
+        full_name: localUserName.value,
+        phone: localUserPhone.value || '',
+        address: localUserAddress.value || '',
+        position: localUserPosition.value || '',
+        company: localUserCompany.value || '',
+        role: dropdownRoles.value.findIndex(role => role.label === dropdownRoleTitle.value),
+        status: dropdownStatus.value.findIndex(status => status.label === dropdownStatusTitle.value),
+        notes: userNotes.value || '',
+        avatar: avatarUrlValue,
+      };
+
+      await setDoc(doc(db, "users", user.uid), newUserDetails);
+
+      emit('save-clicked', newUserDetails);
       resetForm();
       closeModal();
     } catch (error) {
-      console.error("Error adding new user: ", error);
+      const firebaseError = error as { code: string; message: string };
+      if (firebaseError.code === 'auth/email-already-in-use') {
+        errorMessage.value = "Email already in use. Please use a different email!";
+      } else {
+        errorMessage.value = "An error occurred while creating the user. Please try again.";
+      }
+      console.error("Error creating new user: ", error);
     }
 
     function resetForm() {
-      // Reset all form fields
       localUserName.value = '';
       localUserEmail.value = '';
       localUserCompany.value = '';
@@ -305,8 +326,8 @@
       avatarUrl.value = '';
 
       // Reset all dropdowns to their default values
-      dropdownRoleTitle.value = 'General'; // Assuming 'General' is the default
-      dropdownStatusTitle.value = 'Pending'; // Assuming 'Pending' is the default
+      dropdownRoleTitle.value = 'General';
+      dropdownStatusTitle.value = 'Pending';
 
       // Reset all error messages
       errorUserName.value = '';

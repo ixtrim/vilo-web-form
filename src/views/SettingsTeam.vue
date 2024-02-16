@@ -140,7 +140,7 @@
         @close-modal="showModal = false"
         @save-clicked="handleSaveChanges"
       />
-      <VAddUser v-if="showAddModal" :title="modalTitle" :nextUserId="nextUserId" @close-modal="showAddModal = false" @save-clicked="handleAddUser" />
+      <VAddUser v-if="showAddModal" :title="modalTitle" @close-modal="showAddModal = false" @save-clicked="handleAddUser" />
     </VModal>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
@@ -151,6 +151,7 @@
 <script lang="ts">
   import { db } from '@/firebase.js';
   import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
+  import { getFunctions, httpsCallable } from 'firebase/functions';
   import { debounce } from 'lodash';
   import { defineComponent, ref, computed, onMounted, reactive, } from 'vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
@@ -254,7 +255,6 @@ export default defineComponent({
         { label: 'Pending' },
         { label: 'Activated' }
       ],
-      nextUserId: 0,
       selectedRoleFilter: null as number | null,
     };
   },
@@ -263,7 +263,6 @@ export default defineComponent({
     const currentPage = ref(1);
     const itemsPerPage = 10;
     const totalUsers = ref(0);
-    const nextUserId = ref(0); 
     const selectedRoleFilter = ref<number | null>(null);
 
     const fetchUsers = async () => {
@@ -278,11 +277,6 @@ export default defineComponent({
       }
       users.value = allUsers;
 
-      const maxUserId = users.value
-        .map(user => Number(user.id))
-        .reduce((max, id) => id > max ? id : max, 0);
-
-      nextUserId.value = maxUserId + 1;
       totalUsers.value = users.value.length;
     };
 
@@ -324,7 +318,6 @@ export default defineComponent({
       currentPage,
       updatePage,
       changePage,
-      nextUserId,
       fetchUsers,
       selectedRoleFilter,
       filterUsersByRole,
@@ -393,19 +386,23 @@ export default defineComponent({
       }
     },
     async deleteUser(userId: string) {
-      try {
-        await deleteDoc(doc(db, "users", userId));
+      // Initialize Cloud Functions
+      const functions = getFunctions();
 
-        // Remove the user from the local state
-        this.users = this.users.filter(user => user.id !== userId);
-        this.triggerNotification('success', 'Changes saved', 'User deleted successfully.');
+      // Reference to the Cloud Function
+      const deleteUserAndData = httpsCallable(functions, 'deleteUserAndData');
 
-        setTimeout(() => {
-          this.refreshData();
-        }, 1000);
-      } catch (error) {
-        this.triggerNotification('error', 'Error!', 'Couldnt delete user.');
-      }
+      // Call the function with the user ID
+      deleteUserAndData({ userId })
+      .then(() => {
+        this.triggerNotification('success', 'User Deleted', 'The user and their data have been successfully deleted.');
+        // Refresh the user list to reflect the deletion
+        this.refreshData();
+      })
+      .catch((error) => {
+        console.error('Error deleting user:', error);
+        this.triggerNotification('error', 'Error', 'There was an error deleting the user.');
+      });
     },
     async handleSaveChanges(updatedUserData: UpdatedUserData) {
       try {
@@ -458,7 +455,6 @@ export default defineComponent({
     },
     handleAddUser(newUser: User) {
       this.users.push(newUser);
-      this.nextUserId++;
       this.showAddModal = false;
       this.triggerNotification('success', 'Changes saved', 'User added successfully.');
       

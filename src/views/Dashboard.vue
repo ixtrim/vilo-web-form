@@ -114,8 +114,8 @@ export default defineComponent({
     onMounted(() => {
       const currentUser = getCurrentUser();
       if (currentUser) {
-        user.value.id = currentUser.uid;
-        user.value.email = currentUser.email;
+        user.value.id = currentUser.uid || '';
+        user.value.email = currentUser.email || '';
       }
     });
 

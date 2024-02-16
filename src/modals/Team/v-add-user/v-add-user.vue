@@ -117,9 +117,12 @@
         />
       </div>
     </div>
-
   </div>
+
   <div class="modal-footer">
+    <div v-if="errorMessage" class="modal-footer__error-container">
+      <p class="error-message">{{ errorMessage }}</p>
+    </div>
     <ul class="modal-footer__actions">
       <li>
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
@@ -161,6 +164,8 @@
   const errorUserPhone = ref('');
   const errorUserAddress = ref('');
   const errorUserCompany = ref('');
+
+  const errorMessage = ref('');
 
   const avatarUrl = ref('');
   let croppedImageBlob = ref<Blob | null>(null);
@@ -302,12 +307,13 @@
       resetForm();
       closeModal();
     } catch (error) {
-      const firebaseError = error as { code: string };
+      const firebaseError = error as { code: string; message: string };
       if (firebaseError.code === 'auth/email-already-in-use') {
-        console.error("Email already in use. Please use a different email or log in.");
+        errorMessage.value = "Email already in use. Please use a different email!";
       } else {
-        console.error("Error creating new user: ", error);
+        errorMessage.value = "An error occurred while creating the user. Please try again.";
       }
+      console.error("Error creating new user: ", error);
     }
 
     function resetForm() {

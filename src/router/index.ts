@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { getCurrentUser } from '@/firebase.js';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -140,17 +139,6 @@ const router = createRouter({
       component: () => import('../views/SettingsBilling.vue')
     }
   ]
-});
-
-router.beforeEach((to, from, next) => {
-  const currentUser = getCurrentUser();
-  const requiresAuth = !['/', '/sign-in', '/sign-up', '/forgot-password', '/email-verification', '/email-activation', '/set-new-password/:token1/:token2', '/password-changed'].includes(to.path);
-
-  if (requiresAuth && !currentUser) {
-    next('/sign-in');
-  } else {
-    next();
-  }
 });
 
 export default router

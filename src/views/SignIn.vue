@@ -83,7 +83,11 @@
             // Redirect the user after successful login
             this.$router.push('/dashboard'); // Adjust the path as needed
           } catch (error) {
-            this.loginErrorMessage = error.message;
+            if (error.message === 'Firebase: Error (auth/invalid-credential).') {
+              this.loginErrorMessage = 'Error: Wrong email address or password entered.';
+            } else {
+              this.loginErrorMessage = error.message;
+            }
           }
         } else {
           this.loginErrorMessage = 'Please enter both email and password.';

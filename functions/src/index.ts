@@ -1,19 +1,22 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
 
-import {onRequest} from "firebase-functions/v2/https";
-import * as logger from "firebase-functions/logger";
+admin.initializeApp();
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+exports.deleteUserAndData = functions.https.onCall(async (data: { userId: string }, context: functions.https.CallableContext) => {
+  // Ensure the user is authenticated
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
+  }
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+  const userId = data.userId;
+
+  try {
+    await admin.auth().deleteUser(userId);
+    console.log('Successfully deleted user', userId);
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    throw new functions.https.HttpsError('internal', 'Error deleting user.', error);
+  }
+});

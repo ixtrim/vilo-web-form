@@ -140,7 +140,7 @@
         @close-modal="showModal = false"
         @save-clicked="handleSaveChanges"
       />
-      <VAddUser v-if="showAddModal" :title="modalTitle" :nextUserId="nextUserId" @close-modal="showAddModal = false" @save-clicked="handleAddUser" />
+      <VAddUser v-if="showAddModal" :title="modalTitle" @close-modal="showAddModal = false" @save-clicked="handleAddUser" />
     </VModal>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
@@ -254,7 +254,6 @@ export default defineComponent({
         { label: 'Pending' },
         { label: 'Activated' }
       ],
-      nextUserId: 0,
       selectedRoleFilter: null as number | null,
     };
   },
@@ -263,7 +262,6 @@ export default defineComponent({
     const currentPage = ref(1);
     const itemsPerPage = 10;
     const totalUsers = ref(0);
-    const nextUserId = ref(0); 
     const selectedRoleFilter = ref<number | null>(null);
 
     const fetchUsers = async () => {
@@ -278,11 +276,6 @@ export default defineComponent({
       }
       users.value = allUsers;
 
-      const maxUserId = users.value
-        .map(user => Number(user.id))
-        .reduce((max, id) => id > max ? id : max, 0);
-
-      nextUserId.value = maxUserId + 1;
       totalUsers.value = users.value.length;
     };
 
@@ -324,7 +317,6 @@ export default defineComponent({
       currentPage,
       updatePage,
       changePage,
-      nextUserId,
       fetchUsers,
       selectedRoleFilter,
       filterUsersByRole,
@@ -458,7 +450,6 @@ export default defineComponent({
     },
     handleAddUser(newUser: User) {
       this.users.push(newUser);
-      this.nextUserId++;
       this.showAddModal = false;
       this.triggerNotification('success', 'Changes saved', 'User added successfully.');
       

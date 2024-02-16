@@ -163,10 +163,10 @@
   const errorUserCompany = ref('');
 
   const avatarUrl = ref('');
+  let croppedImageBlob = ref<Blob | null>(null);
 
   const props = defineProps({
-    title: String,
-    nextUserId: Number
+    title: String
   });
 
   type DropdownItem = {
@@ -205,20 +205,8 @@
     dropdownStatusTitle.value = item.label;
   }
 
-  async function handleImageCropped(blob: Blob) {
-    if (props.nextUserId === undefined) {
-      console.error("nextUserId is undefined");
-      return;
-    }
-
-    try {
-      const userId = props.nextUserId.toString().padStart(4, '0');
-      const imageRef = storageRef(storage, `users/${userId}.jpg`);
-      await uploadBytes(imageRef, blob);
-      avatarUrl.value = await getDownloadURL(imageRef);
-    } catch (error) {
-      console.error("Error uploading image: ", error);
-    }
+  function handleImageCropped(blob: Blob) {
+    croppedImageBlob.value = blob;
   }
 
   function closeModal() {
@@ -286,6 +274,14 @@
       const auth = getAuth();
       const userCredential = await createUserWithEmailAndPassword(auth, localUserEmail.value, localUserPassword.value);
       const user = userCredential.user;
+      let avatarUrlValue = '';
+
+      if (croppedImageBlob.value) {
+        const avatarUploadPath = `avatars/${user.uid}.jpg`;
+        const imageRef = storageRef(storage, avatarUploadPath);
+        await uploadBytes(imageRef, croppedImageBlob.value);
+        avatarUrlValue = await getDownloadURL(imageRef);
+      }
 
       // Use the UID from Firebase Authentication as the document ID in Firestore
       const newUserDetails = {
@@ -297,7 +293,7 @@
         role: dropdownRoles.value.findIndex(role => role.label === dropdownRoleTitle.value),
         status: dropdownStatus.value.findIndex(status => status.label === dropdownStatusTitle.value),
         notes: userNotes.value || '',
-        avatar: avatarUrl.value,
+        avatar: avatarUrlValue,
       };
 
       await setDoc(doc(db, "users", user.uid), newUserDetails);
@@ -306,7 +302,12 @@
       resetForm();
       closeModal();
     } catch (error) {
-      console.error("Error creating new user: ", error);
+      const firebaseError = error as { code: string };
+      if (firebaseError.code === 'auth/email-already-in-use') {
+        console.error("Email already in use. Please use a different email or log in.");
+      } else {
+        console.error("Error creating new user: ", error);
+      }
     }
 
     function resetForm() {
@@ -319,8 +320,8 @@
       avatarUrl.value = '';
 
       // Reset all dropdowns to their default values
-      dropdownRoleTitle.value = 'General'; // Assuming 'General' is the default
-      dropdownStatusTitle.value = 'Pending'; // Assuming 'Pending' is the default
+      dropdownRoleTitle.value = 'General';
+      dropdownStatusTitle.value = 'Pending';
 
       // Reset all error messages
       errorUserName.value = '';

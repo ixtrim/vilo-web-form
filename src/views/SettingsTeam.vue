@@ -151,7 +151,6 @@
 <script lang="ts">
   import { db } from '@/firebase.js';
   import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
-  import { getFunctions, httpsCallable } from 'firebase/functions';
   import { debounce } from 'lodash';
   import { defineComponent, ref, computed, onMounted, reactive, } from 'vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';

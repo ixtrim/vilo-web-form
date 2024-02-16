@@ -23,3 +23,4 @@ export function getCurrentUser() {
   const auth = getAuth();
   return auth.currentUser;
 }
+export const auth = getAuth(app);

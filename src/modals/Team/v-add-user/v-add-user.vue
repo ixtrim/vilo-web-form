@@ -120,9 +120,6 @@
   </div>
 
   <div class="modal-footer">
-    <div v-if="errorMessage" class="modal-footer__error-container">
-      <p class="error-message">{{ errorMessage }}</p>
-    </div>
     <ul class="modal-footer__actions">
       <li>
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>

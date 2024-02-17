@@ -2,14 +2,18 @@
   <div class="container-fluid ">
 
     <div class="row">
-      <div class="col-lg-10">
+      <div class="col-lg-12">
         <div class="dashboard__heading mb-0">
           <h1>Dashboard</h1>
           <p>Your current working summary and activity.</p>
         </div>
       </div>
-      <div class="col-lg-2 align-right">
-        <Search :value="searchTerm" @input="updateSearchTerm" />
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <p>User ID: {{ user.id }}</p>
+        <p>Email: {{ user.email }}</p>
       </div>
     </div>
 
@@ -83,8 +87,8 @@
 </style>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import VLink from '@/components/v-link/VLink.vue';
+import { getCurrentUser } from '@/firebase';
+import { onMounted, defineComponent, ref } from 'vue';
 import TotalIncome from '@/modules/Home/TotalIncome/TotalIncome.vue';
 import RecentInvoices from '@/modules/Home/RecentInvoices/RecentInvoices.vue';
 import PendingDocuments from '@/modules/Home/PendingDocuments/PendingDocuments.vue';
@@ -94,7 +98,6 @@ import UnreadMessages from '@/modules/Home/UnreadMessages/UnreadMessages.vue';
 
 export default defineComponent({
   components: {
-    VLink,
     TotalIncome,
     RecentInvoices,
     PendingDocuments,
@@ -102,15 +105,23 @@ export default defineComponent({
     UpcomingMeetings,
     UnreadMessages
   },
-  data() {
+  setup() {
+    const user = ref({
+      id: '',
+      email: '',
+    });
+
+    onMounted(() => {
+      const currentUser = getCurrentUser();
+      if (currentUser) {
+        user.value.id = currentUser.uid || '';
+        user.value.email = currentUser.email || '';
+      }
+    });
+
     return {
-      searchTerm: '', // Define the searchTerm data property
+      user,
     };
-  },
-  methods: {
-    updateSearchTerm(value: string) {
-      this.searchTerm = value; // Update the searchTerm data property
-    },
   },
 });
 </script>

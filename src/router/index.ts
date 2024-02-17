@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getCurrentUser } from '@/firebase.js';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -139,6 +141,37 @@ const router = createRouter({
       component: () => import('../views/SettingsBilling.vue')
     }
   ]
+});
+
+let authInitialized = false; // Flag to track auth initialization
+
+const auth = getAuth();
+onAuthStateChanged(auth, (user) => {
+  authInitialized = true; // Set the flag when the auth state is determined
+  if (user) {
+    // Optional: Store user info in a global state (e.g., Vuex) if needed
+  }
+});
+
+router.beforeEach(async (to, from, next) => {
+  // Wait for auth to be initialized
+  if (!authInitialized) {
+    await new Promise<void>((resolve) => { // Explicitly type the Promise as Promise<void>
+      const unsubscribe = onAuthStateChanged(auth, () => {
+        unsubscribe(); // Unsubscribe after getting the auth state
+        resolve(); // Resolve the promise without any value
+      });
+    });
+  }
+
+  const currentUser = auth.currentUser;
+  const requiresAuth = !['/', '/sign-in', '/sign-up', '/forgot-password', '/email-verification', '/email-activation', '/set-new-password/:token1/:token2', '/password-changed'].includes(to.path);
+
+  if (requiresAuth && !currentUser) {
+    next('/sign-in');
+  } else {
+    next();
+  }
 });
 
 export default router

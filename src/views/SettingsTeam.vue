@@ -151,7 +151,6 @@
 <script lang="ts">
   import { db } from '@/firebase.js';
   import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
-  import { getFunctions, httpsCallable } from 'firebase/functions';
   import { debounce } from 'lodash';
   import { defineComponent, ref, computed, onMounted, reactive, } from 'vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
@@ -386,23 +385,19 @@ export default defineComponent({
       }
     },
     async deleteUser(userId: string) {
-      // Initialize Cloud Functions
-      const functions = getFunctions();
+      try {
+        await deleteDoc(doc(db, "users", userId));
 
-      // Reference to the Cloud Function
-      const deleteUserAndData = httpsCallable(functions, 'deleteUserAndData');
+        // Remove the user from the local state
+        this.users = this.users.filter(user => user.id !== userId);
+        this.triggerNotification('success', 'Changes saved', 'User deleted successfully.');
 
-      // Call the function with the user ID
-      deleteUserAndData({ userId })
-      .then(() => {
-        this.triggerNotification('success', 'User Deleted', 'The user and their data have been successfully deleted.');
-        // Refresh the user list to reflect the deletion
-        this.refreshData();
-      })
-      .catch((error) => {
-        console.error('Error deleting user:', error);
-        this.triggerNotification('error', 'Error', 'There was an error deleting the user.');
-      });
+        setTimeout(() => {
+          this.refreshData();
+        }, 1000);
+      } catch (error) {
+        this.triggerNotification('error', 'Error!', 'Couldnt delete user.');
+      }
     },
     async handleSaveChanges(updatedUserData: UpdatedUserData) {
       try {

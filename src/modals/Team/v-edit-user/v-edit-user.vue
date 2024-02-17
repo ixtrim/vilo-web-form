@@ -129,6 +129,7 @@
   import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
   import { uploadBytes, ref as storageRef, getDownloadURL } from 'firebase/storage';
   import { storage } from '@/firebase.js';
+  import { getAuth, updateEmail } from 'firebase/auth';
   import { ref, watch, computed } from 'vue';
   import type { PropType } from 'vue';
   import { defineEmits, defineProps } from 'vue';
@@ -276,6 +277,9 @@
   }
 
   function saveAndClose() {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    
     emit('save-clicked', {
       userId: props.userId,
       userAvatar: localUserAvatar.value,

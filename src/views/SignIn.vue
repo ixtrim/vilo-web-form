@@ -34,13 +34,14 @@
       </div>
     </div>
 
-    <v-button text="Sign In" @click="handleSubmit" :block="true"></v-button>
+    <v-button text="Sign In" @click="handleSignIn" :block="true"></v-button>
 
   </div>
 </template>
 
 <script lang="ts">
-  import axios from 'axios';
+  import { auth } from '@/firebase';
+  import { signInWithEmailAndPassword } from 'firebase/auth';
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VLink from '@/components/v-link/VLink.vue';
@@ -75,12 +76,24 @@
       SignInWithGoogle() {
         console.log('Sign in with Google button clicked');
       },
-      async handleSubmit() {
+      async handleSignIn() {
+        if (this.email && this.password) {
+          try {
+            await signInWithEmailAndPassword(auth, this.email, this.password);
+            // Redirect the user after successful login
+            this.$router.push('/dashboard'); // Adjust the path as needed
+          } catch (error) {
+            if ((error as Error).message === 'Firebase: Error (auth/invalid-credential).') {
+              this.loginErrorMessage = 'Error: Wrong email address or password entered.';
+            } else {
+              this.loginErrorMessage = (error as Error).message;
+            }
+          }
+        } else {
+          this.loginErrorMessage = 'Please enter both email and password.';
+        }
       },
     },
-    mounted() {
-      
-    }
   };
 </script>
 

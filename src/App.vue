@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, provide } from 'vue';
 import { RouterLink, RouterView } from 'vue-router';
 import { useRoute } from 'vue-router';
 import HeroSectionVue from './modules/UserAuthentication/HeroSection.vue';
 import Navigation from './modules/Navigation.vue';
+import { useUserStore } from '@/stores/userStore';
 
 const route = useRoute();
 
@@ -13,7 +14,14 @@ const showInitialContent = computed(() => {
 
 const currentYear = computed(() => new Date().getFullYear());
 
+// Initialize and provide the user store
+const userStore = useUserStore();
+provide('userStore', userStore);
+
+// Optionally, fetch user data immediately if needed
+userStore.fetchUser();
 </script>
+
 <template>
   <div class="container-fluid">
 

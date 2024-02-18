@@ -110,15 +110,15 @@ export default defineComponent({
     const userStore = useUserStore();
 
     onMounted(() => {
-      userStore.fetchUser(); // Call fetchUser when the component mounts
+      userStore.fetchUser();
     });
 
     const userInfo = computed(() => {
       if (userStore.user.value) {
         return {
-          id: userStore.user.value.uid || 'No ID',
-          email: userStore.user.value.email || 'No Email',
-          role: userStore.user.value.role || 'No Role',
+          id: userStore.user.value.id ?? 'No ID',
+          email: userStore.user.value.email ?? 'No Email',
+          role: userStore.user.value.role ?? 'No Role',
         };
       }
       return { id: 'Loading...', email: 'Loading...', role: 'Loading...' };

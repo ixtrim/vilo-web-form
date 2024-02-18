@@ -2,12 +2,12 @@
   <div class="user-account">
 
     <div class="user-account__avatar">
-      <img :src="user.avatar" alt="User avatar" />
+      <img :src="userInfo.avatar" alt="User avatar" />
     </div>
 
     <div class="user-account__info">
-      <span class="user-account__info__name">{{ user.full_name }}</span>
-      <span class="user-account__info__email">{{ user.email }}</span>
+      <span class="user-account__info__name">{{ userInfo.full_name }}</span>
+      <span class="user-account__info__email">{{ userInfo.email }}</span>
     </div>
 
     <div class="user-account__arrow">
@@ -27,21 +27,23 @@
 
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { getAuth, signOut } from 'firebase/auth';
+import { useUserStore } from '@/stores/userStore';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import VLink from '@/components/v-link/VLink.vue';
 import { useRouter } from 'vue-router';
 
-// Initialize Firestore
-const db = getFirestore();
 const auth = getAuth();
+const { user, fetchUser } = useUserStore();
 const router = useRouter();
 
-const user = ref({
-  full_name: 'Loading...',
-  email: 'Loading...',
-  avatar: 'https://firebasestorage.googleapis.com/v0/b/vilo-ebc86.appspot.com/o/vilo_app%2Favatar.png?alt=media&token=05cebcce-137e-42f2-bd6d-7d8b1ad76b67'
+const userInfo = computed(() => {
+  return {
+    full_name: user.value?.full_name ?? 'No name found',
+    email: user.value?.email ?? 'No email found',
+    avatar: user.value?.avatar ?? 'https://firebasestorage.googleapis.com/v0/b/vilo-ebc86.appspot.com/o/vilo_app%2Favatar.png?alt=media&token=05cebcce-137e-42f2-bd6d-7d8b1ad76b67'
+  };
 });
 
 const handleLogout = async () => {
@@ -52,19 +54,4 @@ const handleLogout = async () => {
     console.error("Logout Failed", error);
   }
 };
-
-onMounted(async () => {
-  const auth = getAuth();
-  const currentUser = auth.currentUser;
-  if (currentUser) {
-    user.value.email = currentUser.email || 'No email found';
-    const userDocRef = doc(db, "users", currentUser.uid);
-    const userDoc = await getDoc(userDocRef);
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      user.value.full_name = userData.full_name || 'No name found';
-      user.value.avatar = userData.avatar || 'https://firebasestorage.googleapis.com/v0/b/vilo-ebc86.appspot.com/o/vilo_app%2Favatar.png?alt=media&token=05cebcce-137e-42f2-bd6d-7d8b1ad76b67';
-    }
-  }
-});
 </script>

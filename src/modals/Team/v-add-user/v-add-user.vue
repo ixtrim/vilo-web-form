@@ -188,7 +188,6 @@
     { label: 'Finance' },
     { label: 'Client (individual)'  },
     { label: 'Client (company)'  },
-    
   ]);
   const dropdownRoleTitle = ref('General');
   function onRoleChanged(item: DropdownItem) {
@@ -206,6 +205,20 @@
   function onStatusChanged(item: DropdownItem) {
     dropdownStatusTitle.value = item.label;
   }
+
+  const roleMappings = {
+    'Admin': 0,
+    'General': 1,
+    'Finance': 2,
+    'Client (individual)': 3,
+    'Client (company)': 4,
+  };
+
+  const statusMappings = {
+    'Draft': 0,
+    'Pending': 1,
+    'Activated': 2,
+  };
 
   function handleImageCropped(blob: Blob) {
     croppedImageBlob.value = blob;
@@ -271,47 +284,24 @@
       return;
     }
 
-    // Saving datas to Firebase Authentication and Firestore
-    try {
-      const auth = getAuth();
-      const userCredential = await createUserWithEmailAndPassword(auth, localUserEmail.value, localUserPassword.value);
-      const user = userCredential.user;
-      let avatarUrlValue = '';
+    const newUserDetails = {
+      full_name: localUserName.value,
+      email: localUserEmail.value,
+      password: localUserPassword.value,
+      phone: localUserPhone.value || '',
+      address: localUserAddress.value || '',
+      position: localUserPosition.value || '',
+      company: localUserCompany.value || '',
+      role: roleMappings[dropdownRoleTitle.value as keyof typeof roleMappings],
+      status: statusMappings[dropdownStatusTitle.value as keyof typeof statusMappings],
+      notes: userNotes.value || '',
+      avatarBlob: croppedImageBlob.value,
+    };
 
-      if (croppedImageBlob.value) {
-        const avatarUploadPath = `avatars/${user.uid}.jpg`;
-        const imageRef = storageRef(storage, avatarUploadPath);
-        await uploadBytes(imageRef, croppedImageBlob.value);
-        avatarUrlValue = await getDownloadURL(imageRef);
-      }
+    emit('save-clicked', newUserDetails);
 
-      // Use the UID from Firebase Authentication as the document ID in Firestore
-      const newUserDetails = {
-        full_name: localUserName.value,
-        phone: localUserPhone.value || '',
-        address: localUserAddress.value || '',
-        position: localUserPosition.value || '',
-        company: localUserCompany.value || '',
-        role: dropdownRoles.value.findIndex(role => role.label === dropdownRoleTitle.value),
-        status: dropdownStatus.value.findIndex(status => status.label === dropdownStatusTitle.value),
-        notes: userNotes.value || '',
-        avatar: avatarUrlValue,
-      };
-
-      await setDoc(doc(db, "users", user.uid), newUserDetails);
-
-      emit('save-clicked', newUserDetails);
-      resetForm();
-      closeModal();
-    } catch (error) {
-      const firebaseError = error as { code: string; message: string };
-      if (firebaseError.code === 'auth/email-already-in-use') {
-        errorMessage.value = "Email already in use. Please use a different email!";
-      } else {
-        errorMessage.value = "An error occurred while creating the user. Please try again.";
-      }
-      console.error("Error creating new user: ", error);
-    }
+    resetForm();
+    closeModal();
 
     function resetForm() {
       localUserName.value = '';
@@ -336,7 +326,6 @@
     }
 
   }
-
 </script>
 
 <style>

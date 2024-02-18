@@ -14,12 +14,10 @@ const showInitialContent = computed(() => {
 
 const currentYear = computed(() => new Date().getFullYear());
 
-// Initialize and provide the user store
 const userStore = useUserStore();
 provide('userStore', userStore);
+//userStore.fetchUser();
 
-// Optionally, fetch user data immediately if needed
-userStore.fetchUser();
 </script>
 
 <template>

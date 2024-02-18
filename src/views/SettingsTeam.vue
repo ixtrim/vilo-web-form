@@ -478,7 +478,8 @@ export default defineComponent({
         }, 300);
       } catch (error) {
         console.error(error);
-        this.triggerNotification('error', 'Error adding user', error.message);
+        const message = (error as Error).message;
+        this.triggerNotification('error', 'Error adding user', message);
       }
     },
     handleModalClose(value: boolean) {

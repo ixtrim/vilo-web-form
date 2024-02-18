@@ -150,7 +150,9 @@
 
 <script lang="ts">
   import { db } from '@/firebase.js';
+  import { getFunctions, httpsCallable } from 'firebase/functions';
   import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
+  import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
   import { debounce } from 'lodash';
   import { defineComponent, ref, computed, onMounted, reactive, } from 'vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
@@ -448,14 +450,36 @@ export default defineComponent({
       this.modalTitle = 'Add New User';
       this.showAddModal = true;
     },
-    handleAddUser(newUser: User) {
-      this.users.push(newUser);
-      this.showAddModal = false;
-      this.triggerNotification('success', 'Changes saved', 'User added successfully.');
-      
-      setTimeout(() => {
-        this.refreshData();
-      }, 1000);
+    async handleAddUser(newUserDetails: any) {
+      const functions = getFunctions();
+      const addNewUser = httpsCallable(functions, 'addNewUser');
+      const storage = getStorage();
+
+      try {
+        // Handle avatar upload if present
+        if (newUserDetails.avatarBlob) {
+          const avatarFileName = `${newUserDetails.email.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
+          const avatarRef = storageRef(storage, `avatars/${avatarFileName}`);
+          const avatarUploadResult = await uploadBytes(avatarRef, newUserDetails.avatarBlob);
+          const avatarUrl = await getDownloadURL(avatarUploadResult.ref);
+          newUserDetails.avatar = avatarUrl; // Set the avatar URL in newUserDetails
+        }
+
+        // Remove the avatarBlob from newUserDetails as it's not JSON serializable
+        delete newUserDetails.avatarBlob;
+
+        const result = await addNewUser(newUserDetails);
+        console.log(result);
+
+        this.triggerNotification('success', 'User added', 'The new user has been successfully added.');
+        this.showAddModal = false;
+        setTimeout(() => {
+          this.refreshData();
+        }, 300);
+      } catch (error) {
+        console.error(error);
+        this.triggerNotification('error', 'Error adding user', error.message);
+      }
     },
     handleModalClose(value: boolean) {
       this.showModal = false;

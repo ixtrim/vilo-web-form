@@ -109,12 +109,19 @@ export default defineComponent({
   setup() {
     const userStore = useUserStore();
 
+    onMounted(() => {
+      userStore.fetchUser(); // Call fetchUser when the component mounts
+    });
+
     const userInfo = computed(() => {
-      return {
-        id: userStore.user.value?.id || 'Loading...',
-        email: userStore.user.value?.email || 'Loading...',
-        role: userStore.user.value?.role || 'Loading...',
-      };
+      if (userStore.user.value) {
+        return {
+          id: userStore.user.value.uid || 'No ID',
+          email: userStore.user.value.email || 'No Email',
+          role: userStore.user.value.role || 'No Role',
+        };
+      }
+      return { id: 'Loading...', email: 'Loading...', role: 'Loading...' };
     });
 
     return {

@@ -12,8 +12,9 @@
 
     <div class="row">
       <div class="col-lg-12">
-        <p>User ID: {{ user.id }}</p>
-        <p>Email: {{ user.email }}</p>
+        <p>User ID: {{ userInfo.id }}</p>
+<p>Email: {{ userInfo.email }}</p>
+<p>Role: {{ userInfo.role }}</p>
       </div>
     </div>
 
@@ -87,8 +88,8 @@
 </style>
 
 <script lang="ts">
-import { getCurrentUser } from '@/firebase';
-import { onMounted, defineComponent, ref } from 'vue';
+import { computed, defineComponent, onMounted } from 'vue';
+import { useUserStore } from '@/stores/userStore'; // Corrected import
 import TotalIncome from '@/modules/Home/TotalIncome/TotalIncome.vue';
 import RecentInvoices from '@/modules/Home/RecentInvoices/RecentInvoices.vue';
 import PendingDocuments from '@/modules/Home/PendingDocuments/PendingDocuments.vue';
@@ -103,24 +104,28 @@ export default defineComponent({
     PendingDocuments,
     MyTasks,
     UpcomingMeetings,
-    UnreadMessages
+    UnreadMessages,
   },
   setup() {
-    const user = ref({
-      id: '',
-      email: '',
-    });
+    const userStore = useUserStore();
 
     onMounted(() => {
-      const currentUser = getCurrentUser();
-      if (currentUser) {
-        user.value.id = currentUser.uid || '';
-        user.value.email = currentUser.email || '';
+      userStore.fetchUser(); // Call fetchUser when the component mounts
+    });
+
+    const userInfo = computed(() => {
+      if (userStore.user.value) {
+        return {
+          id: userStore.user.value.uid || 'No ID',
+          email: userStore.user.value.email || 'No Email',
+          role: userStore.user.value.role || 'No Role',
+        };
       }
+      return { id: 'Loading...', email: 'Loading...', role: 'Loading...' };
     });
 
     return {
-      user,
+      userInfo,
     };
   },
 });

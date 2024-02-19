@@ -163,13 +163,14 @@ const router = createRouter({
   ]
 });
 
-let authInitialized = false; // Flag to track auth initialization
+// Flag to track auth initialization
+let authInitialized = false; 
 
 const auth = getAuth();
 onAuthStateChanged(auth, (user) => {
-  authInitialized = true; // Set the flag when the auth state is determined
+  authInitialized = true;
   if (user) {
-    // Optional: Store user info in a global state (e.g., Vuex) if needed
+    // Optional: Store user info in a global state (e.g., Vuex) if needed // For later ...
   }
 });
 
@@ -178,13 +179,12 @@ router.beforeEach(async (to, from, next) => {
   if (!authInitialized) {
     await new Promise<void>((resolve) => {
       const unsubscribe = onAuthStateChanged(auth, () => {
-        unsubscribe(); // Stop listening once we get the auth state
-        resolve(); // Proceed with the routing
+        unsubscribe();
+        resolve();
       });
     });
   }
 
-  // Fetch the current user and their role, if needed
   const userStore = useUserStore();
   await userStore.fetchUserRoleIfNeeded();
 
@@ -203,15 +203,12 @@ router.beforeEach(async (to, from, next) => {
       return next('/invoices');
     }
   } else {
-    // For non-client users, check if they are trying to access admin-only pages
     const restrictedToAdmin = ['/settings', '/settings-team', '/settings-notifications', '/settings-invoice', '/settings-calendar', '/settings-billing'].includes(to.path);
     if (restrictedToAdmin && userStore.user.value?.role !== 0) {
-      // Redirect non-admin users trying to access admin-only pages
-      return next('/dashboard'); // Or any other appropriate page
+      return next('/dashboard');
     }
   }
 
-  // If none of the above conditions are met, proceed with the navigation
   next();
 });
 

@@ -4,5 +4,10 @@ export interface UserData {
   full_name?: string;
   avatar?: string;
   role?: number;
-  // Add any other fields you expect to have
+  status?: number;
+  position?: string;
+  phone?: string;
+  company?: string;
+  address?: string;
+  notes?: string;
 }

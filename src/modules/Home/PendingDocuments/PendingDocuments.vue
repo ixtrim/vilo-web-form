@@ -35,68 +35,7 @@
 
           <div class="dashboard__table__page">
 
-            <div class="dashboard__table__page__item">
-              <div class="col col--l-document">
-                <VFile file-extension="pdf" file-name="Tech requirements.pdf" file-size="200 KB" />
-              </div>
-              <div class="col col--l-status">
-                <VBadge variant="light">Draft</VBadge>
-              </div>
-              <div class="col col--l-uploaded">
-                <p>Jan 1, 2022</p>
-              </div>
-              <div class="col col--l-updated">
-                <p>Jan 4, 2022</p>
-              </div>
-              <div class="col col--l-created">
-                <VUser userName="Phoenix Baker" userEmail="phoenix@untitledui.com" />
-              </div>
-              <div class="col col--l-sign">
-                <VButton :block="false" size="md" styled="primary" @click="" text="Sign"></VButton>
-              </div>
-            </div>
-
-            <div class="dashboard__table__page__item">
-              <div class="col col--l-document">
-                <VFile file-extension="docx" file-name="Dashboard screenshot.docx" file-size="720 KB" />
-              </div>
-              <div class="col col--l-status">
-                <VBadge variant="warning">Pending</VBadge>
-              </div>
-              <div class="col col--l-uploaded">
-                <p>Jan 1, 2022</p>
-              </div>
-              <div class="col col--l-updated">
-                <p>Jan 4, 2022</p>
-              </div>
-              <div class="col col--l-created">
-                <VUser userName="Phoenix Baker" userEmail="phoenix@untitledui.com" />
-              </div>
-              <div class="col col--l-sign">
-                <VButton :block="false" size="md" styled="primary" @click="" text="Sign"></VButton>
-              </div>
-            </div>
-
-            <div class="dashboard__table__page__item">
-              <div class="col col--l-document">
-                <VFile file-extension="doc" file-name="Dashboard prototype recording.doc" file-size="16 MB" />
-              </div>
-              <div class="col col--l-status">
-                <VBadge variant="warning">Pending</VBadge>
-              </div>
-              <div class="col col--l-uploaded">
-                <p>Jan 1, 2022</p>
-              </div>
-              <div class="col col--l-updated">
-                <p>Jan 4, 2022</p>
-              </div>
-              <div class="col col--l-created">
-                <VUser userName="Phoenix Baker" userEmail="phoenix@untitledui.com" />
-              </div>
-              <div class="col col--l-sign">
-                <VButton :block="false" size="md" styled="primary" @click="" text="Sign"></VButton>
-              </div>
-            </div>
+            
 
           </div>
 

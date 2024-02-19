@@ -11,7 +11,6 @@
           :block="true"
         >
           <span>{{ link.name }}</span>
-          <VBadge v-if="link.badge && link.name === 'Chat'" :variant="'danger'">{{ link.badge }}</VBadge>
         </VLink>
       </li>
     </ul>
@@ -22,7 +21,6 @@
 import { computed, ref, onMounted } from 'vue';
 import axios from 'axios';
 import VLink from '@/components/v-link/VLink.vue';
-import VBadge from '@/components/v-badge/VBadge.vue';
 import { useUserStore } from '@/stores/userStore';
 
 const { user } = useUserStore();
@@ -49,12 +47,7 @@ const links = computed(() => {
   } else {
     return [
       { name: 'Home', to: '/dashboard', icon: 'left', iconStyle: 'home' },
-      { name: 'Cases', to: '/case-boards', icon: 'left', iconStyle: 'boards' },
       { name: 'Clients', to: '/clients-management', icon: 'left', iconStyle: 'clients' },
-      { name: 'Library', to: '/library', icon: 'left', iconStyle: 'library' },
-      { name: 'Invoices', to: '/invoices', icon: 'left', iconStyle: 'invoices' },
-      { name: 'Calendar', to: '/calendar', icon: 'left', iconStyle: 'calendar' },
-      { name: 'Chat', to: '/chat', icon: 'left', iconStyle: 'chat', badge: chatBadgeNumber },
     ];
   }
 });

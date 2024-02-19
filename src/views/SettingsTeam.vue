@@ -456,16 +456,14 @@ export default defineComponent({
       const storage = getStorage();
 
       try {
-        // Handle avatar upload if present
         if (newUserDetails.avatarBlob) {
           const avatarFileName = `${newUserDetails.email.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
           const avatarRef = storageRef(storage, `avatars/${avatarFileName}`);
           const avatarUploadResult = await uploadBytes(avatarRef, newUserDetails.avatarBlob);
           const avatarUrl = await getDownloadURL(avatarUploadResult.ref);
-          newUserDetails.avatar = avatarUrl; // Set the avatar URL in newUserDetails
+          newUserDetails.avatar = avatarUrl;
         }
-
-        // Remove the avatarBlob from newUserDetails as it's not JSON serializable
+        
         delete newUserDetails.avatarBlob;
 
         const result = await addNewUser(newUserDetails);
@@ -475,7 +473,7 @@ export default defineComponent({
         this.showAddModal = false;
         setTimeout(() => {
           this.refreshData();
-        }, 300);
+        }, 100);
       } catch (error) {
         console.error(error);
         const message = (error as Error).message;

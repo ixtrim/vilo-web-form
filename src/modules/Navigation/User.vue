@@ -35,7 +35,7 @@ import VLink from '@/components/v-link/VLink.vue';
 import { useRouter } from 'vue-router';
 
 const auth = getAuth();
-const { user, fetchUser } = useUserStore();
+const { user } = useUserStore();
 const router = useRouter();
 
 const userInfo = computed(() => {

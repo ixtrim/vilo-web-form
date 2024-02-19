@@ -18,13 +18,13 @@ exports.addNewUser = functions.https.onCall(async (data: any, context: functions
     
     // Add other user data to Firestore
     await admin.firestore().collection('users').doc(userRecord.uid).set({
-      email: userRecord.email, // Ensure email is included
+      email: userRecord.email,
       ...otherUserData,
     });
 
     return { uid: userRecord.uid };
   } catch (error) {
-    const message = (error as Error).message; // Type assertion
+    const message = (error as Error).message;
     throw new functions.https.HttpsError('internal', message);
   }
 });

@@ -219,7 +219,7 @@ export default defineComponent({
       }
     },
     async fetchViewData() {
-      try {
+      /*try {
         const docRef = doc(db, "settings", "general");
         const docSnap = await getDoc(docRef);
 
@@ -239,7 +239,7 @@ export default defineComponent({
         setTimeout(() => {
           this.initialDataLoaded = true;
         }, 750);
-      }
+      }*/
     },
     async userInitiatedUpdateAppName() {
       try {

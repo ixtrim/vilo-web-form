@@ -117,10 +117,6 @@ export default defineComponent({
       notificationType: 'success',
       notificationHeader: 'Changes saved',
       notificationMessage: 'This account has been successfully edited.',
-      lastUpdatedAppName: '',
-      lastUpdatedAppTimezone: '',
-      lastUpdatedAppTimeFormat: '',
-      lastUpdatedAppServices: '',
       dropdownTimezone: [
         { label: 'GMT -12', value: 'GMT-12' },
         { label: 'GMT -11', value: 'GMT-11' },
@@ -283,39 +279,26 @@ export default defineComponent({
     this.debouncedUpdateAppServices = debounce(this.userInitiatedUpdateAppServices, 1200);
   },
   watch: {
-    appName(newVal) {
-      if (this.initialDataLoaded && newVal !== this.lastUpdatedAppName) {
-        if (this.debouncedUpdateAppName) {
-          this.debouncedUpdateAppName()?.catch(e => console.error(e));
-        }
-        this.lastUpdatedAppName = newVal;
+    appName(newVal, oldVal) {
+      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateAppName) {
+        this.debouncedUpdateAppName()?.catch(e => console.error(e));
       }
     },
-    appTimezone(newVal) {
-      if (this.initialDataLoaded && newVal !== this.lastUpdatedAppTimezone) {
-        if (this.debouncedUpdateTimezone) {
-          this.debouncedUpdateTimezone()?.catch(e => console.error(e));
-        }
-        this.lastUpdatedAppTimezone = newVal;
+    appTimezone(newVal, oldVal) {
+      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimezone) {
+        this.debouncedUpdateTimezone()?.catch(e => console.error(e));
       }
     },
-    appTimeFormat(newVal) {
-      if (this.initialDataLoaded && newVal !== this.lastUpdatedAppTimeFormat) {
-        if (this.debouncedUpdateTimeFormat) {
-          this.debouncedUpdateTimeFormat()?.catch(e => console.error(e));
-        }
-        this.lastUpdatedAppTimeFormat = newVal;
+    appTimeFormat(newVal, oldVal) {
+      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimeFormat) {
+        this.debouncedUpdateTimeFormat()?.catch(e => console.error(e));
       }
     },
     appServices: {
       deep: true,
-      handler(newVal) {
-        const newServicesString = JSON.stringify(newVal);
-        if (this.initialDataLoaded && newServicesString !== this.lastUpdatedAppServices) {
-          if (this.debouncedUpdateAppServices) {
-            this.debouncedUpdateAppServices()?.catch(e => console.error(e));
-          }
-          this.lastUpdatedAppServices = newServicesString; // Store the last updated value as a JSON string
+      handler(newServices) {
+        if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
+          this.debouncedUpdateAppServices()?.catch(e => console.error(e));
         }
       }
     }

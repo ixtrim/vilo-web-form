@@ -45,7 +45,7 @@
       iconStyle: {
         type: String,
         default: '',
-        validator: (value: unknown): boolean => ['arrow-left', 'arrow-right', 'save', 'preview', 'edit', 'delete', 'add', 'copy', 'upload', 'share'].includes(value as string)
+        validator: (value: unknown): boolean => ['arrow-left', 'arrow-right', 'save', 'preview', 'edit', 'delete', 'add', 'copy', 'upload', 'share', 'simple-icon', 'add-blue'].includes(value as string)
       }
     },
     methods: {

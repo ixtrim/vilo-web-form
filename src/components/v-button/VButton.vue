@@ -50,7 +50,7 @@
       styled: {
         type: String,
         default: 'primary',
-        validator: (value: string): boolean => ['primary', 'secondary', 'outlined', 'important', 'crucial'].includes(value),
+        validator: (value: string): boolean => ['primary', 'secondary', 'outlined', 'important', 'crucial', 'simple-icon', 'add-blue'].includes(value),
       }
     },
     methods: {

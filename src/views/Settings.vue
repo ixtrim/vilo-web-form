@@ -78,7 +78,6 @@
   import { defineComponent, ref, onMounted } from 'vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
   import VInput from '@/components/v-input/VInput.vue';
-  import VButton from '@/components/v-button/VButton.vue';
   import TabsSettings from '@/modules/TabsSettings.vue';
   import VTextInputGroup from '@/components/v-text-input-group/VTextInputGroup.vue';
   import VNotification from '@/components/v-notification/VNotification.vue';
@@ -98,7 +97,6 @@
 
 export default defineComponent({
   components: {
-    VButton,
     VInput,
     VDropdown,
     TabsSettings,

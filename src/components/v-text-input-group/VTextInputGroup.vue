@@ -2,8 +2,7 @@
   <div class="v-text-input-group">
     <div v-for="input in localInputs" :key="input.id" class="input-row">
       <VInput label="" placeholder="" v-model="input.value" />
-      <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="removeInput(input.id)"
-        text=""></VButton>
+      <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="removeInput(input.id)" text=""></VButton>
     </div>
 
     <VLink @click="addInput" icon="left" icon-style="add-blue">Add Item</VLink>

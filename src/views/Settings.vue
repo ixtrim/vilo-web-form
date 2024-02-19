@@ -273,13 +273,13 @@ export default defineComponent({
   },
   mounted() {
     this.fetchViewData();
-    this.debouncedUpdateAppName = debounce(this.userInitiatedUpdateAppName, 1000);
-    this.debouncedUpdateTimezone = debounce(this.userInitiatedUpdateTimezone, 600);
-    this.debouncedUpdateTimeFormat = debounce(this.userInitiatedUpdateTimeFormat, 600);
+    //this.debouncedUpdateAppName = debounce(this.userInitiatedUpdateAppName, 1000);
+    //this.debouncedUpdateTimezone = debounce(this.userInitiatedUpdateTimezone, 600);
+    //this.debouncedUpdateTimeFormat = debounce(this.userInitiatedUpdateTimeFormat, 600);
     //this.debouncedUpdateAppServices = debounce(this.userInitiatedUpdateAppServices, 1200);
   },
   watch: {
-    appName(newVal, oldVal) {
+    /*appName(newVal, oldVal) {
       if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateAppName) {
         this.debouncedUpdateAppName()?.catch(e => console.error(e));
       }
@@ -293,7 +293,7 @@ export default defineComponent({
       if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimeFormat) {
         this.debouncedUpdateTimeFormat()?.catch(e => console.error(e));
       }
-    },
+    },*/
     //appServices: {
       //deep: true,
       //handler(newServices) {
@@ -301,9 +301,7 @@ export default defineComponent({
       //    this.debouncedUpdateAppServices()?.catch(e => console.error(e));
       //  }
       //}
-    //}
-  }
-});
+    }••••••••••••
 </script>
 
 <style>

@@ -11,14 +11,6 @@
     </div>
 
     <div class="row">
-      <div class="col-lg-12">
-        <p>User ID: {{ userInfo.id }}</p>
-<p>Email: {{ userInfo.email }}</p>
-<p>Role: {{ userInfo.role }}</p>
-      </div>
-    </div>
-
-    <div class="row">
       <div class="col-lg-12 dashboard__separator">
         &nbsp;
       </div>
@@ -89,7 +81,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted } from 'vue';
-import { useUserStore } from '@/stores/userStore'; // Corrected import
+import { useUserStore } from '@/stores/userStore';
 import TotalIncome from '@/modules/Home/TotalIncome/TotalIncome.vue';
 import RecentInvoices from '@/modules/Home/RecentInvoices/RecentInvoices.vue';
 import PendingDocuments from '@/modules/Home/PendingDocuments/PendingDocuments.vue';
@@ -105,29 +97,7 @@ export default defineComponent({
     MyTasks,
     UpcomingMeetings,
     UnreadMessages,
-  },
-  setup() {
-    const userStore = useUserStore();
-
-    onMounted(() => {
-      userStore.fetchUser();
-    });
-
-    const userInfo = computed(() => {
-      if (userStore.user.value) {
-        return {
-          id: userStore.user.value.id ?? 'No ID',
-          email: userStore.user.value.email ?? 'No Email',
-          role: userStore.user.value.role ?? 'No Role',
-        };
-      }
-      return { id: 'Loading...', email: 'Loading...', role: 'Loading...' };
-    });
-
-    return {
-      userInfo,
-    };
-  },
+  }
 });
 </script>
 

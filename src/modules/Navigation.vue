@@ -36,18 +36,14 @@
 
 <script setup lang="ts">
   import { computed, ref, onMounted } from 'vue';
-  import { getAuth, signOut } from 'firebase/auth';
   import { useUserStore } from '@/stores/userStore';
-  import { useRouter } from 'vue-router';
 
   import Logo     from '@/modules/Navigation/Logo.vue';
   import Menu     from '@/modules/Navigation/Menu.vue';
   import Settings from '@/modules/Navigation/Settings.vue';
   import User     from '@/modules/Navigation/User.vue';
 
-  const auth = getAuth();
   const { user } = useUserStore();
-  const router = useRouter();
 
   const userInfo = computed(() => {
     return {

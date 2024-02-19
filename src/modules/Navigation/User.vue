@@ -30,7 +30,6 @@
 import { computed, ref, onMounted } from 'vue';
 import { getAuth, signOut } from 'firebase/auth';
 import { useUserStore } from '@/stores/userStore';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import VLink from '@/components/v-link/VLink.vue';
 import { useRouter } from 'vue-router';
 

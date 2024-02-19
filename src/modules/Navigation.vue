@@ -19,7 +19,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="userInfo.role === 0">
       <div class="col-lg-12">
         <Settings />
       </div>
@@ -35,11 +35,21 @@
 </template>
 
 <script setup lang="ts">
+  import { computed, ref, onMounted } from 'vue';
+  import { useUserStore } from '@/stores/userStore';
+
   import Logo     from '@/modules/Navigation/Logo.vue';
-  import Search   from '@/modules/Navigation/Search.vue';
   import Menu     from '@/modules/Navigation/Menu.vue';
   import Settings from '@/modules/Navigation/Settings.vue';
   import User     from '@/modules/Navigation/User.vue';
+
+  const { user } = useUserStore();
+
+  const userInfo = computed(() => {
+    return {
+      role: user.value?.role ?? '',
+    };
+  });
 </script>
 
 <style>

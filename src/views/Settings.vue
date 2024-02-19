@@ -117,6 +117,10 @@ export default defineComponent({
       notificationType: 'success',
       notificationHeader: 'Changes saved',
       notificationMessage: 'This account has been successfully edited.',
+      lastUpdatedAppName: '',
+      lastUpdatedAppTimezone: '',
+      lastUpdatedAppTimeFormat: '',
+      lastUpdatedAppServices: '',
       dropdownTimezone: [
         { label: 'GMT -12', value: 'GMT-12' },
         { label: 'GMT -11', value: 'GMT-11' },
@@ -273,35 +277,50 @@ export default defineComponent({
   },
   mounted() {
     this.fetchViewData();
-    //this.debouncedUpdateAppName = debounce(this.userInitiatedUpdateAppName, 1000);
-    //this.debouncedUpdateTimezone = debounce(this.userInitiatedUpdateTimezone, 600);
-    //this.debouncedUpdateTimeFormat = debounce(this.userInitiatedUpdateTimeFormat, 600);
-    //this.debouncedUpdateAppServices = debounce(this.userInitiatedUpdateAppServices, 1200);
+    this.debouncedUpdateAppName = debounce(this.userInitiatedUpdateAppName, 1000);
+    this.debouncedUpdateTimezone = debounce(this.userInitiatedUpdateTimezone, 600);
+    this.debouncedUpdateTimeFormat = debounce(this.userInitiatedUpdateTimeFormat, 600);
+    this.debouncedUpdateAppServices = debounce(this.userInitiatedUpdateAppServices, 1200);
   },
   watch: {
-    /*appName(newVal, oldVal) {
-      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateAppName) {
-        this.debouncedUpdateAppName()?.catch(e => console.error(e));
+    appName(newVal) {
+      if (this.initialDataLoaded && newVal !== this.lastUpdatedAppName) {
+        if (this.debouncedUpdateAppName) {
+          this.debouncedUpdateAppName()?.catch(e => console.error(e));
+        }
+        this.lastUpdatedAppName = newVal;
       }
     },
-    appTimezone(newVal, oldVal) {
-      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimezone) {
-        this.debouncedUpdateTimezone()?.catch(e => console.error(e));
+    appTimezone(newVal) {
+      if (this.initialDataLoaded && newVal !== this.lastUpdatedAppTimezone) {
+        if (this.debouncedUpdateTimezone) {
+          this.debouncedUpdateTimezone()?.catch(e => console.error(e));
+        }
+        this.lastUpdatedAppTimezone = newVal;
       }
     },
-    appTimeFormat(newVal, oldVal) {
-      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimeFormat) {
-        this.debouncedUpdateTimeFormat()?.catch(e => console.error(e));
+    appTimeFormat(newVal) {
+      if (this.initialDataLoaded && newVal !== this.lastUpdatedAppTimeFormat) {
+        if (this.debouncedUpdateTimeFormat) {
+          this.debouncedUpdateTimeFormat()?.catch(e => console.error(e));
+        }
+        this.lastUpdatedAppTimeFormat = newVal;
       }
-    },*/
-    //appServices: {
-      //deep: true,
-      //handler(newServices) {
-      //  if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
-      //    this.debouncedUpdateAppServices()?.catch(e => console.error(e));
-      //  }
-      //}
-    }••••••••••••
+    },
+    appServices: {
+      deep: true,
+      handler(newVal) {
+        const newServicesString = JSON.stringify(newVal);
+        if (this.initialDataLoaded && newServicesString !== this.lastUpdatedAppServices) {
+          if (this.debouncedUpdateAppServices) {
+            this.debouncedUpdateAppServices()?.catch(e => console.error(e));
+          }
+          this.lastUpdatedAppServices = newServicesString; // Store the last updated value as a JSON string
+        }
+      }
+    }
+  }
+});
 </script>
 
 <style>

@@ -110,7 +110,7 @@
                 <div v-if="!isCurrentUserMessage(message.from)" class="user-message__other">
                   <div class="user-message__current__info">
                     <span class="user-message__current__info__name">You</span>
-                    <small class="user-message__current__info__time">{{ message.timestamp }}</small>
+                    <small class="user-message__current__info__time">{{ formatTimestamp(message.timestamp) }}</small>
                   </div>
                   <div class="user-message__current__bubble">
                     <p v-html="sanitizeHtml(message.text)"></p>
@@ -125,7 +125,7 @@
                   <div class="user-message__other__text">
                     <div class="user-message__other__text__info">
                       <span class="user-message__other__text__info__name">{{ activeChat?.full_name }}</span>
-                      <small class="user-message__other__text__info__time">{{ message.timestamp }}</small>
+                      <small class="user-message__other__text__info__time">{{ formatTimestamp(message.timestamp) }}</small>
                     </div>
                     <div class="user-message__other__text__bubble">
                       <p v-html="sanitizeHtml(message.text)"></p>
@@ -179,6 +179,7 @@
   import { debounce } from 'lodash';
   import { defineComponent, ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
   import { getFirestore, collection, query, where, getDoc, doc, getDocs, addDoc, serverTimestamp, onSnapshot, Timestamp } from 'firebase/firestore';
+  import { format, isToday, isYesterday } from 'date-fns';
   import { db, auth } from '@/firebase.js';
   import Search from '@/modules/Navigation/Search.vue';
   import VButton from '@/components/v-button/VButton.vue';
@@ -449,6 +450,20 @@
       };
     },
     methods: {
+      formatTimestamp(timestamp: any) {
+        const date = timestamp.toDate(); // Convert Firestore Timestamp to JavaScript Date object
+        let formattedDate = '';
+
+        if (isToday(date)) {
+          formattedDate = `Today, ${format(date, 'HH:mm')}`;
+        } else if (isYesterday(date)) {
+          formattedDate = `Yesterday, ${format(date, 'HH:mm')}`;
+        } else {
+          formattedDate = format(date, 'dd.MM.yyyy, HH:mm');
+        }
+
+        return formattedDate;
+      },
       handleButtonClick() {
         
       },

@@ -62,7 +62,7 @@
           <div v-if="selectedUser" class="v-chat__messages__chat__search-user-chosen">
             <img class="rounded-circle mr-2" :src="selectedUser?.avatar" alt="Avatar" style="width: 50px; height: 50px;">
             <h5>{{ selectedUser?.full_name }}<br/><span>@{{ formatNick(selectedUser?.full_name) }}</span></h5>
-            <VButton :block="true" size="md" icon="no" styled="primary" @click="startChatWithSelectedUser" text="Start Chat"></VButton>
+            <VButton :block="true" size="md" icon="no" styled="primary" @click="debouncedStartChat" text="Start Chat"></VButton>
           </div>
           <div v-else class="v-chat__messages__chat__search-user">
             <input type="text" class="form-control" placeholder="New Message to @" v-model="searchUser" @input="filterUsers">
@@ -176,7 +176,7 @@
 </template>
 
 <script lang="ts">
-  import axios from 'axios';
+  import { debounce } from 'lodash';
   import { defineComponent, ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
   import { collection, query, where, getDocs, addDoc, serverTimestamp, onSnapshot, Timestamp } from 'firebase/firestore';
   import { db, auth } from '@/firebase.js';
@@ -239,6 +239,7 @@
       const users = ref<User[]>([]);
       const filteredUsers = ref<User[]>([]);
       const currentUserId = ref<string>('');
+      const debouncedStartChat = debounce(startChatWithSelectedUser, 300);
 
       let unsubscribeMessagesListener: (() => void) | null = null;
 
@@ -288,6 +289,9 @@
               participants: [currentUserId.value, selectedUser.value.id],
               participantsKey: participantsKey,
               createdAt: serverTimestamp(),
+              userAvatar: selectedUser.value.avatar, // Assuming this field exists
+              full_name: selectedUser.value.full_name, // Assuming this field exists
+              // Other necessary fields...
             };
             const chatRef = await addDoc(chatsRef, chatData);
             activeChat.value = { id: chatRef.id, ...chatData, userAvatar: '', full_name: '', timeAgo: '', lastMessage: '' };
@@ -420,6 +424,7 @@
         selectedUser,
         changePerson,
         isCurrentUserMessage,
+        debouncedStartChat,
       };
     },
     methods: {

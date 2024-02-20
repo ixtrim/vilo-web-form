@@ -35,7 +35,7 @@
 
           <div class="dashboard__table__page">
 
-            <div class="dashboard__table__page__item">
+            <div class="dashboard__table__page__item" style="display: none;">
               <div class="col col--l-document">
                 <VFile file-extension="pdf" file-name="Tech requirements.pdf" file-size="200 KB" />
               </div>
@@ -56,7 +56,7 @@
               </div>
             </div>
 
-            <div class="dashboard__table__page__item">
+            <div class="dashboard__table__page__item" style="display: none;">
               <div class="col col--l-document">
                 <VFile file-extension="docx" file-name="Dashboard screenshot.docx" file-size="720 KB" />
               </div>
@@ -77,7 +77,7 @@
               </div>
             </div>
 
-            <div class="dashboard__table__page__item">
+            <div class="dashboard__table__page__item" style="display: none;">
               <div class="col col--l-document">
                 <VFile file-extension="doc" file-name="Dashboard prototype recording.doc" file-size="16 MB" />
               </div>

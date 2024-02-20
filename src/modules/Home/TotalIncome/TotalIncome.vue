@@ -6,7 +6,7 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-lg-12 align-center">
+      <div class="col-lg-12 align-center" style="display: none;">
         <img src="@/assets/temporary/income-chart.svg" alt="Total income" />
       </div>
     </div>

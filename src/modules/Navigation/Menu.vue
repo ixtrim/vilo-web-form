@@ -31,7 +31,7 @@ const isClient = computed(() => {
   return [3, 4].includes(user.value?.role ?? 0);
 });
 
-const chatBadgeNumber = ref(20);
+const chatBadgeNumber = ref(0);
 onMounted(async () => {
   try {
     //const response = await axios.get('/api/chat/notifications');
@@ -44,16 +44,16 @@ onMounted(async () => {
 const links = computed(() => {
   if (isClient.value) {
     return [
-      { name: 'Invoices', to: '/invoices', icon: 'left', iconStyle: 'invoices' },
+      //{ name: 'Invoices', to: '/invoices', icon: 'left', iconStyle: 'invoices' },
     ];
   } else {
     return [
       { name: 'Home', to: '/dashboard', icon: 'left', iconStyle: 'home' },
-      { name: 'Cases', to: '/case-boards', icon: 'left', iconStyle: 'boards' },
+      //{ name: 'Cases', to: '/case-boards', icon: 'left', iconStyle: 'boards' },
       { name: 'Clients', to: '/clients-management', icon: 'left', iconStyle: 'clients' },
-      { name: 'Library', to: '/library', icon: 'left', iconStyle: 'library' },
-      { name: 'Invoices', to: '/invoices', icon: 'left', iconStyle: 'invoices' },
-      { name: 'Calendar', to: '/calendar', icon: 'left', iconStyle: 'calendar' },
+      //{ name: 'Library', to: '/library', icon: 'left', iconStyle: 'library' },
+      //{ name: 'Invoices', to: '/invoices', icon: 'left', iconStyle: 'invoices' },
+      //{ name: 'Calendar', to: '/calendar', icon: 'left', iconStyle: 'calendar' },
       { name: 'Chat', to: '/chat', icon: 'left', iconStyle: 'chat', badge: chatBadgeNumber },
     ];
   }

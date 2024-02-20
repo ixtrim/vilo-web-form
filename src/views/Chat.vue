@@ -178,7 +178,7 @@
 <script lang="ts">
   import { debounce } from 'lodash';
   import { defineComponent, ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
-  import { collection, query, where, getDocs, addDoc, serverTimestamp, onSnapshot, Timestamp } from 'firebase/firestore';
+  import { collection, query, where, getDoc, doc, getDocs, addDoc, serverTimestamp, onSnapshot, Timestamp } from 'firebase/firestore';
   import { db, auth } from '@/firebase.js';
   import Search from '@/modules/Navigation/Search.vue';
   import VButton from '@/components/v-button/VButton.vue';
@@ -334,9 +334,23 @@
         return activeChat.value ? messages.value[activeChat.value.id] || [] : [];
       });
 
-      function selectChat(chat: Chat) {
+      async function selectChat(chat: any) {
         activeChat.value = chat;
         isNewChat.value = false;
+
+        const otherUserId = chat.participants.find((id: string) => id !== currentUserId.value);
+        if (otherUserId) {
+          const userDocRef = doc(db, 'users', otherUserId);
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            const otherUser = userDocSnap.data();
+            // Now set the necessary details from otherUser to activeChat for display
+            if (activeChat.value) {
+              activeChat.value.userAvatar = otherUser.avatar;
+              activeChat.value.full_name = otherUser.full_name;
+            }
+          }
+        }
       }
 
       async function sendMessage() {

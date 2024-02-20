@@ -54,24 +54,28 @@
 
           <div class="v-chat__messages__chat__header">
             <h4 class="v-chat__messages__chat__header__new">New Message</h4>
+            <div class="v-chat__messages__chat__header__change" v-if="selectedUser">
+              <VButton :block="true" size="sm" icon="no" styled="outlined" @click="changePerson" text="Change person"></VButton>
+            </div>
           </div>
 
-          <div v-if="selectedUser" class="v-chat__messages__chat__search-user__chosen">
+          <div v-if="selectedUser" class="v-chat__messages__chat__search-user-chosen">
             <img class="rounded-circle mr-2" :src="selectedUser?.avatar" alt="Avatar" style="width: 50px; height: 50px;">
-            <h5>{{ selectedUser?.full_name }}</h5>
-            <button @click="startChatWithSelectedUser">Start Chat</button>
+            <h5>{{ selectedUser?.full_name }}<br/><span>@{{ formatNick(selectedUser?.full_name) }}</span></h5>
+            <VButton :block="true" size="md" icon="no" styled="primary" @click="startChatWithSelectedUser" text="Start Chat"></VButton>
           </div>
           <div v-else class="v-chat__messages__chat__search-user">
             <input type="text" class="form-control" placeholder="New Message to @" v-model="searchUser" @input="filterUsers">
             <ul class="list-group" v-if="!selectedUser">
               <li v-for="user in filteredUsers" :key="user.id" class="list-group-item" @click="selectUser(user)">
-                <img class="rounded-circle mr-2" :src="user.avatar" alt="Avatar" style="width: 30px; height: 30px;">
-                {{ user.full_name }} (@{{ formatNick(user.full_name) }})
+                <img class="rounded-circle mr-2" :src="user.avatar" alt="Avatar" style="width: 40px; height: 40px;">
+                <div>
+                  <strong>{{ user.full_name }}</strong>
+                  <span>@{{ formatNick(user.full_name) }}</span>
+                </div>
               </li>
             </ul>
           </div>
-          
-          <!-- Existing template code below -->
           
           <div class="v-chat__messages__chat__empty">
             <div class="v-chat__messages__chat__empty__content">
@@ -80,32 +84,7 @@
             </div>
           </div>
 
-          <div class="v-chat__messages__chat__action" v-if="activeChat || isNewChat">
-            <div class="v-chat__messages__chat__action__wrapper">
-
-              <div class="input-group">
-                <div contenteditable="true" class="form-control wysiwyg-editor" ref="messageInput" @input="updateMessage"></div>
-              </div>
-
-              <div class="v-chat__messages__chat__action__wrapper__toolbar">
-                <ul>
-                  <li>
-                    <button class="wysiwyg-btn wysiwyg-btn--bold" type="button" @click="applyFormat('bold')"></button>
-                  </li>
-                  <li>
-                    <button class="wysiwyg-btn wysiwyg-btn--italic" type="button" @click="applyFormat('italic')"></button>
-                  </li>
-                  <li>
-                    <button class="wysiwyg-btn wysiwyg-btn--list" type="button" @click="applyFormat('insertUnorderedList')"></button>
-                  </li>
-                  <li>
-                    <button class="btn btn-primary" type="button" @click="startChatWithSelectedUser">Start Chat</button>
-                  </li>
-                </ul>
-              </div>
-
-            </div>
-          </div>
+          
 
         </div>
 
@@ -179,6 +158,7 @@
                   <li>
                     <button class="wysiwyg-btn wysiwyg-btn--list" type="button" @click="applyFormat('insertUnorderedList')"></button>
                   </li>
+                  
                   <li>
                     <button class="btn btn-primary" type="button" @click="sendMessage()">Send</button>
                   </li>
@@ -305,6 +285,11 @@
         filteredUsers.value = users.value;
       }
 
+      function changePerson() {
+        selectedUser.value = null;
+        searchUser.value = '';
+      }
+
       const activeMessages = computed(() => {
         return activeChat.value ? messages.value[activeChat.value.id] || [] : [];
       });
@@ -398,6 +383,7 @@
         selectUser,
         startChatWithSelectedUser,
         selectedUser,
+        changePerson,
       };
     },
     methods: {

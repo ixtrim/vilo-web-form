@@ -84,8 +84,6 @@
             </div>
           </div>
 
-          
-
         </div>
 
         <div v-else class="v-chat__messages__chat">
@@ -273,38 +271,42 @@
       }
 
       async function startChatWithSelectedUser() {
-        alert('ddd');
-        if (!selectedUser.value) return;
+        try {
+          if (!selectedUser.value) return;
 
-        // Check if a chat already exists
-        const chatsRef = collection(db, "chats");
-        const q = query(chatsRef, where("participants", "array-contains", currentUserId.value), where("participants", "array-contains", selectedUser.value.id));
+          const participantIds = [currentUserId.value, selectedUser.value.id].sort();
+          const participantsKey = participantIds.join('_');
 
-        const querySnapshot = await getDocs(q);
+          const chatsRef = collection(db, "chats");
+          const q = query(chatsRef, where("participantsKey", "==", participantsKey));
 
-        if (querySnapshot.empty) {
-          // No existing chat, create a new one
-          const chatData = {
-            participants: [currentUserId.value, selectedUser.value.id],
-            createdAt: serverTimestamp(),
-          };
-          const chatRef = await addDoc(chatsRef, chatData);
-          activeChat.value = { id: chatRef.id, ...chatData, userAvatar: '', full_name: '', timeAgo: '', lastMessage: '' };
-        } else {
-          // Existing chat found, set it as active
-          querySnapshot.forEach((doc) => {
-            activeChat.value = { id: doc.id, ...doc.data(), userAvatar: '', full_name: '', timeAgo: '', lastMessage: '' };
-          });
-        }
+          const querySnapshot = await getDocs(q);
 
-        // Reset selected user and prepare UI for messaging
-        selectedUser.value = null;
-        isNewChat.value = false;
-        if (activeChat.value) {
-          listenForMessages(activeChat.value.id); // Start listening for messages in this chat
+          if (querySnapshot.empty) {
+            // No existing chat, create a new one
+            const chatData = {
+              participants: [currentUserId.value, selectedUser.value.id],
+              participantsKey: participantsKey,
+              createdAt: serverTimestamp(),
+            };
+            const chatRef = await addDoc(chatsRef, chatData);
+            activeChat.value = { id: chatRef.id, ...chatData, userAvatar: '', full_name: '', timeAgo: '', lastMessage: '' };
+          } else {
+            // Existing chat found, set it as active
+            querySnapshot.forEach((doc) => {
+              activeChat.value = { id: doc.id, ...doc.data(), userAvatar: '', full_name: '', timeAgo: '', lastMessage: '' };
+            });
+          }
+
+          selectedUser.value = null;
+          isNewChat.value = false;
+          if (activeChat.value) {
+            listenForMessages(activeChat.value.id);
+          }
+        } catch (error) {
+          console.error("Failed to start chat:", error);
         }
       }
-
 
       onMounted(() => {
         const user = auth.currentUser;

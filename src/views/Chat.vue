@@ -62,7 +62,7 @@
           <div v-if="selectedUser" class="v-chat__messages__chat__search-user-chosen">
             <img class="rounded-circle mr-2" :src="selectedUser?.avatar" alt="Avatar" style="width: 50px; height: 50px;">
             <h5>{{ selectedUser?.full_name }}<br/><span>@{{ formatNick(selectedUser?.full_name) }}</span></h5>
-            <VButton :block="true" size="md" icon="no" styled="primary" @click="startChatWithSelectedUser" text="Start Chat"></VButton>
+            <VButton :block="true" size="md" icon="no" styled="primary" @click="debouncedStartChat" text="Start Chat"></VButton>
           </div>
           <div v-else class="v-chat__messages__chat__search-user">
             <input type="text" class="form-control" placeholder="New Message to @" v-model="searchUser" @input="filterUsers">
@@ -83,8 +83,6 @@
               <h4>No chat history yet</h4>
             </div>
           </div>
-
-          
 
         </div>
 
@@ -109,7 +107,17 @@
 
               <div v-for="message in activeMessages" :key="message.id" class="user-message">
 
-                <div v-if="!message.isCurrentUser" class="user-message__other">
+                <div v-if="!isCurrentUserMessage(message.from)" class="user-message__other">
+                  <div class="user-message__current__info">
+                    <span class="user-message__current__info__name">You</span>
+                    <small class="user-message__current__info__time">{{ message.timestamp }}</small>
+                  </div>
+                  <div class="user-message__current__bubble">
+                    <p v-html="sanitizeHtml(message.text)"></p>
+                  </div>
+                </div>
+
+                <div v-else class="user-message__current">
                   <div class="user-message__other__avatar">
                     <img :src="activeChat?.userAvatar" alt="Avatar" class="rounded-circle chat-avatar">
                     <div class="user-message__other__avatar__status"></div>
@@ -120,20 +128,12 @@
                       <small class="user-message__other__text__info__time">{{ message.timestamp }}</small>
                     </div>
                     <div class="user-message__other__text__bubble">
-                      <p v-html="sanitizeHtml(message.content)"></p>
+                      <p v-html="sanitizeHtml(message.text)"></p>
                     </div>
                   </div>
                 </div>
 
-                <div v-else="!message.isCurrentUser" class="user-message__current">
-                  <div class="user-message__current__info">
-                    <span class="user-message__current__info__name">You</span>
-                    <small class="user-message__current__info__time">{{ message.timestamp }}</small>
-                  </div>
-                  <div class="user-message__current__bubble">
-                    <p v-html="sanitizeHtml(message.content)"></p>
-                  </div>
-                </div>
+                
                 
               </div>
 
@@ -176,9 +176,9 @@
 </template>
 
 <script lang="ts">
-  import axios from 'axios';
-  import { defineComponent, ref, computed, onMounted, nextTick } from 'vue';
-  import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
+  import { debounce } from 'lodash';
+  import { defineComponent, ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+  import { collection, query, where, getDoc, doc, getDocs, addDoc, serverTimestamp, onSnapshot, Timestamp } from 'firebase/firestore';
   import { db, auth } from '@/firebase.js';
   import Search from '@/modules/Navigation/Search.vue';
   import VButton from '@/components/v-button/VButton.vue';
@@ -209,8 +209,15 @@
     isCurrentUser: boolean;
   }
 
+  interface MessageType {
+    id: string;
+    from: string;
+    text: string;
+    timestamp: Timestamp;
+  }
+
   interface Messages {
-    [key: string]: Message[];
+    [key: string]: MessageType[];
   }
 
   export default defineComponent({
@@ -221,7 +228,7 @@
     },
     setup() {
       const chats = ref<Chat[]>([]);
-      const messages = ref<Messages>({});
+      const messages = ref<Record<string, MessageType[]>>({});
       const activeChat = ref<Chat | null>(null);
       const newMessage = ref<string>('');
       const isNewChat = ref<boolean>(false);
@@ -232,6 +239,9 @@
       const users = ref<User[]>([]);
       const filteredUsers = ref<User[]>([]);
       const currentUserId = ref<string>('');
+      const debouncedStartChat = debounce(startChatWithSelectedUser, 300);
+
+      let unsubscribeMessagesListener: (() => void) | null = null;
 
       // Adjusted fetchUsersByRole function
       async function fetchUsersByRole() {
@@ -253,23 +263,53 @@
         );
       }
 
+      function isCurrentUserMessage(messageFromId: string) {
+        return currentUserId.value === messageFromId;
+      }
+
       function selectUser(user: User) {
         selectedUser.value = user;
       }
 
-      function startChatWithSelectedUser() {
-        if (!selectedUser.value) return;
+      async function startChatWithSelectedUser() {
+        try {
+          if (!selectedUser.value) return;
 
-        activeChat.value = {
-          userAvatar: selectedUser.value.avatar,
-          full_name: selectedUser.value.full_name,
-          id: Date.now().toString(),
-          timeAgo: 'Just now',
-          lastMessage: ''
-        };
+          const participantIds = [currentUserId.value, selectedUser.value.id].sort();
+          const participantsKey = participantIds.join('_');
 
-        selectedUser.value = null;
-        isNewChat.value = false;
+          const chatsRef = collection(db, "chats");
+          const q = query(chatsRef, where("participantsKey", "==", participantsKey));
+
+          const querySnapshot = await getDocs(q);
+
+          if (querySnapshot.empty) {
+            // No existing chat, create a new one
+            const chatData = {
+              participants: [currentUserId.value, selectedUser.value.id],
+              participantsKey: participantsKey,
+              createdAt: serverTimestamp(),
+              userAvatar: selectedUser.value.avatar, // Assuming this field exists
+              full_name: selectedUser.value.full_name, // Assuming this field exists
+              // Other necessary fields...
+            };
+            const chatRef = await addDoc(chatsRef, chatData);
+            activeChat.value = { id: chatRef.id, ...chatData, userAvatar: '', full_name: '', timeAgo: '', lastMessage: '' };
+          } else {
+            // Existing chat found, set it as active
+            querySnapshot.forEach((doc) => {
+              activeChat.value = { id: doc.id, ...doc.data(), userAvatar: '', full_name: '', timeAgo: '', lastMessage: '' };
+            });
+          }
+
+          selectedUser.value = null;
+          isNewChat.value = false;
+          if (activeChat.value) {
+            listenForMessages(activeChat.value.id);
+          }
+        } catch (error) {
+          console.error("Failed to start chat:", error);
+        }
       }
 
       onMounted(() => {
@@ -294,46 +334,36 @@
         return activeChat.value ? messages.value[activeChat.value.id] || [] : [];
       });
 
-      function selectChat(chat: Chat) {
+      async function selectChat(chat: any) {
         activeChat.value = chat;
         isNewChat.value = false;
+
+        const otherUserId = chat.participants.find((id: string) => id !== currentUserId.value);
+        if (otherUserId) {
+          const userDocRef = doc(db, 'users', otherUserId);
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            const otherUser = userDocSnap.data();
+            // Now set the necessary details from otherUser to activeChat for display
+            if (activeChat.value) {
+              activeChat.value.userAvatar = otherUser.avatar;
+              activeChat.value.full_name = otherUser.full_name;
+            }
+          }
+        }
       }
 
-      function sendMessage() {
+      async function sendMessage() {
         if (newMessage.value.trim() !== '' && activeChat.value) {
-          const chatMessages = messages.value[activeChat.value.id] || [];
-          chatMessages.push({
-            id: chatMessages.length + 1,
-            content: newMessage.value,
-            timestamp: new Date().toLocaleTimeString(),
-            isCurrentUser: true
+          const messagesRef = collection(db, "chats", activeChat.value.id, "messages");
+          await addDoc(messagesRef, {
+            from: currentUserId.value,
+            text: newMessage.value,
+            timestamp: serverTimestamp(),
           });
 
-          // Update the last message and timeAgo in the chat object
-          chats.value = chats.value.map(c => {
-            if (c.id === activeChat.value?.id) {
-              // Format the current time as needed
-              const currentTimeFormatted = "Just now"; // This can be more dynamic based on actual time difference
-              return { ...c, lastMessage: newMessage.value, timeAgo: currentTimeFormatted };
-            }
-            return c;
-          });
-
-          // Move the active chat to the top of the list
-          const activeChatIndex = chats.value.findIndex(c => c.id === activeChat.value?.id);
-          if (activeChatIndex > -1) {
-            const activeChatData = chats.value.splice(activeChatIndex, 1)[0];
-            chats.value.unshift(activeChatData);
-          }
-
-          // Clear the WYSIWYG editor
-          if (messageInput.value) {
-            messageInput.value.innerHTML = '';
-          }
-
-          // Also clear the newMessage reactive variable
-          newMessage.value = '';
-          scrollToBottom();
+          newMessage.value = ''; // Clear the input after sending
+          // No need to manually update the messages list if you're listening for updates
         }
       }
 
@@ -348,12 +378,35 @@
         });
       }
 
+      function listenForMessages(chatId: string) {
+        const messagesRef = collection(db, "chats", chatId, "messages");
+        unsubscribeMessagesListener = onSnapshot(messagesRef, (querySnapshot) => {
+          const newMessages: MessageType[] = [];
+          querySnapshot.forEach((doc: any) => {
+            newMessages.push({ id: doc.id, ...doc.data() });
+          });
+          messages.value[chatId] = newMessages; // Assuming you have a reactive property for messages
+        });
+      }
+
+      // Call this function when you need to stop listening (e.g., when switching chats or on component unmount)
+      function stopListeningForMessages() {
+        if (unsubscribeMessagesListener) {
+          unsubscribeMessagesListener();
+          unsubscribeMessagesListener = null;
+        }
+      }
+
       const messageInput = ref<HTMLElement | null>(null);
 
       onMounted(() => {
         if (messageInput.value) {
           messageInput.value.focus();
         }
+      });
+
+      onUnmounted(() => {
+        stopListeningForMessages();
       });
 
       function applyFormat(command: string) {
@@ -384,6 +437,8 @@
         startChatWithSelectedUser,
         selectedUser,
         changePerson,
+        isCurrentUserMessage,
+        debouncedStartChat,
       };
     },
     methods: {

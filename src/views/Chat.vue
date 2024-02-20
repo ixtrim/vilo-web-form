@@ -199,7 +199,7 @@
   import axios from 'axios';
   import { defineComponent, ref, computed, onMounted, nextTick } from 'vue';
   import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
-  import { db } from '@/firebase.js';
+  import { db, auth } from '@/firebase.js';
   import Search from '@/modules/Navigation/Search.vue';
   import VButton from '@/components/v-button/VButton.vue';
   import VIconbox from '@/components/v-iconbox/VIconbox.vue';
@@ -251,13 +251,16 @@
       const selectedUser = ref<User | null>(null);
       const users = ref<User[]>([]);
       const filteredUsers = ref<User[]>([]);
+      const currentUserId = ref<string>('');
 
       // Adjusted fetchUsersByRole function
       async function fetchUsersByRole() {
         const usersRef = collection(db, "users");
         const q = query(usersRef, where("role", "in", [0, 1, 2]));
         const querySnapshot = await getDocs(q);
-        users.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
+        users.value = querySnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as User))
+          .filter(user => user.id !== currentUserId.value);
         filteredUsers.value = users.value;
       }
 
@@ -265,7 +268,8 @@
       function filterUsers() {
         const searchLower = searchUser.value.toLowerCase();
         filteredUsers.value = users.value.filter(user =>
-          user.full_name.toLowerCase().includes(searchLower)
+          user.full_name.toLowerCase().includes(searchLower) &&
+          user.id !== currentUserId.value // Exclude the current user
         );
       }
 
@@ -289,6 +293,10 @@
       }
 
       onMounted(() => {
+        const user = auth.currentUser;
+        if (user) {
+          currentUserId.value = user.uid;
+        }
         fetchUsersByRole();
       });
 

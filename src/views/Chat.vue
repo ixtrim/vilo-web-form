@@ -24,12 +24,12 @@
 
               <div class="user-messages__top">
                 <div class="user-messages__top__avatar">
-                  <img class="rounded-circle mr-2" :src="chat.personIcon" alt="Person" style="width: 50px; height: 50px;">
+                  <img class="rounded-circle mr-2" :src="chat.userAvatar" alt="Person" style="width: 50px; height: 50px;">
                   <div class="user-messages__top__avatar__status"></div>
                 </div>
                 <div class="user-messages__top__name">
-                  <h5 class="mb-1">{{ chat.fullName }}</h5>
-                  <span>@{{ chat.nick }}</span>
+                  <h5 class="mb-1">{{ chat.full_name }}</h5>
+                  <span>@{{ formatNick(chat.full_name) }}</span>
                 </div>
                 <div class="user-messages__top__time">
                   <small>{{ chat.timeAgo }}</small>
@@ -56,15 +56,22 @@
             <h4 class="v-chat__messages__chat__header__new">New Message</h4>
           </div>
 
-          <div class="v-chat__messages__chat__search-user">
+          <div v-if="selectedUser" class="v-chat__messages__chat__search-user__chosen">
+            <img class="rounded-circle mr-2" :src="selectedUser?.avatar" alt="Avatar" style="width: 50px; height: 50px;">
+            <h5>{{ selectedUser?.full_name }}</h5>
+            <button @click="startChatWithSelectedUser">Start Chat</button>
+          </div>
+          <div v-else class="v-chat__messages__chat__search-user">
             <input type="text" class="form-control" placeholder="New Message to @" v-model="searchUser" @input="filterUsers">
-            <ul class="list-group">
+            <ul class="list-group" v-if="!selectedUser">
               <li v-for="user in filteredUsers" :key="user.id" class="list-group-item" @click="selectUser(user)">
                 <img class="rounded-circle mr-2" :src="user.avatar" alt="Avatar" style="width: 30px; height: 30px;">
-                {{ user.fullName }} (@{{ user.nick }})
+                {{ user.full_name }} (@{{ formatNick(user.full_name) }})
               </li>
             </ul>
           </div>
+          
+          <!-- Existing template code below -->
           
           <div class="v-chat__messages__chat__empty">
             <div class="v-chat__messages__chat__empty__content">
@@ -92,7 +99,7 @@
                     <button class="wysiwyg-btn wysiwyg-btn--list" type="button" @click="applyFormat('insertUnorderedList')"></button>
                   </li>
                   <li>
-                    <button class="btn btn-primary" type="button" @click="sendMessage()">Send</button>
+                    <button class="btn btn-primary" type="button" @click="startChatWithSelectedUser">Start Chat</button>
                   </li>
                 </ul>
               </div>
@@ -106,14 +113,11 @@
 
           <div class="v-chat__messages__chat__header" v-if="activeChat">
             <div class="v-chat__messages__chat__header__avatar" >
-              <img class="rounded-circle mr-2" :src="activeChat?.personIcon" alt="{{ activeChat?.fullName }}">
+              <img class="rounded-circle mr-2" :src="activeChat?.userAvatar" alt="{{ activeChat?.full_name }}">
             </div>
             <div class="v-chat__messages__chat__header__name">
-              <h4>{{ activeChat?.fullName }}</h4>
-              <span>@{{ activeChat?.nick }}</span>
-            </div>
-            <div class="v-chat__messages__chat__header__archive">
-              <VButton :block="true" size="md" styled="outlined" @click="handleButtonClick" text="Archive"></VButton>
+              <h4>{{ activeChat?.full_name }}</h4>
+              <span>@{{ activeChat?.full_name }}</span>
             </div>
           </div>
 
@@ -128,12 +132,12 @@
 
                 <div v-if="!message.isCurrentUser" class="user-message__other">
                   <div class="user-message__other__avatar">
-                    <img :src="activeChat?.personIcon" alt="Avatar" class="rounded-circle chat-avatar">
+                    <img :src="activeChat?.userAvatar" alt="Avatar" class="rounded-circle chat-avatar">
                     <div class="user-message__other__avatar__status"></div>
                   </div>
                   <div class="user-message__other__text">
                     <div class="user-message__other__text__info">
-                      <span class="user-message__other__text__info__name">{{ activeChat?.fullName }}</span>
+                      <span class="user-message__other__text__info__name">{{ activeChat?.full_name }}</span>
                       <small class="user-message__other__text__info__time">{{ message.timestamp }}</small>
                     </div>
                     <div class="user-message__other__text__bubble">
@@ -193,29 +197,29 @@
 
 <script lang="ts">
   import axios from 'axios';
-  import DOMPurify from 'dompurify';
   import { defineComponent, ref, computed, onMounted, nextTick } from 'vue';
+  import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
+  import { db } from '@/firebase.js';
   import Search from '@/modules/Navigation/Search.vue';
   import VButton from '@/components/v-button/VButton.vue';
   import VIconbox from '@/components/v-iconbox/VIconbox.vue';
-
-  interface Chat {
-    id: number;
-    personIcon: string;
-    fullName: string;
-    nick: string;
-    timeAgo: string;
-    lastMessage: string;
-  }
+  import DOMPurify from 'dompurify';
 
   interface User {
-    id: number;
+    id: string;
     avatar: string;
-    fullName: string;
-    nick: string;
-    first_name: string;
-    last_name: string;
-    username: string;
+    full_name: string;
+    first_name?: string;
+    last_name?: string;
+    username?: string;
+  }
+
+  interface Chat {
+    id: string;
+    userAvatar: string;
+    full_name: string;
+    timeAgo: string;
+    lastMessage: string;
   }
 
   interface Message {
@@ -226,7 +230,7 @@
   }
 
   interface Messages {
-    [key: number]: Message[];
+    [key: string]: Message[];
   }
 
   export default defineComponent({
@@ -236,88 +240,61 @@
       VIconbox,
     },
     setup() {
-
-      const sampleMessages = [
-        "Have you reviewed the latest case brief?",
-        "Reminder: Client meeting rescheduled to 2 PM.",
-        "Could you forward the updated contract draft?",
-        "Let's discuss the implications of the new statute tomorrow.",
-        "I'll need your input on the Smith negotiation strategy.",
-        "Are the deposition summaries ready for review?",
-        "Please confirm receipt of the settlement agreement.",
-        "The court's ruling on our motion just came in.",
-        "We need to update our compliance guidelines by next week.",
-        "Can we set a meeting to go over the case law findings?",
-        "The merger documents require your signature by EOD.",
-        "I've attached the patent filing for your perusal.",
-        "Urgent: The opposition has filed an injunction.",
-        "Let's debrief on the recent legislative changes.",
-        "The client has requested a copy of their case file.",
-        "Have we received the witness affidavits yet?",
-        "Please review the attached legal brief before submission.",
-        "We need to coordinate with the finance team onimport axios from 'axios'; the budget.",
-        "The regulatory filing deadline is approaching fast.",
-        "Can you handle the client follow-up for the Johnson estate?"
-      ];
-
-      function getRandomMessage() {
-        const randomIndex = Math.floor(Math.random() * sampleMessages.length);
-        return sampleMessages[randomIndex];
-      }
-
       const chats = ref<Chat[]>([]);
       const messages = ref<Messages>({});
       const activeChat = ref<Chat | null>(null);
       const newMessage = ref<string>('');
       const isNewChat = ref<boolean>(false);
-      const searchUser = ref<string>('');
-      const filteredUsers = ref<User[]>([]);
-      const users = ref<User[]>([]);
       const chatContainer = ref<HTMLElement | null>(null);
 
-      onMounted(async () => {
-        try {
-          const response = await axios.get('https://random-data-api.com/api/users/random_user?size=20');
-          const usersData: User[] = response.data;
-          chats.value = usersData.map((user, index) => {
-            const id = index + 1;
-            messages.value[id] = Array.from({ length: 5 }, () => ({
-              id: Math.random(),
-              content: getRandomMessage(),
-              timestamp: `10:${String(Math.floor(Math.random() * 60)).padStart(2, '0')} AM`,
-              isCurrentUser: Math.random() > 0.5
-            }));
-            return {
-              id: id,
-              personIcon: `https://randomuser.me/api/portraits/men/${index + 1}.jpg`,
-              fullName: `${user.first_name} ${user.last_name}`,
-              nick: user.username,
-              timeAgo: `${5 * (index + 1)}m ago`,
-              lastMessage: messages.value[id][0].content
-            };
-          });
-        } catch (error) {
-          console.error('Failed to fetch users:', error);
-        }
+      const searchUser = ref('');
+      const selectedUser = ref<User | null>(null);
+      const users = ref<User[]>([]);
+      const filteredUsers = ref<User[]>([]);
+
+      // Adjusted fetchUsersByRole function
+      async function fetchUsersByRole() {
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("role", "in", [0, 1, 2]));
+        const querySnapshot = await getDocs(q);
+        users.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
+        filteredUsers.value = users.value;
+      }
+
+      // Filter users based on search input
+      function filterUsers() {
+        const searchLower = searchUser.value.toLowerCase();
+        filteredUsers.value = users.value.filter(user =>
+          user.full_name.toLowerCase().includes(searchLower)
+        );
+      }
+
+      function selectUser(user: User) {
+        selectedUser.value = user;
+      }
+
+      function startChatWithSelectedUser() {
+        if (!selectedUser.value) return;
+
+        activeChat.value = {
+          userAvatar: selectedUser.value.avatar,
+          full_name: selectedUser.value.full_name,
+          id: Date.now().toString(),
+          timeAgo: 'Just now',
+          lastMessage: ''
+        };
+
+        selectedUser.value = null;
+        isNewChat.value = false;
+      }
+
+      onMounted(() => {
+        fetchUsersByRole();
       });
 
       function startNewChat() {
         isNewChat.value = true;
         filteredUsers.value = users.value;
-      }
-
-      function filterUsers() {
-        if (searchUser.value) {
-          filteredUsers.value = users.value.filter(user =>
-            `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchUser.value.toLowerCase())
-          );
-        } else {
-          filteredUsers.value = users.value;
-        }
-      }
-
-      function selectUser(user: User) {
-        // Here we will add fx to search thru users for new message
       }
 
       const activeMessages = computed(() => {
@@ -405,20 +382,29 @@
         messageInput,
         startNewChat,
         filterUsers,
-        selectUser,
         selectChat,
         applyFormat,
         updateMessage,
         sendMessage,
         scrollToBottom,
+        selectUser,
+        startChatWithSelectedUser,
+        selectedUser,
       };
     },
     methods: {
       handleButtonClick() {
         
       },
+      formatNick(fullNick: string) {
+        return fullNick.toLowerCase().replace(/\s+/g, '.');
+      },
       sanitizeHtml(htmlContent: string) {
         return DOMPurify.sanitize(htmlContent);
+      },
+      selectUser(user: User) { // Now 'user' is explicitly typed
+        console.log("Selected user:", user);
+        // Implement chat creation or selection logic here
       },
     },
   });

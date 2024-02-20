@@ -11,7 +11,7 @@
     <div class="row">
       <div class="col-lg-12 align-center">
         
-        <ul class="unread-messages__list">
+        <ul class="unread-messages__list" style="display: none;">
           <li class="unread-messages__list__item">
 
             <div class="unread-messages__list__item__avatar">

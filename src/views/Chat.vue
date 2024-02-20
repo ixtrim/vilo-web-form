@@ -178,7 +178,7 @@
 <script lang="ts">
   import { debounce } from 'lodash';
   import { defineComponent, ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
-  import { collection, query, where, getDoc, doc, getDocs, addDoc, serverTimestamp, onSnapshot, Timestamp } from 'firebase/firestore';
+  import { getFirestore, collection, query, where, getDoc, doc, getDocs, addDoc, serverTimestamp, onSnapshot, Timestamp } from 'firebase/firestore';
   import { db, auth } from '@/firebase.js';
   import Search from '@/modules/Navigation/Search.vue';
   import VButton from '@/components/v-button/VButton.vue';
@@ -243,6 +243,8 @@
 
       let unsubscribeMessagesListener: (() => void) | null = null;
 
+      const db = getFirestore();
+
       // Adjusted fetchUsersByRole function
       async function fetchUsersByRole() {
         const usersRef = collection(db, "users");
@@ -289,18 +291,21 @@
               participants: [currentUserId.value, selectedUser.value.id],
               participantsKey: participantsKey,
               createdAt: serverTimestamp(),
-              userAvatar: selectedUser.value.avatar, // Assuming this field exists
-              full_name: selectedUser.value.full_name, // Assuming this field exists
+              userAvatar: selectedUser.value.avatar,
+              full_name: selectedUser.value.full_name,
               // Other necessary fields...
             };
             const chatRef = await addDoc(chatsRef, chatData);
-            activeChat.value = { id: chatRef.id, ...chatData, userAvatar: '', full_name: '', timeAgo: '', lastMessage: '' };
+            // Update activeChat with selected user's details
+            activeChat.value = { id: chatRef.id, ...chatData, timeAgo: '', lastMessage: '' };
           } else {
             // Existing chat found, set it as active
             querySnapshot.forEach((doc) => {
               activeChat.value = { id: doc.id, ...doc.data(), userAvatar: '', full_name: '', timeAgo: '', lastMessage: '' };
             });
           }
+          // After setting activeChat, make sure to update UI
+          activeChat.value = { ...activeChat.value, id: activeChat.value?.id || '', userAvatar: activeChat.value?.userAvatar || '', full_name: activeChat.value?.full_name ?? '', timeAgo: activeChat.value?.timeAgo ?? '', lastMessage: activeChat.value?.lastMessage ?? '' };
 
           selectedUser.value = null;
           isNewChat.value = false;
@@ -338,17 +343,19 @@
         activeChat.value = chat;
         isNewChat.value = false;
 
+        // Assuming chat.participants is an array of user IDs
         const otherUserId = chat.participants.find((id: string) => id !== currentUserId.value);
         if (otherUserId) {
           const userDocRef = doc(db, 'users', otherUserId);
           const userDocSnap = await getDoc(userDocRef);
           if (userDocSnap.exists()) {
             const otherUser = userDocSnap.data();
-            // Now set the necessary details from otherUser to activeChat for display
+            // Update activeChat with other user's details
             if (activeChat.value) {
               activeChat.value.userAvatar = otherUser.avatar;
               activeChat.value.full_name = otherUser.full_name;
             }
+            activeChat.value = { id: '', ...activeChat.value, userAvatar: '', full_name: '', timeAgo: '', lastMessage: '' };
           }
         }
       }

@@ -178,7 +178,7 @@
 <script lang="ts">
   import { debounce } from 'lodash';
   import { defineComponent, ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
-  import { orderBy, getFirestore, collection, query, where, getDoc, doc, getDocs, addDoc, serverTimestamp, onSnapshot, Timestamp } from 'firebase/firestore';
+  import { orderBy, getFirestore, collection, query, where, getDoc, doc, getDocs, addDoc, serverTimestamp, onSnapshot, Timestamp, limit } from 'firebase/firestore';
   import { format, isToday, isYesterday } from 'date-fns';
   import { db, auth } from '@/firebase.js';
   import Search from '@/modules/Navigation/Search.vue';
@@ -247,31 +247,50 @@
       const db = getFirestore();
 
       async function fetchChats() {
-        const chatsRef = collection(db, "chats");
-        // Query for chats where the current user is a participant
-        const q = query(chatsRef, where("participants", "array-contains", currentUserId.value));
-        
-        const querySnapshot = await getDocs(q);
-        const fetchedChats: Chat[] = []; // Use the Chat interface to type the array
-        querySnapshot.forEach((doc) => {
-          const chatData = doc.data();
-          // You'll need to implement logic to fetch or compute these values correctly
-          const lastMessage = "Last message here"; // Placeholder, replace with actual logic
-          const timeAgo = "Time ago here"; // Placeholder, replace with actual logic
-          // Assuming you have a method to determine the userAvatar and full_name
-          const userAvatar = "Path to avatar here"; // Placeholder, replace with actual logic
-          const full_name = "Full name here"; // Placeholder, replace with actual logic
-
-          fetchedChats.push({
-            id: doc.id,
-            userAvatar,
-            full_name,
-            lastMessage,
-            timeAgo,
-          });
-        });
-        chats.value = fetchedChats;
+    const chatsRef = collection(db, "chats");
+    const q = query(chatsRef, where("participants", "array-contains", currentUserId.value));
+    
+    const querySnapshot = await getDocs(q);
+    const fetchedChats: Chat[] = [];
+    
+    for (const docSnapshot of querySnapshot.docs) {
+      const chatData = docSnapshot.data();
+      const otherUserId = chatData.participants.find((id: string) => id !== currentUserId.value);
+      
+      if (!otherUserId) continue;
+      
+      const otherUserDocRef = doc(db, "users", otherUserId);
+      const otherUserDoc = await getDoc(otherUserDocRef);
+      
+      if (!otherUserDoc.exists()) continue;
+      const otherUserData = otherUserDoc.data() as any; // Use 'any' or a more specific type if known
+      
+      const userAvatar = otherUserData.avatar || "default_avatar_path";
+      const full_name = otherUserData.full_name || "Unknown User";
+      
+      const messagesRef = collection(db, "chats", docSnapshot.id, "messages");
+      const lastMessageQuery = query(messagesRef, orderBy("timestamp", "desc"), limit(1));
+      const lastMessageSnapshot = await getDocs(lastMessageQuery);
+      
+      let lastMessage = "No messages yet";
+      let timeAgo = "";
+      if (!lastMessageSnapshot.empty) {
+        const lastMessageData = lastMessageSnapshot.docs[0].data();
+        lastMessage = lastMessageData.text;
+        timeAgo = "Time ago calculation"; // Implement time ago calculation based on lastMessageData.timestamp
       }
+      
+      fetchedChats.push({
+        id: docSnapshot.id,
+        userAvatar,
+        full_name,
+        lastMessage,
+        timeAgo,
+      });
+    }
+    
+    chats.value = fetchedChats;
+  }
 
       // Adjusted fetchUsersByRole function
       async function fetchUsersByRole() {

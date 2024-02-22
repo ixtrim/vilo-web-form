@@ -107,17 +107,7 @@
 
               <div v-for="message in activeMessages" :key="message.id" class="user-message">
 
-                <div v-if="!isCurrentUserMessage(message.from)" class="user-message__current">
-                  <div class="user-message__current__info">
-                    <span class="user-message__current__info__name">You</span>
-                    <small class="user-message__current__info__time">{{ formatTimestamp(message.timestamp) }}</small>
-                  </div>
-                  <div class="user-message__current__bubble">
-                    <p v-html="sanitizeHtml(message.text)"></p>
-                  </div>
-                </div>
-
-                <div v-else class="user-message__other">
+                <div v-if="!isCurrentUserMessage(message.from)" class="user-message__other">
                   <div class="user-message__other__avatar">
                     <img :src="activeChat?.userAvatar" alt="Avatar" class="rounded-circle chat-avatar">
                     <div class="user-message__other__avatar__status"></div>
@@ -132,6 +122,18 @@
                     </div>
                   </div>
                 </div>
+
+                <div v-else class="user-message__current">
+                  <div class="user-message__current__info">
+                    <span class="user-message__current__info__name">You</span>
+                    <small class="user-message__current__info__time">{{ formatTimestamp(message.timestamp) }}</small>
+                  </div>
+                  <div class="user-message__current__bubble">
+                    <p v-html="sanitizeHtml(message.text)"></p>
+                  </div>
+                </div>
+
+                
 
                 
                 
@@ -331,7 +333,7 @@
           const q = query(chatsRef, where("participantsKey", "==", participantsKey));
 
           const querySnapshot = await getDocs(q);
-
+          let chatId = '';
           if (querySnapshot.empty) {
             // No existing chat, create a new one
             const chatData = {
@@ -343,16 +345,21 @@
               // Other necessary fields...
             };
             const chatRef = await addDoc(chatsRef, chatData);
+            chatId = chatRef.id;
             // Update activeChat with selected user's details
             activeChat.value = { id: chatRef.id, ...chatData, timeAgo: '', lastMessage: '' };
           } else {
             // Existing chat found, set it as active
-            querySnapshot.forEach((doc) => {
-              activeChat.value = { id: doc.id, ...doc.data(), userAvatar: '', full_name: '', timeAgo: '', lastMessage: '' };
-            });
+            chatId = querySnapshot.docs[0].id;
           }
           // After setting activeChat, make sure to update UI
-          activeChat.value = { ...activeChat.value, id: activeChat.value?.id || '', userAvatar: activeChat.value?.userAvatar || '', full_name: activeChat.value?.full_name ?? '', timeAgo: activeChat.value?.timeAgo ?? '', lastMessage: activeChat.value?.lastMessage ?? '' };
+          activeChat.value = {
+            id: chatId,
+            userAvatar: selectedUser.value.avatar, // Use selectedUser's avatar
+            full_name: selectedUser.value.full_name, // Use selectedUser's full name
+            lastMessage: '', // You may want to fetch the last message if needed
+            timeAgo: '', // Calculate or fetch as needed
+          };
 
           selectedUser.value = null;
           isNewChat.value = false;

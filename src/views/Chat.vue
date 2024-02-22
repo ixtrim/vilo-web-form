@@ -246,6 +246,33 @@
 
       const db = getFirestore();
 
+      async function fetchChats() {
+        const chatsRef = collection(db, "chats");
+        // Query for chats where the current user is a participant
+        const q = query(chatsRef, where("participants", "array-contains", currentUserId.value));
+        
+        const querySnapshot = await getDocs(q);
+        const fetchedChats: Chat[] = []; // Use the Chat interface to type the array
+        querySnapshot.forEach((doc) => {
+          const chatData = doc.data();
+          // You'll need to implement logic to fetch or compute these values correctly
+          const lastMessage = "Last message here"; // Placeholder, replace with actual logic
+          const timeAgo = "Time ago here"; // Placeholder, replace with actual logic
+          // Assuming you have a method to determine the userAvatar and full_name
+          const userAvatar = "Path to avatar here"; // Placeholder, replace with actual logic
+          const full_name = "Full name here"; // Placeholder, replace with actual logic
+
+          fetchedChats.push({
+            id: doc.id,
+            userAvatar,
+            full_name,
+            lastMessage,
+            timeAgo,
+          });
+        });
+        chats.value = fetchedChats;
+      }
+
       // Adjusted fetchUsersByRole function
       async function fetchUsersByRole() {
         const usersRef = collection(db, "users");
@@ -322,8 +349,9 @@
         const user = auth.currentUser;
         if (user) {
           currentUserId.value = user.uid;
+          fetchChats();
+          fetchUsersByRole();
         }
-        fetchUsersByRole();
       });
 
       function startNewChat() {

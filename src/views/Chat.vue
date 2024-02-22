@@ -107,7 +107,7 @@
 
               <div v-for="message in activeMessages" :key="message.id" class="user-message">
 
-                <div v-if="!isCurrentUserMessage(message.from)" class="user-message__other">
+                <div v-if="!isCurrentUserMessage(message.from)" class="user-message__current">
                   <div class="user-message__current__info">
                     <span class="user-message__current__info__name">You</span>
                     <small class="user-message__current__info__time">{{ formatTimestamp(message.timestamp) }}</small>
@@ -117,7 +117,7 @@
                   </div>
                 </div>
 
-                <div v-else class="user-message__current">
+                <div v-else class="user-message__other">
                   <div class="user-message__other__avatar">
                     <img :src="activeChat?.userAvatar" alt="Avatar" class="rounded-circle chat-avatar">
                     <div class="user-message__other__avatar__status"></div>

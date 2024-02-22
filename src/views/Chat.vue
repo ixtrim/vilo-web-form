@@ -107,7 +107,7 @@
 
               <div v-for="message in activeMessages" :key="message.id" class="user-message">
 
-                <div v-if="!isCurrentUserMessage(message.from)" class="user-message__other">
+                <div v-if="!isCurrentUserMessage(message.from)" class="user-message__current">
                   <div class="user-message__current__info">
                     <span class="user-message__current__info__name">You</span>
                     <small class="user-message__current__info__time">{{ formatTimestamp(message.timestamp) }}</small>
@@ -117,7 +117,7 @@
                   </div>
                 </div>
 
-                <div v-else class="user-message__current">
+                <div v-else class="user-message__other">
                   <div class="user-message__other__avatar">
                     <img :src="activeChat?.userAvatar" alt="Avatar" class="rounded-circle chat-avatar">
                     <div class="user-message__other__avatar__status"></div>
@@ -178,7 +178,7 @@
 <script lang="ts">
   import { debounce } from 'lodash';
   import { defineComponent, ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
-  import { getFirestore, collection, query, where, getDoc, doc, getDocs, addDoc, serverTimestamp, onSnapshot, Timestamp } from 'firebase/firestore';
+  import { orderBy, getFirestore, collection, query, where, getDoc, doc, getDocs, addDoc, serverTimestamp, onSnapshot, Timestamp } from 'firebase/firestore';
   import { format, isToday, isYesterday } from 'date-fns';
   import { db, auth } from '@/firebase.js';
   import Search from '@/modules/Navigation/Search.vue';
@@ -346,10 +346,13 @@
 
         // Find the ID of the other participant
         const otherUserId = chat.participants.find((id: string) => id !== currentUserId.value);
+        console.error("currentUserId:" + currentUserId);
+        console.error("otherUserId:" + otherUserId);
         if (otherUserId) {
           try {
             const userDocRef = doc(db, 'users', otherUserId);
             const userDocSnap = await getDoc(userDocRef);
+            console.log("User document:", userDocSnap.data());
             if (userDocSnap.exists()) {
               const otherUser = userDocSnap.data();
               // Update activeChat with other user's details
@@ -399,7 +402,10 @@
 
       function listenForMessages(chatId: string) {
         const messagesRef = collection(db, "chats", chatId, "messages");
-        unsubscribeMessagesListener = onSnapshot(messagesRef, (querySnapshot) => {
+
+        const q = query(messagesRef, orderBy("timestamp", "asc"));
+
+        unsubscribeMessagesListener = onSnapshot(q, (querySnapshot) => {
           const newMessages: MessageType[] = [];
           querySnapshot.forEach((doc: any) => {
             newMessages.push({ id: doc.id, ...doc.data() });

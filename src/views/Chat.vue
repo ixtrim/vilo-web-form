@@ -344,21 +344,32 @@
         activeChat.value = chat;
         isNewChat.value = false;
 
-        // Assuming chat.participants is an array of user IDs
+        // Find the ID of the other participant
         const otherUserId = chat.participants.find((id: string) => id !== currentUserId.value);
         if (otherUserId) {
-          const userDocRef = doc(db, 'users', otherUserId);
-          const userDocSnap = await getDoc(userDocRef);
-          if (userDocSnap.exists()) {
-            const otherUser = userDocSnap.data();
-            // Update activeChat with other user's details
-            if (activeChat.value) {
-              activeChat.value.userAvatar = otherUser.avatar;
-              activeChat.value.full_name = otherUser.full_name;
+          try {
+            const userDocRef = doc(db, 'users', otherUserId);
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+              const otherUser = userDocSnap.data();
+              // Update activeChat with other user's details
+              if (activeChat.value) {
+                activeChat.value = {
+                  ...activeChat.value,
+                  userAvatar: otherUser.avatar,
+                  full_name: otherUser.full_name,
+                };
+              }
+            } else {
+              console.error("User document not found");
             }
-            activeChat.value = { id: '', ...activeChat.value, userAvatar: '', full_name: '', timeAgo: '', lastMessage: '' };
+          } catch (error) {
+            console.error("Error fetching user information:", error);
           }
         }
+
+        // Listen for messages in the selected chat
+        listenForMessages(chat.id);
       }
 
       async function sendMessage() {

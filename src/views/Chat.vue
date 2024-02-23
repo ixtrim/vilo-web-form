@@ -14,13 +14,13 @@
         </div>
 
         <div class="v-chat__sidebar__search">
-          <Search />
+          <FilterChat @update-search="filterChats" />
         </div>
 
         <div class="v-chat__sidebar__messages">
           
           <ul class="list-group list-group-flush">
-            <li class="list-group-item user-messages" v-for="chat in chats" :key="chat.id" @click="selectChat(chat)">
+            <li class="list-group-item user-messages" v-for="chat in filteredChats" :key="chat.id" @click="selectChat(chat)">
 
               <div class="user-messages__top">
                 <div class="user-messages__top__avatar">
@@ -133,10 +133,6 @@
                   </div>
                 </div>
 
-                
-
-                
-                
               </div>
 
             </div>
@@ -184,7 +180,7 @@
   import { orderBy, getFirestore, collection, query, where, getDoc, doc, getDocs, addDoc, serverTimestamp, onSnapshot, Timestamp, limit } from 'firebase/firestore';
   import { format, isToday, isYesterday } from 'date-fns';
   import { db, auth } from '@/firebase.js';
-  import Search from '@/modules/Navigation/Search.vue';
+  import FilterChat from '@/modules/Chat/FilterChat.vue';
   import VButton from '@/components/v-button/VButton.vue';
   import VIconbox from '@/components/v-iconbox/VIconbox.vue';
   import DOMPurify from 'dompurify';
@@ -227,7 +223,7 @@
 
   export default defineComponent({
     components: {
-      Search,
+      FilterChat,
       VButton,
       VIconbox,
     },
@@ -245,6 +241,15 @@
       const filteredUsers = ref<User[]>([]);
       const currentUserId = ref<string>('');
       const debouncedStartChat = debounce(startChatWithSelectedUser, 300);
+
+      const chatSearchTerm = ref('');
+      const filterChats = (searchTerm: string) => {
+        chatSearchTerm.value = searchTerm;
+      };
+      const filteredChats = computed(() => {
+        if (!chatSearchTerm.value) return chats.value;
+        return chats.value.filter(chat => chat.full_name.toLowerCase().includes(chatSearchTerm.value.toLowerCase()));
+      });
 
       let unsubscribeMessagesListener: (() => void) | null = null;
 
@@ -542,6 +547,8 @@
         changePerson,
         isCurrentUserMessage,
         debouncedStartChat,
+        filterChats,
+        filteredChats,
       };
     },
     methods: {

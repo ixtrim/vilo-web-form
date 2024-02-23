@@ -232,7 +232,7 @@
       const activeChat = ref<Chat | null>(null);
       const newMessage = ref<string>('');
       const isNewChat = ref<boolean>(false);
-      const chatContainer = ref(null);
+      const chatContainer = ref<HTMLElement | null>(null);
 
       const searchUser = ref('');
       const selectedUser = ref<User | null>(null);
@@ -473,7 +473,7 @@
       function scrollToBottom() {
         nextTick(() => {
           setTimeout(() => {
-            if (chatContainer.value instanceof HTMLElement) {
+            if (chatContainer.value) {
               chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
             }
           }, 300);
@@ -551,7 +551,6 @@
         applyFormat,
         updateMessage,
         sendMessage,
-        scrollToBottom,
         selectUser,
         startChatWithSelectedUser,
         selectedUser,
@@ -561,6 +560,7 @@
         filterChats,
         filteredChats,
         chatContainer,
+        scrollToBottom,
       };
     },
     methods: {

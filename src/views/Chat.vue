@@ -364,6 +364,16 @@
           } else {
             // Existing chat found, set it as active
             chatId = querySnapshot.docs[0].id;
+
+            // Scroll to bottom of chat container
+            nextTick(() => {
+              setTimeout(() => {
+                if (chatContainer.value) {
+                  chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+                }
+              }, 600);
+            });
+            
           }
           // After setting activeChat, make sure to update UI
           activeChat.value = {
@@ -431,6 +441,15 @@
             }
           }
         }
+
+        // Scroll to bottom of chat container
+        nextTick(() => {
+          setTimeout(() => {
+            if (chatContainer.value) {
+              chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+            }
+          }, 500);
+        });
 
         listenForMessages(chat.id);
       }

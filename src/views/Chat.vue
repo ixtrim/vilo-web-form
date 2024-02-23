@@ -395,37 +395,35 @@
       });
 
       async function selectChat(chat: any) {
-        activeChat.value = chat;
-        isNewChat.value = false;
+        // Assuming 'chat' contains all necessary chat details including 'id'
+        activeChat.value = chat; // Set the active chat to the selected one
 
-        // Find the ID of the other participant
-        const otherUserId = chat.participants.find((id: string) => id !== currentUserId.value);
-        console.error("currentUserId:" + currentUserId);
-        console.error("otherUserId:" + otherUserId);
-        if (otherUserId) {
-          try {
-            const userDocRef = doc(db, 'users', otherUserId);
-            const userDocSnap = await getDoc(userDocRef);
-            console.log("User document:", userDocSnap.data());
-            if (userDocSnap.exists()) {
-              const otherUser = userDocSnap.data();
-              // Update activeChat with other user's details
-              if (activeChat.value) {
-                activeChat.value = {
-                  ...activeChat.value,
-                  userAvatar: otherUser.avatar,
-                  full_name: otherUser.full_name,
-                };
+        // Check if there's a need to fetch user details again (e.g., if not already included in 'chat')
+        if (!chat.full_name || !chat.userAvatar) {
+          // Assuming 'participants' is an array of userIds in the chat
+          const otherUserId = chat.participants.find((id: string) => id !== currentUserId.value);
+          if (otherUserId) {
+            try {
+              const userDocRef = doc(db, 'users', otherUserId);
+              const userDocSnap = await getDoc(userDocRef);
+              if (userDocSnap.exists()) {
+                const otherUser = userDocSnap.data();
+                // Update activeChat with other user's details
+                if (activeChat.value) {
+                  activeChat.value = {
+                    ...activeChat.value,
+                    userAvatar: otherUser.avatar, // Assuming 'avatar' is the field for user avatar
+                    full_name: otherUser.full_name, // Assuming 'full_name' is the field for user full name
+                  };
+                }
               }
-            } else {
-              console.error("User document not found");
+            } catch (error) {
+              console.error("Error fetching user information:", error);
             }
-          } catch (error) {
-            console.error("Error fetching user information:", error);
           }
         }
 
-        // Listen for messages in the selected chat
+        // Fetch and listen for messages in the selected chat
         listenForMessages(chat.id);
       }
 

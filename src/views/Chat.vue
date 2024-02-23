@@ -25,7 +25,7 @@
               <div class="user-messages__top">
                 <div class="user-messages__top__avatar">
                   <img class="rounded-circle mr-2" :src="chat.userAvatar" alt="Person" style="width: 50px; height: 50px;">
-                  <div class="user-messages__top__avatar__status"></div>
+                  <div class="user-messages__top__avatar__status" style="display: none;"></div>
                 </div>
                 <div class="user-messages__top__name">
                   <h5 class="mb-1">{{ chat.full_name }}</h5>
@@ -110,7 +110,7 @@
                 <div v-if="!isCurrentUserMessage(message.from)" class="user-message__other">
                   <div class="user-message__other__avatar">
                     <img :src="activeChat?.userAvatar" alt="Avatar" class="rounded-circle chat-avatar">
-                    <div class="user-message__other__avatar__status"></div>
+                    <div class="user-message__other__avatar__status" style="display: none;"></div>
                   </div>
                   <div class="user-message__other__text">
                     <div class="user-message__other__text__info">
@@ -179,6 +179,7 @@
 
 <script lang="ts">
   import { debounce } from 'lodash';
+  import { formatDistanceToNow } from 'date-fns';
   import { defineComponent, ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
   import { orderBy, getFirestore, collection, query, where, getDoc, doc, getDocs, addDoc, serverTimestamp, onSnapshot, Timestamp, limit } from 'firebase/firestore';
   import { format, isToday, isYesterday } from 'date-fns';
@@ -249,50 +250,53 @@
       const db = getFirestore();
 
       async function fetchChats() {
-    const chatsRef = collection(db, "chats");
-    const q = query(chatsRef, where("participants", "array-contains", currentUserId.value));
-    
-    const querySnapshot = await getDocs(q);
-    const fetchedChats: Chat[] = [];
-    
-    for (const docSnapshot of querySnapshot.docs) {
-      const chatData = docSnapshot.data();
-      const otherUserId = chatData.participants.find((id: string) => id !== currentUserId.value);
-      
-      if (!otherUserId) continue;
-      
-      const otherUserDocRef = doc(db, "users", otherUserId);
-      const otherUserDoc = await getDoc(otherUserDocRef);
-      
-      if (!otherUserDoc.exists()) continue;
-      const otherUserData = otherUserDoc.data() as any; // Use 'any' or a more specific type if known
-      
-      const userAvatar = otherUserData.avatar || "default_avatar_path";
-      const full_name = otherUserData.full_name || "Unknown User";
-      
-      const messagesRef = collection(db, "chats", docSnapshot.id, "messages");
-      const lastMessageQuery = query(messagesRef, orderBy("timestamp", "desc"), limit(1));
-      const lastMessageSnapshot = await getDocs(lastMessageQuery);
-      
-      let lastMessage = "No messages yet";
-      let timeAgo = "";
-      if (!lastMessageSnapshot.empty) {
-        const lastMessageData = lastMessageSnapshot.docs[0].data();
-        lastMessage = lastMessageData.text;
-        timeAgo = "Time ago calculation"; // Implement time ago calculation based on lastMessageData.timestamp
+        const chatsRef = collection(db, "chats");
+        const q = query(chatsRef, where("participants", "array-contains", currentUserId.value));
+
+        const querySnapshot = await getDocs(q);
+        const fetchedChats: Chat[] = [];
+
+        for (const docSnapshot of querySnapshot.docs) {
+          const chatData = docSnapshot.data();
+          const otherUserId = chatData.participants.find((id: string) => id !== currentUserId.value);
+
+          if (!otherUserId) continue;
+
+          const otherUserDocRef = doc(db, "users", otherUserId);
+          const otherUserDoc = await getDoc(otherUserDocRef);
+
+          if (!otherUserDoc.exists()) continue;
+          const otherUserData = otherUserDoc.data() as any; // Use 'any' or a more specific type if known
+
+          const userAvatar = otherUserData.avatar || "default_avatar_path";
+          const full_name = otherUserData.full_name || "Unknown User";
+
+          const messagesRef = collection(db, "chats", docSnapshot.id, "messages");
+          const lastMessageQuery = query(messagesRef, orderBy("timestamp", "desc"), limit(1));
+          const lastMessageSnapshot = await getDocs(lastMessageQuery);
+
+          let lastMessage = "No messages yet";
+          let timeAgo = "";
+          if (!lastMessageSnapshot.empty) {
+            const lastMessageData = lastMessageSnapshot.docs[0].data();
+            lastMessage = lastMessageData.text;
+            // Calculate time ago
+            const date = lastMessageData.timestamp.toDate(); // Assuming 'timestamp' is a Firestore Timestamp
+            timeAgo = formatDistanceToNow(date, { addSuffix: true });
+          }
+
+          fetchedChats.push({
+            id: docSnapshot.id,
+            userAvatar,
+            full_name,
+            lastMessage,
+            timeAgo,
+          });
+        }
+
+        chats.value = fetchedChats;
       }
-      
-      fetchedChats.push({
-        id: docSnapshot.id,
-        userAvatar,
-        full_name,
-        lastMessage,
-        timeAgo,
-      });
-    }
-    
-    chats.value = fetchedChats;
-  }
+
 
       // Adjusted fetchUsersByRole function
       async function fetchUsersByRole() {
@@ -395,12 +399,9 @@
       });
 
       async function selectChat(chat: any) {
-        // Assuming 'chat' contains all necessary chat details including 'id'
-        activeChat.value = chat; // Set the active chat to the selected one
+        activeChat.value = chat;
 
-        // Check if there's a need to fetch user details again (e.g., if not already included in 'chat')
         if (!chat.full_name || !chat.userAvatar) {
-          // Assuming 'participants' is an array of userIds in the chat
           const otherUserId = chat.participants.find((id: string) => id !== currentUserId.value);
           if (otherUserId) {
             try {
@@ -408,12 +409,11 @@
               const userDocSnap = await getDoc(userDocRef);
               if (userDocSnap.exists()) {
                 const otherUser = userDocSnap.data();
-                // Update activeChat with other user's details
                 if (activeChat.value) {
                   activeChat.value = {
                     ...activeChat.value,
-                    userAvatar: otherUser.avatar, // Assuming 'avatar' is the field for user avatar
-                    full_name: otherUser.full_name, // Assuming 'full_name' is the field for user full name
+                    userAvatar: otherUser.avatar,
+                    full_name: otherUser.full_name,
                   };
                 }
               }
@@ -423,7 +423,6 @@
           }
         }
 
-        // Fetch and listen for messages in the selected chat
         listenForMessages(chat.id);
       }
 
@@ -436,8 +435,7 @@
             timestamp: serverTimestamp(),
           });
 
-          newMessage.value = ''; // Clear the input after sending
-          // No need to manually update the messages list if you're listening for updates
+          newMessage.value = '';
         }
       }
 

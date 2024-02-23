@@ -156,7 +156,6 @@
                   <li>
                     <button class="wysiwyg-btn wysiwyg-btn--list" type="button" @click="applyFormat('insertUnorderedList')"></button>
                   </li>
-                  
                   <li>
                     <button class="btn btn-primary" type="button" @click="sendMessage()">Send</button>
                   </li>
@@ -233,7 +232,7 @@
       const activeChat = ref<Chat | null>(null);
       const newMessage = ref<string>('');
       const isNewChat = ref<boolean>(false);
-      const chatContainer = ref<HTMLElement | null>(null);
+      const chatContainer = ref(null);
 
       const searchUser = ref('');
       const selectedUser = ref<User | null>(null);
@@ -454,23 +453,30 @@
             chats.value.sort((a, b) => (b.lastMessageTimestamp?.getTime() || 0) - (a.lastMessageTimestamp?.getTime() || 0));
           }
 
-          newMessage.value = ''; // Clear the reactive newMessage value
+          newMessage.value = '';
 
           // Clear the contenteditable div
           if (messageInput.value) {
-            messageInput.value.innerHTML = ''; // This clears the content
+            messageInput.value.innerHTML = '';
           }
+
+          nextTick(() => {
+            setTimeout(() => {
+              if (chatContainer.value instanceof HTMLElement) {
+                chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+              }
+            }, 300);
+          });
         }
       }
 
       function scrollToBottom() {
         nextTick(() => {
           setTimeout(() => {
-            const chatContainerElement = chatContainer.value;
-            if (chatContainerElement) {
-              chatContainerElement.scrollTop = chatContainerElement.scrollHeight;
+            if (chatContainer.value instanceof HTMLElement) {
+              chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
             }
-          }, 100);
+          }, 300);
         });
       }
 
@@ -554,6 +560,7 @@
         debouncedStartChat,
         filterChats,
         filteredChats,
+        chatContainer,
       };
     },
     methods: {

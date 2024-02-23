@@ -538,7 +538,10 @@
         return fullNick.toLowerCase().replace(/\s+/g, '.');
       },
       sanitizeHtml(htmlContent: string) {
-        return DOMPurify.sanitize(htmlContent);
+        const cleanHtml = DOMPurify.sanitize(htmlContent, {
+          FORBID_ATTR: ['style'],
+        });
+        return cleanHtml;
       },
       truncateText(text: string, maxLength = 100) {
         const strippedText = text.replace(/<[^>]*>?/gm, '');

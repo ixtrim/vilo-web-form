@@ -179,6 +179,7 @@
 
 <script lang="ts">
   import { debounce } from 'lodash';
+  import { formatDistanceToNow } from 'date-fns';
   import { defineComponent, ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
   import { orderBy, getFirestore, collection, query, where, getDoc, doc, getDocs, addDoc, serverTimestamp, onSnapshot, Timestamp, limit } from 'firebase/firestore';
   import { format, isToday, isYesterday } from 'date-fns';
@@ -249,50 +250,53 @@
       const db = getFirestore();
 
       async function fetchChats() {
-    const chatsRef = collection(db, "chats");
-    const q = query(chatsRef, where("participants", "array-contains", currentUserId.value));
-    
-    const querySnapshot = await getDocs(q);
-    const fetchedChats: Chat[] = [];
-    
-    for (const docSnapshot of querySnapshot.docs) {
-      const chatData = docSnapshot.data();
-      const otherUserId = chatData.participants.find((id: string) => id !== currentUserId.value);
-      
-      if (!otherUserId) continue;
-      
-      const otherUserDocRef = doc(db, "users", otherUserId);
-      const otherUserDoc = await getDoc(otherUserDocRef);
-      
-      if (!otherUserDoc.exists()) continue;
-      const otherUserData = otherUserDoc.data() as any; // Use 'any' or a more specific type if known
-      
-      const userAvatar = otherUserData.avatar || "default_avatar_path";
-      const full_name = otherUserData.full_name || "Unknown User";
-      
-      const messagesRef = collection(db, "chats", docSnapshot.id, "messages");
-      const lastMessageQuery = query(messagesRef, orderBy("timestamp", "desc"), limit(1));
-      const lastMessageSnapshot = await getDocs(lastMessageQuery);
-      
-      let lastMessage = "No messages yet";
-      let timeAgo = "";
-      if (!lastMessageSnapshot.empty) {
-        const lastMessageData = lastMessageSnapshot.docs[0].data();
-        lastMessage = lastMessageData.text;
-        timeAgo = "Time ago calculation"; // Implement time ago calculation based on lastMessageData.timestamp
+        const chatsRef = collection(db, "chats");
+        const q = query(chatsRef, where("participants", "array-contains", currentUserId.value));
+
+        const querySnapshot = await getDocs(q);
+        const fetchedChats: Chat[] = [];
+
+        for (const docSnapshot of querySnapshot.docs) {
+          const chatData = docSnapshot.data();
+          const otherUserId = chatData.participants.find((id: string) => id !== currentUserId.value);
+
+          if (!otherUserId) continue;
+
+          const otherUserDocRef = doc(db, "users", otherUserId);
+          const otherUserDoc = await getDoc(otherUserDocRef);
+
+          if (!otherUserDoc.exists()) continue;
+          const otherUserData = otherUserDoc.data() as any; // Use 'any' or a more specific type if known
+
+          const userAvatar = otherUserData.avatar || "default_avatar_path";
+          const full_name = otherUserData.full_name || "Unknown User";
+
+          const messagesRef = collection(db, "chats", docSnapshot.id, "messages");
+          const lastMessageQuery = query(messagesRef, orderBy("timestamp", "desc"), limit(1));
+          const lastMessageSnapshot = await getDocs(lastMessageQuery);
+
+          let lastMessage = "No messages yet";
+          let timeAgo = "";
+          if (!lastMessageSnapshot.empty) {
+            const lastMessageData = lastMessageSnapshot.docs[0].data();
+            lastMessage = lastMessageData.text;
+            // Calculate time ago
+            const date = lastMessageData.timestamp.toDate(); // Assuming 'timestamp' is a Firestore Timestamp
+            timeAgo = formatDistanceToNow(date, { addSuffix: true });
+          }
+
+          fetchedChats.push({
+            id: docSnapshot.id,
+            userAvatar,
+            full_name,
+            lastMessage,
+            timeAgo,
+          });
+        }
+
+        chats.value = fetchedChats;
       }
-      
-      fetchedChats.push({
-        id: docSnapshot.id,
-        userAvatar,
-        full_name,
-        lastMessage,
-        timeAgo,
-      });
-    }
-    
-    chats.value = fetchedChats;
-  }
+
 
       // Adjusted fetchUsersByRole function
       async function fetchUsersByRole() {

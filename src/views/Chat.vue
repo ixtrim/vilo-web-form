@@ -37,7 +37,7 @@
               </div>
 
               <div class="user-messages__bottom">
-                <p v-html="sanitizeHtml(chat.lastMessage)"></p>
+                <p v-html="sanitizeHtml(truncateText(chat.lastMessage))"></p>
               </div>
 
             </li>
@@ -540,9 +540,15 @@
       sanitizeHtml(htmlContent: string) {
         return DOMPurify.sanitize(htmlContent);
       },
-      selectUser(user: User) { // Now 'user' is explicitly typed
+      truncateText(text: string, maxLength = 100) {
+        const strippedText = text.replace(/<[^>]*>?/gm, '');
+        if (strippedText.length <= maxLength) return strippedText;
+        let trimmedText = strippedText.substr(0, maxLength);
+        trimmedText = trimmedText.substr(0, Math.min(trimmedText.length, trimmedText.lastIndexOf(" ")));
+        return `${trimmedText}...`;
+      },
+      selectUser(user: User) {
         console.log("Selected user:", user);
-        // Implement chat creation or selection logic here
       },
     },
   });

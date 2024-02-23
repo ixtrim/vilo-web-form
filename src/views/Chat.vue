@@ -454,7 +454,12 @@
             chats.value.sort((a, b) => (b.lastMessageTimestamp?.getTime() || 0) - (a.lastMessageTimestamp?.getTime() || 0));
           }
 
-          newMessage.value = '';
+          newMessage.value = ''; // Clear the reactive newMessage value
+
+          // Clear the contenteditable div
+          if (messageInput.value) {
+            messageInput.value.innerHTML = ''; // This clears the content
+          }
         }
       }
 

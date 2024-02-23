@@ -204,6 +204,7 @@
     full_name: string;
     timeAgo: string;
     lastMessage: string;
+    lastMessageTimestamp?: Date;
   }
 
   interface Message {
@@ -277,7 +278,7 @@
 
           let lastMessage = "No messages yet";
           let timeAgo = "";
-          let lastMessageTimestamp = new Date(0); // Default to epoch time if no messages
+          let lastMessageTimestamp = new Date(0);
 
           if (!lastMessageSnapshot.empty) {
             const lastMessageData = lastMessageSnapshot.docs[0].data();
@@ -439,6 +440,15 @@
             timestamp: serverTimestamp(),
           });
 
+          // Update lastMessage and timeAgo for the active chat
+          const chatIndex = chats.value.findIndex(chat => chat.id === activeChat.value?.id);
+          if (chatIndex !== -1) {
+            chats.value[chatIndex].lastMessage = newMessage.value;
+            chats.value[chatIndex].timeAgo = "Just now";
+            chats.value[chatIndex].lastMessageTimestamp = new Date();
+            chats.value.sort((a, b) => (b.lastMessageTimestamp?.getTime() || 0) - (a.lastMessageTimestamp?.getTime() || 0));
+          }
+
           newMessage.value = '';
         }
       }
@@ -456,15 +466,29 @@
 
       function listenForMessages(chatId: string) {
         const messagesRef = collection(db, "chats", chatId, "messages");
-
         const q = query(messagesRef, orderBy("timestamp", "asc"));
 
         unsubscribeMessagesListener = onSnapshot(q, (querySnapshot) => {
           const newMessages: MessageType[] = [];
-          querySnapshot.forEach((doc: any) => {
-            newMessages.push({ id: doc.id, ...doc.data() });
+          querySnapshot.forEach((doc) => {
+            const messageData = doc.data();
+            newMessages.push({
+              id: doc.id,
+              from: messageData.from,
+              text: messageData.text,
+              timestamp: messageData.timestamp,
+            });
+            // Update lastMessage, timeAgo, and lastMessageTimestamp for the chat with new message
+            const chatIndex = chats.value.findIndex(chat => chat.id === chatId);
+            if (chatIndex !== -1) {
+              chats.value[chatIndex].lastMessage = messageData.text;
+              chats.value[chatIndex].timeAgo = formatDistanceToNow(messageData.timestamp.toDate(), { addSuffix: true });
+              chats.value[chatIndex].lastMessageTimestamp = messageData.timestamp.toDate();
+              // Re-sort chats
+              chats.value.sort((a, b) => (b.lastMessageTimestamp?.getTime() || 0) - (a.lastMessageTimestamp?.getTime() || 0));
+            }
           });
-          messages.value[chatId] = newMessages; // Assuming you have a reactive property for messages
+          messages.value[chatId] = newMessages;
         });
       }
 

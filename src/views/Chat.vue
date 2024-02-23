@@ -156,7 +156,6 @@
                   <li>
                     <button class="wysiwyg-btn wysiwyg-btn--list" type="button" @click="applyFormat('insertUnorderedList')"></button>
                   </li>
-                  
                   <li>
                     <button class="btn btn-primary" type="button" @click="sendMessage()">Send</button>
                   </li>
@@ -365,6 +364,16 @@
           } else {
             // Existing chat found, set it as active
             chatId = querySnapshot.docs[0].id;
+
+            // Scroll to bottom of chat container
+            nextTick(() => {
+              setTimeout(() => {
+                if (chatContainer.value) {
+                  chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+                }
+              }, 600);
+            });
+            
           }
           // After setting activeChat, make sure to update UI
           activeChat.value = {
@@ -433,6 +442,15 @@
           }
         }
 
+        // Scroll to bottom of chat container
+        nextTick(() => {
+          setTimeout(() => {
+            if (chatContainer.value) {
+              chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+            }
+          }, 500);
+        });
+
         listenForMessages(chat.id);
       }
 
@@ -455,17 +473,29 @@
           }
 
           newMessage.value = '';
+
+          // Clear the contenteditable div
+          if (messageInput.value) {
+            messageInput.value.innerHTML = '';
+          }
+
+          nextTick(() => {
+            setTimeout(() => {
+              if (chatContainer.value instanceof HTMLElement) {
+                chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+              }
+            }, 300);
+          });
         }
       }
 
       function scrollToBottom() {
         nextTick(() => {
           setTimeout(() => {
-            const chatContainerElement = chatContainer.value;
-            if (chatContainerElement) {
-              chatContainerElement.scrollTop = chatContainerElement.scrollHeight;
+            if (chatContainer.value) {
+              chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
             }
-          }, 100);
+          }, 300);
         });
       }
 
@@ -540,7 +570,6 @@
         applyFormat,
         updateMessage,
         sendMessage,
-        scrollToBottom,
         selectUser,
         startChatWithSelectedUser,
         selectedUser,
@@ -549,6 +578,8 @@
         debouncedStartChat,
         filterChats,
         filteredChats,
+        chatContainer,
+        scrollToBottom,
       };
     },
     methods: {

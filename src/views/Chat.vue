@@ -254,7 +254,7 @@
         const q = query(chatsRef, where("participants", "array-contains", currentUserId.value));
 
         const querySnapshot = await getDocs(q);
-        const fetchedChats: Chat[] = [];
+        let fetchedChats = [];
 
         for (const docSnapshot of querySnapshot.docs) {
           const chatData = docSnapshot.data();
@@ -266,7 +266,7 @@
           const otherUserDoc = await getDoc(otherUserDocRef);
 
           if (!otherUserDoc.exists()) continue;
-          const otherUserData = otherUserDoc.data() as any; // Use 'any' or a more specific type if known
+          const otherUserData = otherUserDoc.data();
 
           const userAvatar = otherUserData.avatar || "default_avatar_path";
           const full_name = otherUserData.full_name || "Unknown User";
@@ -277,12 +277,14 @@
 
           let lastMessage = "No messages yet";
           let timeAgo = "";
+          let lastMessageTimestamp = new Date(0); // Default to epoch time if no messages
+
           if (!lastMessageSnapshot.empty) {
             const lastMessageData = lastMessageSnapshot.docs[0].data();
             lastMessage = lastMessageData.text;
-            // Calculate time ago
-            const date = lastMessageData.timestamp.toDate(); // Assuming 'timestamp' is a Firestore Timestamp
-            timeAgo = formatDistanceToNow(date, { addSuffix: true });
+            const timestampDate = lastMessageData.timestamp.toDate();
+            timeAgo = formatDistanceToNow(timestampDate, { addSuffix: true });
+            lastMessageTimestamp = timestampDate;
           }
 
           fetchedChats.push({
@@ -291,12 +293,14 @@
             full_name,
             lastMessage,
             timeAgo,
+            lastMessageTimestamp // Include this for sorting
           });
         }
 
+        // Sort chats by lastMessageTimestamp from newest to oldest
+        fetchedChats = fetchedChats.sort((a, b) => Number(b.lastMessageTimestamp) - Number(a.lastMessageTimestamp));
         chats.value = fetchedChats;
       }
-
 
       // Adjusted fetchUsersByRole function
       async function fetchUsersByRole() {
@@ -538,7 +542,10 @@
         return fullNick.toLowerCase().replace(/\s+/g, '.');
       },
       sanitizeHtml(htmlContent: string) {
-        return DOMPurify.sanitize(htmlContent);
+        const cleanHtml = DOMPurify.sanitize(htmlContent, {
+          FORBID_ATTR: ['style'],
+        });
+        return cleanHtml;
       },
       truncateText(text: string, maxLength = 100) {
         const strippedText = text.replace(/<[^>]*>?/gm, '');

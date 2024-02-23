@@ -378,10 +378,10 @@
           // After setting activeChat, make sure to update UI
           activeChat.value = {
             id: chatId,
-            userAvatar: selectedUser.value.avatar, // Use selectedUser's avatar
-            full_name: selectedUser.value.full_name, // Use selectedUser's full name
-            lastMessage: '', // You may want to fetch the last message if needed
-            timeAgo: '', // Calculate or fetch as needed
+            userAvatar: selectedUser.value.avatar,
+            full_name: selectedUser.value.full_name,
+            lastMessage: '',
+            timeAgo: '',
           };
 
           selectedUser.value = null;
@@ -584,7 +584,7 @@
     },
     methods: {
       formatTimestamp(timestamp: any) {
-        const date = timestamp.toDate(); // Convert Firestore Timestamp to JavaScript Date object
+        const date = timestamp.toDate();
         let formattedDate = '';
 
         if (isToday(date)) {

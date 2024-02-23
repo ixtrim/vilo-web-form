@@ -11,7 +11,7 @@
           :block="true"
         >
           <span>{{ link.name }}</span>
-          <VBadge v-if="link.badge && link.name === 'Chat'" :variant="'danger'">{{ link.badge }}</VBadge>
+          <VBadge v-if="link.badge && link.name === 'Chat'" :variant="'danger'" style="display: none;">{{ link.badge }}</VBadge>
         </VLink>
       </li>
     </ul>

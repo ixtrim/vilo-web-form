@@ -25,7 +25,7 @@
               <div class="user-messages__top">
                 <div class="user-messages__top__avatar">
                   <img class="rounded-circle mr-2" :src="chat.userAvatar" alt="Person" style="width: 50px; height: 50px;">
-                  <div class="user-messages__top__avatar__status"></div>
+                  <div class="user-messages__top__avatar__status" style="display: none;"></div>
                 </div>
                 <div class="user-messages__top__name">
                   <h5 class="mb-1">{{ chat.full_name }}</h5>
@@ -110,7 +110,7 @@
                 <div v-if="!isCurrentUserMessage(message.from)" class="user-message__other">
                   <div class="user-message__other__avatar">
                     <img :src="activeChat?.userAvatar" alt="Avatar" class="rounded-circle chat-avatar">
-                    <div class="user-message__other__avatar__status"></div>
+                    <div class="user-message__other__avatar__status" style="display: none;"></div>
                   </div>
                   <div class="user-message__other__text">
                     <div class="user-message__other__text__info">
@@ -395,12 +395,9 @@
       });
 
       async function selectChat(chat: any) {
-        // Assuming 'chat' contains all necessary chat details including 'id'
-        activeChat.value = chat; // Set the active chat to the selected one
+        activeChat.value = chat;
 
-        // Check if there's a need to fetch user details again (e.g., if not already included in 'chat')
         if (!chat.full_name || !chat.userAvatar) {
-          // Assuming 'participants' is an array of userIds in the chat
           const otherUserId = chat.participants.find((id: string) => id !== currentUserId.value);
           if (otherUserId) {
             try {
@@ -408,12 +405,11 @@
               const userDocSnap = await getDoc(userDocRef);
               if (userDocSnap.exists()) {
                 const otherUser = userDocSnap.data();
-                // Update activeChat with other user's details
                 if (activeChat.value) {
                   activeChat.value = {
                     ...activeChat.value,
-                    userAvatar: otherUser.avatar, // Assuming 'avatar' is the field for user avatar
-                    full_name: otherUser.full_name, // Assuming 'full_name' is the field for user full name
+                    userAvatar: otherUser.avatar,
+                    full_name: otherUser.full_name,
                   };
                 }
               }
@@ -423,7 +419,6 @@
           }
         }
 
-        // Fetch and listen for messages in the selected chat
         listenForMessages(chat.id);
       }
 
@@ -436,8 +431,7 @@
             timestamp: serverTimestamp(),
           });
 
-          newMessage.value = ''; // Clear the input after sending
-          // No need to manually update the messages list if you're listening for updates
+          newMessage.value = '';
         }
       }
 

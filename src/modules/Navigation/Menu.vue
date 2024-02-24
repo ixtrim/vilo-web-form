@@ -11,7 +11,7 @@
           :block="true"
         >
           <span>{{ link.name }}</span>
-          <VBadge v-if="link.badge && link.name === 'Chat'" :variant="'danger'" style="display: none;">{{ link.badge }}</VBadge>
+          <VBadge v-if="link.badge && link.name === 'Chat'" :variant="'danger'">{{ link.badge }}</VBadge>
         </VLink>
       </li>
     </ul>
@@ -19,8 +19,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
-import axios from 'axios';
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
+import { getFirestore, collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '@/firebase.js'; // Ensure this points to your Firebase config file
 import VLink from '@/components/v-link/VLink.vue';
 import VBadge from '@/components/v-badge/VBadge.vue';
 import { useUserStore } from '@/stores/userStore';
@@ -31,13 +32,43 @@ const isClient = computed(() => {
   return [3, 4].includes(user.value?.role ?? 0);
 });
 
-const chatBadgeNumber = ref(0);
-onMounted(async () => {
-  try {
-    //const response = await axios.get('/api/chat/notifications');
-    //chatBadgeNumber.value = response.data.unreadMessages; 
-  } catch (error) {
-    //console.error('Failed to fetch chat notifications:', error);
+const chatBadgeNumber = ref<number>(0);
+
+// Explicitly type unsubscribe as a function or null
+let unsubscribe: (() => void) | null = null;
+
+// Type the parameter currentUserId as string
+const fetchUnreadChatCount = (currentUserId: string) => {
+  const chatsRef = collection(db, "chats");
+  const q = query(chatsRef, where(`viewed_status.${currentUserId}`, "==", false));
+
+  unsubscribe = onSnapshot(q, (querySnapshot) => {
+    chatBadgeNumber.value = querySnapshot.docs.length; // Update the count reactively
+  }, (error) => {
+    console.error('Failed to fetch unread chat count:', error);
+  });
+};
+
+onMounted(() => {
+  if (user.value?.id) {
+    fetchUnreadChatCount(user.value.id);
+  }
+});
+
+// Clean up the listener when the component unmounts
+onUnmounted(() => {
+  if (unsubscribe) {
+    unsubscribe();
+  }
+});
+
+// Reactively fetch unread chat count if the user changes
+watch(() => user.value?.id, (newId, oldId) => {
+  if (unsubscribe && oldId) {
+    unsubscribe(); // Unsubscribe from the old listener
+  }
+  if (newId) {
+    fetchUnreadChatCount(newId);
   }
 });
 

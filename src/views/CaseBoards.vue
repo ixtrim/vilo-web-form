@@ -88,7 +88,7 @@
                 <template v-if="caseItem.client_id && usersMap[caseItem.client_id]">
                   <VUser :userName="usersMap[caseItem.client_id].full_name" :userAvatar="usersMap[caseItem.client_id].avatar" />
                 </template>
-                <span v-else class="col--cb-client__general">General {{ caseItem.client_id }}</span>
+                <span v-else class="col--cb-client__general">General</span>
               </div>
               <div class="col col--cb-about">
                 <span class="col--cb-about__description">{{ caseItem.description }}</span>
@@ -143,15 +143,12 @@
 import { defineComponent, ref, computed, onMounted, watch } from 'vue';
 import type { Ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { collection, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
-import { db } from '@/firebase.js';
-import firebase from 'firebase/app';
-import VLink from '@/components/v-link/VLink.vue';
+import { collection, getDocs, doc, getDoc, Timestamp, query, where } from 'firebase/firestore';
+import { db, auth } from '@/firebase.js';
 import VButton from '@/components/v-button/VButton.vue';
 import Search from '@/modules/Cases/Search.vue';
 import VUser from '@/components/v-user/v-user.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
-import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import VNotification from '@/components/v-notification/VNotification.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
@@ -191,11 +188,9 @@ interface NotificationRef {
 export default defineComponent({
   components: {
     Search,
-    VLink,
     VButton,
     VUser,
     VPaginationList,
-    VModalSmall,
     VDropdown,
     VNotification,
     VModal,
@@ -211,8 +206,6 @@ export default defineComponent({
       notificationType: 'success',
       notificationHeader: 'Changes saved',
       notificationMessage: 'This account has been successfully edited.',
-      userName: 'Olivia Rhye',
-      userEmail: 'olivia@untitledui.com',
       sortCases: [
         { label: 'All cases' },
         { label: 'Active cases' },
@@ -246,17 +239,28 @@ export default defineComponent({
     const currentDropdownTitle = ref('All cases');
 
     const fetchCases = async () => {
-      const querySnapshot = await getDocs(collection(db, "cases"));
-      originalCases.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Case);
-      cases.value = [...originalCases.value];
-      cases.value.forEach(caseItem => {
-        if (caseItem.client_id) {
-          fetchUser(caseItem.client_id);
-        }
-        caseItem.team_members.forEach(memberId => {
-          fetchUser(memberId);
+      // Check if there's a logged-in user
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        // Create a query that filters cases where the team_members array contains the current user's ID
+        const casesQuery = query(collection(db, "cases"), where("team_members", "array-contains", currentUser.uid));
+        const querySnapshot = await getDocs(casesQuery);
+        originalCases.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Case);
+        cases.value = [...originalCases.value];
+        cases.value.forEach(caseItem => {
+          if (caseItem.client_id) {
+            fetchUser(caseItem.client_id);
+          }
+          caseItem.team_members.forEach(memberId => {
+            fetchUser(memberId);
+          });
         });
-      });
+      } else {
+        // Handle the case where there is no logged-in user
+        console.log("No user logged in");
+        // Optionally clear or set cases to a default state
+        cases.value = [];
+      }
     };
 
     const sortCasesByTimeAdded = (days: number) => {

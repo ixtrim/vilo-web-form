@@ -21,7 +21,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { getFirestore, collection, query, where, onSnapshot } from 'firebase/firestore';
-import { db } from '@/firebase.js'; // Ensure this points to your Firebase config file
+import { db } from '@/firebase.js';
 import VLink from '@/components/v-link/VLink.vue';
 import VBadge from '@/components/v-badge/VBadge.vue';
 import { useUserStore } from '@/stores/userStore';
@@ -43,7 +43,7 @@ const fetchUnreadChatCount = (currentUserId: string) => {
   const q = query(chatsRef, where(`viewed_status.${currentUserId}`, "==", false));
 
   unsubscribe = onSnapshot(q, (querySnapshot) => {
-    chatBadgeNumber.value = querySnapshot.docs.length; // Update the count reactively
+    chatBadgeNumber.value = querySnapshot.docs.length;
   }, (error) => {
     console.error('Failed to fetch unread chat count:', error);
   });
@@ -65,7 +65,7 @@ onUnmounted(() => {
 // Reactively fetch unread chat count if the user changes
 watch(() => user.value?.id, (newId, oldId) => {
   if (unsubscribe && oldId) {
-    unsubscribe(); // Unsubscribe from the old listener
+    unsubscribe();
   }
   if (newId) {
     fetchUnreadChatCount(newId);

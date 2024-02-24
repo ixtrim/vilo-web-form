@@ -91,6 +91,22 @@
       }
 
       .list-group {
+
+        .currently-active {
+          background-color: var(--v-gray-100);
+        }
+        
+        .new-message-indicator {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background-color: var(--v-red-500);
+          border: 2px solid var(--v-gray-100);
+          position: absolute;
+          bottom: 0px;
+          right: 0px;
+        }
+
         .user-messages {
           border-bottom: 1px solid var(--v-gray-200);
           padding: 16px 16px 16px 36px;

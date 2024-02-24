@@ -20,12 +20,17 @@
         <div class="v-chat__sidebar__messages">
           
           <ul class="list-group list-group-flush">
-            <li class="list-group-item user-messages" v-for="chat in filteredChats" :key="chat.id" @click="selectChat(chat)">
-
+            <li
+              class="list-group-item user-messages"
+              v-for="chat in filteredChats"
+              :key="chat.id"
+              @click="selectChat(chat)"
+              :class="{'currently-active': chat.id === activeChat?.id}"
+            >
               <div class="user-messages__top">
                 <div class="user-messages__top__avatar">
                   <img class="rounded-circle mr-2" :src="chat.userAvatar" alt="Person" style="width: 50px; height: 50px;">
-                  <div class="user-messages__top__avatar__status" style="display: none;"></div>
+                  <span v-if="chat.viewed_status && chat.viewed_status[currentUserId] === false" class="new-message-indicator"></span>
                 </div>
                 <div class="user-messages__top__name">
                   <h5 class="mb-1">{{ chat.full_name }}</h5>
@@ -39,7 +44,6 @@
               <div class="user-messages__bottom">
                 <p v-html="sanitizeHtml(truncateText(chat.lastMessage))"></p>
               </div>
-
             </li>
           </ul>
 
@@ -176,7 +180,7 @@
   import { debounce } from 'lodash';
   import { formatDistanceToNow } from 'date-fns';
   import { defineComponent, ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
-  import { orderBy, getFirestore, collection, query, where, getDoc, doc, getDocs, addDoc, serverTimestamp, onSnapshot, Timestamp, limit } from 'firebase/firestore';
+  import { orderBy, getFirestore, collection, query, where, getDoc, doc, getDocs, addDoc, updateDoc, serverTimestamp, onSnapshot, Timestamp, limit } from 'firebase/firestore';
   import { format, isToday, isYesterday } from 'date-fns';
   import { db, auth } from '@/firebase.js';
   import FilterChat from '@/modules/Chat/FilterChat.vue';
@@ -200,6 +204,8 @@
     timeAgo: string;
     lastMessage: string;
     lastMessageTimestamp?: Date;
+    participants: string[];
+    viewed_status?: Record<string, boolean>;
   }
 
   interface Message {
@@ -298,7 +304,9 @@
             full_name,
             lastMessage,
             timeAgo,
-            lastMessageTimestamp // Include this for sorting
+            lastMessageTimestamp,
+            participants: chatData.participants,
+            viewed_status: chatData.viewed_status || {},
           });
         }
 
@@ -355,15 +363,33 @@
               createdAt: serverTimestamp(),
               userAvatar: selectedUser.value.avatar,
               full_name: selectedUser.value.full_name,
+              viewed_status: { [currentUserId.value]: true },
               // Other necessary fields...
             };
             const chatRef = await addDoc(chatsRef, chatData);
             chatId = chatRef.id;
             // Update activeChat with selected user's details
-            activeChat.value = { id: chatRef.id, ...chatData, timeAgo: '', lastMessage: '' };
+            activeChat.value = { id: chatRef.id, ...chatData, timeAgo: '', lastMessage: '', participants: [currentUserId.value, selectedUser.value.id], };
           } else {
             // Existing chat found, set it as active
             chatId = querySnapshot.docs[0].id;
+            const existingChatIndex = chats.value.findIndex(c => c.id === chatId);
+
+            if (existingChatIndex !== -1) {
+              chats.value[existingChatIndex] = { 
+                ...chats.value[existingChatIndex], 
+                viewed_status: { 
+                  ...chats.value[existingChatIndex].viewed_status, 
+                  [currentUserId.value]: true 
+                } 
+              };
+            }
+
+            // Update viewed_status for current user in Firestore
+            const chatRef = doc(db, "chats", chatId);
+            await updateDoc(chatRef, {
+              [`viewed_status.${currentUserId.value}`]: true,
+            });
 
             // Scroll to bottom of chat container
             nextTick(() => {
@@ -382,6 +408,8 @@
             full_name: selectedUser.value.full_name,
             lastMessage: '',
             timeAgo: '',
+            participants: [currentUserId.value, selectedUser.value.id],
+            viewed_status: { [currentUserId.value]: true },
           };
 
           selectedUser.value = null;
@@ -420,6 +448,8 @@
       async function selectChat(chat: any) {
         activeChat.value = chat;
 
+        chat.viewed_status = { ...chat.viewed_status, [currentUserId.value]: true };
+
         if (!chat.full_name || !chat.userAvatar) {
           const otherUserId = chat.participants.find((id: string) => id !== currentUserId.value);
           if (otherUserId) {
@@ -442,6 +472,11 @@
           }
         }
 
+        const chatRef = doc(db, "chats", chat.id);
+        await updateDoc(chatRef, {
+          [`viewed_status.${currentUserId.value}`]: true,
+        });
+
         // Scroll to bottom of chat container
         nextTick(() => {
           setTimeout(() => {
@@ -457,10 +492,20 @@
       async function sendMessage() {
         if (newMessage.value.trim() !== '' && activeChat.value) {
           const messagesRef = collection(db, "chats", activeChat.value.id, "messages");
+          const otherUserId = activeChat.value.participants.find((id: string) => id !== currentUserId.value);
+
+          console.log("otherUserId: ", otherUserId);
+          
           await addDoc(messagesRef, {
             from: currentUserId.value,
             text: newMessage.value,
             timestamp: serverTimestamp(),
+          });
+
+          const chatRef = doc(db, "chats", activeChat.value?.id);
+          await updateDoc(chatRef, {
+            [`viewed_status.${currentUserId.value}`]: true,
+            [`viewed_status.${otherUserId}`]: false,
           });
 
           // Update lastMessage and timeAgo for the active chat
@@ -580,6 +625,7 @@
         filteredChats,
         chatContainer,
         scrollToBottom,
+        currentUserId,
       };
     },
     methods: {

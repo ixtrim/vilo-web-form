@@ -234,7 +234,7 @@ export default defineComponent({
     ]);
 
     const currentPage = ref(1);
-    const itemsPerPage = ref(10);
+    const itemsPerPage = ref(2);
     const selectedStatus = ref<number | null>(null);
     const currentDropdownTitle = ref('All cases');
 
@@ -365,6 +365,10 @@ export default defineComponent({
       }
     };
 
+    watch([searchTerm, selectedStatus], () => {
+      currentPage.value = 1; // Reset to first page when filters change
+    }, { deep: true });
+
     onMounted(fetchCases);
 
     watch(cases, (newCases) => {
@@ -396,15 +400,12 @@ export default defineComponent({
     });
 
     const processedCases = computed(() => {
+      const start = (currentPage.value - 1) * itemsPerPage.value;
+      const end = start + itemsPerPage.value;
       return cases.value
-        .filter(caseItem => {
-          // Filter by selectedStatus (if applicable)
-          return selectedStatus.value === null || caseItem.status === selectedStatus.value;
-        })
-        .filter(caseItem => {
-          // Filter by search term
-          return caseItem.title.toLowerCase().includes(searchTerm.value.toLowerCase());
-        })
+        .filter(caseItem => selectedStatus.value === null || caseItem.status === selectedStatus.value)
+        .filter(caseItem => caseItem.title.toLowerCase().includes(searchTerm.value.toLowerCase()))
+        .slice(start, end)
         .map(caseItem => {
           const extraMembersCount = caseItem.team_members.length > 5 ? caseItem.team_members.length - 5 : 0;
           return {
@@ -416,7 +417,10 @@ export default defineComponent({
     });
 
     const totalPages = computed(() => {
-      return Math.ceil(processedCases.value.length / itemsPerPage.value);
+      const filteredCases = cases.value
+        .filter(caseItem => selectedStatus.value === null || caseItem.status === selectedStatus.value)
+        .filter(caseItem => caseItem.title.toLowerCase().includes(searchTerm.value.toLowerCase()));
+      return Math.ceil(filteredCases.length / itemsPerPage.value);
     });
 
     const updatePage = (newPage: number) => {

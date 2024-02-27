@@ -114,13 +114,13 @@
 
           <div class="dashboard__table__pagination">
             <div class="dashboard__table__pagination__prev">
-              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="prevPage" text="Previous"></v-button>
+              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="changePage(-1, $event)" text="Previous" v-if="currentPage > 1"></v-button>
             </div>
             <div class="dashboard__table__pagination__pages">
-              <v-pagination-list :total-pages="totalPages" @update:currentPage="updatePage" />
+              <v-pagination-list :total-pages="totalPages" :initial-page="currentPage" @update:currentPage="updatePage" />
             </div>
             <div class="dashboard__table__pagination__next">
-              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="nextPage" text="Next"></v-button>
+              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="changePage(1, $event)" text="Next" v-if="currentPage < totalPages"></v-button>
             </div>
           </div>
 
@@ -234,7 +234,7 @@ export default defineComponent({
     ]);
 
     const currentPage = ref(1);
-    const itemsPerPage = ref(2);
+    const itemsPerPage = ref(10);
     const selectedStatus = ref<number | null>(null);
     const currentDropdownTitle = ref('All cases');
 
@@ -427,16 +427,14 @@ export default defineComponent({
       currentPage.value = newPage;
     };
 
-    const nextPage = () => {
-      if (currentPage.value < totalPages.value) {
-        currentPage.value++;
+    const changePage = (step: number, event: Event) => {
+      const newPage = currentPage.value + step;
+      if (newPage >= 1 && newPage <= totalPages.value) {
+        currentPage.value = newPage;
+      } else {
+        console.log(`Page change out of bounds: ${newPage}`);
       }
-    };
-
-    const prevPage = () => {
-      if (currentPage.value > 1) {
-        currentPage.value--;
-      }
+      event.preventDefault();
     };
 
     return {
@@ -448,8 +446,7 @@ export default defineComponent({
       totalPages,
       currentPage,
       updatePage,
-      nextPage,
-      prevPage,
+      changePage,
       navigateToCaseBoard,
       processedCases,
       selectedStatus,
@@ -469,16 +466,6 @@ export default defineComponent({
       this.notificationHeader = header;
       this.notificationMessage = message;
       (this.$refs.notificationRef as NotificationRef).showNotification();
-    },
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
-    },
-    nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
     },
     openEditModal() {
       this.modalEditTitle = 'Edit case board';

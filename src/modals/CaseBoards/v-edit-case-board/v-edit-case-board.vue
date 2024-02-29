@@ -54,18 +54,31 @@
 
 <script setup lang="ts">
   import { db } from '@/firebase.js';
-  import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
-  import { ref, watch, computed } from 'vue';
+  import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc, query, where } from 'firebase/firestore';
+  import { onMounted, ref, watch, computed } from 'vue';
   import type { PropType } from 'vue';
   import { defineEmits, defineProps } from 'vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VTextarea from '@/components/v-textarea/v-textarea.vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
   import VButton from '@/components/v-button/VButton.vue';
+  
 
   const localTitle = ref('');
   const localDescription = ref('');
   const localClient = ref('');
+  const dropdownClient = ref<DropdownItem[]>([]);
+
+  const fetchClients = async () => {
+  const clientsQuery = query(collection(db, "users"), where("role", "in", [3, 4]));
+  const querySnapshot = await getDocs(clientsQuery);
+  dropdownClient.value = querySnapshot.docs.map(doc => ({
+      label: doc.data().full_name, // Assuming you want to display the client's full name
+      value: doc.id // Storing the client's ID for later use
+    }));
+  };
+
+  onMounted(fetchClients);
 
   const props = defineProps({
     caseData: Object,
@@ -73,14 +86,10 @@
 
   type DropdownItem = {
     label: string;
+    value: string;
   };
 
   const emit = defineEmits(['close-modal', 'save-clicked', 'role-changed', 'status-changed']);
-  const userNotes = ref('The plaintiff, Emily Smith, filed a lawsuit against the defendant, David Jones, alleging that Jones negligently caused a car accident on December 1, 2022, resulting in significant damage to Smiths vehicle and personal injuries. Smith claims that Jones ran a red light at the intersection of 5th Avenue and Main Street in New York City, colliding with her vehicle.');
-  const computedUserNotes = computed({
-    get: () => userNotes.value === 'string' ? '' : userNotes.value,
-    set: (val) => userNotes.value = val
-  });
 
   const dropdownTeam = ref([
     { label: 'Sara Kozinska' },
@@ -93,25 +102,26 @@
   function onTeamChanged(item: DropdownItem) {
     dropdownTeamTitle.value = item.label;
   }
-
-  const dropdownClient = ref([
-    { label: 'Valaria Roches' },
-    { label: 'Cooper Houtbie'  },
-    { label: 'Giusto Tomson'  },
-    { label: 'General use'  },
-  ]);
   const dropdownClientTitle = ref('Giusto Tomson');
 
-  watch(() => props.caseData, (newValue) => {
+  watch(() => props.caseData, async (newValue) => {
     if (newValue) {
       localTitle.value = newValue.title;
       localDescription.value = newValue.description;
       localClient.value = newValue.client_id;
+      // Fetch clients to ensure dropdownClient is populated
+      await fetchClients();
+      // Find the client in dropdownClient to set the title
+      const selectedClient = dropdownClient.value.find(client => client.value === newValue.client_id);
+      if (selectedClient) {
+        dropdownClientTitle.value = selectedClient.label;
+      }
     }
   }, { immediate: true });
 
   function onClientChanged(item: DropdownItem) {
     dropdownClientTitle.value = item.label;
+    localClient.value = item.value;
   }
 
   function closeModal() {

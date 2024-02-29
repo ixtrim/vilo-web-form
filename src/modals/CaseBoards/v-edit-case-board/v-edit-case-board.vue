@@ -34,7 +34,7 @@
       <div class="col-lg-12">
         <div class="form-group">
           <label>Add team members</label>
-          <VDropdown :title="dropdownTeamTitle" :items="dropdownTeam" @item-clicked="onTeamChanged" />
+          <VMultiselect :items="allUsers" v-model:selected="selectedTeamMembers" />
         </div>
       </div>
     </div>
@@ -62,6 +62,7 @@
   import VTextarea from '@/components/v-textarea/v-textarea.vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
   import VButton from '@/components/v-button/VButton.vue';
+  import VMultiselect from '@/components/v-multiselect/VMultiselect.vue';
   
 
   const localTitle = ref('');
@@ -78,7 +79,22 @@
     }));
   };
 
-  onMounted(fetchClients);
+  const allUsers = ref<DropdownItem[]>([]);
+  const selectedTeamMembers = ref<DropdownItem[]>([]);
+
+  const fetchAllUsers = async () => {
+    const usersQuery = query(collection(db, "users"));
+    const querySnapshot = await getDocs(usersQuery);
+    allUsers.value = querySnapshot.docs.map(doc => ({
+      label: doc.data().full_name,
+      value: doc.id
+    }));
+  };
+
+  onMounted(() => {
+    fetchClients();
+    fetchAllUsers();
+  });
 
   const props = defineProps({
     caseData: Object,
@@ -116,6 +132,10 @@
       if (selectedClient) {
         dropdownClientTitle.value = selectedClient.label;
       }
+      selectedTeamMembers.value = newValue.team_members.map((memberId: string) => {
+        const user = allUsers.value.find(user => user.value === memberId);
+        return user ? user : { label: "Unknown", value: memberId };
+      });
     }
   }, { immediate: true });
 
@@ -136,6 +156,7 @@
           title: localTitle.value,
           description: localDescription.value,
           client_id: localClient.value,
+          team_members: selectedTeamMembers.value.map(member => member.value),
           // Include other fields that need to be updated
         });
 

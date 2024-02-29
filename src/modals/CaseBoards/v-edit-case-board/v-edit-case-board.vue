@@ -34,7 +34,7 @@
       <div class="col-lg-12">
         <div class="form-group">
           <label>Add team members</label>
-          <VMultiselect :items="allUsers" v-model:selected="selectedTeamMembers" />
+          <VMultiselect :items="allUsers" :selected="selectedTeamMembers" />
         </div>
       </div>
     </div>
@@ -56,6 +56,7 @@
   import { db } from '@/firebase.js';
   import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc, query, where } from 'firebase/firestore';
   import { onMounted, ref, watch, computed } from 'vue';
+  import type { Ref } from 'vue';
   import type { PropType } from 'vue';
   import { defineEmits, defineProps } from 'vue';
   import VInput from '@/components/v-input/VInput.vue';
@@ -63,47 +64,51 @@
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
   import VButton from '@/components/v-button/VButton.vue';
   import VMultiselect from '@/components/v-multiselect/VMultiselect.vue';
-  
 
+  interface DropdownItem {
+    label: string;
+    value: string;
+  }
+
+  interface User {
+    full_name: string;
+    id: string;
+  }
+  
   const localTitle = ref('');
   const localDescription = ref('');
   const localClient = ref('');
-  const dropdownClient = ref<DropdownItem[]>([]);
+  const dropdownClient: Ref<DropdownItem[]> = ref([]);
 
   const fetchClients = async () => {
-  const clientsQuery = query(collection(db, "users"), where("role", "in", [3, 4]));
-  const querySnapshot = await getDocs(clientsQuery);
-  dropdownClient.value = querySnapshot.docs.map(doc => ({
-      label: doc.data().full_name, // Assuming you want to display the client's full name
-      value: doc.id // Storing the client's ID for later use
+    const clientsQuery = query(collection(db, "users"), where("role", "in", [3, 4]));
+    const querySnapshot = await getDocs(clientsQuery);
+    dropdownClient.value = querySnapshot.docs.map(doc => ({
+      label: doc.data().full_name as string,
+      value: doc.id
     }));
   };
 
-  const allUsers = ref<DropdownItem[]>([]);
-  const selectedTeamMembers = ref<DropdownItem[]>([]);
+  const allUsers: Ref<DropdownItem[]> = ref([]);
+  const selectedTeamMembers: Ref<DropdownItem[]> = ref([]);
 
   const fetchAllUsers = async () => {
     const usersQuery = query(collection(db, "users"));
     const querySnapshot = await getDocs(usersQuery);
     allUsers.value = querySnapshot.docs.map(doc => ({
-      label: doc.data().full_name,
+      label: doc.data().full_name as string,
       value: doc.id
     }));
   };
 
-  onMounted(() => {
-    fetchClients();
-    fetchAllUsers();
+  onMounted(async () => {
+    await fetchClients();
+    await fetchAllUsers();
   });
 
   const props = defineProps({
     caseData: Object,
   });
-
-  type DropdownItem = {
-    label: string;
-    value: string;
-  };
 
   const emit = defineEmits(['close-modal', 'save-clicked', 'role-changed', 'status-changed']);
 
@@ -118,24 +123,29 @@
   function onTeamChanged(item: DropdownItem) {
     dropdownTeamTitle.value = item.label;
   }
-  const dropdownClientTitle = ref('Giusto Tomson');
+  const dropdownClientTitle = ref('');
 
   watch(() => props.caseData, async (newValue) => {
     if (newValue) {
       localTitle.value = newValue.title;
       localDescription.value = newValue.description;
       localClient.value = newValue.client_id;
-      // Fetch clients to ensure dropdownClient is populated
       await fetchClients();
-      // Find the client in dropdownClient to set the title
       const selectedClient = dropdownClient.value.find(client => client.value === newValue.client_id);
       if (selectedClient) {
         dropdownClientTitle.value = selectedClient.label;
       }
-      selectedTeamMembers.value = newValue.team_members.map((memberId: string) => {
+    }
+  }, { immediate: true });
+
+  watch(allUsers, () => {
+    if (props.caseData) {
+      selectedTeamMembers.value = props.caseData.team_members.map((memberId: string) => {
         const user = allUsers.value.find(user => user.value === memberId);
-        return user ? user : { label: "Unknown", value: memberId };
-      });
+        return user ? { label: user.label, value: user.value } : null;
+      }).filter(Boolean);
+      alert(selectedTeamMembers.value);
+      console.log("SelectedTeamMembers: " + selectedTeamMembers.value);
     }
   }, { immediate: true });
 
@@ -157,14 +167,12 @@
           description: localDescription.value,
           client_id: localClient.value,
           team_members: selectedTeamMembers.value.map(member => member.value),
-          // Include other fields that need to be updated
         });
 
         emit('save-clicked');
         closeModal();
       } catch (error) {
         console.error("Failed to save case:", error);
-        // Handle the error appropriately
       }
     }
   }

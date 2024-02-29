@@ -42,7 +42,7 @@ const { items, selected } = toRefs(props);
 
 // Method to add an item to the selected list
 function addItem(event: Event) {
-  const target = event.target as HTMLSelectElement; // Safely cast the event target
+  const target = event.target as HTMLSelectElement;
   if (target && target.value) {
     const item = items.value.find(i => i.value === target.value);
     if (item && !selected.value.find(i => i.value === target.value)) {
@@ -54,9 +54,11 @@ function addItem(event: Event) {
 
 // Method to remove an item from the selected list
 function removeItem(itemToRemove: DropdownItem) {
-  selected.value = selected.value.filter(item => item.value !== itemToRemove.value);
-  // Emit an update event for parent components
-  emit('update:selected', selected.value);
+  const index = selected.value.findIndex(item => item.value === itemToRemove.value);
+  if (index !== -1) {
+    selected.value.splice(index, 1);
+    emit('update:selected', selected.value);
+  }
 }
 
 // Emit function needs to be defined for emitting events to parent

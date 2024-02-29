@@ -7,7 +7,7 @@
   select {
     width: 100%;
     padding: 5px;
-    margin: 0 0 16px 0;
+    margin: 0;
     border: 1px solid var(--v-gray-300);
     outline: none;
     border-radius: 6px;
@@ -36,6 +36,8 @@
   }
 
   .multiselect-selected-items {
+    margin: 10px 0 6px;
+
     span {
       display: inline-block;
       border: 1px solid var(--v-gray-300);

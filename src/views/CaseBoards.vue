@@ -106,7 +106,7 @@
                 </ul>
               </div>
               <div class="col col--cb-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal(caseItem)" text=""></VButton>
               </div>
             </div>
 
@@ -130,7 +130,7 @@
     </div>
 
     <VModal :show="showEditModal || showAddModal" :title="modalEditTitle || modalAddTitle" @update:show="handleModalClose">
-      <VEditCaseBoard v-if="showEditModal" :title="modalEditTitle" @close-modal="showEditModal = false" @save-clicked="handleEditCase" />
+      <VEditCaseBoard v-if="showEditModal" :title="modalEditTitle" :caseData="selectedCase" @close-modal="showEditModal = false" @save-clicked="handleEditCase" />
       <VAddCaseBoard v-if="showAddModal" :title="modalAddTitle" @close-modal="showAddModal = false" @save-clicked="handleAddCase" />
     </VModal>
 
@@ -216,6 +216,7 @@ export default defineComponent({
       selectedStatus: null,
       currentDropdownTitle: 'All cases',
       searchTerm: '',
+      selectedCase: undefined,
     };
   },
   setup() {
@@ -369,6 +370,10 @@ export default defineComponent({
       currentPage.value = 1; // Reset to first page when filters change
     }, { deep: true });
 
+    const actions = ref({
+      fetchCases,
+    });
+
     onMounted(fetchCases);
 
     watch(cases, (newCases) => {
@@ -438,6 +443,7 @@ export default defineComponent({
     };
 
     return {
+      actions,
       cases,
       usersMap,
       fetchUser,
@@ -467,12 +473,14 @@ export default defineComponent({
       this.notificationMessage = message;
       (this.$refs.notificationRef as NotificationRef).showNotification();
     },
-    openEditModal() {
+    openEditModal(caseItem: any) {
+      this.selectedCase = caseItem;
       this.modalEditTitle = 'Edit case board';
       this.showEditModal = true;
     },
-    handleEditCase() {
+    async handleEditCase() {
       this.showEditModal = false;
+      await this.actions.fetchCases();
       this.triggerNotification('success', 'Changes saved', 'Case board modified successfully.');
     },
     openAddModal() {

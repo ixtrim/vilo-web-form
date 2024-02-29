@@ -6,7 +6,7 @@
         <VInput 
           label="Title" 
           placeholder="Vilo" 
-          v-model="localUserName"
+          v-model="localTitle"
         />
       </div>
     </div>
@@ -70,6 +70,14 @@
   const localUserAddress = ref('');
   const localUserPosition = ref('');
 
+  const localTitle = ref('');
+  const localDescription = ref('');
+  const localClient = ref('');
+
+  const props = defineProps({
+    caseData: Object,
+  });
+
   type DropdownItem = {
     label: string;
   };
@@ -100,6 +108,15 @@
     { label: 'General use'  },
   ]);
   const dropdownClientTitle = ref('Giusto Tomson');
+
+  watch(() => props.caseData, (newValue) => {
+    if (newValue) {
+      localTitle.value = newValue.title;
+      localDescription.value = newValue.description;
+      localClient.value = newValue.client_id;
+    }
+  }, { immediate: true });
+
   function onClientChanged(item: DropdownItem) {
     dropdownClientTitle.value = item.label;
   }
@@ -108,10 +125,26 @@
     emit('close-modal');
   }
 
-  function saveAndClose() {
-    emit('save-clicked');
-    closeModal();
+  async function saveAndClose() {
+    if (props.caseData) {
+      try {
+        const caseRef = doc(db, "cases", props.caseData.id);
+        await updateDoc(caseRef, {
+          title: localTitle.value,
+          description: localDescription.value,
+          client_id: localClient.value,
+          // Include other fields that need to be updated
+        });
+
+        emit('save-clicked');
+        closeModal();
+      } catch (error) {
+        console.error("Failed to save case:", error);
+        // Handle the error appropriately
+      }
+    }
   }
+
 </script>
 
 <style>

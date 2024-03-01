@@ -80,7 +80,7 @@
                     <img :src="caseItem.icon" :alt="caseItem.title" />
                   </li>
                   <li>
-                    <h4 class="active" @click="navigateToCaseBoard(1)">{{ caseItem.title }} {{ caseItem.status }}</h4>
+                    <h4 class="active" @click="navigateToCaseBoard(1)">{{ caseItem.title }}</h4>
                   </li>
                 </ul>
               </div>
@@ -395,7 +395,7 @@ export default defineComponent({
     const router = useRouter();
     const navigateToCaseBoard = (caseId: number) => {
       //router.push(`/case-board/${caseId}`);
-      router.push(`/case-board`);
+      router.push({ name: 'CaseBoard', params: { caseId: caseId } });
     };
 
     const paginatedCases = computed(() => {

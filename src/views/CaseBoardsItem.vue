@@ -10,8 +10,8 @@
     <div class="row">
       <div class="col-lg-10">
         <div class="dashboard__heading">
-          <h1>1 {{ caseDetails.title }}</h1>
-          <p>2 {{ caseDetails.description }}</p>
+          <h1>{{ caseDetails.title }}</h1>
+          <p>{{ caseDetails.description }}</p>
           <VUserSmall userName="Phoenix Baker" />
         </div>
       </div>
@@ -108,7 +108,7 @@
         const caseId = route.params.caseId as string;
         const docRef = doc(db, "cases", caseId);
         const docSnap = await getDoc(docRef);
-        
+
         if (docSnap.exists()) {
           const data = docSnap.data();
           caseDetails.value = {

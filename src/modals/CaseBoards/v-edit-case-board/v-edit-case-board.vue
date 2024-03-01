@@ -111,18 +111,6 @@
   });
 
   const emit = defineEmits(['close-modal', 'save-clicked', 'role-changed', 'status-changed']);
-
-  const dropdownTeam = ref([
-    { label: 'Sara Kozinska' },
-    { label: 'Matthew Bowman' },
-    { label: 'Bessy Hourigan'  },
-    { label: 'Fiona Rainton'  },
-    
-  ]);
-  const dropdownTeamTitle = ref('Bessy Hourigan');
-  function onTeamChanged(item: DropdownItem) {
-    dropdownTeamTitle.value = item.label;
-  }
   const dropdownClientTitle = ref('');
 
   watch(() => props.caseData, async (newValue) => {
@@ -144,8 +132,6 @@
         const user = allUsers.value.find(user => user.value === memberId);
         return user ? { label: user.label, value: user.value } : null;
       }).filter(Boolean);
-      alert(selectedTeamMembers.value);
-      console.log("SelectedTeamMembers: " + selectedTeamMembers.value);
     }
   }, { immediate: true });
 

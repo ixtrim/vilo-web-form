@@ -12,7 +12,8 @@
         <div class="dashboard__heading">
           <h1>{{ caseDetails.title }}</h1>
           <p>{{ caseDetails.description }}</p>
-          <VUserSmall userName="Phoenix Baker" />
+          <VUserSmall v-if="userDetails.full_name" :userName="userDetails.full_name" :userAvatar="userDetails.avatar" />
+          <VUserSmall v-else userName="General case board" userAvatar="https://firebasestorage.googleapis.com/v0/b/vilo-ebc86.appspot.com/o/vilo_app%2Fvilo.svg?alt=media&token=5a714643-100b-4673-a24a-ca52bbf166f6" />
         </div>
       </div>
       <div class="col-lg-2 align-right">
@@ -102,7 +103,8 @@
     },
     setup() {
       const route = useRoute();
-      const caseDetails = ref<DocumentData>({ title: '', description: '' });
+      const caseDetails = ref<DocumentData>({ title: '', description: '', client_id: '' });
+      const userDetails = ref<DocumentData>({ full_name: '', avatar: '' });
 
       const fetchCaseDetails = async () => {
         const caseId = route.params.caseId as string;
@@ -112,9 +114,18 @@
         if (docSnap.exists()) {
           const data = docSnap.data();
           caseDetails.value = {
-            title: data.title || 'No Title', // Provide default values
+            title: data.title || 'No Title',
             description: data.description || 'No Description',
+            client_id: data.client_id || '',
           };
+          // Fetch user details if client_id is available
+          if (caseDetails.value.client_id) {
+            const userRef = doc(db, "users", caseDetails.value.client_id);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+              userDetails.value = userSnap.data();
+            }
+          }
         } else {
           console.log("No such document!");
         }
@@ -129,7 +140,8 @@
 
       return {
         caseDetails,
-        breadcrumbs, 
+        breadcrumbs,
+        userDetails,
       };
     },
     data() {

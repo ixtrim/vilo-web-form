@@ -122,8 +122,14 @@
 
       onMounted(fetchCaseDetails);
 
+      const breadcrumbs = computed(() => [
+        { text: 'Case boards', to: '/case-boards' },
+        { text: caseDetails.value.title || 'Loading case...' }
+      ]);
+
       return {
         caseDetails,
+        breadcrumbs, 
       };
     },
     data() {
@@ -135,10 +141,6 @@
         notificationType: 'success',
         notificationHeader: 'Changes saved',
         notificationMessage: 'This account has been successfully edited.',
-        breadcrumbs: [
-          { text: 'Case boards', to: '/case-boards' },
-          { text: 'Baker INC 0212' }
-        ],
         sortPriority: [
           { label: 'All' },
           { label: 'High Priority' },

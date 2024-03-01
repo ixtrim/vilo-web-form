@@ -59,9 +59,9 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/case-board',
-      name: 'case-board',
-      component: () => import('../views/CaseBoardsItem.vue'),
+      path: '/case-board/:caseId',
+      name: 'CaseBoard',
+      component: () => import('@/views/CaseBoardsItem.vue'),
       meta: { requiresAuth: true }
     },
     {
@@ -211,7 +211,5 @@ router.beforeEach(async (to, from, next) => {
 
   next();
 });
-
-
 
 export default router

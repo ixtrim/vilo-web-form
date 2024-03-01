@@ -10,8 +10,8 @@
     <div class="row">
       <div class="col-lg-10">
         <div class="dashboard__heading">
-          <h1>Baker INC / 0212</h1>
-          <p>Time tracking, invoicing and expenses.</p>
+          <h1>1 {{ caseDetails.title }}</h1>
+          <p>2 {{ caseDetails.description }}</p>
           <VUserSmall userName="Phoenix Baker" />
         </div>
       </div>
@@ -65,7 +65,11 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, ref, computed } from 'vue';
+  import { defineComponent, onMounted, ref, computed } from 'vue';
+  import { useRoute } from 'vue-router';
+  import { doc, getDoc } from 'firebase/firestore';
+  import type { DocumentData } from 'firebase/firestore';
+  import { db } from '@/firebase.js';
   import VBreadcrumbs from '@/components/v-breadcrumbs/VBreadcrumbs.vue';
   import VButton from '@/components/v-button/VButton.vue';
   import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
@@ -95,6 +99,32 @@
       VDropdown,
       Board,
       Search
+    },
+    setup() {
+      const route = useRoute();
+      const caseDetails = ref<DocumentData>({ title: '', description: '' });
+
+      const fetchCaseDetails = async () => {
+        const caseId = route.params.caseId as string;
+        const docRef = doc(db, "cases", caseId);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          caseDetails.value = {
+            title: data.title || 'No Title', // Provide default values
+            description: data.description || 'No Description',
+          };
+        } else {
+          console.log("No such document!");
+        }
+      };
+
+      onMounted(fetchCaseDetails);
+
+      return {
+        caseDetails,
+      };
     },
     data() {
       return {

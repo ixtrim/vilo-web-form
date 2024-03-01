@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
   import { db } from '@/firebase.js';
-  import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc, query, where } from 'firebase/firestore';
+  import { addDoc, doc, getDoc, updateDoc, collection, getDocs, deleteDoc, query, where } from 'firebase/firestore';
   import { onMounted, ref, watch, computed } from 'vue';
   import type { Ref } from 'vue';
   import type { PropType } from 'vue';
@@ -77,7 +77,7 @@
   
   const localTitle = ref('');
   const localDescription = ref('');
-  const localClient = ref('');
+  const localClient = ref('0');
   const dropdownClient: Ref<DropdownItem[]> = ref([]);
 
   const fetchClients = async () => {
@@ -111,7 +111,7 @@
   });
 
   const emit = defineEmits(['close-modal', 'save-clicked', 'role-changed', 'status-changed']);
-  const dropdownClientTitle = ref('');
+  const dropdownClientTitle = ref('General');
 
   watch(() => props.caseData, async (newValue) => {
     if (newValue) {
@@ -144,22 +144,23 @@
     emit('close-modal');
   }
 
-  async function saveAndClose() {
-    if (props.caseData) {
-      try {
-        const caseRef = doc(db, "cases", props.caseData.id);
-        await updateDoc(caseRef, {
-          title: localTitle.value,
-          description: localDescription.value,
-          client_id: localClient.value,
-          team_members: selectedTeamMembers.value.map(member => member.value),
-        });
+  async function saveAndClose(event: any) {
+    event.stopPropagation();
+    try {
+      await addDoc(collection(db, "cases"), {
+        title: localTitle.value,
+        description: localDescription.value,
+        client_id: localClient.value === '0' ? '' : localClient.value,
+        team_members: selectedTeamMembers.value.map(member => member.value),
+        time_added: new Date(),
+        status: 1,
+        icon: 'https://firebasestorage.googleapis.com/v0/b/vilo-ebc86.appspot.com/o/cases_icons%2FAvatar-5.svg?alt=media&token=04e731e6-cdba-4429-81ea-6ad753b2743c'
+      });
 
-        emit('save-clicked');
-        closeModal();
-      } catch (error) {
-        console.error("Failed to save case:", error);
-      }
+      emit('save-clicked');
+      closeModal();
+    } catch (error) {
+      console.error("Failed to add new case:", error);
     }
   }
 

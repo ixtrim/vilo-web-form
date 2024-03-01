@@ -80,7 +80,7 @@
                     <img :src="caseItem.icon" :alt="caseItem.title" />
                   </li>
                   <li>
-                    <h4 class="active" @click="navigateToCaseBoard(1)">{{ caseItem.title }}</h4>
+                    <h4 class="active" @click="navigateToCaseBoard(1)">{{ caseItem.title }} {{ caseItem.status }}</h4>
                   </li>
                 </ul>
               </div>
@@ -487,8 +487,9 @@ export default defineComponent({
       this.modalAddTitle = 'Create New Case';
       this.showAddModal = true;
     },
-    handleAddCase() {
+    async handleAddCase() {
       this.showAddModal = false;
+      await this.actions.fetchCases();
       this.triggerNotification('success', 'Changes saved', 'Case board added successfully.');
     },
     handleModalClose(value: boolean) {

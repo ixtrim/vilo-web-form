@@ -1,60 +1,44 @@
 <template>
-  <div class="board">
+  <div class="board"> 
     <List v-for="list in lists" :key="list.id" :list="list" @addTask="$emit('addTask')" />
   </div>
 </template>
 
 <script lang="ts">
+import { defineComponent, onMounted, ref, watch } from 'vue';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/firebase.js';
 import { Sortable } from '@shopify/draggable';
 import List from '@/modules/Board/List.vue';
 
-export default {
+interface Task {
+  id: string;
+  title: string;
+  priority: number;
+  due_date: { toDate: () => Date };
+  user_assigned: string;
+  status: number;
+}
+
+export default defineComponent({
   components: {
     List
+  },
+  props: {
+    caseId: String
   },
   data() {
     return {
       lists: [
-        {
-          id: 1, 
-          title: 'Pending', 
-          cards: [
-            { id: 'a1', title: 'Consult with experts in relevant fields for opinions and analysis that could strengthen the case.', priority: 'high', dueDate: '05.12.2023', assignedUserId: '1', assignedUserName: 'Jane Doe' },
-            { id: 'a2', title: 'Prepare for trial, including organizing evidence, preparing witness testimonies, and planning opening and closing statements.', priority: 'medium', dueDate: '10.12.2023', assignedUserId: '2', assignedUserName: 'John Smith' },
-            { id: 'a3', title: 'Ensure all legal procedures and actions comply with ethical and legal standards.', priority: 'low', dueDate: '15.12.2023', assignedUserId: '3', assignedUserName: 'Emily Johnson' },
-            { id: 'a4', title: 'Regularly update the client on the cases progress, including potential risks and changes in strategy.', priority: 'high', dueDate: '20.12.2023', assignedUserId: '4', assignedUserName: 'Michael Brown' }
-          ]
-        },
-        {
-          id: 2, 
-          title: 'In Progress', 
-          cards: [
-            { id: 'b1', title: 'Manage the discovery process, including requests for production, interrogatories, and depositions.', priority: 'medium', dueDate: '06.12.2023', assignedUserId: '5', assignedUserName: 'Sarah Miller' },
-            { id: 'b2', title: 'Ensure all necessary documents are correctly filed with the court before deadlines.', priority: 'high', dueDate: '12.12.2023', assignedUserId: '6', assignedUserName: 'David Wilson' },
-            { id: 'b3', title: 'Develop a comprehensive legal strategy, considering various scenarios and potential outcomes.', priority: 'low', dueDate: '18.12.2023', assignedUserId: '7', assignedUserName: 'Linda Garcia' }
-          ]
-        },
-        {
-          id: 3, 
-          title: 'In Review', 
-          cards: [
-            { id: 'c1', title: 'Identify and interview potential witnesses to gather more information and statements that could support the case.', priority: 'medium', dueDate: '07.12.2023', assignedUserId: '8', assignedUserName: 'Brian Martinez' },
-            { id: 'c2', title: 'Analyze all evidence, including documents, photos, and electronic data, to determine its relevance and admissibility.', priority: 'high', dueDate: '13.12.2023', assignedUserId: '9', assignedUserName: 'Nancy Robinson' },
-            { id: 'c3', title: 'Prepare necessary legal documents, such as briefs, motions, and pleadings, relevant to the case.', priority: 'low', dueDate: '19.12.2023', assignedUserId: '10', assignedUserName: 'Daniel Clark' }
-          ]
-        },
-        {
-          id: 4, 
-          title: 'Completed', 
-          cards: [
-            { id: 'd1', title: 'Legal research to find relevant statutes, case laws, and legal precedents that could impact the case.', priority: 'low', dueDate: '08.12.2023', assignedUserId: '11', assignedUserName: 'Jessica Rodriguez' },
-            { id: 'd2', title: 'Examine all case documents, evidence, and client information', priority: 'medium', dueDate: '14.12.2023', assignedUserId: '12', assignedUserName: 'William Lewis' }
-          ]
-        }
+        { id: 1, title: 'Pending', cards: [] },
+        { id: 2, title: 'In Progress', cards: [] },
+        { id: 3, title: 'In Review', cards: [] },
+        { id: 4, title: 'Completed', cards: [] }
       ]
     };
   },
-  mounted() {
+  async mounted() {
+    await this.fetchTasks();
     const boardElement = this.$refs.board as HTMLElement;
     if (boardElement) {
       new Sortable(boardElement, {
@@ -70,9 +54,44 @@ export default {
     sortable.on('sortable:stop', (event) => {
       
     });
+  },
+  watch: {
+    async caseId(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        await this.fetchTasks();
+      }
+    }
+  },
+  methods: {
+    async fetchTasks() {
+      if (!this.caseId) return;
+      const tasksQuery = query(collection(db, "tasks"), where("case", "==", this.caseId));
+      const querySnapshot = await getDocs(tasksQuery);
+      const tasks = querySnapshot.docs.map(doc => ({ ...(doc.data() as Task), id: doc.id }));
+      
+
+      // Reset cards in lists
+      this.lists.forEach(list => { list.cards = []; });
+
+      // Assign tasks to the appropriate list based on their status
+      tasks.forEach(task => {
+        const list = this.lists.find(list => list.id === task.status + 1); // Assuming status is 0-indexed
+        if (list) {
+          list.cards.push({
+            id: task.id,
+            title: task.title,
+            priority: task.priority,
+            dueDate: task.due_date.toDate().toLocaleDateString(), // Format date as needed
+            assignedUserId: task.user_assigned,
+            assignedUserName: '' // You'll need to fetch user details based on `user_assigned` if required
+          });
+        }
+      });
+    }
   }
-};
+});
 </script>
+
 
 <style>
   @import url(./styles/board.scss);

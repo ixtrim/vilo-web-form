@@ -495,8 +495,6 @@ export default defineComponent({
       this.showEditModal = false;
       this.showAddModal = false;
     },
-    handleButtonClick() {
-    },
   },
 });
 </script>

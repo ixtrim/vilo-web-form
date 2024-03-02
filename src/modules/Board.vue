@@ -23,8 +23,7 @@ interface Task {
   description: string;
   priority: string;
   due_date: string;
-  assignedUserId: string;
-  assignedUserName: string;
+  user_assigned: string;
   status: number; // Add this line
 }
 
@@ -101,8 +100,7 @@ export default defineComponent({
             description: task.description,
             priority: task.priority,
             due_date: task.due_date,
-            assignedUserId: task.assignedUserId,
-            assignedUserName: '',
+            user_assigned: task.user_assigned,
             status: 0,
           });
         }

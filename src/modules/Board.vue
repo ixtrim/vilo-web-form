@@ -11,13 +11,20 @@ import { db } from '@/firebase.js';
 import { Sortable } from '@shopify/draggable';
 import List from '@/modules/Board/List.vue';
 
+interface List {
+  id: number;
+  title: string;
+  cards: Task[]; // Use the Task interface
+}
+
 interface Task {
   id: string;
   title: string;
   priority: number;
-  due_date: { toDate: () => Date };
-  user_assigned: string;
-  status: number;
+  dueDate: string;
+  assignedUserId: string;
+  assignedUserName: string;
+  status: number; // Add this line
 }
 
 export default defineComponent({
@@ -30,11 +37,11 @@ export default defineComponent({
   data() {
     return {
       lists: [
-        { id: 1, title: 'Pending', cards: [] },
-        { id: 2, title: 'In Progress', cards: [] },
-        { id: 3, title: 'In Review', cards: [] },
-        { id: 4, title: 'Completed', cards: [] }
-      ]
+        { id: 1, title: 'Pending', cards: [] as Task[] },
+        { id: 2, title: 'In Progress', cards: [] as Task[] },
+        { id: 3, title: 'In Review', cards: [] as Task[] },
+        { id: 4, title: 'Completed', cards: [] as Task[] },
+      ] as List[]
     };
   },
   async mounted() {
@@ -75,15 +82,15 @@ export default defineComponent({
 
       // Assign tasks to the appropriate list based on their status
       tasks.forEach(task => {
-        const list = this.lists.find(list => list.id === task.status + 1); // Assuming status is 0-indexed
+        const list = this.lists.find(list => list.id === task.status + 1);
         if (list) {
           list.cards.push({
             id: task.id,
             title: task.title,
             priority: task.priority,
-            dueDate: task.due_date.toDate().toLocaleDateString(), // Format date as needed
+            dueDate: task.due_date.toDate().toLocaleDateString(),
             assignedUserId: task.user_assigned,
-            assignedUserName: '' // You'll need to fetch user details based on `user_assigned` if required
+            assignedUserName: '',
           });
         }
       });

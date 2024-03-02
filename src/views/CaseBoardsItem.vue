@@ -208,8 +208,8 @@ export default defineComponent({
     },
     async handleEditCase(updatedCase: any) {
       this.showEditModal = false;
-      await this.updateCaseInFirestore(updatedCase);
-      await this.fetchCaseDetails();
+      //await this.updateCaseInFirestore(updatedCase);
+      //await this.fetchCaseDetails();
       this.triggerNotification('success', 'Case Updated', 'The case has been successfully updated.');
     },
     openAddTaskModal() {

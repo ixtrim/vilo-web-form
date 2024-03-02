@@ -83,10 +83,11 @@
   const fetchClients = async () => {
     const clientsQuery = query(collection(db, "users"), where("role", "in", [3, 4]));
     const querySnapshot = await getDocs(clientsQuery);
-    dropdownClient.value = querySnapshot.docs.map(doc => ({
+    dropdownClient.value = [{ label: "General", value: "" }]; // Add General option with empty value
+    dropdownClient.value.push(...querySnapshot.docs.map(doc => ({
       label: doc.data().full_name as string,
       value: doc.id
-    }));
+    })));
   };
 
   const allUsers: Ref<DropdownItem[]> = ref([]);
@@ -119,9 +120,13 @@
       localDescription.value = newValue.description;
       localClient.value = newValue.client_id;
       await fetchClients();
-      const selectedClient = dropdownClient.value.find(client => client.value === newValue.client_id);
-      if (selectedClient) {
-        dropdownClientTitle.value = selectedClient.label;
+      if (!newValue.client_id || newValue.client_id === "0") {
+        dropdownClientTitle.value = "General";
+      } else {
+        const selectedClient = dropdownClient.value.find(client => client.value === newValue.client_id);
+        if (selectedClient) {
+          dropdownClientTitle.value = selectedClient.label;
+        }
       }
     }
   }, { immediate: true });

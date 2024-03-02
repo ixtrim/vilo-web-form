@@ -21,7 +21,7 @@ interface Task {
   id: string;
   title: string;
   priority: number;
-  dueDate: string;
+  due_date: string;
   assignedUserId: string;
   assignedUserName: string;
   status: number; // Add this line
@@ -88,9 +88,10 @@ export default defineComponent({
             id: task.id,
             title: task.title,
             priority: task.priority,
-            dueDate: task.due_date.toDate().toLocaleDateString(),
-            assignedUserId: task.user_assigned,
+            due_date: new Date(task.due_date).toLocaleDateString(),
+            assignedUserId: task.assignedUserId,
             assignedUserName: '',
+            status: 0,
           });
         }
       });

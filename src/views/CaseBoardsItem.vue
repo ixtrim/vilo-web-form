@@ -50,8 +50,8 @@
     </div>
 
     <div class="row fill-space">
-      <div class="col-lg-12">
-        <Board @addTask="openAddTaskModal" />
+      <div class="col-lg-12"> 
+        <Board :caseId="caseDetails.id" @addTask="openAddTaskModal" />
       </div>
     </div>
 
@@ -115,6 +115,7 @@ export default defineComponent({
       if (docSnap.exists()) {
         const data = docSnap.data();
         caseDetails.value = {
+          id: docSnap.id,
           title: data.title || 'No Title',
           description: data.description || 'No Description',
           client_id: data.client_id || '',
@@ -208,8 +209,6 @@ export default defineComponent({
     },
     async handleEditCase(updatedCase: any) {
       this.showEditModal = false;
-      //await this.updateCaseInFirestore(updatedCase);
-      //await this.fetchCaseDetails();
       this.triggerNotification('success', 'Case Updated', 'The case has been successfully updated.');
     },
     openAddTaskModal() {

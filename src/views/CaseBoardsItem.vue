@@ -57,7 +57,7 @@
 
     <VModal :show="showAddTaskModal || showEditModal" :title="modalAddTaskTitle || modalEditTitle" @update:show="handleModalClose">
       <VAddTask v-if="showAddTaskModal" :title="modalAddTaskTitle" @close-modal="showAddTaskModal = false" @save-clicked="handleAddTaskCase" />
-      <VEditCaseBoard v-if="showEditModal" :title="modalEditTitle" @close-modal="showEditModal = false" @save-clicked="handleEditCase" />
+      <VEditCaseBoard v-if="showEditModal" :title="modalEditTitle" :caseData="editableCaseDetails" @close-modal="showEditModal = false" @save-clicked="handleEditCase" />
     </VModal>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
@@ -66,140 +66,172 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent, onMounted, ref, computed } from 'vue';
-  import { useRoute } from 'vue-router';
-  import { doc, getDoc } from 'firebase/firestore';
-  import type { DocumentData } from 'firebase/firestore';
-  import { db } from '@/firebase.js';
-  import VBreadcrumbs from '@/components/v-breadcrumbs/VBreadcrumbs.vue';
-  import VButton from '@/components/v-button/VButton.vue';
-  import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
-  import VDropdown from '@/components/v-dropdown/VDropdown.vue';
-  import Search from '@/modules/Navigation/Search.vue';
-  import Board from '@/modules/Board.vue';
-  import VNotification from '@/components/v-notification/VNotification.vue';
-  import VModal from '@/components/v-modal/v-modal.vue';
-  import VEditCaseBoard from '@/modals/CaseBoards/v-edit-case-board/v-edit-case-board.vue';
-  import VAddTask from '@/modals/CaseBoards/v-add-task/v-add-task.vue';
-  import VUserSmall from '@/components/v-user-small/v-user-small.vue';
+import { defineComponent, onMounted, ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import type { DocumentData } from 'firebase/firestore';
+import { db } from '@/firebase.js';
+import VBreadcrumbs from '@/components/v-breadcrumbs/VBreadcrumbs.vue';
+import VButton from '@/components/v-button/VButton.vue';
+import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
+import VDropdown from '@/components/v-dropdown/VDropdown.vue';
+import Search from '@/modules/Navigation/Search.vue';
+import Board from '@/modules/Board.vue';
+import VNotification from '@/components/v-notification/VNotification.vue';
+import VModal from '@/components/v-modal/v-modal.vue';
+import VEditCaseBoard from '@/modals/CaseBoards/v-edit-case-board/v-edit-case-board.vue';
+import VAddTask from '@/modals/CaseBoards/v-add-task/v-add-task.vue';
+import VUserSmall from '@/components/v-user-small/v-user-small.vue';
 
-  interface NotificationRef {
-    showNotification: () => void;
-  }
+export default defineComponent({
+  components: {
+    VBreadcrumbs,
+    VButton,
+    VModalSmall,
+    VNotification,
+    VModal,
+    VEditCaseBoard,
+    VAddTask,
+    VUserSmall,
+    VDropdown,
+    Board,
+    Search
+  },
+  setup() {
+    const route = useRoute();
+    const caseDetails = ref<DocumentData>({ title: '', description: '', client_id: '' });
+    const userDetails = ref<DocumentData>({ full_name: '', avatar: '' });
 
-  export default defineComponent({
-    components: {
-      VBreadcrumbs,
-      VButton,
-      VModalSmall,
-      VNotification,
-      VModal,
-      VEditCaseBoard,
-      VAddTask,
-      VUserSmall,
-      VDropdown,
-      Board,
-      Search
-    },
-    setup() {
-      const route = useRoute();
-      const caseDetails = ref<DocumentData>({ title: '', description: '', client_id: '' });
-      const userDetails = ref<DocumentData>({ full_name: '', avatar: '' });
+    const breadcrumbs = computed(() => [
+      { text: 'Case boards', to: '/case-boards' },
+      { text: caseDetails.value.title || 'Loading case...' }
+    ]);
 
-      const fetchCaseDetails = async () => {
-        const caseId = route.params.caseId as string;
-        const docRef = doc(db, "cases", caseId);
-        const docSnap = await getDoc(docRef);
+    const fetchCaseDetails = async () => {
+      const caseId = route.params.caseId as string;
+      const docRef = doc(db, "cases", caseId);
+      const docSnap = await getDoc(docRef);
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          caseDetails.value = {
-            title: data.title || 'No Title',
-            description: data.description || 'No Description',
-            client_id: data.client_id || '',
-          };
-          // Fetch user details if client_id is available
-          if (caseDetails.value.client_id) {
-            const userRef = doc(db, "users", caseDetails.value.client_id);
-            const userSnap = await getDoc(userRef);
-            if (userSnap.exists()) {
-              userDetails.value = userSnap.data();
-            }
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        caseDetails.value = {
+          title: data.title || 'No Title',
+          description: data.description || 'No Description',
+          client_id: data.client_id || '',
+          team_members: data.team_members || '',
+        };
+        // Fetch user details if client_id is available
+        if (caseDetails.value.client_id) {
+          const userRef = doc(db, "users", caseDetails.value.client_id);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            userDetails.value = userSnap.data();
           }
-        } else {
-          console.log("No such document!");
         }
-      };
+      } else {
+        console.log("No such document!");
+      }
+    };
 
-      onMounted(fetchCaseDetails);
+    onMounted(fetchCaseDetails);
 
-      const breadcrumbs = computed(() => [
-        { text: 'Case boards', to: '/case-boards' },
-        { text: caseDetails.value.title || 'Loading case...' }
-      ]);
+    return {
+      caseDetails,
+      breadcrumbs,
+      userDetails,
+      fetchCaseDetails, // This is not needed to return if you don't use it outside setup
+    };
+  },
+  data() {
+    return {
+      showEditModal: false,
+      showAddTaskModal: false,
+      modalEditTitle: '',
+      modalAddTaskTitle: '',
+      notificationType: 'success',
+      notificationHeader: 'Changes saved',
+      notificationMessage: 'This account has been successfully edited.',
+      sortPriority: [
+        { label: 'All' },
+        { label: 'High Priority' },
+        { label: 'Medium Priority' },
+        { label: 'Low Priority' },
+      ],
+      sortTasks: [
+        { label: 'All Tasks' },
+        { label: 'My Tasks' },
+      ],
+      editableCaseDetails: {},
+    };
+  },
+  methods: {
+    async fetchCaseDetails() {
+      const route = useRoute();
+      const caseId = route.params.caseId as string;
+      const docRef = doc(db, "cases", caseId);
+      const docSnap = await getDoc(docRef);
 
-      return {
-        caseDetails,
-        breadcrumbs,
-        userDetails,
-      };
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        this.caseDetails = {
+          title: data.title || 'No Title',
+          description: data.description || 'No Description',
+          client_id: data.client_id || '',
+          team_members: data.team_members || '',
+        };
+        // Fetch user details if client_id is available
+        if (this.caseDetails.client_id) {
+          const userRef = doc(db, "users", this.caseDetails.client_id);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            this.userDetails = userSnap.data();
+          }
+        }
+      } else {
+        console.log("No such document!");
+      }
     },
-    data() {
-      return {
-        showEditModal: false,
-        showAddTaskModal: false,
-        modalEditTitle: '',
-        modalAddTaskTitle: '',
-        notificationType: 'success',
-        notificationHeader: 'Changes saved',
-        notificationMessage: 'This account has been successfully edited.',
-        sortPriority: [
-          { label: 'All' },
-          { label: 'High Priority' },
-          { label: 'Medium Priority' },
-          { label: 'Low Priority' },
-        ],
-        sortTasks: [
-          { label: 'All Tasks' },
-          { label: 'My Tasks' },
-        ],
-      };
+    async updateCaseInFirestore(updatedCase: DocumentData) {
+      const caseRef = doc(db, "cases", updatedCase.id);
+      await updateDoc(caseRef, updatedCase);
     },
-    methods: {
-      triggerNotification(type: string, header: string, message: string) {
-        this.notificationType = type;
-        this.notificationHeader = header;
-        this.notificationMessage = message;
-        (this.$refs.notificationRef as NotificationRef).showNotification();
-      },
-      openEditModal() {
-        this.modalEditTitle = 'Edit case board';
-        this.showEditModal = true;
-      },
-      handleEditCase() {
-        this.showEditModal = false;
-        this.triggerNotification('success', 'Changes saved', 'Case board modified successfully.');
-      },
-      openAddTaskModal() {
-        this.modalAddTaskTitle = 'Create task';
-        this.showAddTaskModal = true;
-      },
-      handleAddTaskCase() {
-        this.showAddTaskModal = false;
-        this.triggerNotification('success', 'You successfully created new task', 'Your task will be added to Vilo board.');
-      },
-      handleModalClose(value: boolean) {
-        this.showEditModal = false;
-        this.showAddTaskModal = false;
-      },
-      handleDropdownClick() {
-      },
-      handleButtonClick() {
-      },
+    triggerNotification(type: string, header: string, message: string) {
+      this.notificationType = type;
+      this.notificationHeader = header;
+      this.notificationMessage = message;
+      (this.$refs.notificationRef as any).showNotification();
     },
-  });
+    openEditModal(caseItem: any) {
+      this.editableCaseDetails = JSON.parse(JSON.stringify(this.caseDetails));
+      this.modalEditTitle = 'Edit Case';
+      this.showEditModal = true;
+    },
+    async handleEditCase(updatedCase: any) {
+      this.showEditModal = false;
+      await this.updateCaseInFirestore(updatedCase);
+      await this.fetchCaseDetails();
+      this.triggerNotification('success', 'Case Updated', 'The case has been successfully updated.');
+    },
+    openAddTaskModal() {
+      this.modalAddTaskTitle = 'Create task';
+      this.showAddTaskModal = true;
+    },
+    handleAddTaskCase() {
+      this.showAddTaskModal = false;
+      this.triggerNotification('success', 'You successfully created new task', 'Your task will be added to Vilo board.');
+    },
+    handleModalClose(value: boolean) {
+      this.showEditModal = false;
+      this.showAddTaskModal = false;
+    },
+    handleDropdownClick() {
+    },
+    handleButtonClick() {
+    },
+  },
+});
 </script>
 
 <style>
-  @import url(./styles/dashboard.scss);
+@import url(./styles/dashboard.scss);
 </style>

@@ -20,7 +20,8 @@ interface List {
 interface Task {
   id: string;
   title: string;
-  priority: number;
+  description: string;
+  priority: string;
   due_date: string;
   assignedUserId: string;
   assignedUserName: string;
@@ -74,7 +75,17 @@ export default defineComponent({
       if (!this.caseId) return;
       const tasksQuery = query(collection(db, "tasks"), where("case", "==", this.caseId));
       const querySnapshot = await getDocs(tasksQuery);
-      const tasks = querySnapshot.docs.map(doc => ({ ...(doc.data() as Task), id: doc.id }));
+      const tasks = querySnapshot.docs.map(doc => {
+        const taskData = doc.data() as any; // Temporarily use 'any' to access Firestore Timestamp
+        const dueDate = taskData.due_date.toDate(); // Convert Firestore Timestamp to Date
+        const formattedDueDate = `${dueDate.getDate().toString().padStart(2, '0')}.${(dueDate.getMonth() + 1).toString().padStart(2, '0')}.${dueDate.getFullYear()}`;
+
+        return {
+          ...taskData,
+          id: doc.id,
+          due_date: formattedDueDate, // Now correctly formatted
+        };
+      });
       
 
       // Reset cards in lists
@@ -87,8 +98,9 @@ export default defineComponent({
           list.cards.push({
             id: task.id,
             title: task.title,
+            description: task.description,
             priority: task.priority,
-            due_date: new Date(task.due_date).toLocaleDateString(),
+            due_date: task.due_date,
             assignedUserId: task.assignedUserId,
             assignedUserName: '',
             status: 0,

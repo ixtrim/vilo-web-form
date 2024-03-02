@@ -54,9 +54,8 @@
         <Board :caseId="caseDetails.id" @addTask="openAddTaskModal" />
       </div>
     </div>
-
     <VModal :show="showAddTaskModal || showEditModal" :title="modalAddTaskTitle || modalEditTitle" @update:show="handleModalClose">
-      <VAddTask v-if="showAddTaskModal" :title="modalAddTaskTitle" @close-modal="showAddTaskModal = false" @save-clicked="handleAddTaskCase" />
+      <VAddTask v-if="showAddTaskModal" :title="modalAddTaskTitle" :caseId="caseDetails.id" @close-modal="showAddTaskModal = false" @save-clicked="handleAddTask" />
       <VEditCaseBoard v-if="showEditModal" :title="modalEditTitle" :caseData="editableCaseDetails" @close-modal="showEditModal = false" @save-clicked="handleEditCase" />
     </VModal>
 
@@ -215,7 +214,7 @@ export default defineComponent({
       this.modalAddTaskTitle = 'Create task';
       this.showAddTaskModal = true;
     },
-    handleAddTaskCase() {
+    handleAddTask() {
       this.showAddTaskModal = false;
       this.triggerNotification('success', 'You successfully created new task', 'Your task will be added to Vilo board.');
     },

@@ -28,24 +28,6 @@
     </div>
 
     <div class="row">
-      <div class="col-lg-6">
-        <div class="form-group">
-          <label>Priority</label>
-          <VDropdown :title="dropdownPriorityTitle" :items="dropdownPriority" @item-clicked="onPriorityChanged" />
-        </div>
-      </div>
-      <div class="col-lg-6">
-        <div class="form-group">
-          <VInput 
-            label="Due Date" 
-            placeholder="02.12.2023" 
-            v-model="localDueDate"
-          />
-        </div>
-      </div>
-    </div>
-
-    <div class="row">
       <div class="col-lg-12">
         <div class="form-group">
           <label>Assign to</label>
@@ -59,6 +41,21 @@
         <div class="form-group">
           <label>Reporter</label>
           <VDropdown :title="dropdownReporterTitle" :items="dropdownReporter" @item-clicked="onReporterChanged" />
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="form-group">
+          <label>Priority</label>
+          <VDropdown :title="dropdownPriorityTitle" :items="dropdownPriority" @item-clicked="onPriorityChanged" />
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="form-group">
+          <label>Due Date</label>
+          <VueDatePicker label="Due Date" v-model="localDueDate"></VueDatePicker>
         </div>
       </div>
     </div>
@@ -95,6 +92,8 @@
   import VTextarea from '@/components/v-textarea/v-textarea.vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
   import VButton from '@/components/v-button/VButton.vue';
+  import VueDatePicker from '@vuepic/vue-datepicker';
+  import '@vuepic/vue-datepicker/dist/main.css';
 
   interface DropdownItem {
     label: string;

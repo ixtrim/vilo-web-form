@@ -3,12 +3,6 @@
 
     <div class="row">
       <div class="col-lg-12">
-        <p>Case ID: {{ props.caseId }}</p>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-lg-12">
         <VInput 
           label="Title" 
           placeholder="New task" 

@@ -31,7 +31,7 @@
             <div v-for="task in tasks" :key="task.id" class="my-tasks__wrapper__item">
               <div class="my-tasks__wrapper__item__top">
                 <h4>{{ task.title }}</h4>
-                <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="" text="" style="display:none;"></VButton>
               </div>
               <ul class="my-tasks__wrapper__item__bottom">
                 <li>

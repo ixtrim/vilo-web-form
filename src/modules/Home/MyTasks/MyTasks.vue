@@ -136,8 +136,21 @@ export default defineComponent({
     onMounted(fetchTasks);
 
     const getTimestampVariant = (dueDate: string): string => {
-      // Placeholder logic for determining the variant based on dueDate
-      return 'primary';
+      const now = new Date();
+      const dueDateTime = convertToDate(dueDate).getTime();
+      const nowTime = now.getTime();
+      const twoDaysInMs = 2 * 24 * 60 * 60 * 1000; // 48 hours in milliseconds
+
+      if (dueDateTime < nowTime) {
+        // Task is past due
+        return 'danger';
+      } else if (dueDateTime <= nowTime + twoDaysInMs) {
+        // Task is due within the next 48 hours
+        return 'warning';
+      } else {
+        // Task is not due soon
+        return 'primary';
+      }
     };
 
     return {

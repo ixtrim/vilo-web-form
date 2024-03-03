@@ -51,7 +51,7 @@
 
     <div class="row fill-space">
       <div class="col-lg-12"> 
-        <Board :caseId="caseDetails.id" @addTask="openAddTaskModal" />
+        <Board ref="boardComponent" :caseId="caseDetails.id" @addTask="openAddTaskModal" />
       </div>
     </div>
     <VModal :show="showAddTaskModal || showEditModal" :title="modalAddTaskTitle || modalEditTitle" @update:show="handleModalClose">
@@ -66,6 +66,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, computed } from 'vue';
+import type { Ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import type { DocumentData } from 'firebase/firestore';
@@ -216,6 +217,7 @@ export default defineComponent({
     },
     handleAddTask() {
       this.showAddTaskModal = false;
+      (this.$refs.boardComponent as any).fetchTasks();
       this.triggerNotification('success', 'You successfully created new task', 'Your task will be added to Vilo board.');
     },
     handleModalClose(value: boolean) {

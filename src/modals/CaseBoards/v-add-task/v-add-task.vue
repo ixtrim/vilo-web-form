@@ -109,7 +109,7 @@
     caseId: String
   });
 
-  const emit = defineEmits(['close-modal', 'save-clicked']);
+  const emit = defineEmits(['close-modal', 'save-clicked', 'task-added']);
 
   const localTitle = ref('');
   const localDescription = ref('');
@@ -177,13 +177,13 @@
     emit('close-modal');
   }
 
-  async function saveAndClose() {
+  async function saveAndClose(event: any) {
     // Ensure all required fields are filled
     if (!localTitle.value || !localDescription.value || !localDueDate.value) {
       alert("Please fill in all required fields.");
       return;
     }
-
+    event.stopPropagation();
     try {
       const newTask = {
         title: localTitle.value,
@@ -191,15 +191,14 @@
         user_assigned: dropdownAssigned.value.find(user => user.label === dropdownAssignedTitle.value)?.value || '',
         user_reporting: dropdownReporter.value.find(user => user.label === dropdownReporterTitle.value)?.value || '',
         case: props.caseId,
-        due_date: Timestamp.fromDate(new Date(localDueDate.value)), // Assuming localDueDate is a string in YYYY-MM-DD format
+        due_date: Timestamp.fromDate(new Date(localDueDate.value)),
         created_date: Timestamp.fromDate(new Date()),
-        status: 1, // Assuming 1 is the default status for new tasks
+        status: 0,
         priority: dropdownPriority.value.find(priority => priority.label === dropdownPriorityTitle.value)?.value || 'low',
-        attachments: [], // Assuming no attachments initially
+        attachments: [],
       };
 
       await addDoc(collection(db, "tasks"), newTask);
-
       emit('save-clicked');
       closeModal();
     } catch (error) {

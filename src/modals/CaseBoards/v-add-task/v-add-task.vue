@@ -83,8 +83,8 @@
 
 <script setup lang="ts">
   import { db } from '@/firebase.js';
-  import { DocumentReference, addDoc, doc, getDoc, updateDoc, collection, getDocs, deleteDoc, query, where } from 'firebase/firestore';
-  import { onMounted, ref, watch, computed } from 'vue';
+  import { DocumentReference, addDoc, doc, getDoc, updateDoc, collection, getDocs, deleteDoc, query, where, Timestamp } from 'firebase/firestore';
+  import { defineComponent, onMounted, ref, watch, computed } from 'vue';
   import type { Ref } from 'vue';
   import type { PropType } from 'vue';
   import { defineEmits, defineProps } from 'vue';
@@ -109,11 +109,15 @@
     caseId: String
   });
 
-  const selectedPriority = ref('low');
+  const emit = defineEmits(['close-modal', 'save-clicked']);
 
   const localTitle = ref('');
   const localDescription = ref('');
-  const localDueDate = ref('');
+  const localDueDate = ref(new Date());
+  const selectedPriority = ref('low');
+  const selectedAssigned = ref('');
+  const selectedReporter = ref('');
+
   const dropdownReporter: Ref<DropdownItem[]> = ref([]);
   const dropdownAssigned: Ref<DropdownItem[]> = ref([]);
 
@@ -145,10 +149,6 @@
     }
   };
 
-
-
-  const emit = defineEmits(['close-modal', 'save-clicked', 'role-changed', 'status-changed']);
-
   const dropdownReporterTitle = ref('Matthew Bowman');
   function onReporterChanged(item: DropdownItem) {
     dropdownReporterTitle.value = item.label;
@@ -177,9 +177,35 @@
     emit('close-modal');
   }
 
-  function saveAndClose() {
-    emit('save-clicked');
-    closeModal();
+  async function saveAndClose() {
+    // Ensure all required fields are filled
+    if (!localTitle.value || !localDescription.value || !localDueDate.value) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      const newTask = {
+        title: localTitle.value,
+        description: localDescription.value,
+        user_assigned: dropdownAssigned.value.find(user => user.label === dropdownAssignedTitle.value)?.value || '',
+        user_reporting: dropdownReporter.value.find(user => user.label === dropdownReporterTitle.value)?.value || '',
+        case: props.caseId,
+        due_date: Timestamp.fromDate(new Date(localDueDate.value)), // Assuming localDueDate is a string in YYYY-MM-DD format
+        created_date: Timestamp.fromDate(new Date()),
+        status: 1, // Assuming 1 is the default status for new tasks
+        priority: dropdownPriority.value.find(priority => priority.label === dropdownPriorityTitle.value)?.value || 'low',
+        attachments: [], // Assuming no attachments initially
+      };
+
+      await addDoc(collection(db, "tasks"), newTask);
+
+      emit('save-clicked');
+      closeModal();
+    } catch (error) {
+      console.error("Failed to add new task:", error);
+      alert("Failed to add new task. Please try again.");
+    }
   }
 </script>
 

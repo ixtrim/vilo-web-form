@@ -24,10 +24,10 @@
             </li>
           </ul>
 
-          <div class="my-tasks__wrapper__item" style="display: none;">
+          <div class="my-tasks__wrapper__item">
             <div class="my-tasks__wrapper__item__top">
               <h4>Create contract template for Employment Assignment</h4>
-              <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="" text=""></VButton>
+              <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="" text="" style="display: none;"></VButton>
             </div>
             <ul class="my-tasks__wrapper__item__bottom">
               <li>
@@ -39,10 +39,10 @@
             </ul>
           </div>
 
-          <div class="my-tasks__wrapper__item" style="display: none;">
+          <div class="my-tasks__wrapper__item">
             <div class="my-tasks__wrapper__item__top">
               <h4>Create contract template for Employment Assignment</h4>
-              <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="" text=""></VButton>
+              <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="" text="" style="display: none;"></VButton>
             </div>
             <ul class="my-tasks__wrapper__item__bottom">
               <li>
@@ -54,10 +54,10 @@
             </ul>
           </div>
 
-          <div class="my-tasks__wrapper__item" style="display: none;">
+          <div class="my-tasks__wrapper__item">
             <div class="my-tasks__wrapper__item__top">
               <h4>Create contract template for Employment Assignment</h4>
-              <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="" text=""></VButton>
+              <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="" text="" style="display: none;"></VButton>
             </div>
             <ul class="my-tasks__wrapper__item__bottom">
               <li>
@@ -69,10 +69,10 @@
             </ul>
           </div>
 
-          <div class="my-tasks__wrapper__item" style="display: none;">
+          <div class="my-tasks__wrapper__item">
             <div class="my-tasks__wrapper__item__top">
               <h4>Create contract template for Employment Assignment</h4>
-              <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="" text=""></VButton>
+              <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="" text="" style="display: none;"></VButton>
             </div>
             <ul class="my-tasks__wrapper__item__bottom">
               <li>

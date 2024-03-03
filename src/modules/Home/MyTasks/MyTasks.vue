@@ -117,8 +117,21 @@ export default defineComponent({
         };
       });
 
-      tasks.value = await Promise.all(tasksPromises);
+      const unsortedTasks = await Promise.all(tasksPromises);
+
+      // Sort tasks by due_date
+      tasks.value = unsortedTasks.sort((a, b) => {
+        const dateA = convertToDate(a.due_date).getTime();
+        const dateB = convertToDate(b.due_date).getTime();
+        return dateA - dateB;
+      });
     };
+
+    // Helper function to convert DD.MM.YYYY string to Date object
+    function convertToDate(dateString: string): Date {
+      const [day, month, year] = dateString.split('.').map(Number);
+      return new Date(year, month - 1, day);
+    }
 
     onMounted(fetchTasks);
 

@@ -31,7 +31,7 @@
             <div v-for="task in tasks" :key="task.id" class="my-tasks__wrapper__item">
               <div class="my-tasks__wrapper__item__top">
                 <h4>{{ task.title }}</h4>
-                <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="" text="" style="display:none;"></VButton>
               </div>
               <ul class="my-tasks__wrapper__item__bottom">
                 <li>
@@ -117,8 +117,21 @@ export default defineComponent({
         };
       });
 
-      tasks.value = await Promise.all(tasksPromises);
+      const unsortedTasks = await Promise.all(tasksPromises);
+
+      // Sort tasks by due_date
+      tasks.value = unsortedTasks.sort((a, b) => {
+        const dateA = convertToDate(a.due_date).getTime();
+        const dateB = convertToDate(b.due_date).getTime();
+        return dateA - dateB;
+      });
     };
+
+    // Helper function to convert DD.MM.YYYY string to Date object
+    function convertToDate(dateString: string): Date {
+      const [day, month, year] = dateString.split('.').map(Number);
+      return new Date(year, month - 1, day);
+    }
 
     onMounted(fetchTasks);
 

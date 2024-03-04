@@ -84,7 +84,7 @@ const links = computed(() => {
       { name: 'Clients', to: '/clients-management', icon: 'left', iconStyle: 'clients' },
       //{ name: 'Library', to: '/library', icon: 'left', iconStyle: 'library' },
       //{ name: 'Invoices', to: '/invoices', icon: 'left', iconStyle: 'invoices' },
-      //{ name: 'Calendar', to: '/calendar', icon: 'left', iconStyle: 'calendar' },
+      { name: 'Calendar', to: '/calendar', icon: 'left', iconStyle: 'calendar' },
       { name: 'Chat', to: '/chat', icon: 'left', iconStyle: 'chat', badge: chatBadgeNumber },
     ];
   }

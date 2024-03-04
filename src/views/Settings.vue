@@ -219,14 +219,14 @@ export default defineComponent({
       }
     },
     async fetchViewData() {
-      /*try {
+      try {
         const docRef = doc(db, "settings", "general");
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
           this.appName = docSnap.data().app_name;
-          this.appTimezone = docSnap.data().app_timezone || 'Select Timezone';
-          this.appTimeFormat = docSnap.data().app_timeformat || 'Select Date format';
+          //this.appTimezone = docSnap.data().app_timezone || 'Select Timezone';
+          //this.appTimeFormat = docSnap.data().app_timeformat || 'Select Date format';
           this.appServices = (docSnap.data().app_services as string[]).map(service => ({ value: service }));
         } else {
           console.log("No such document!");
@@ -239,7 +239,7 @@ export default defineComponent({
         setTimeout(() => {
           this.initialDataLoaded = true;
         }, 750);
-      }*/
+      }
     },
     async userInitiatedUpdateAppName() {
       try {

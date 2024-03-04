@@ -33,7 +33,6 @@ export default {
         if (!monthlyTotals[monthYear]) {
           monthlyTotals[monthYear] = 0;
         }
-        alert(invoice.total_amount);
         monthlyTotals[monthYear] += invoice.total_amount;
         
       });

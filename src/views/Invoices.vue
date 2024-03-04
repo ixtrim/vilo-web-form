@@ -99,7 +99,7 @@
             <div 
               class="dashboard__table__page__item"
               v-for="(item, index) in items"
-              :key="index"
+              :key="index" style="display: none;"
             >
               <div class="col col--checkbox">
                 <input type="checkbox" />

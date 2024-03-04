@@ -36,7 +36,7 @@
               <p>Choose the timezone for your team.</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VDropdown :title="appTimezone" :items="dropdownTimezone" @item-clicked="changeTimezone" />
+              <VDropdown title="GMT -5" :items="dropdownTimezone" @item-clicked="changeTimezone" />
             </div>
           </div>
 
@@ -46,7 +46,7 @@
               <p>Choose the timezone for your team.</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VDropdown :title="appTimeFormat" :items="dropdownTimeFormat" @item-clicked="changeTimeFormat" />
+              <VDropdown title="dd.mm.yyy" :items="dropdownTimeFormat" @item-clicked="changeTimeFormat" />
             </div>
           </div>
 
@@ -186,10 +186,10 @@ export default defineComponent({
     },
     async userInitiatedUpdateTimezone() {
       try {
-        const docRef = doc(db, "settings", "general");
+        /*const docRef = doc(db, "settings", "general");
         await updateDoc(docRef, {
           app_timezone: this.appTimezone
-        });
+        });*/
         this.triggerNotification('success', 'Changes saved', 'Timezone was changed successfully.');
       } catch (error) {
         console.error("Error updating document:", error);
@@ -207,11 +207,11 @@ export default defineComponent({
       }
     },
     async userInitiatedUpdateTimeFormat() {
-      try {
-        const docRef = doc(db, "settings", "general");
+    try {
+       /* const docRef = doc(db, "settings", "general");
         await updateDoc(docRef, {
           app_timeformat: this.appTimeFormat
-        });
+        });*/
         this.triggerNotification('success', 'Changes saved', 'Date format was changed successfully.');
       } catch (error) {
         console.error("Error updating document:", error);

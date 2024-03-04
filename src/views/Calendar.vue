@@ -1,100 +1,70 @@
 <template>
   <div class="container-fluid">
-
     <div class="row">
       <div class="col-lg-10">
         <div class="dashboard__heading">
           <h1>Calendar</h1>
-          <p> Create and manage your meetings and events.</p>
+          <p>Create and manage your meetings and events.</p>
         </div>
       </div>
-      <div class="col-lg-2" style="display: none;">
-        <VButton :block="true" size="md" icon="left" icon-style="add-white" @click="handleButtonClick" text="Add new event"></VButton>
+      <div class="col-lg-2">
+        <VButton :block="true" size="md" icon="left" icon-style="add-white" @click="signIn" text="Sign In"></VButton>
       </div>
     </div>
 
     <div class="row fill-space">
-      <div class="col-lg-12">
-        <p>Your e-mail account need to be integrated with Google Calendar.</p>
+      <div class="col-lg-12" v-if="isSignedIn">
+        <p>Calendar integration successful. You can now manage your meetings and events.</p>
+      </div>
+      <div class="col-lg-12" v-else>
+        <p>Your e-mail account needs to be integrated with Google Calendar.</p>
       </div>
     </div>
-
-    
-
-    
-
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
-import VLink from '@/components/v-link/VLink.vue';
+<script setup>
+import { ref, onMounted } from 'vue';
 import VButton from '@/components/v-button/VButton.vue';
-import Search   from '@/modules/Navigation/Search.vue';
-import VUser from '@/components/v-user/v-user.vue';
-import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
-import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
 
-export default defineComponent({
-  components: {
-    Search,
-    VLink,
-    VButton,
-    VUser,
-    VPaginationList,
-    VModalSmall,
-  },
-  data() {
-    return {
-      userName: 'Olivia Rhye',
-      userEmail: 'olivia@untitledui.com'
-    };
-  },
-  setup() {
-    const itemsPerPage = 10;
-    const allItems = ref([
-      { id: 1, name: 'Page 1' },
-      { id: 2, name: 'Page 2' },
-      { id: 3, name: 'Page 3' },
-      { id: 4, name: 'Page 4' },
-      { id: 5, name: 'Page 5' },
-      { id: 6, name: 'Page 6' },
-      { id: 7, name: 'Page 7' },
-      { id: 8, name: 'Page 8' },
-      { id: 9, name: 'Page 9' },
-      { id: 10, name: 'Page 10' },
-      { id: 11, name: 'Page 11' },
-      { id: 12, name: 'Page 12' },
-    ]);
-    const currentPage = ref(1);
+const CLIENT_ID = '25628282085-eam0js4alo06mr3vb10nifeo2nfd1pts.apps.googleusercontent.com';
+const API_KEY = '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';
+const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+const SCOPES = "https://www.googleapis.com/auth/calendar.events";
 
-    const totalPages = computed(() => Math.ceil(allItems.value.length / itemsPerPage));
+const isSignedIn = ref(false);
 
-    const paginatedItems = computed(() => {
-      const start = (currentPage.value - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      return allItems.value.slice(start, end);
-    });
+function handleClientLoad() {
+  gapi.load('client:auth2', initClient);
+}
 
-    const updatePage = (newPage: number) => {
-      currentPage.value = newPage;
-    };
+function initClient() {
+  gapi.client.init({
+    apiKey: API_KEY,
+    clientId: CLIENT_ID,
+    discoveryDocs: DISCOVERY_DOCS,
+    scope: SCOPES
+  }).then(() => {
+    gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+    updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+  }, (error) => {
+    console.error(JSON.stringify(error, null, 2));
+  });
+}
 
-    return {
-      paginatedItems,
-      totalPages,
-      currentPage,
-      updatePage
-    };
-  },
-  methods: {
-    handleButtonClick() {
-      
-    },
-  },
+function updateSigninStatus(isSignedInStatus) {
+  isSignedIn.value = isSignedInStatus;
+}
+
+function signIn() {
+  gapi.auth2.getAuthInstance().signIn();
+}
+
+onMounted(() => {
+  handleClientLoad();
 });
 </script>
 
 <style>
-  @import url(./styles/dashboard.scss);
+@import url(./styles/dashboard.scss);
 </style>

@@ -9,7 +9,7 @@
           :block="true"
         >
           <span>{{ link.name }}</span>
-          <v-badge v-if="link.name === 'Team'" variant="primary">{{ pendingUsersCount }}</v-badge>
+          <v-badge v-if="link.name === 'Team' && pendingUsersCount > 0" variant="primary">{{ pendingUsersCount }}</v-badge>
         </v-link>
       </li>
     </ul>

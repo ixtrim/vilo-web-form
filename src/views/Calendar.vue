@@ -16,15 +16,15 @@
     <div class="row fill-space">
       <div class="col-lg-12">
         <FullCalendar
-      :plugins="calendarPlugins"
-      :initialView="'dayGridMonth'"
-      :headerToolbar="{
-        left: 'prev,next today',
-        center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-      }"
-      :events="calendarEvents"
-    />
+          :plugins="calendarPlugins"
+          :initialView="'dayGridMonth'"
+          :headerToolbar="{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+          }"
+          :events="calendarEvents"
+        />
         <p>Your e-mail account need to be integrated with Google Calendar.</p>
       </div>
     </div>
@@ -34,7 +34,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import FullCalendar from '@fullcalendar/vue3'; // Corrected import
+import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -85,6 +85,21 @@ function convertEvents(googleEvents) {
     url: event.htmlLink, // Link to the Google Calendar event
   }));
 }
+
+async function fetchGoogleCalendarEvents() {
+  // This is a placeholder function. You need to replace it with actual API calls to fetch events.
+  // Below is a mock response structure. Replace it with actual response handling from Google Calendar API.
+  return [
+    {
+      summary: 'Event 1',
+      start: { dateTime: '2024-03-10T10:00:00' },
+      end: { dateTime: '2024-03-10T12:00:00' },
+      htmlLink: 'https://www.google.com/calendar/event?eid=event_id'
+    },
+    // Add more events as needed
+  ];
+}
+
 
 onMounted(async () => {
   // Initialize Google API and fetch events

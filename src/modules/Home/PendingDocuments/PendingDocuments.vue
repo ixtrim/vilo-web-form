@@ -49,7 +49,7 @@
                 <p>{{ file.last_updated }}</p>
               </div>
               <div class="col col--l-created">
-                <VUser :userName="file.createdByDetails.name" :userEmail="file.createdByDetails.email" :userAvatar="file.createdByDetails.avatar" />
+                <VUser :userName="file.createdByDetails.name" :userEmail="truncateEmail(file.createdByDetails.email)" :userAvatar="file.createdByDetails.avatar" />
               </div>
               <div class="col col--l-sign">
                 <VButton :block="false" size="md" styled="primary" @click="" text="Sign"></VButton>
@@ -101,6 +101,10 @@ export default defineComponent({
   setup() {
     const files = ref<File[]>([]);
 
+    const truncateEmail = (email: string) => {
+      return email.length > 25 ? `${email.substring(0, 22)}...` : email;
+    };
+
     const fetchFiles = async () => {
       const filesQuery = query(collection(db, "files"), where("status", "==", 0), limit(3));
       const querySnapshot = await getDocs(filesQuery);
@@ -149,6 +153,7 @@ export default defineComponent({
 
     return {
       files,
+      truncateEmail,
     };
   },
 });

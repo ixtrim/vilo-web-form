@@ -1,6 +1,5 @@
 <template>
   <div class="container-fluid">
-
     <div class="row">
       <div class="col-lg-10">
         <div class="dashboard__heading">
@@ -9,7 +8,26 @@
         </div>
       </div>
       <div class="col-lg-2">
-        <VButton :block="true" size="md" icon="left" icon-style="add-white" @click="signIn" text="Sign In"></VButton>
+        <!-- Sign In Button -->
+        <VButton
+          v-if="!isSignedIn"
+          :block="true"
+          size="md"
+          icon="left"
+          icon-style="add-white"
+          @click="signIn"
+          text="Sign In"
+        ></VButton>
+        <!-- Sign Out Button -->
+        <VButton
+          v-else
+          :block="true"
+          size="md"
+          icon="left"
+          icon-style="add-white"
+          @click="signOut"
+          text="Sign Out"
+        ></VButton>
       </div>
     </div>
 
@@ -25,10 +43,9 @@
           }"
           :events="calendarEvents"
         />
-        <p>Your e-mail account need to be integrated with Google Calendar.</p>
+        <p v-if="!isSignedIn">Your e-mail account needs to be integrated with Google Calendar.</p>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -74,6 +91,14 @@ function updateSigninStatus(isSignedInStatus) {
 
 function signIn() {
   gapi.auth2.getAuthInstance().signIn();
+}
+
+function signOut() {
+  var auth2 = gapi.auth2.getAuthInstance();
+  auth2.signOut().then(function () {
+    console.log('User signed out.');
+    updateSigninStatus(false);
+  });
 }
 
 // Convert Google Calendar events to FullCalendar event format

@@ -108,7 +108,7 @@
                 </VStatus>
               </div>
               <div class="col col--inv-customer">
-                <VUser userName="" userEmail="" />
+                <VUser :userName="invoice.clientName" :userEmail="truncateEmail(invoice.clientEmail)" :userAvatar="invoice.clientAvatar" />
               </div>
               <div class="col col--inv-reminder">
                 
@@ -160,12 +160,13 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed } from 'vue';
 import { db } from '@/firebase.js';
-import { collection, query, getDocs } from 'firebase/firestore';
+import { collection, query, getDocs, doc, getDoc } from 'firebase/firestore';
 import VStatus from '@/components/v-status/VStatus.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
 import VAddInvoice from '@/modals/Invoices/v-add-invoice/v-add-invoice.vue';
 import VPreviewInvoice from '@/modals/Invoices/v-preview-invoice/v-preview-invoice.vue';
+import VUser from '@/components/v-user/v-user.vue';
 
 interface Invoice {
   id: string;
@@ -187,6 +188,7 @@ export default defineComponent({
     VAddInvoice,
     VPreviewInvoice,
     VStatus,
+    VUser,
   },
   setup() {
     const invoices = ref<Invoice[]>([]);
@@ -194,19 +196,34 @@ export default defineComponent({
     const itemsPerPage = ref(10);
     const searchTerm = ref('');
 
+    const truncateEmail = (email: string) => {
+      return email.length > 35 ? `${email.substring(0, 32)}...` : email;
+    };
+
     const fetchInvoices = async () => {
       const querySnapshot = await getDocs(collection(db, "invoices"));
-      invoices.value = querySnapshot.docs.map(doc => {
-        const data = doc.data();
+      const invoicePromises = querySnapshot.docs.map(async (docSnapshot) => {
+        const invoiceData = docSnapshot.data();
+        const clientDocRef = doc(db, "users", invoiceData.client_id);
+        const clientDocSnap = await getDoc(clientDocRef);
+        let clientName = "Unknown";
+        let clientEmail = "No Email";
+        let clientAvatar = "Default Avatar URL"; // Set a default avatar URL here
+        if (clientDocSnap.exists()) {
+          const clientData = clientDocSnap.data();
+          clientName = clientData.full_name || "Unknown";
+          clientEmail = clientData.email || "No Email";
+          clientAvatar = clientData.avatar || "Default Avatar URL"; // Use the default avatar URL if not present
+        }
         return {
-          id: doc.id,
-          number: data.number,
-          case: data.case,
-          due_date: data.due_date,
-          status: data.status,
-          client_id: data.client_id,
+          ...invoiceData, // Spread the existing invoice data
+          id: docSnapshot.id,
+          clientName,
+          clientEmail,
+          clientAvatar,
         };
       });
+      invoices.value = await Promise.all(invoicePromises);
     };
 
     onMounted(fetchInvoices);
@@ -235,6 +252,7 @@ export default defineComponent({
       totalPages,
       searchTerm,
       fetchInvoices,
+      truncateEmail,
     };
   },
   methods: {

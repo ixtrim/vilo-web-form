@@ -1,5 +1,6 @@
 <template>
   <div class="container-fluid">
+
     <div class="row">
       <div class="col-lg-10">
         <div class="dashboard__heading">
@@ -13,18 +14,30 @@
     </div>
 
     <div class="row fill-space">
-      <div class="col-lg-12" v-if="isSignedIn">
-        <p>Calendar integration successful. You can now manage your meetings and events.</p>
-      </div>
-      <div class="col-lg-12" v-else>
-        <p>Your e-mail account needs to be integrated with Google Calendar.</p>
+      <div class="col-lg-12">
+        <FullCalendar
+      :plugins="calendarPlugins"
+      :initialView="'dayGridMonth'"
+      :headerToolbar="{
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      }"
+      :events="calendarEvents"
+    />
+        <p>Your e-mail account need to be integrated with Google Calendar.</p>
       </div>
     </div>
+
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import FullCalendar from '@fullcalendar/vue3'; // Corrected import
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
 import VButton from '@/components/v-button/VButton.vue';
 
 const CLIENT_ID = '25628282085-eam0js4alo06mr3vb10nifeo2nfd1pts.apps.googleusercontent.com';
@@ -33,6 +46,9 @@ const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v
 const SCOPES = "https://www.googleapis.com/auth/calendar.events";
 
 const isSignedIn = ref(false);
+
+const calendarPlugins = [dayGridPlugin, timeGridPlugin, interactionPlugin];
+const calendarEvents = ref([]);
 
 function handleClientLoad() {
   gapi.load('client:auth2', initClient);
@@ -59,6 +75,23 @@ function updateSigninStatus(isSignedInStatus) {
 function signIn() {
   gapi.auth2.getAuthInstance().signIn();
 }
+
+// Convert Google Calendar events to FullCalendar event format
+function convertEvents(googleEvents) {
+  return googleEvents.map(event => ({
+    title: event.summary,
+    start: event.start.dateTime || event.start.date, // Use dateTime for timed events and date for all-day events
+    end: event.end.dateTime || event.end.date,
+    url: event.htmlLink, // Link to the Google Calendar event
+  }));
+}
+
+onMounted(async () => {
+  // Initialize Google API and fetch events
+  await initClient(); // Make sure this function is defined and correctly initializes the Google API
+  const googleEvents = await fetchGoogleCalendarEvents(); // Fetch events from Google Calendar
+  calendarEvents.value = convertEvents(googleEvents);
+});
 
 onMounted(() => {
   handleClientLoad();

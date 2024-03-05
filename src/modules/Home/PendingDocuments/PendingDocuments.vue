@@ -35,63 +35,21 @@
 
           <div class="dashboard__table__page">
 
-            <div class="dashboard__table__page__item" style="display: none;">
+            <div v-for="file in files" :key="file.id" class="dashboard__table__page__item">
               <div class="col col--l-document">
-                <VFile file-extension="pdf" file-name="Tech requirements.pdf" file-size="200 KB" />
-              </div>
-              <div class="col col--l-status">
-                <VBadge variant="light">Draft</VBadge>
-              </div>
-              <div class="col col--l-uploaded">
-                <p>Jan 1, 2022</p>
-              </div>
-              <div class="col col--l-updated">
-                <p>Jan 4, 2022</p>
-              </div>
-              <div class="col col--l-created">
-                <VUser userName="Phoenix Baker" userEmail="phoenix@untitledui.com" />
-              </div>
-              <div class="col col--l-sign">
-                <VButton :block="false" size="md" styled="primary" @click="" text="Sign"></VButton>
-              </div>
-            </div>
-
-            <div class="dashboard__table__page__item" style="display: none;">
-              <div class="col col--l-document">
-                <VFile file-extension="docx" file-name="Dashboard screenshot.docx" file-size="720 KB" />
+                <VFile :file-extension="file.extension" :file-name="file.document_name" :file-size="file.size" />
               </div>
               <div class="col col--l-status">
                 <VBadge variant="warning">Pending</VBadge>
               </div>
               <div class="col col--l-uploaded">
-                <p>Jan 1, 2022</p>
+                <p>{{ file.date_uploaded }}</p>
               </div>
               <div class="col col--l-updated">
-                <p>Jan 4, 2022</p>
+                <p>{{ file.last_updated }}</p>
               </div>
               <div class="col col--l-created">
-                <VUser userName="Phoenix Baker" userEmail="phoenix@untitledui.com" />
-              </div>
-              <div class="col col--l-sign">
-                <VButton :block="false" size="md" styled="primary" @click="" text="Sign"></VButton>
-              </div>
-            </div>
-
-            <div class="dashboard__table__page__item" style="display: none;">
-              <div class="col col--l-document">
-                <VFile file-extension="doc" file-name="Dashboard prototype recording.doc" file-size="16 MB" />
-              </div>
-              <div class="col col--l-status">
-                <VBadge variant="warning">Pending</VBadge>
-              </div>
-              <div class="col col--l-uploaded">
-                <p>Jan 1, 2022</p>
-              </div>
-              <div class="col col--l-updated">
-                <p>Jan 4, 2022</p>
-              </div>
-              <div class="col col--l-created">
-                <VUser userName="Phoenix Baker" userEmail="phoenix@untitledui.com" />
+                <VUser :userName="file.createdByDetails.name" :userEmail="file.createdByDetails.email" :userAvatar="file.createdByDetails.avatar" />
               </div>
               <div class="col col--l-sign">
                 <VButton :block="false" size="md" styled="primary" @click="" text="Sign"></VButton>
@@ -107,12 +65,30 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
+import { db } from '@/firebase.js';
+import { doc, getDoc, query, collection, orderBy, limit, getDocs, where } from 'firebase/firestore';
 import VLink from '@/components/v-link/VLink.vue';
 import VBadge from '@/components/v-badge/VBadge.vue';
 import VUser from '@/components/v-user/v-user.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import VFile from '@/components/v-file/VFile.vue';
+
+interface File {
+  id: string;
+  document_name: string;
+  extension: string;
+  size: string;
+  date_uploaded: string;
+  last_updated: string;
+  createdBy: string;
+  createdByDetails: { // Add a new property to hold user details
+    name: string;
+    email: string;
+    avatar: string;
+  };
+  status: number;
+}
 
 export default defineComponent({
   components: {
@@ -122,8 +98,62 @@ export default defineComponent({
     VButton,
     VFile,
   },
+  setup() {
+    const files = ref<File[]>([]);
+
+    const fetchFiles = async () => {
+      const filesQuery = query(collection(db, "files"), where("status", "==", 0), limit(3));
+      const querySnapshot = await getDocs(filesQuery);
+      const filesWithUserDetails = await Promise.all(querySnapshot.docs.map(async (docSnapshot) => {
+        const fileData = docSnapshot.data();
+        const userDocRef = doc(db, "users", fileData.created_by);
+        const userDocSnap = await getDoc(userDocRef);
+        let createdByDetails = {
+          name: "Unknown User",
+          email: "No Email",
+          avatar: "Default Avatar URL"
+        };
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          createdByDetails = {
+            name: userData.full_name || "Unknown User",
+            email: userData.email || "No Email",
+            avatar: userData.avatar || "Default Avatar URL"
+          };
+        }
+        return {
+          id: docSnapshot.id,
+          document_name: fileData.document_name,
+          extension: fileData.extension,
+          size: "2MB", // Adjust as needed
+          date_uploaded: fileData.date_uploaded.toDate().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          }),
+          last_updated: fileData.last_updated.toDate().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          }),
+          createdBy: fileData.created_by,
+          createdByDetails, // Add user details to the file object
+          status: fileData.status,
+        };
+      }));
+
+      files.value = filesWithUserDetails;
+    };
+
+    onMounted(fetchFiles);
+
+    return {
+      files,
+    };
+  },
 });
 </script>
+
 
 <style>
   @import url(./PendingDocuments.scss);

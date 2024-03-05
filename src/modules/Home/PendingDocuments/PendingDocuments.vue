@@ -106,7 +106,7 @@ export default defineComponent({
     };
 
     const fetchFiles = async () => {
-      const filesQuery = query(collection(db, "files"), where("status", "==", 0), limit(3));
+      const filesQuery = query(collection(db, "files"), where("status", "==", 1), limit(8));
       const querySnapshot = await getDocs(filesQuery);
       const filesWithUserDetails = await Promise.all(querySnapshot.docs.map(async (docSnapshot) => {
         const fileData = docSnapshot.data();

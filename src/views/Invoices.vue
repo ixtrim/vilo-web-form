@@ -97,7 +97,7 @@
                 <h5>{{ invoice.number }}</h5>
               </div>
               <div class="col col--inv-case">
-                <p>{{  }}</p>
+                <VLink :to="`/case-board/${invoice.case}`" isRouteLink styled="secondary" icon="left" icon-style="tag">{{ invoice.caseTitle }}</VLink>
               </div>
               <div class="col col--inv-date">
                 <p>{{ formatDate(invoice.due_date) }}</p>
@@ -167,6 +167,7 @@ import VModal from '@/components/v-modal/v-modal.vue';
 import VAddInvoice from '@/modals/Invoices/v-add-invoice/v-add-invoice.vue';
 import VPreviewInvoice from '@/modals/Invoices/v-preview-invoice/v-preview-invoice.vue';
 import VUser from '@/components/v-user/v-user.vue';
+import VLink from '@/components/v-link/VLink.vue';
 
 interface Invoice {
   id: string;
@@ -189,6 +190,7 @@ export default defineComponent({
     VPreviewInvoice,
     VStatus,
     VUser,
+    VLink,
   },
   setup() {
     const invoices = ref<Invoice[]>([]);
@@ -204,6 +206,7 @@ export default defineComponent({
       const querySnapshot = await getDocs(collection(db, "invoices"));
       const invoicePromises = querySnapshot.docs.map(async (docSnapshot) => {
         const invoiceData = docSnapshot.data();
+        // Fetch client details
         const clientDocRef = doc(db, "users", invoiceData.client_id);
         const clientDocSnap = await getDoc(clientDocRef);
         let clientName = "Unknown";
@@ -215,12 +218,21 @@ export default defineComponent({
           clientEmail = clientData.email || "No Email";
           clientAvatar = clientData.avatar || "Default Avatar URL"; // Use the default avatar URL if not present
         }
+        // Fetch case details
+        const caseDocRef = doc(db, "cases", invoiceData.case);
+        const caseDocSnap = await getDoc(caseDocRef);
+        let caseTitle = "Unknown Case";
+        if (caseDocSnap.exists()) {
+          const caseData = caseDocSnap.data();
+          caseTitle = caseData.title || "Unknown Case";
+        }
         return {
           ...invoiceData, // Spread the existing invoice data
           id: docSnapshot.id,
           clientName,
           clientEmail,
           clientAvatar,
+          caseTitle, // Include the case title
         };
       });
       invoices.value = await Promise.all(invoicePromises);

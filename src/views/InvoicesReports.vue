@@ -21,6 +21,21 @@
       </div>
     </div>
 
+    <div class="row mb-4">
+      <div class="col-lg-7">
+        <TotalIncome />
+      </div>
+      <div class="col-lg-5">
+        <div class="dashboard__heading">
+          <h4>Tax Due</h4>
+          <p>Keep track of your income</p>
+        </div>
+        <div class="row">
+          <ClientsBreakdown />
+        </div>
+      </div>
+    </div>
+
     <div class="row">
       <div class="col-lg-12">
         <div class="dashboard__heading mb-3">
@@ -183,6 +198,8 @@ import Search from '@/modules/Navigation/Search.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import VBreadcrumbs from '@/components/v-breadcrumbs/VBreadcrumbs.vue';
+import TotalIncome from '@/modules/InvoicesReports/TotalIncome/TotalIncome.vue';
+import ClientsBreakdown from '@/modules/InvoicesReports/ClientsBreakdown/ClientsBreakdown.vue';
 
 interface Invoice {
   id: string;
@@ -210,6 +227,8 @@ export default defineComponent({
     VPaginationList,
     VDropdown,
     VBreadcrumbs,
+    TotalIncome,
+    ClientsBreakdown,
   },
   setup() {
     const invoices = ref<Invoice[]>([]);
@@ -222,7 +241,7 @@ export default defineComponent({
     const modalPreviewInvoiceTitle = ref('');
 
     const breadcrumbs = computed(() => [
-      { text: 'Invoices', to: '/case-boards' },
+      { text: 'Invoices', to: '/invoices' },
       { text: 'Reports' || '/invoices-reports' }
     ]);
 

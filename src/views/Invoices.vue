@@ -16,7 +16,6 @@
               isRouteLink 
               styled="alternate"
               :block="true"
-              @click.prevent="handleLogout"
             >Reports</VLink>
           </li>
           <li>

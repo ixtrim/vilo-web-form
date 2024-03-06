@@ -32,7 +32,18 @@
     </div>
 
     <div class="row fill-space">
-      
+      <div class="col-lg-12" v-if="!isSignedIn">
+        <FullCalendar
+          :plugins="calendarPlugins"
+          :initialView="'dayGridMonth'"
+          :headerToolbar="{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+          }"
+          :events="calendarEvents"
+        />
+      </div>
       <div class="empty-list">
         <div class="empty-list__wrapper">
           <v-iconbox class="v-google" />

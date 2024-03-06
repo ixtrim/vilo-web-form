@@ -32,18 +32,21 @@
     </div>
 
     <div class="row fill-space">
-      <div class="col-lg-12">
-        <FullCalendar
-          :plugins="calendarPlugins"
-          :initialView="'dayGridMonth'"
-          :headerToolbar="{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-          }"
-          :events="calendarEvents"
-        />
-        <p v-if="!isSignedIn">Your e-mail account needs to be integrated with Google Calendar.</p>
+      
+      <div class="empty-list">
+        <div class="empty-list__wrapper">
+          <v-iconbox class="v-google" />
+          <h4>Sign In into your Google Calendar</h4>
+          <VButton
+            v-if="!isSignedIn"
+            :block="true"
+            size="md"
+            icon="left"
+            icon-style="add-white"
+            @click="signIn"
+            text="Sign In Now"
+          ></VButton>
+        </div>
       </div>
     </div>
   </div>
@@ -56,6 +59,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import VButton from '@/components/v-button/VButton.vue';
+import VIconbox from '@/components/v-iconbox/VIconbox.vue';
 
 const CLIENT_ID = '25628282085-eam0js4alo06mr3vb10nifeo2nfd1pts.apps.googleusercontent.com';
 const API_KEY = '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';

@@ -93,6 +93,46 @@
     padding: 0;
     margin: 0;
   }
+
+  .empty-list {
+    flex: 1 1 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url(../../assets/backgrounds/full-circles.svg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+
+    &__wrapper {
+      width: 100%;
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      top: 22px;
+
+      .iconbox-wrapper {
+        margin-top: 75px;
+      }
+
+      h4 {
+        margin: 16px 0 0;
+        padding: 0;
+        font-size: 18px;
+        line-height: 18px;
+        font-weight: 600;
+        font-family: var(--v-font-inter-semi-bold);
+        color: var(--v-gray-900);
+      }
+
+      .v-button {
+        width: auto;
+        margin: 32px auto 0;
+        display: inline-block;
+      }
+    }
+  }
   
   &__heading {
     width: 100%;

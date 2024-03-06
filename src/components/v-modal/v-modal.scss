@@ -73,6 +73,32 @@
       overflow-y: auto;
       overflow-x: hidden;
 
+      hr {
+        margin: 20px 0;
+        padding: 0;
+        border: none;
+        border-bottom: 1px solid var(--v-gray-300);
+      }
+
+      strong {
+        color: var(--v-gray-700);
+      }
+
+      small {
+        color: var(--v-gray-500);
+        font-size: 12px;
+      }
+
+      a {
+        color: var(--v-primary-indigo-700);
+        text-decoration: none;
+        font-weight: 500;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
       &::-webkit-scrollbar-track {
         border-radius: 6px;
         background-color: var(--v-gray-100);

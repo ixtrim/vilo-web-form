@@ -111,6 +111,41 @@
       </div>
     </div>
 
+    <div class="row">
+      <div class="col-lg-12">
+        <hr />
+        <strong style="">User Google Calendar Integration</strong><br/><br/>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="form-group">
+          <label></label>
+          <VInput 
+            label="Google Calendar API key" 
+            placeholder="ex. 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" 
+            v-model="localUserGoogleCalendarAPIKey"
+          />
+          <small>In the Google Cloud console, go to Menu menu > APIs & Services > Credentials. Click Create credentials > API key. Your new API key is displayed. Click Copy content_copy to copy your API key for use in your app's code. <a href="https://cloud.google.com/docs/authentication/api-keys" target="_blank">Here you can find more information.</a></small>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="form-group">
+          <label></label>
+          <VInput 
+            label="Google Calendar ID" 
+            placeholder="ex. abcdeaa21f268@group.calendar.google.com" 
+            v-model="localUserGoogleCalendarID"
+          />
+          <small>Click on the three vertical dot menu option next to your name or the primary calendar name. Select Settings and sharing. Scroll down on the screen and select Integrate calendar. You will find your Calendar ID. <a href="https://support.google.com/calendar/answer/37083?hl=en" target="_blank">Here you can find more information.</a></small>
+        </div>
+      </div>
+    </div>
+
   </div>
   <div class="modal-footer">
     <ul class="modal-footer__actions">
@@ -165,6 +200,8 @@
     userStatus: Number,
     userNotes: String,
     userAvatar: String,
+    userGoogleCalendarAPIKey: String,
+    userGoogleCalendarID: String,
     title: {
       type: String,
       required: true
@@ -185,6 +222,8 @@
   const userStatus = ref(props.userStatus);
   const userNotes = ref(props.userNotes);
   const userAvatar = ref(props.userAvatar);
+  const userGoogleCalendarAPIKey = ref(props.userGoogleCalendarAPIKey);
+  const userGoogleCalendarID = ref(props.userGoogleCalendarID);
 
   const localUserName = ref(props.userName);
   const localUserEmail = ref(props.userEmail);
@@ -196,6 +235,8 @@
   const localUserStatus = ref(props.userStatus);
   const localUserNotes = ref(props.userNotes);
   const localUserAvatar = ref(props.userAvatar);
+  const localUserGoogleCalendarAPIKey = ref(props.userGoogleCalendarAPIKey);
+  const localUserGoogleCalendarID = ref(props.userGoogleCalendarID);
 
   watch(() => props.userName, (newVal) => localUserName.value = newVal);
   watch(() => props.userEmail, (newVal) => localUserEmail.value = newVal);
@@ -207,6 +248,8 @@
   watch(() => props.userStatus, (newVal) => localUserStatus.value = newVal);
   watch(() => props.userNotes, (newVal) => localUserNotes.value = newVal);
   watch(() => props.userAvatar, (newVal) => localUserAvatar.value = newVal);
+  watch(() => props.userGoogleCalendarAPIKey, (newVal) => localUserGoogleCalendarAPIKey.value = newVal);
+  watch(() => props.userGoogleCalendarID, (newVal) => localUserGoogleCalendarID.value = newVal);
 
   async function handleImageCropped(blob: Blob) {
     const userId = props.userId;
@@ -292,6 +335,8 @@
       userRole: localUserRole.value,
       userStatus: localUserStatus.value,
       userNotes: localUserNotes.value,
+      userGoogleCalendarAPIKey: localUserGoogleCalendarAPIKey.value,
+      userGoogleCalendarID: localUserGoogleCalendarID.value,
     });
     closeModal();
   }

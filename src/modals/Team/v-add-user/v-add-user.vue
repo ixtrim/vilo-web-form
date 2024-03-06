@@ -125,7 +125,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="dropdownRoleTitle !== 'Client (individual)' && dropdownRoleTitle !== 'Client (company)'">
       <div class="col-lg-12">
         <div class="form-group">
           <label></label>
@@ -139,7 +139,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="dropdownRoleTitle !== 'Client (individual)' && dropdownRoleTitle !== 'Client (company)'">
       <div class="col-lg-12">
         <div class="form-group">
           <label></label>

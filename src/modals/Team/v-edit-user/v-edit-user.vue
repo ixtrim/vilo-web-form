@@ -111,14 +111,14 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="localUserRole !== 3 && localUserRole !== 4">
       <div class="col-lg-12">
         <hr />
         <strong style="">User Google Calendar Integration</strong><br/><br/>
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="localUserRole !== 3 && localUserRole !== 4">
       <div class="col-lg-12">
         <div class="form-group">
           <label></label>
@@ -132,7 +132,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="localUserRole !== 3 && localUserRole !== 4">
       <div class="col-lg-12">
         <div class="form-group">
           <label></label>

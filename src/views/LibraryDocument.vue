@@ -3,7 +3,7 @@
 
     <div class="row fill-space">
       <div class="col-lg-12">
-        <img src="@/assets/document.svg" alt="Vilo Icon" style="width: 100%;">
+        Loading content...
       </div>
     </div>
 

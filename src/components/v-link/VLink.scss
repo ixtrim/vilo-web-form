@@ -21,6 +21,23 @@
     color: var(--v-primary-indigo-700);
   }
 
+  &--alternate {
+    background-color: var(--v-primary-indigo-100);
+    border: 1px solid var(--v-primary-indigo-200);
+    border-radius: 8px;
+    color: var(--v-primary-indigo-700);
+
+    &:hover {
+      background-color: var(--v-primary-indigo-200);
+      text-decoration: none;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0px 0px 0px 4px #F2F4F7, 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+    }
+  }
+
   &--secondary {
     color: var(--v-gray-600);
   }

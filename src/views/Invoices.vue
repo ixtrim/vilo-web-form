@@ -2,16 +2,21 @@
   <div class="container-fluid">
 
     <div class="row">
-      <div class="col-lg-10">
+      <div class="col-lg-9">
         <div class="dashboard__heading mb-0">
           <h1>Invoices</h1>
           <p>Create and manage your team documents and templates.</p>
         </div>
       </div>
-      <div class="col-lg-2 align-right">
+      <div class="col-lg-3 align-right">
         <ul class="dashboard__actions">
           <li>
-            <VLink to="/case-boards" isRouteLink styled="secondary">View all</VLink>
+            <VLink 
+              to="/invoices-reports" 
+              isRouteLink 
+              styled="alternate"
+              :block="true"
+            >Reports</VLink>
           </li>
           <li>
             <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="openAddInvoiceModal" text="Add new invoice"></VButton>
@@ -208,7 +213,7 @@ export default defineComponent({
   setup() {
     const invoices = ref<Invoice[]>([]);
     const currentPage = ref(1);
-    const itemsPerPage = ref(12);
+    const itemsPerPage = ref(10);
     const searchTerm = ref('');
     const showAddInvoiceModal = ref(false);
     const showPreviewInvoiceModal = ref(false);

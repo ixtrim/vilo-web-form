@@ -22,23 +22,31 @@
     </div>
 
     <div class="row mb-4">
-      <div class="col-lg-7">
-        <TotalIncome />
-      </div>
       <div class="col-lg-5">
-        <div class="dashboard__heading">
-          <h4>Tax Due</h4>
-          <p>Keep track of your income</p>
+
+        <div class="row mb-3">
+          <div class="tax-due">
+            <div class="row">
+              <div class="col-lg-12">
+                <h3>Tax due</h3>
+                <h2>$ {{ taxDueAmount.toFixed(2) }}</h2>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="row">
           <ClientsBreakdown />
         </div>
+
+      </div>
+      <div class="col-lg-7">
+        <TotalIncome />
       </div>
     </div>
 
     <div class="row">
       <div class="col-lg-12">
-        <div class="dashboard__heading mb-3">
+        <div class="dashboard__heading mt-3 mb-3">
           <h4>Invoices</h4>
           <p>Keep track of your clients & payments</p>
         </div>
@@ -236,8 +244,11 @@ export default defineComponent({
 
     const truncateEmail = (email: string) => email.length > 25 ? `${email.substring(0, 22)}...` : email;
 
+    const taxDueAmount = ref(0);
+
     const fetchInvoices = async () => {
       const querySnapshot = await getDocs(collection(db, "invoices"));
+      let totalPaidInvoicesAmount = 0;
       const invoicePromises = querySnapshot.docs.map(async (docSnapshot) => {
         const invoiceData = docSnapshot.data() as any; // Use `as any` temporarily to bypass TypeScript checks
         // Assuming invoiceData contains all required fields directly
@@ -261,6 +272,14 @@ export default defineComponent({
         if (caseDocSnap.exists()) {
           caseTitle = caseDocSnap.data().title || "Unknown Case";
         }
+        
+        querySnapshot.forEach((doc) => {
+          const invoice = doc.data();
+          if (invoice.status === 2) { // Check if the invoice status is 'Paid'
+            totalPaidInvoicesAmount += invoice.total_amount; // Sum up the total amount
+          }
+        });
+        taxDueAmount.value = totalPaidInvoicesAmount * 0.25;
 
         // Ensure all required properties are included
         return {
@@ -357,6 +376,7 @@ export default defineComponent({
       notificationHeader,
       notificationMessage,
       breadcrumbs,
+      taxDueAmount,
     };
   },
   methods: {

@@ -9,7 +9,14 @@
         </div>
       </div>
       <div class="col-lg-2 align-right">
-        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="openAddInvoiceModal" text="Add new invoice"></VButton>
+        <ul class="dashboard__actions">
+          <li>
+            <VLink to="/case-boards" isRouteLink styled="secondary">View all</VLink>
+          </li>
+          <li>
+            <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="openAddInvoiceModal" text="Add new invoice"></VButton>
+          </li>
+        </ul>
       </div>
     </div>
 
@@ -177,7 +184,7 @@ interface Invoice {
   number: string;
   case: string;
   due_date: Timestamp;
-  status: number; // Assuming status is stored as a number
+  status: number;
   client_id: string;
   clientName: string;
   clientEmail: string;
@@ -208,38 +215,62 @@ export default defineComponent({
     const modalAddInvoiceTitle = ref('');
     const modalPreviewInvoiceTitle = ref('');
 
+    const sortTime = ref([
+      { label: 'All' },
+      { label: 'Last year' },
+      { label: 'Last three months' },
+      { label: 'Last two months' },
+      { label: 'Last month' },
+      { label: 'This week' },
+    ]);
+
+    const notificationType = ref('success');
+    const notificationHeader = ref('Changes saved');
+    const notificationMessage = ref('This account has been successfully edited.');
+
     const truncateEmail = (email: string) => email.length > 35 ? `${email.substring(0, 32)}...` : email;
 
     const fetchInvoices = async () => {
       const querySnapshot = await getDocs(collection(db, "invoices"));
       const invoicePromises = querySnapshot.docs.map(async (docSnapshot) => {
-        const invoiceData = docSnapshot.data();
+        const invoiceData = docSnapshot.data() as any; // Use `as any` temporarily to bypass TypeScript checks
+        // Assuming invoiceData contains all required fields directly
         const clientDocRef = doc(db, "users", invoiceData.client_id);
         const clientDocSnap = await getDoc(clientDocRef);
         let clientName = "Unknown";
         let clientEmail = "No Email";
         let clientAvatar = "Default Avatar URL";
+
         if (clientDocSnap.exists()) {
           const clientData = clientDocSnap.data();
           clientName = clientData.full_name || "Unknown";
           clientEmail = clientData.email || "No Email";
           clientAvatar = clientData.avatar || "Default Avatar URL";
         }
+
         const caseDocRef = doc(db, "cases", invoiceData.case);
         const caseDocSnap = await getDoc(caseDocRef);
         let caseTitle = "Unknown Case";
+
         if (caseDocSnap.exists()) {
           caseTitle = caseDocSnap.data().title || "Unknown Case";
         }
+
+        // Ensure all required properties are included
         return {
-          ...invoiceData,
           id: docSnapshot.id,
+          number: invoiceData.number, // Ensure this exists in your document
+          case: invoiceData.case, // Ensure this exists in your document
+          due_date: invoiceData.due_date, // Ensure this exists in your document and is a Timestamp
+          status: invoiceData.status, // Ensure this is a number
+          client_id: invoiceData.client_id, // Ensure this exists in your document
           clientName,
           clientEmail,
           clientAvatar,
           caseTitle,
         };
       });
+
       invoices.value = await Promise.all(invoicePromises);
     };
 
@@ -259,6 +290,38 @@ export default defineComponent({
       showPreviewInvoiceModal.value = false;
     };
 
+    const handleDropdownClick = () => {
+      // Implement dropdown click handling
+    };
+
+    const handleDownloadClick = () => {
+      // Implement download click handling
+    };
+
+    const handleDeleteClick = () => {
+      // Implement delete click handling
+    };
+
+    const prevPage = () => {
+      // Implement previous page logic
+    };
+
+    const nextPage = () => {
+      // Implement next page logic
+    };
+
+    const updatePage = (newPage: number) => {
+      // Implement page update logic
+    };
+
+    const handleAddInvoiceCase = () => {
+      // Implement add invoice case handling
+    };
+
+    const handlePreviewInvoiceCase = () => {
+      // Implement preview invoice case handling
+    };
+
     return {
       invoices,
       currentPage,
@@ -274,6 +337,18 @@ export default defineComponent({
       openAddInvoiceModal,
       openPreviewInvoiceModal,
       handleModalClose,
+      handleDropdownClick,
+      handleDownloadClick,
+      handleDeleteClick,
+      prevPage,
+      nextPage,
+      updatePage,
+      handleAddInvoiceCase,
+      handlePreviewInvoiceCase,
+      sortTime,
+      notificationType,
+      notificationHeader,
+      notificationMessage,
     };
   },
   methods: {

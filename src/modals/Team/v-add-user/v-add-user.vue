@@ -117,6 +117,42 @@
         />
       </div>
     </div>
+
+    <div class="row" v-if="dropdownRoleTitle !== 'Client (individual)' && dropdownRoleTitle !== 'Client (company)'">
+      <div class="col-lg-12">
+        <hr />
+        <strong style="">User Google Calendar Integration</strong><br/><br/>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="form-group">
+          <label></label>
+          <VInput 
+            label="Google Calendar API key" 
+            placeholder="ex. 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" 
+            v-model="localUserGoogleCalendarAPIKey"
+          />
+          <small>In the Google Cloud console, go to Menu menu > APIs & Services > Credentials. Click Create credentials > API key. Your new API key is displayed. Click Copy content_copy to copy your API key for use in your app's code. <a href="https://cloud.google.com/docs/authentication/api-keys" target="_blank">Here you can find more information.</a></small>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="form-group">
+          <label></label>
+          <VInput 
+            label="Google Calendar ID" 
+            placeholder="ex. abcdeaa21f268@group.calendar.google.com" 
+            v-model="localUserGoogleCalendarID"
+          />
+          <small>Click on the three vertical dot menu option next to your name or the primary calendar name. Select Settings and sharing. Scroll down on the screen and select Integrate calendar. You will find your Calendar ID. <a href="https://support.google.com/calendar/answer/37083?hl=en" target="_blank">Here you can find more information.</a></small>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <div class="modal-footer">
@@ -153,6 +189,8 @@
   const localUserPhone = ref('');
   const localUserAddress = ref('');
   const localUserPosition = ref('');
+  const localUserGoogleCalendarAPIKey = ref('');
+  const localUserGoogleCalendarID = ref('');
 
   const errorUserName = ref('');
   const errorUserEmail = ref('');
@@ -296,6 +334,8 @@
       status: statusMappings[dropdownStatusTitle.value as keyof typeof statusMappings],
       notes: userNotes.value || '',
       avatarBlob: croppedImageBlob.value,
+      google_calendar_api_key: localUserGoogleCalendarAPIKey.value,
+      google_calendar_id: localUserGoogleCalendarID.value,
     };
 
     emit('save-clicked', newUserDetails);

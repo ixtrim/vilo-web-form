@@ -189,7 +189,7 @@ interface User {
   role: number;
   status: number;
   notes: string;
-  google_calendar_api: string;
+  google_calendar_api_key: string;
   google_calendar_id: string;
 }
 
@@ -423,7 +423,7 @@ export default defineComponent({
           role: updatedUserData.userRole,
           status: updatedUserData.userStatus,
           notes: updatedUserData.userNotes,
-          google_calendar_api: updatedUserData.userGoogleCalendarAPIKey,
+          google_calendar_api_key: updatedUserData.userGoogleCalendarAPIKey,
           google_calendar_id: updatedUserData.userGoogleCalendarID,
         });
 
@@ -454,7 +454,7 @@ export default defineComponent({
       this.selectedUserRole = user.role.toString();
       this.selectedUserStatus = user.status.toString();
       this.selectedUserNotes = user.notes;
-      this.selectedUserGoogleCalendarAPIKey = user.google_calendar_api;
+      this.selectedUserGoogleCalendarAPIKey = user.google_calendar_api_key;
       this.selectedUserGoogleCalendarID = user.google_calendar_id;
       this.showModal = true;
     },

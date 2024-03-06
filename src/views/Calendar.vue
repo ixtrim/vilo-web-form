@@ -41,7 +41,10 @@
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
           }"
-          :events="calendarEvents"
+          :events="{
+            googleCalendarId: googleCalendarId,
+            googleCalendarApiKey: API_KEY
+          }"
         />
       </div>
       <div class="empty-list">
@@ -64,93 +67,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import googleCalendarPlugin from '@fullcalendar/google-calendar'; // Import the Google Calendar plugin
 import VButton from '@/components/v-button/VButton.vue';
 import VIconbox from '@/components/v-iconbox/VIconbox.vue';
 
-const CLIENT_ID = '25628282085-eam0js4alo06mr3vb10nifeo2nfd1pts.apps.googleusercontent.com';
+// Your Google Calendar API key
 const API_KEY = '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';
-const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
-const SCOPES = "https://www.googleapis.com/auth/calendar.events";
+// The ID of the Google Calendar you want to display events from
+const googleCalendarId = 'abcd1234@group.calendar.google.com';
 
-const isSignedIn = ref(false);
+const calendarPlugins = [dayGridPlugin, timeGridPlugin, interactionPlugin, googleCalendarPlugin]; // Add googleCalendarPlugin to the list
 
-const calendarPlugins = [dayGridPlugin, timeGridPlugin, interactionPlugin];
+// Since we're directly using the Google Calendar plugin, we no longer need to manage sign-in state
 const calendarEvents = ref([]);
-
-function handleClientLoad() {
-  gapi.load('client:auth2', initClient);
-}
-
-function initClient() {
-  gapi.client.init({
-    apiKey: API_KEY,
-    clientId: CLIENT_ID,
-    discoveryDocs: DISCOVERY_DOCS,
-    scope: SCOPES
-  }).then(() => {
-    gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-    updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-  }, (error) => {
-    console.error(JSON.stringify(error, null, 2));
-  });
-}
-
-function updateSigninStatus(isSignedInStatus) {
-  isSignedIn.value = isSignedInStatus;
-}
-
-function signIn() {
-  gapi.auth2.getAuthInstance().signIn();
-}
-
-function signOut() {
-  var auth2 = gapi.auth2.getAuthInstance();
-  auth2.signOut().then(function () {
-    console.log('User signed out.');
-    updateSigninStatus(false);
-  });
-}
-
-// Convert Google Calendar events to FullCalendar event format
-function convertEvents(googleEvents) {
-  return googleEvents.map(event => ({
-    title: event.summary,
-    start: event.start.dateTime || event.start.date, // Use dateTime for timed events and date for all-day events
-    end: event.end.dateTime || event.end.date,
-    url: event.htmlLink, // Link to the Google Calendar event
-  }));
-}
-
-async function fetchGoogleCalendarEvents() {
-  // This is a placeholder function. You need to replace it with actual API calls to fetch events.
-  // Below is a mock response structure. Replace it with actual response handling from Google Calendar API.
-  return [
-    {
-      summary: 'Event 1',
-      start: { dateTime: '2024-03-10T10:00:00' },
-      end: { dateTime: '2024-03-10T12:00:00' },
-      htmlLink: 'https://www.google.com/calendar/event?eid=event_id'
-    },
-    // Add more events as needed
-  ];
-}
-
-
-onMounted(async () => {
-  // Initialize Google API and fetch events
-  await initClient(); // Make sure this function is defined and correctly initializes the Google API
-  const googleEvents = await fetchGoogleCalendarEvents(); // Fetch events from Google Calendar
-  calendarEvents.value = convertEvents(googleEvents);
-});
-
-onMounted(() => {
-  handleClientLoad();
-});
 </script>
 
 <style>

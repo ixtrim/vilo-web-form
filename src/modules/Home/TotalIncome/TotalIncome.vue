@@ -99,4 +99,9 @@ export default {
 
 <style>
 @import url(./TotalIncome.scss);
+
+  canvas {
+    max-width: 100%;
+    max-height: 220px;
+  }
 </style>

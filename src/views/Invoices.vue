@@ -52,21 +52,15 @@
         <div class="dashboard__table mt-2">
 
           <div class="dashboard__table__head">
-            <div class="col col--checkbox">
-              <input type="checkbox" />
-            </div>
             <div class="col col--inv-invoice">
               <ul>
                 <li>
                   <h4>Invoice</h4>
                 </li>
-                <li>
-                  <VButton :block="false" size="sm" icon="left" icon-style="arrow-down" styled="simple-icon" @click="handleButtonClick" text=""></VButton>
-                </li>
               </ul>
             </div>
             <div class="col col--inv-case">
-              <h4>Case number</h4>
+              <h4>Case</h4>
             </div>
             <div class="col col--inv-date">
               <h4>Date</h4>
@@ -95,33 +89,29 @@
           </div>
 
           <div class="dashboard__table__page">
-
             <div 
               class="dashboard__table__page__item"
-              v-for="(item, index) in items"
-              :key="index" style="display: none;"
+              v-for="invoice in paginatedInvoices" :key="invoice.id"
             >
-              <div class="col col--checkbox">
-                <input type="checkbox" />
-              </div>
               <div class="col col--inv-invoice">
-                <h5>{{ item.invoice }}</h5>
+                <h5>{{ invoice.number }}</h5>
               </div>
               <div class="col col--inv-case">
-                <p>{{ item.case }}</p>
+                <VLink :to="`/case-board/${invoice.case}`" isRouteLink styled="secondary" icon="left" icon-style="tag">{{ invoice.caseTitle }}</VLink>
               </div>
               <div class="col col--inv-date">
-                <p>{{ item.date }}</p>
+                <p>{{ formatDate(invoice.due_date) }}</p>
               </div>
               <div class="col col--inv-status">
-                <VStatus :variant="item.status.toLowerCase()">{{ item.status }}</VStatus>
+                <VStatus :variant="statusText(invoice.status).variant.toLowerCase()">
+                  {{ statusText(invoice.status).text }}
+                </VStatus>
               </div>
               <div class="col col--inv-customer">
-                <VUser :userName="item.customer.name" :userEmail="item.customer.email" />
+                <VUser :userName="invoice.clientName" :userEmail="truncateEmail(invoice.clientEmail)" :userAvatar="invoice.clientAvatar" />
               </div>
               <div class="col col--inv-reminder">
-                <span v-if="item.reminder !== 'Set reminder'" class="v-reminder">{{ item.reminder }}</span>
-                <VButton v-else :block="false" size="sm" styled="link" @click="handleSetReminder" text="Set reminder"></VButton>
+                
               </div>
               <!-- Assuming you have different methods for different buttons -->
               <div class="col col--inv-action">
@@ -168,174 +158,139 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
-import VLink from '@/components/v-link/VLink.vue';
-import VButton from '@/components/v-button/VButton.vue';
-import Search   from '@/modules/Navigation/Search.vue';
-import VUser from '@/components/v-user/v-user.vue';
+import { defineComponent, ref, onMounted, computed } from 'vue';
+import { db } from '@/firebase.js';
+import { collection, query, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
 import VStatus from '@/components/v-status/VStatus.vue';
-import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
-import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
-import VDropdown from '@/components/v-dropdown/VDropdown.vue';
+import VButton from '@/components/v-button/VButton.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
 import VAddInvoice from '@/modals/Invoices/v-add-invoice/v-add-invoice.vue';
 import VPreviewInvoice from '@/modals/Invoices/v-preview-invoice/v-preview-invoice.vue';
+import VUser from '@/components/v-user/v-user.vue';
+import VLink from '@/components/v-link/VLink.vue';
+import Search from '@/modules/Navigation/Search.vue';
+import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
+import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 
-  interface NotificationRef {
-    showNotification: () => void;
-  }
+interface Invoice {
+  id: string;
+  number: string;
+  case: string;
+  due_date: Timestamp;
+  status: number; // Assuming status is stored as a number
+  client_id: string;
+  clientName: string;
+  clientEmail: string;
+  clientAvatar: string;
+  caseTitle: string;
+}
 
 export default defineComponent({
   components: {
-    Search,
-    VLink,
     VButton,
-    VUser,
-    VPaginationList,
-    VModalSmall,
-    VDropdown,
-    VStatus,
     VModal,
     VAddInvoice,
     VPreviewInvoice,
-  },
-  data() {
-    return {
-      showAddInvoiceModal: false,
-      showPreviewInvoiceModal: false,
-      modalAddInvoiceTitle: '',
-      modalPreviewInvoiceTitle: '',
-      notificationType: 'success',
-      notificationHeader: 'Changes saved',
-      notificationMessage: 'This account has been successfully edited.',
-      userName: 'Olivia Rhye',
-      userEmail: 'olivia@untitledui.com',
-      sortTime: [
-        { label: 'All' },
-        { label: 'Last year' },
-        { label: 'Last three months' },
-        { label: 'Last two months' },
-        { label: 'Last month' },
-        { label: 'This week' },
-      ],
-      sortCases: [
-        { label: 'Internal user' },
-        { label: 'Client (individual)' },
-        { label: 'Client (company)' },
-        { label: 'Admin' },
-      ],
-      items: [
-        // Generate 10 dummy data items
-        ...Array.from({ length: 10 }, (_, i) => ({
-          invoice: `INV-${3056 + i}`,
-          case: Math.floor(Math.random() * 100),
-          date: new Date(2022, 0, 6 + i).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
-          status: ['Paid', 'Draft', 'Refunded', 'Pending payment', 'Cancelled'][Math.floor(Math.random() * 5)],
-          customer: {
-            name: `Customer ${i}`,
-            email: `customer${i}@example.com`
-          },
-          reminder: ['Daily', 'Weekly', 'Monthly', 'Quarterly', 'Annually'][Math.floor(Math.random() * 5)]
-        }))
-      ]
-    };
+    VStatus,
+    VUser,
+    VLink,
+    Search,
+    VPaginationList,
+    VDropdown,
   },
   setup() {
-    const itemsPerPage = 10;
-    const allItems = ref([
-      { id: 1, name: 'Page 1' },
-      { id: 2, name: 'Page 2' },
-      { id: 3, name: 'Page 3' },
-      { id: 4, name: 'Page 4' },
-      { id: 5, name: 'Page 5' },
-      { id: 6, name: 'Page 6' },
-      { id: 7, name: 'Page 7' },
-      { id: 8, name: 'Page 8' },
-      { id: 9, name: 'Page 9' },
-      { id: 10, name: 'Page 10' },
-      { id: 11, name: 'Page 11' },
-      { id: 12, name: 'Page 12' },
-    ]);
+    const invoices = ref<Invoice[]>([]);
     const currentPage = ref(1);
+    const itemsPerPage = ref(10);
+    const searchTerm = ref('');
+    const showAddInvoiceModal = ref(false);
+    const showPreviewInvoiceModal = ref(false);
+    const modalAddInvoiceTitle = ref('');
+    const modalPreviewInvoiceTitle = ref('');
 
-    const totalPages = computed(() => Math.ceil(allItems.value.length / itemsPerPage));
+    const truncateEmail = (email: string) => email.length > 35 ? `${email.substring(0, 32)}...` : email;
 
-    const paginatedItems = computed(() => {
-      const start = (currentPage.value - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      return allItems.value.slice(start, end);
+    const fetchInvoices = async () => {
+      const querySnapshot = await getDocs(collection(db, "invoices"));
+      const invoicePromises = querySnapshot.docs.map(async (docSnapshot) => {
+        const invoiceData = docSnapshot.data();
+        const clientDocRef = doc(db, "users", invoiceData.client_id);
+        const clientDocSnap = await getDoc(clientDocRef);
+        let clientName = "Unknown";
+        let clientEmail = "No Email";
+        let clientAvatar = "Default Avatar URL";
+        if (clientDocSnap.exists()) {
+          const clientData = clientDocSnap.data();
+          clientName = clientData.full_name || "Unknown";
+          clientEmail = clientData.email || "No Email";
+          clientAvatar = clientData.avatar || "Default Avatar URL";
+        }
+        const caseDocRef = doc(db, "cases", invoiceData.case);
+        const caseDocSnap = await getDoc(caseDocRef);
+        let caseTitle = "Unknown Case";
+        if (caseDocSnap.exists()) {
+          caseTitle = caseDocSnap.data().title || "Unknown Case";
+        }
+        return {
+          ...invoiceData,
+          id: docSnapshot.id,
+          clientName,
+          clientEmail,
+          clientAvatar,
+          caseTitle,
+        };
+      });
+      invoices.value = await Promise.all(invoicePromises);
+    };
+
+    onMounted(fetchInvoices);
+
+    const filteredInvoices = computed(() => invoices.value.filter(invoice => invoice.number.toLowerCase().includes(searchTerm.value.toLowerCase()) || invoice.client_id.toLowerCase().includes(searchTerm.value.toLowerCase())));
+    const totalPages = computed(() => Math.ceil(filteredInvoices.value.length / itemsPerPage.value));
+    const paginatedInvoices = computed(() => {
+      const start = (currentPage.value - 1) * itemsPerPage.value;
+      return filteredInvoices.value.slice(start, start + itemsPerPage.value);
     });
 
-    const updatePage = (newPage: number) => {
-      currentPage.value = newPage;
+    const openAddInvoiceModal = () => showAddInvoiceModal.value = true;
+    const openPreviewInvoiceModal = () => showPreviewInvoiceModal.value = true;
+    const handleModalClose = () => {
+      showAddInvoiceModal.value = false;
+      showPreviewInvoiceModal.value = false;
     };
 
     return {
-      paginatedItems,
-      totalPages,
+      invoices,
       currentPage,
-      updatePage
+      itemsPerPage,
+      paginatedInvoices,
+      totalPages,
+      searchTerm,
+      truncateEmail,
+      showAddInvoiceModal,
+      showPreviewInvoiceModal,
+      modalAddInvoiceTitle,
+      modalPreviewInvoiceTitle,
+      openAddInvoiceModal,
+      openPreviewInvoiceModal,
+      handleModalClose,
     };
   },
   methods: {
-    triggerNotification(type: string, header: string, message: string) {
-      this.notificationType = type;
-      this.notificationHeader = header;
-      this.notificationMessage = message;
-      (this.$refs.notificationRef as NotificationRef).showNotification();
+    formatDate(timestamp: Timestamp) {
+      return timestamp ? timestamp.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
     },
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
+    statusText(status: number) {
+      const statusMap: { [key: number]: { text: string; variant: string } } = {
+        0: { text: 'Draft', variant: 'draft' },
+        1: { text: 'Pending', variant: 'pending' },
+        2: { text: 'Paid', variant: 'paid' },
+        3: { text: 'Cancelled', variant: 'cancelled' },
+        4: { text: 'Refunded', variant: 'refunded' }
+      };
+      return statusMap[status] || { text: 'Unknown', variant: 'unknown' };
     },
-    nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
-    },
-    openAddInvoiceModal() {
-      this.modalAddInvoiceTitle = 'Create new Invoice';
-      this.showAddInvoiceModal = true;
-    },
-    handleAddInvoiceCase() {
-      this.showAddInvoiceModal = false;
-      this.triggerNotification('success', 'Changes saved', 'Case board modified successfully.');
-    },
-    openPreviewInvoiceModal() {
-      this.modalPreviewInvoiceTitle = 'INVOICE';
-      this.showPreviewInvoiceModal = true;
-    },
-    handlePreviewInvoiceCase() {
-      this.showPreviewInvoiceModal = false;
-      this.triggerNotification('success', 'You successfully created new task', 'Your task will be added to Vilo board.');
-    },
-    handleModalClose(value: boolean) {
-      this.showAddInvoiceModal = false;
-      this.showPreviewInvoiceModal = false;
-    },
-    handleButtonClick() {
-      
-    },
-    handleDropdownClick() {
-      console.log('Dropdown clicked');
-    },
-    handleSetReminder() {
-      // Handle set reminder click
-    },
-    handlePreviewClick() {
-      // Handle preview click
-    },
-    handleDownloadClick() {
-      // Handle download click
-    },
-    handleDeleteClick() {
-      // Handle delete click
-    },
-    handleEditClick() {
-      // Handle edit click
-    }
-  },
+  }
 });
 </script>
 

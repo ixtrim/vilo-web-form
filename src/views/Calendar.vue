@@ -34,13 +34,8 @@
     <div class="row fill-space">
       <div class="col-lg-12" v-if="!isSignedIn">
         <FullCalendar
-          :plugins="calendarPlugins"
-          :initialView="'dayGridMonth'"
-          :headerToolbar="{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-          }"
+        :plugins="[dayGridPlugin]"
+  :initialView="'dayGridMonth'"
           :events="{
             googleCalendarId: googleCalendarId,
             googleCalendarApiKey: API_KEY
@@ -72,14 +67,14 @@ import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import googleCalendarPlugin from '@fullcalendar/google-calendar'; // Import the Google Calendar plugin
+import googleCalendarPlugin from '@fullcalendar/google-calendar';
 import VButton from '@/components/v-button/VButton.vue';
 import VIconbox from '@/components/v-iconbox/VIconbox.vue';
 
 // Your Google Calendar API key
 const API_KEY = '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';
 // The ID of the Google Calendar you want to display events from
-const googleCalendarId = 'abcd1234@group.calendar.google.com';
+const googleCalendarId = 'cd748c89bfce6d2ca5a6d3f7e6aae99d5fb4eb9aac144fc1b71f5651aa21f268@group.calendar.google.com';
 
 const calendarPlugins = [dayGridPlugin, timeGridPlugin, interactionPlugin, googleCalendarPlugin]; // Add googleCalendarPlugin to the list
 

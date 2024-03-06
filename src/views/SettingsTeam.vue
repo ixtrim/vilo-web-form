@@ -137,6 +137,8 @@
         :userStatus="Number(selectedUserStatus)"
         :userNotes="selectedUserNotes"
         :userAvatar="selectedUserAvatar"
+        :userGoogleCalendarAPIKey="selectedUserGoogleCalendarAPIKey"
+        :userGoogleCalendarID="selectedUserGoogleCalendarID"
         @close-modal="showModal = false"
         @save-clicked="handleSaveChanges"
       />
@@ -187,6 +189,8 @@ interface User {
   role: number;
   status: number;
   notes: string;
+  google_calendar_api: string;
+  google_calendar_id: string;
 }
 
 interface UpdatedUserData {
@@ -201,6 +205,8 @@ interface UpdatedUserData {
     userRole: number;
     userStatus: number;
     userNotes: string;
+    userGoogleCalendarAPIKey: string;
+    userGoogleCalendarID: string;
   }
 
 export default defineComponent({
@@ -233,6 +239,8 @@ export default defineComponent({
       selectedUserRole: '',
       selectedUserStatus: '',
       selectedUserNotes: '',
+      selectedUserGoogleCalendarAPIKey: '',
+      selectedUserGoogleCalendarID: '',
       notificationType: 'success',
       notificationHeader: 'Changes saved',
       notificationMessage: 'This account has been successfully edited.',
@@ -415,6 +423,8 @@ export default defineComponent({
           role: updatedUserData.userRole,
           status: updatedUserData.userStatus,
           notes: updatedUserData.userNotes,
+          google_calendar_api: updatedUserData.userGoogleCalendarAPIKey,
+          google_calendar_id: updatedUserData.userGoogleCalendarID,
         });
 
         // Update the user in the local state
@@ -444,6 +454,8 @@ export default defineComponent({
       this.selectedUserRole = user.role.toString();
       this.selectedUserStatus = user.status.toString();
       this.selectedUserNotes = user.notes;
+      this.selectedUserGoogleCalendarAPIKey = user.google_calendar_api;
+      this.selectedUserGoogleCalendarID = user.google_calendar_id;
       this.showModal = true;
     },
     openAddModal() {

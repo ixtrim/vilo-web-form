@@ -263,11 +263,8 @@ export default defineComponent({
               label: 'Total Income',
               data: data,
               backgroundColor: [
-                '#444ce7',
-                '#6172f3',
-                '#8098f9',
-                '#a4bcfd',
-                '#eaecf0',
+                '#444CE7',
+                '#F97066',
               ],
               hoverOffset: 4
             }]

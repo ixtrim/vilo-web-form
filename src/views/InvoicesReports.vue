@@ -35,7 +35,14 @@
           </div>
         </div>
         <div class="row">
-          <ClientsBreakdown />
+          <div class="clients-breakdown">
+            <div class="row">
+              <div class="col-lg-12">
+                <h3>Client’s Breakdown</h3>
+                <canvas ref="chartRef"></canvas>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -167,9 +174,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed } from 'vue';
+import { defineComponent, ref, onMounted, computed, nextTick } from 'vue';
 import { db } from '@/firebase.js';
 import { collection, query, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
+import Chart from 'chart.js/auto';
 import VStatus from '@/components/v-status/VStatus.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
@@ -182,7 +190,6 @@ import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vu
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import VBreadcrumbs from '@/components/v-breadcrumbs/VBreadcrumbs.vue';
 import TotalIncome from '@/modules/InvoicesReports/TotalIncome/TotalIncome.vue';
-import ClientsBreakdown from '@/modules/InvoicesReports/ClientsBreakdown/ClientsBreakdown.vue';
 
 interface Invoice {
   id: string;
@@ -212,7 +219,6 @@ export default defineComponent({
     VDropdown,
     VBreadcrumbs,
     TotalIncome,
-    ClientsBreakdown,
   },
   setup() {
     const invoices = ref<Invoice[]>([]);
@@ -237,6 +243,48 @@ export default defineComponent({
       { label: 'Last month' },
       { label: 'This week' },
     ]);
+
+    const chartRef = ref(null);
+    const fetchInvoicesAndCalculateIncome = async () => {
+      // Example data and labels
+      const data = [3500, 19583]; // Replace with your actual data
+      const labels = ['Aniyah Ernser', 'James Williams']; // Replace with your actual labels
+
+      // Wait for the next DOM update cycle to ensure the ref is bound
+      await nextTick();
+
+      if (chartRef.value) {
+        const ctx = chartRef.value.getContext('2d');
+        new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Total Income',
+              data: data,
+              backgroundColor: [
+                '#444ce7',
+                '#6172f3',
+                '#8098f9',
+                '#a4bcfd',
+                '#eaecf0',
+              ],
+              hoverOffset: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'top',
+              },
+            }
+          }
+        });
+      }
+    };
+
+    onMounted(fetchInvoicesAndCalculateIncome);
 
     const notificationType = ref('success');
     const notificationHeader = ref('Changes saved');
@@ -377,6 +425,7 @@ export default defineComponent({
       notificationMessage,
       breadcrumbs,
       taxDueAmount,
+      chartRef,
     };
   },
   methods: {

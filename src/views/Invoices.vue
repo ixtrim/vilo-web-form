@@ -160,7 +160,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed } from 'vue';
 import { db } from '@/firebase.js';
-import { collection, query, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, query, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
 import VStatus from '@/components/v-status/VStatus.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
@@ -168,13 +168,16 @@ import VAddInvoice from '@/modals/Invoices/v-add-invoice/v-add-invoice.vue';
 import VPreviewInvoice from '@/modals/Invoices/v-preview-invoice/v-preview-invoice.vue';
 import VUser from '@/components/v-user/v-user.vue';
 import VLink from '@/components/v-link/VLink.vue';
+import Search from '@/modules/Navigation/Search.vue';
+import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
+import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 
 interface Invoice {
   id: string;
   number: string;
   case: string;
-  due_date: firebase.firestore.Timestamp;
-  status: string;
+  due_date: Timestamp;
+  status: number; // Assuming status is stored as a number
   client_id: string;
   clientName: string;
   clientEmail: string;
@@ -191,48 +194,50 @@ export default defineComponent({
     VStatus,
     VUser,
     VLink,
+    Search,
+    VPaginationList,
+    VDropdown,
   },
   setup() {
     const invoices = ref<Invoice[]>([]);
     const currentPage = ref(1);
     const itemsPerPage = ref(10);
     const searchTerm = ref('');
+    const showAddInvoiceModal = ref(false);
+    const showPreviewInvoiceModal = ref(false);
+    const modalAddInvoiceTitle = ref('');
+    const modalPreviewInvoiceTitle = ref('');
 
-    const truncateEmail = (email: string) => {
-      return email.length > 35 ? `${email.substring(0, 32)}...` : email;
-    };
+    const truncateEmail = (email: string) => email.length > 35 ? `${email.substring(0, 32)}...` : email;
 
     const fetchInvoices = async () => {
       const querySnapshot = await getDocs(collection(db, "invoices"));
       const invoicePromises = querySnapshot.docs.map(async (docSnapshot) => {
         const invoiceData = docSnapshot.data();
-        // Fetch client details
         const clientDocRef = doc(db, "users", invoiceData.client_id);
         const clientDocSnap = await getDoc(clientDocRef);
         let clientName = "Unknown";
         let clientEmail = "No Email";
-        let clientAvatar = "Default Avatar URL"; // Set a default avatar URL here
+        let clientAvatar = "Default Avatar URL";
         if (clientDocSnap.exists()) {
           const clientData = clientDocSnap.data();
           clientName = clientData.full_name || "Unknown";
           clientEmail = clientData.email || "No Email";
-          clientAvatar = clientData.avatar || "Default Avatar URL"; // Use the default avatar URL if not present
+          clientAvatar = clientData.avatar || "Default Avatar URL";
         }
-        // Fetch case details
         const caseDocRef = doc(db, "cases", invoiceData.case);
         const caseDocSnap = await getDoc(caseDocRef);
         let caseTitle = "Unknown Case";
         if (caseDocSnap.exists()) {
-          const caseData = caseDocSnap.data();
-          caseTitle = caseData.title || "Unknown Case";
+          caseTitle = caseDocSnap.data().title || "Unknown Case";
         }
         return {
-          ...invoiceData, // Spread the existing invoice data
+          ...invoiceData,
           id: docSnapshot.id,
           clientName,
           clientEmail,
           clientAvatar,
-          caseTitle, // Include the case title
+          caseTitle,
         };
       });
       invoices.value = await Promise.all(invoicePromises);
@@ -240,42 +245,43 @@ export default defineComponent({
 
     onMounted(fetchInvoices);
 
-    const filteredInvoices = computed(() => {
-      return invoices.value.filter(invoice => {
-        return invoice.number.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-               invoice.client_id.toLowerCase().includes(searchTerm.value.toLowerCase());
-      });
-    });
-
-    const totalPages = computed(() => {
-      return Math.ceil(filteredInvoices.value.length / itemsPerPage.value);
-    });
-
+    const filteredInvoices = computed(() => invoices.value.filter(invoice => invoice.number.toLowerCase().includes(searchTerm.value.toLowerCase()) || invoice.client_id.toLowerCase().includes(searchTerm.value.toLowerCase())));
+    const totalPages = computed(() => Math.ceil(filteredInvoices.value.length / itemsPerPage.value));
     const paginatedInvoices = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage.value;
-      const end = start + itemsPerPage.value;
-      return filteredInvoices.value.slice(start, end);
+      return filteredInvoices.value.slice(start, start + itemsPerPage.value);
     });
 
+    const openAddInvoiceModal = () => showAddInvoiceModal.value = true;
+    const openPreviewInvoiceModal = () => showPreviewInvoiceModal.value = true;
+    const handleModalClose = () => {
+      showAddInvoiceModal.value = false;
+      showPreviewInvoiceModal.value = false;
+    };
+
     return {
+      invoices,
       currentPage,
       itemsPerPage,
       paginatedInvoices,
       totalPages,
       searchTerm,
-      fetchInvoices,
       truncateEmail,
+      showAddInvoiceModal,
+      showPreviewInvoiceModal,
+      modalAddInvoiceTitle,
+      modalPreviewInvoiceTitle,
+      openAddInvoiceModal,
+      openPreviewInvoiceModal,
+      handleModalClose,
     };
   },
   methods: {
-    formatDate(timestamp) {
-      if (!timestamp) return '';
-      // Convert Firestore Timestamp to Date and format it
-      const date = timestamp.toDate();
-      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    formatDate(timestamp: Timestamp) {
+      return timestamp ? timestamp.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
     },
-    statusText(status) {
-      const statusMap = {
+    statusText(status: number) {
+      const statusMap: { [key: number]: { text: string; variant: string } } = {
         0: { text: 'Draft', variant: 'draft' },
         1: { text: 'Pending', variant: 'pending' },
         2: { text: 'Paid', variant: 'paid' },

@@ -1,9 +1,9 @@
 <template>
-  <div class="total-income">
+  <div class="clients-breakdown">
     <div class="row">
       <div class="col-lg-12">
         <h3>Client’s breakdown</h3>
-        <canvas id="incomeChart"></canvas>
+        <canvas id="clientsBreakdown"></canvas>
       </div>
     </div>
   </div>
@@ -43,7 +43,7 @@ export default {
       });
       const data = Object.values(monthlyTotals);
 
-      const ctx = document.getElementById('incomeChart').getContext('2d');
+      const ctx = document.getElementById('clientsBreakdown').getContext('2d');
       new Chart(ctx, {
         type: 'line',
         data: {

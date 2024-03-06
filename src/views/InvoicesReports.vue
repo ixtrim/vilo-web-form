@@ -85,32 +85,20 @@
                 </li>
               </ul>
             </div>
+            <div class="col col--inv-customer">
+              <h4>Customer</h4>
+            </div>
+            <div class="col col--inv-amount">
+              <h4>Amount</h4>
+            </div>
             <div class="col col--inv-case">
               <h4>Case</h4>
             </div>
             <div class="col col--inv-date">
-              <h4>Date</h4>
+              <h4>Due date</h4>
             </div>
             <div class="col col--inv-status">
               <h4>Status</h4>
-            </div>
-            <div class="col col--inv-customer">
-              <h4>Customer</h4>
-            </div>
-            <div class="col col--inv-reminder">
-              <h4>Reminder</h4>
-            </div>
-            <div class="col col--inv-action">
-              &nbsp;
-            </div>
-            <div class="col col--inv-action">
-              &nbsp;
-            </div>
-            <div class="col col--inv-action">
-              &nbsp;
-            </div>
-            <div class="col col--inv-action">
-              &nbsp;
             </div>
           </div>
 
@@ -122,6 +110,12 @@
               <div class="col col--inv-invoice">
                 <h5>{{ invoice.number }}</h5>
               </div>
+              <div class="col col--inv-customer">
+                <VUser :userName="invoice.clientName" :userEmail="truncateEmail(invoice.clientEmail)" :userAvatar="invoice.clientAvatar" />
+              </div>
+              <div class="col col--inv-amount">
+                <p>$ {{ invoice.total_amount }}</p>
+              </div>
               <div class="col col--inv-case">
                 <VLink :to="`/case-board/${invoice.case}`" isRouteLink styled="secondary" icon="left" icon-style="tag">{{ invoice.caseTitle }}</VLink>
               </div>
@@ -132,25 +126,6 @@
                 <VStatus :variant="statusText(invoice.status).variant.toLowerCase()">
                   {{ statusText(invoice.status).text }}
                 </VStatus>
-              </div>
-              <div class="col col--inv-customer">
-                <VUser :userName="invoice.clientName" :userEmail="truncateEmail(invoice.clientEmail)" :userAvatar="invoice.clientAvatar" />
-              </div>
-              <div class="col col--inv-reminder">
-                
-              </div>
-              <!-- Assuming you have different methods for different buttons -->
-              <div class="col col--inv-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="openPreviewInvoiceModal" text=""></VButton>
-              </div>
-              <div class="col col--inv-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="download" styled="simple-icon" @click="handleDownloadClick" text=""></VButton>
-              </div>
-              <div class="col col--inv-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleDeleteClick" text=""></VButton>
-              </div>
-              <div class="col col--inv-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openAddInvoiceModal" text=""></VButton>
               </div>
             </div>
 
@@ -207,6 +182,7 @@ interface Invoice {
   case: string;
   due_date: Timestamp;
   status: number;
+  total_amount: number;
   client_id: string;
   clientName: string;
   clientEmail: string;
@@ -258,7 +234,7 @@ export default defineComponent({
     const notificationHeader = ref('Changes saved');
     const notificationMessage = ref('This account has been successfully edited.');
 
-    const truncateEmail = (email: string) => email.length > 35 ? `${email.substring(0, 32)}...` : email;
+    const truncateEmail = (email: string) => email.length > 25 ? `${email.substring(0, 22)}...` : email;
 
     const fetchInvoices = async () => {
       const querySnapshot = await getDocs(collection(db, "invoices"));
@@ -294,6 +270,7 @@ export default defineComponent({
           due_date: invoiceData.due_date, // Ensure this exists in your document and is a Timestamp
           status: invoiceData.status, // Ensure this is a number
           client_id: invoiceData.client_id, // Ensure this exists in your document
+          total_amount: invoiceData.total_amount, // Ensure this exists in your document
           clientName,
           clientEmail,
           clientAvatar,

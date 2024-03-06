@@ -1,48 +1,19 @@
 <template>
   <div class="container-fluid">
     <div class="row">
-      <div class="col-lg-10">
+      <div class="col-lg-12">
         <div class="dashboard__heading">
           <h1>Calendar</h1>
           <p>Create and manage your meetings and events.</p>
         </div>
       </div>
-      <div class="col-lg-2">
-        <!-- Sign In Button -->
-        <VButton
-          v-if="!isSignedIn"
-          :block="true"
-          size="md"
-          icon="left"
-          icon-style="add-white"
-          @click="signIn"
-          text="Sign In"
-        ></VButton>
-        <!-- Sign Out Button -->
-        <VButton
-          v-else
-          :block="true"
-          size="md"
-          icon="left"
-          icon-style="add-white"
-          @click="signOut"
-          text="Sign Out"
-        ></VButton>
-      </div>
     </div>
 
     <div class="row fill-space">
       <div class="col-lg-12" v-if="!isSignedIn">
-        <FullCalendar
-        :plugins="[dayGridPlugin]"
-  :initialView="'dayGridMonth'"
-          :events="{
-            googleCalendarId: googleCalendarId,
-            googleCalendarApiKey: API_KEY
-          }"
-        />
+        <FullCalendar :options="calendarOptions" />
       </div>
-      <div class="empty-list">
+      <div class="empty-list" style="display: none;">
         <div class="empty-list__wrapper">
           <v-iconbox class="v-google" />
           <h4>Sign In into your Google Calendar</h4>
@@ -76,12 +47,21 @@ const API_KEY = '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';
 // The ID of the Google Calendar you want to display events from
 const googleCalendarId = 'cd748c89bfce6d2ca5a6d3f7e6aae99d5fb4eb9aac144fc1b71f5651aa21f268@group.calendar.google.com';
 
-const calendarPlugins = [dayGridPlugin, timeGridPlugin, interactionPlugin, googleCalendarPlugin]; // Add googleCalendarPlugin to the list
+const calendarOptions = ref({
+  plugins: [dayGridPlugin, googleCalendarPlugin],
+  initialView: 'dayGridMonth',
+  googleCalendarApiKey: API_KEY,
+  events: {
+    googleCalendarId: googleCalendarId,
+    googleCalendarApiKey: API_KEY
+  }
+});
 
-// Since we're directly using the Google Calendar plugin, we no longer need to manage sign-in state
-const calendarEvents = ref([]);
+const calendarPlugins = ref([dayGridPlugin, googleCalendarPlugin]);
+
 </script>
 
 <style>
 @import url(./styles/dashboard.scss);
+@import url(./styles/calendar.scss);
 </style>

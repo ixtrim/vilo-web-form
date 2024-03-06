@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-body invoice">
+  <div class="modal-body invoice" style="opacity: 0;">
     <div class="row invoice__meta">
       <div class="col-lg-12">
         <h4>Billed to:</h4>

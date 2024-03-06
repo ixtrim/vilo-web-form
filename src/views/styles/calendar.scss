@@ -1,0 +1,13 @@
+@import '@/components/styles/variables/fonts.scss';
+@import '@/components/styles/variables/colors.scss';
+
+.fc-button {
+  border-radius: 8px!important;
+  font-family: var(--v-font-inter-semi-bold)!important;
+  font-size: 16px!important;
+}
+
+.fc-button-primary {
+  background-color: var(--v-primary-indigo-600);
+  font-family: var(--v-font-inter-semi-bold);
+}

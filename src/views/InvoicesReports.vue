@@ -266,13 +266,14 @@ export default defineComponent({
     ]);
 
     const sortTime = ref([
-      { label: 'All' },
-      { label: 'Last year' },
-      { label: 'Last three months' },
-      { label: 'Last two months' },
-      { label: 'Last month' },
-      { label: 'This week' },
+      { label: 'All', value: 'all' },
+      { label: 'Last year', value: 'lastYear' },
+      { label: 'Last three months', value: 'lastThreeMonths' },
+      { label: 'Last two months', value: 'lastTwoMonths' },
+      { label: 'Last month', value: 'lastMonth' },
+      { label: 'This week', value: 'thisWeek' },
     ]);
+    const selectedTimeFrame = ref('all');
 
     const sortStatus = ref([
       { label: 'All', value: null },
@@ -427,14 +428,42 @@ export default defineComponent({
     onMounted(fetchInvoices);
 
     const filteredInvoices = computed(() => {
+      const now = new Date();
       return invoices.value
         .filter(invoice => {
-          return invoice.number.toLowerCase().includes(searchTerm.value.toLowerCase()) || invoice.client_id.toLowerCase().includes(searchTerm.value.toLowerCase());
-        })
-        .filter(invoice => {
-          return selectedStatus.value === null || invoice.status === selectedStatus.value;
+          // Filter by search term and status as before
+          const matchesSearchTerm = invoice.number.toLowerCase().includes(searchTerm.value.toLowerCase()) || invoice.client_id.toLowerCase().includes(searchTerm.value.toLowerCase());
+          const matchesStatus = selectedStatus.value === null || invoice.status === selectedStatus.value;
+          
+          // Determine if the invoice matches the selected time frame
+          let matchesTimeFrame = true;
+          if (selectedTimeFrame.value !== 'all') {
+            const invoiceDate = invoice.due_date.toDate();
+            switch (selectedTimeFrame.value) {
+              case 'lastYear':
+                matchesTimeFrame = invoiceDate >= new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+                break;
+              case 'lastThreeMonths':
+                matchesTimeFrame = invoiceDate >= new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+                break;
+              case 'lastTwoMonths':
+                matchesTimeFrame = invoiceDate >= new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
+                break;
+              case 'lastMonth':
+                matchesTimeFrame = invoiceDate >= new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+                break;
+              case 'thisWeek':
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(now.getDate() - 7);
+                matchesTimeFrame = invoiceDate >= oneWeekAgo;
+                break;
+            }
+          }
+          
+          return matchesSearchTerm && matchesStatus && matchesTimeFrame;
         });
     });
+
     const totalPages = computed(() => Math.ceil(filteredInvoices.value.length / itemsPerPage.value));
     const paginatedInvoices = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage.value;
@@ -498,6 +527,7 @@ export default defineComponent({
 
 
     const handleFilterTime = (item: any) => {
+      selectedTimeFrame.value = item.value;
     };
 
     const handleFilterStatus = (item: any) => {

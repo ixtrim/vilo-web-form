@@ -38,7 +38,7 @@
           <div class="row">
             <div class="col-lg-3">
               <div class="dashboard__filters">
-                <Search />
+                <Search :value="searchTerm" @update-search="updateSearchTerm" />
               </div>
             </div>
             <div class="col-lg-6"></div>
@@ -295,6 +295,10 @@ export default defineComponent({
       showPreviewInvoiceModal.value = false;
     };
 
+    const updateSearchTerm = (value: string) => {
+      searchTerm.value = value;
+    };
+
     const handleDropdownClick = () => {
       // Implement dropdown click handling
     };
@@ -354,6 +358,7 @@ export default defineComponent({
       notificationType,
       notificationHeader,
       notificationMessage,
+      updateSearchTerm,
     };
   },
   methods: {

@@ -29,7 +29,7 @@
             <div class="row">
               <div class="col-lg-12">
                 <h3>Tax due</h3>
-                <h2>$ {{ taxDueAmount.toFixed(2) }}</h2>
+                <h2>{{ formatCurrency(taxDueAmount) }}</h2>
               </div>
             </div>
           </div>
@@ -39,6 +39,12 @@
             <div class="row align-middle">
               <div class="col-lg-6 align-middle">
                 <h3>Client’s Breakdown</h3>
+
+                <div v-for="summary in invoiceSummaries" :key="summary.clientId" style="display: none;">
+                  <h3>{{ summary.clientName }}</h3>
+                  <p>Unpaid Invoices Total: ${{ summary.unpaidInvoicesTotal }}</p>
+                  <p>Paid Invoices Total: ${{ summary.paidInvoicesTotal }}</p>
+                </div>
               </div>
               <div class="col-lg-6 align-right">
                 <VDropdown :title="dropdownTitle" :items="clientsList" @item-clicked="handleClientSelected" />
@@ -136,7 +142,7 @@
                 <VUser :userName="invoice.clientName" :userEmail="truncateEmail(invoice.clientEmail)" :userAvatar="invoice.clientAvatar" />
               </div>
               <div class="col col--inv-amount">
-                <p>$ {{ invoice.total_amount }}</p>
+                <p>{{ formatCurrency(invoice.total_amount) }}</p>
               </div>
               <div class="col col--inv-case">
                 <VLink :to="`/case-board/${invoice.case}`" isRouteLink styled="secondary" icon="left" icon-style="tag">{{ invoice.caseTitle }}</VLink>
@@ -314,6 +320,7 @@ export default defineComponent({
         
         querySnapshot.forEach((doc) => {
           const invoice = doc.data();
+          
           if (invoice.status === 2) {
             totalPaidInvoicesAmount += invoice.total_amount;
           } else if (invoice.status === 1) {
@@ -343,9 +350,9 @@ export default defineComponent({
             };
           }
 
-          if (status === 1) { // Unpaid
+          if (status === 1) {
             summaries[clientId].unpaidInvoicesTotal += totalAmount;
-          } else if (status === 2) { // Paid
+          } else if (status === 2) {
             summaries[clientId].paidInvoicesTotal += totalAmount;
           }
         }
@@ -520,6 +527,13 @@ export default defineComponent({
       // Implement preview invoice case handling
     };
 
+    function formatCurrency(amount: number): string {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(amount);
+    }
+
     return {
       invoices,
       currentPage,
@@ -556,6 +570,7 @@ export default defineComponent({
       handleClientSelected,
       dropdownTitle,
       canvasKey,
+      formatCurrency,
     };
   },
   methods: {

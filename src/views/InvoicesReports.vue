@@ -38,21 +38,15 @@
           <div class="clients-breakdown">
             <div class="row align-middle">
               <div class="col-lg-6 align-middle">
-                <h3 style="line-height: 45px;">Client’s Breakdown</h3>
-                
-                <div v-for="summary in invoiceSummaries" :key="summary.clientId">
-  <h3>{{ summary.clientName }}</h3>
-  <p>Unpaid Invoices Total: ${{ summary.unpaidInvoicesTotal.toFixed(2) }}</p>
-  <p>Paid Invoices Total: ${{ summary.paidInvoicesTotal.toFixed(2) }}</p>
-</div>
+                <h3>Client’s Breakdown</h3>
               </div>
               <div class="col-lg-6 align-right">
-                <VDropdown :title="'Choose client'" :items="clientsList" />
+                <VDropdown :title="dropdownTitle" :items="clientsList" @item-clicked="handleClientSelected" />
               </div>
             </div>
             <div class="row">
               <div class="col-lg-12 mt-3">
-                <canvas ref="chartRef"></canvas>
+                <canvas ref="chartRef" :key="canvasKey"></canvas>
               </div>
             </div>
           </div>
@@ -187,7 +181,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed, nextTick } from 'vue';
+import { defineComponent, ref, onMounted, computed, nextTick, watch } from 'vue';
 import type { Ref } from 'vue';
 import { db } from '@/firebase.js';
 import { collection, query, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
@@ -264,6 +258,9 @@ export default defineComponent({
     const taxDueAmount = ref(0);
     const totalPaidAmount = ref(0);
     const totalUnpaidAmount = ref(0);
+    const selectedClientId = ref<string | null>(null);
+    const dropdownTitle = ref('Choose client');
+    const canvasKey = ref(0);
 
     const breadcrumbs = computed(() => [
       { text: 'Invoices', to: '/invoices' },
@@ -387,7 +384,6 @@ export default defineComponent({
       const data = [totalPaidAmount.value, totalUnpaidAmount.value];
       const labels = ['Paid invoices', 'Pending invoices'];
 
-      // Wait for the next DOM update cycle to ensure the ref is bound
       await nextTick();
 
       if (chartRef.value) {
@@ -435,6 +431,62 @@ export default defineComponent({
       showAddInvoiceModal.value = false;
       showPreviewInvoiceModal.value = false;
     };
+
+    const handleClientSelected = (item: ClientOption) => {
+      selectedClientId.value = item.value;
+      dropdownTitle.value = item.label;
+
+      const summary = invoiceSummaries.value.find(summary => summary.clientId === item.value);
+      if (summary) {
+        updateChartData([summary.paidInvoicesTotal, summary.unpaidInvoicesTotal]);
+      } else {
+        updateChartData([totalPaidAmount.value, totalUnpaidAmount.value]);
+      }
+    };
+
+
+    let myChart: Chart | null = null;
+    const updateChartData = (data: number[]) => {
+      canvasKey.value++;
+
+      nextTick(() => {
+        if (chartRef.value) {
+          const ctx = chartRef.value.getContext('2d');
+          if (ctx) {
+            if (myChart) {
+              myChart.destroy();
+              myChart = null;
+            }
+
+            myChart = new Chart(ctx, {
+              type: 'doughnut',
+              data: {
+                labels: ['Paid invoices', 'Unpaid invoices'],
+                datasets: [{
+                  label: 'Invoice Summary',
+                  data: data,
+                  backgroundColor: ['#444CE7', '#F97066'],
+                  hoverOffset: 4
+                }]
+              },
+              options: {
+                responsive: true,
+                plugins: {
+                  legend: {
+                    position: 'top',
+                  },
+                }
+              }
+            }) as any;
+          } else {
+            console.error("Failed to get canvas context");
+          }
+        } else {
+          console.error("Canvas ref is not available");
+        }
+      });
+    };
+
 
     const handleDropdownClick = () => {
       // Implement dropdown click handling
@@ -500,6 +552,10 @@ export default defineComponent({
       chartRef,
       clientsList,
       invoiceSummaries,
+      selectedClientId,
+      handleClientSelected,
+      dropdownTitle,
+      canvasKey,
     };
   },
   methods: {

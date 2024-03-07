@@ -36,15 +36,22 @@
         </div>
         <div class="row">
           <div class="clients-breakdown">
+            <div class="row align-middle">
+              <div class="col-lg-6 align-middle">
+                <h3 style="line-height: 45px;">Client’s Breakdown</h3>
+              </div>
+              <div class="col-lg-6 align-right">
+                <VDropdown :title="'Choose client'" :items="clientsList" />
+              </div>
+            </div>
             <div class="row">
-              <div class="col-lg-12">
-                <h3>Client’s Breakdown</h3>
+              <div class="col-lg-12 mt-3">
                 <canvas ref="chartRef"></canvas>
               </div>
             </div>
           </div>
         </div>
-
+        
       </div>
       <div class="col-lg-7">
         <TotalIncome />
@@ -206,6 +213,11 @@ interface Invoice {
   caseTitle: string;
 }
 
+interface ClientOption {
+  label: string;
+  value: string;
+}
+
 export default defineComponent({
   components: {
     VButton,
@@ -230,6 +242,8 @@ export default defineComponent({
     const showPreviewInvoiceModal = ref(false);
     const modalAddInvoiceTitle = ref('');
     const modalPreviewInvoiceTitle = ref('');
+    const clientsList = ref<ClientOption[]>([]);
+    const clientsMap: Record<string, ClientOption> = {};
 
     const breadcrumbs = computed(() => [
       { text: 'Invoices', to: '/invoices' },
@@ -260,10 +274,10 @@ export default defineComponent({
       let totalPaidInvoicesAmount = 0;
       let totalUnpaidInvoicesAmount = 0;
       const invoicePromises = querySnapshot.docs.map(async (docSnapshot) => {
-        const invoiceData = docSnapshot.data() as any; // Use `as any` temporarily to bypass TypeScript checks
-        // Assuming invoiceData contains all required fields directly
+        const invoiceData = docSnapshot.data() as any;
         const clientDocRef = doc(db, "users", invoiceData.client_id);
         const clientDocSnap = await getDoc(clientDocRef);
+
         let clientName = "Unknown";
         let clientEmail = "No Email";
         let clientAvatar = "Default Avatar URL";
@@ -273,6 +287,10 @@ export default defineComponent({
           clientName = clientData.full_name || "Unknown";
           clientEmail = clientData.email || "No Email";
           clientAvatar = clientData.avatar || "Default Avatar URL";
+
+          if (!clientsMap[invoiceData.client_id]) {
+            clientsMap[invoiceData.client_id] = { label: clientName, value: invoiceData.client_id };
+          }
         }
 
         const caseDocRef = doc(db, "cases", invoiceData.case);
@@ -291,10 +309,12 @@ export default defineComponent({
             totalUnpaidInvoicesAmount += invoice.total_amount;
           }
         });
+
         taxDueAmount.value = totalPaidInvoicesAmount * 0.25;
         totalPaidAmount.value = totalPaidInvoicesAmount;
         totalUnpaidAmount.value = totalUnpaidInvoicesAmount;
-        alert(totalPaidAmount.value);
+
+        clientsList.value = Object.values(clientsMap) as { label: string; value: string }[];
 
         fetchInvoicesAndCalculateIncome();
 
@@ -433,6 +453,7 @@ export default defineComponent({
       breadcrumbs,
       taxDueAmount,
       chartRef,
+      clientsList,
     };
   },
   methods: {

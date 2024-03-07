@@ -241,7 +241,7 @@ export default defineComponent({
   setup() {
     const invoices = ref<Invoice[]>([]);
     const currentPage = ref(1);
-    const itemsPerPage = ref(10);
+    const itemsPerPage = ref(2);
     const searchTerm = ref('');
     const showAddInvoiceModal = ref(false);
     const showPreviewInvoiceModal = ref(false);
@@ -464,7 +464,9 @@ export default defineComponent({
         });
     });
 
-    const totalPages = computed(() => Math.ceil(filteredInvoices.value.length / itemsPerPage.value));
+    const totalPages = computed(() => {
+      return Math.ceil(filteredInvoices.value.length / itemsPerPage.value);
+    });
     const paginatedInvoices = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage.value;
       return filteredInvoices.value.slice(start, start + itemsPerPage.value);
@@ -543,15 +545,21 @@ export default defineComponent({
     };
 
     const prevPage = () => {
-      // Implement previous page logic
+      if (currentPage.value > 1) {
+        currentPage.value--;
+      }
     };
 
     const nextPage = () => {
-      // Implement next page logic
+      if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+      }
     };
 
     const updatePage = (newPage: number) => {
-      // Implement page update logic
+      if (newPage >= 1 && newPage <= totalPages.value) {
+        currentPage.value = newPage;
+      }
     };
 
     const updateSearchTerm = (value: string) => {

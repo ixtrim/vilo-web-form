@@ -35,7 +35,14 @@
           </div>
         </div>
         <div class="row">
-          <ClientsBreakdown />
+          <div class="clients-breakdown">
+            <div class="row">
+              <div class="col-lg-12">
+                <h3>Client’s Breakdown</h3>
+                <canvas ref="chartRef"></canvas>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -167,9 +174,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed } from 'vue';
+import { defineComponent, ref, onMounted, computed, nextTick } from 'vue';
+import type { Ref } from 'vue';
 import { db } from '@/firebase.js';
 import { collection, query, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
+import Chart from 'chart.js/auto';
 import VStatus from '@/components/v-status/VStatus.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
@@ -182,7 +191,6 @@ import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vu
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import VBreadcrumbs from '@/components/v-breadcrumbs/VBreadcrumbs.vue';
 import TotalIncome from '@/modules/InvoicesReports/TotalIncome/TotalIncome.vue';
-import ClientsBreakdown from '@/modules/InvoicesReports/ClientsBreakdown/ClientsBreakdown.vue';
 
 interface Invoice {
   id: string;
@@ -212,7 +220,6 @@ export default defineComponent({
     VDropdown,
     VBreadcrumbs,
     TotalIncome,
-    ClientsBreakdown,
   },
   setup() {
     const invoices = ref<Invoice[]>([]);
@@ -245,10 +252,13 @@ export default defineComponent({
     const truncateEmail = (email: string) => email.length > 25 ? `${email.substring(0, 22)}...` : email;
 
     const taxDueAmount = ref(0);
+    const totalPaidAmount = ref(0);
+    const totalUnpaidAmount = ref(0);
 
     const fetchInvoices = async () => {
       const querySnapshot = await getDocs(collection(db, "invoices"));
       let totalPaidInvoicesAmount = 0;
+      let totalUnpaidInvoicesAmount = 0;
       const invoicePromises = querySnapshot.docs.map(async (docSnapshot) => {
         const invoiceData = docSnapshot.data() as any; // Use `as any` temporarily to bypass TypeScript checks
         // Assuming invoiceData contains all required fields directly
@@ -275,21 +285,28 @@ export default defineComponent({
         
         querySnapshot.forEach((doc) => {
           const invoice = doc.data();
-          if (invoice.status === 2) { // Check if the invoice status is 'Paid'
-            totalPaidInvoicesAmount += invoice.total_amount; // Sum up the total amount
+          if (invoice.status === 2) {
+            totalPaidInvoicesAmount += invoice.total_amount;
+          } else if (invoice.status === 1) {
+            totalUnpaidInvoicesAmount += invoice.total_amount;
           }
         });
         taxDueAmount.value = totalPaidInvoicesAmount * 0.25;
+        totalPaidAmount.value = totalPaidInvoicesAmount;
+        totalUnpaidAmount.value = totalUnpaidInvoicesAmount;
+        alert(totalPaidAmount.value);
+
+        fetchInvoicesAndCalculateIncome();
 
         // Ensure all required properties are included
         return {
           id: docSnapshot.id,
-          number: invoiceData.number, // Ensure this exists in your document
-          case: invoiceData.case, // Ensure this exists in your document
-          due_date: invoiceData.due_date, // Ensure this exists in your document and is a Timestamp
-          status: invoiceData.status, // Ensure this is a number
-          client_id: invoiceData.client_id, // Ensure this exists in your document
-          total_amount: invoiceData.total_amount, // Ensure this exists in your document
+          number: invoiceData.number,
+          case: invoiceData.case,
+          due_date: invoiceData.due_date,
+          status: invoiceData.status,
+          client_id: invoiceData.client_id,
+          total_amount: invoiceData.total_amount,
           clientName,
           clientEmail,
           clientAvatar,
@@ -298,6 +315,44 @@ export default defineComponent({
       });
 
       invoices.value = await Promise.all(invoicePromises);
+    };
+
+    const chartRef: Ref<HTMLCanvasElement | null> = ref(null);
+    const fetchInvoicesAndCalculateIncome = async () => {
+      const data = [totalPaidAmount.value, totalUnpaidAmount.value];
+      const labels = ['Paid invoices', 'Pending invoices'];
+
+      // Wait for the next DOM update cycle to ensure the ref is bound
+      await nextTick();
+
+      if (chartRef.value) {
+        const ctx = chartRef.value.getContext('2d');
+        if (ctx) {
+          new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: labels,
+              datasets: [{
+                label: 'Total Income',
+                data: data,
+                backgroundColor: [
+                  '#444CE7',
+                  '#F97066',
+                ],
+                hoverOffset: 4
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'top',
+                },
+              }
+            }
+          });
+        }
+      }
     };
 
     onMounted(fetchInvoices);
@@ -377,6 +432,7 @@ export default defineComponent({
       notificationMessage,
       breadcrumbs,
       taxDueAmount,
+      chartRef,
     };
   },
   methods: {

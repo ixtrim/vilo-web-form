@@ -39,6 +39,12 @@
             <div class="row align-middle">
               <div class="col-lg-6 align-middle">
                 <h3 style="line-height: 45px;">Client’s Breakdown</h3>
+                
+                <div v-for="summary in invoiceSummaries" :key="summary.clientId">
+  <h3>{{ summary.clientName }}</h3>
+  <p>Unpaid Invoices Total: ${{ summary.unpaidInvoicesTotal.toFixed(2) }}</p>
+  <p>Paid Invoices Total: ${{ summary.paidInvoicesTotal.toFixed(2) }}</p>
+</div>
               </div>
               <div class="col-lg-6 align-right">
                 <VDropdown :title="'Choose client'" :items="clientsList" />
@@ -218,6 +224,13 @@ interface ClientOption {
   value: string;
 }
 
+interface InvoiceSummary {
+  clientId: string;
+  clientName: string;
+  unpaidInvoicesTotal: number;
+  paidInvoicesTotal: number;
+}
+
 export default defineComponent({
   components: {
     VButton,
@@ -244,6 +257,13 @@ export default defineComponent({
     const modalPreviewInvoiceTitle = ref('');
     const clientsList = ref<ClientOption[]>([]);
     const clientsMap: Record<string, ClientOption> = {};
+    const invoiceSummaries = ref<InvoiceSummary[]>([]);
+    const notificationType = ref('success');
+    const notificationHeader = ref('Changes saved');
+    const notificationMessage = ref('This account has been successfully edited.');
+    const taxDueAmount = ref(0);
+    const totalPaidAmount = ref(0);
+    const totalUnpaidAmount = ref(0);
 
     const breadcrumbs = computed(() => [
       { text: 'Invoices', to: '/invoices' },
@@ -259,20 +279,14 @@ export default defineComponent({
       { label: 'This week' },
     ]);
 
-    const notificationType = ref('success');
-    const notificationHeader = ref('Changes saved');
-    const notificationMessage = ref('This account has been successfully edited.');
-
     const truncateEmail = (email: string) => email.length > 25 ? `${email.substring(0, 22)}...` : email;
-
-    const taxDueAmount = ref(0);
-    const totalPaidAmount = ref(0);
-    const totalUnpaidAmount = ref(0);
 
     const fetchInvoices = async () => {
       const querySnapshot = await getDocs(collection(db, "invoices"));
+      const summaries: Record<string, InvoiceSummary> = {};
       let totalPaidInvoicesAmount = 0;
       let totalUnpaidInvoicesAmount = 0;
+      
       const invoicePromises = querySnapshot.docs.map(async (docSnapshot) => {
         const invoiceData = docSnapshot.data() as any;
         const clientDocRef = doc(db, "users", invoiceData.client_id);
@@ -310,11 +324,42 @@ export default defineComponent({
           }
         });
 
+        for (const docSnapshot of querySnapshot.docs) {
+          const invoiceData = docSnapshot.data() as any;
+          const clientId = invoiceData.client_id;
+          const status = invoiceData.status;
+          const totalAmount = invoiceData.total_amount;
+
+          if (!summaries[clientId]) {
+            const clientDocSnap = await getDoc(doc(db, "users", clientId));
+            let clientName = "Unknown";
+            if (clientDocSnap.exists()) {
+              const clientData = clientDocSnap.data();
+              clientName = clientData.full_name || "Unknown";
+            }
+
+            summaries[clientId] = {
+              clientId,
+              clientName,
+              unpaidInvoicesTotal: 0,
+              paidInvoicesTotal: 0,
+            };
+          }
+
+          if (status === 1) { // Unpaid
+            summaries[clientId].unpaidInvoicesTotal += totalAmount;
+          } else if (status === 2) { // Paid
+            summaries[clientId].paidInvoicesTotal += totalAmount;
+          }
+        }
+
         taxDueAmount.value = totalPaidInvoicesAmount * 0.25;
         totalPaidAmount.value = totalPaidInvoicesAmount;
         totalUnpaidAmount.value = totalUnpaidInvoicesAmount;
 
         clientsList.value = Object.values(clientsMap) as { label: string; value: string }[];
+
+        invoiceSummaries.value = Object.values(summaries);
 
         fetchInvoicesAndCalculateIncome();
 
@@ -454,6 +499,7 @@ export default defineComponent({
       taxDueAmount,
       chartRef,
       clientsList,
+      invoiceSummaries,
     };
   },
   methods: {

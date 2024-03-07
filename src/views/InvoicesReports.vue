@@ -80,7 +80,7 @@
           <div class="row">
             <div class="col-lg-3">
               <div class="dashboard__filters">
-                <Search />
+                <Search :value="searchTerm" @update-search="updateSearchTerm" />
               </div>
             </div>
             <div class="col-lg-6"></div>
@@ -527,6 +527,10 @@ export default defineComponent({
       // Implement preview invoice case handling
     };
 
+    const updateSearchTerm = (value: string) => {
+      searchTerm.value = value;
+    };
+
     function formatCurrency(amount: number): string {
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -571,6 +575,7 @@ export default defineComponent({
       dropdownTitle,
       canvasKey,
       formatCurrency,
+      updateSearchTerm,
     };
   },
   methods: {

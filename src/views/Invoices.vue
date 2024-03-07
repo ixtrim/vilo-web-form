@@ -45,10 +45,10 @@
             <div class="col-lg-3">
               <ul class="dashboard__actions">
                 <li>
-                  <VDropdown :title="'Sort by date'" :items="sortTime" @item-clicked="handleDropdownClick" />
+                  <VDropdown :title="'Sort by date'" :items="sortTime" @item-clicked="handleFilterTime" />
                 </li>
                 <li>
-                  <VDropdown :title="'All invoices'" :items="sortTime" @item-clicked="handleDropdownClick" />
+                  <VDropdown :title="'All invoices'" :items="sortStatus" @item-clicked="handleFilterStatus" />
                 </li>
               </ul>
             </div>
@@ -281,7 +281,24 @@ export default defineComponent({
 
     onMounted(fetchInvoices);
 
-    const filteredInvoices = computed(() => invoices.value.filter(invoice => invoice.number.toLowerCase().includes(searchTerm.value.toLowerCase()) || invoice.client_id.toLowerCase().includes(searchTerm.value.toLowerCase())));
+    const sortStatus = ref([
+      { label: 'All', value: null },
+      { label: 'Draft', value: 0 },
+      { label: 'Paid', value: 2 },
+      { label: 'Cancelled', value: 3 },
+      { label: 'Refunded', value: 4 },
+    ]);
+    const selectedStatus = ref(null);
+
+    const filteredInvoices = computed(() => {
+      return invoices.value
+        .filter(invoice => {
+          return invoice.number.toLowerCase().includes(searchTerm.value.toLowerCase()) || invoice.client_id.toLowerCase().includes(searchTerm.value.toLowerCase());
+        })
+        .filter(invoice => {
+          return selectedStatus.value === null || invoice.status === selectedStatus.value;
+        });
+    });
     const totalPages = computed(() => Math.ceil(filteredInvoices.value.length / itemsPerPage.value));
     const paginatedInvoices = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage.value;
@@ -297,6 +314,13 @@ export default defineComponent({
 
     const updateSearchTerm = (value: string) => {
       searchTerm.value = value;
+    };
+
+    const handleFilterTime = (item: any) => {
+    };
+
+    const handleFilterStatus = (item: any) => {
+      selectedStatus.value = item.value;
     };
 
     const handleDropdownClick = () => {
@@ -349,12 +373,15 @@ export default defineComponent({
       handleDropdownClick,
       handleDownloadClick,
       handleDeleteClick,
+      handleFilterTime,
+      handleFilterStatus,
       prevPage,
       nextPage,
       updatePage,
       handleAddInvoiceCase,
       handlePreviewInvoiceCase,
       sortTime,
+      sortStatus,
       notificationType,
       notificationHeader,
       notificationMessage,

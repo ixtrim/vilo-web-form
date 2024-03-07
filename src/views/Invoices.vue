@@ -146,13 +146,13 @@
 
           <div class="dashboard__pagination-below-table">
             <div class="dashboard__pagination-below-table__prev">
-              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="link-gray" @click="prevPage" text="Previous"></v-button>
+              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="changePage(-1, $event)" text="Previous" v-if="currentPage > 1"></v-button>
             </div>
             <div class="dashboard__pagination-below-table__pages">
-              <v-pagination-list :total-pages="totalPages" @update:currentPage="updatePage" />
+              <v-pagination-list :total-pages="totalPages" :initial-page="currentPage" @update:currentPage="updatePage" />
             </div>
             <div class="dashboard__pagination-below-table__next">
-              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="link-gray" @click="nextPage" text="Next"></v-button>
+              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="changePage(1, $event)" text="Next" v-if="currentPage < totalPages"></v-button>
             </div>
           </div>
 
@@ -170,7 +170,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed } from 'vue';
+import { defineComponent, ref, onMounted, computed, watch } from 'vue';
 import { db } from '@/firebase.js';
 import { collection, query, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
 import VStatus from '@/components/v-status/VStatus.vue';
@@ -213,7 +213,7 @@ export default defineComponent({
   setup() {
     const invoices = ref<Invoice[]>([]);
     const currentPage = ref(1);
-    const itemsPerPage = ref(10);
+    const itemsPerPage = ref(2);
     const searchTerm = ref('');
     const showAddInvoiceModal = ref(false);
     const showPreviewInvoiceModal = ref(false);
@@ -365,16 +365,22 @@ export default defineComponent({
       // Implement delete click handling
     };
 
-    const prevPage = () => {
-      // Implement previous page logic
+    const changePage = (step: number, event: Event) => {
+      const newPage = currentPage.value + step;
+      if (newPage >= 1 && newPage <= totalPages.value) {
+        currentPage.value = newPage;
+      }
+      event.preventDefault();
     };
 
-    const nextPage = () => {
-      // Implement next page logic
-    };
+    watch([selectedStatus, selectedTimeFrame, searchTerm], () => {
+      currentPage.value = 1;
+    }, { deep: true });
 
     const updatePage = (newPage: number) => {
-      // Implement page update logic
+      if (newPage >= 1 && newPage <= totalPages.value) {
+        currentPage.value = newPage;
+      }
     };
 
     const handleAddInvoiceCase = () => {
@@ -405,8 +411,7 @@ export default defineComponent({
       handleDeleteClick,
       handleFilterTime,
       handleFilterStatus,
-      prevPage,
-      nextPage,
+      changePage,
       updatePage,
       handleAddInvoiceCase,
       handlePreviewInvoiceCase,

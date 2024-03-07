@@ -186,9 +186,6 @@ import { collection, query, getDocs, doc, getDoc, Timestamp } from 'firebase/fir
 import Chart from 'chart.js/auto';
 import VStatus from '@/components/v-status/VStatus.vue';
 import VButton from '@/components/v-button/VButton.vue';
-import VModal from '@/components/v-modal/v-modal.vue';
-import VAddInvoice from '@/modals/Invoices/v-add-invoice/v-add-invoice.vue';
-import VPreviewInvoice from '@/modals/Invoices/v-preview-invoice/v-preview-invoice.vue';
 import VUser from '@/components/v-user/v-user.vue';
 import VLink from '@/components/v-link/VLink.vue';
 import Search from '@/modules/Navigation/Search.vue';
@@ -226,9 +223,6 @@ interface InvoiceSummary {
 export default defineComponent({
   components: {
     VButton,
-    VModal,
-    VAddInvoice,
-    VPreviewInvoice,
     VStatus,
     VUser,
     VLink,

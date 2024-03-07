@@ -163,13 +163,13 @@
 
           <div class="dashboard__pagination-below-table">
             <div class="dashboard__pagination-below-table__prev">
-              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="link-gray" @click="prevPage" text="Previous"></v-button>
+              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="changePage(-1, $event)" text="Previous" v-if="currentPage > 1"></v-button>
             </div>
             <div class="dashboard__pagination-below-table__pages">
-              <v-pagination-list :total-pages="totalPages" @update:currentPage="updatePage" />
+              <v-pagination-list :total-pages="totalPages" :initial-page="currentPage" @update:currentPage="updatePage" />
             </div>
             <div class="dashboard__pagination-below-table__next">
-              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="link-gray" @click="nextPage" text="Next"></v-button>
+              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="changePage(1, $event)" text="Next" v-if="currentPage < totalPages"></v-button>
             </div>
           </div>
 
@@ -186,9 +186,6 @@ import { collection, query, getDocs, doc, getDoc, Timestamp } from 'firebase/fir
 import Chart from 'chart.js/auto';
 import VStatus from '@/components/v-status/VStatus.vue';
 import VButton from '@/components/v-button/VButton.vue';
-import VModal from '@/components/v-modal/v-modal.vue';
-import VAddInvoice from '@/modals/Invoices/v-add-invoice/v-add-invoice.vue';
-import VPreviewInvoice from '@/modals/Invoices/v-preview-invoice/v-preview-invoice.vue';
 import VUser from '@/components/v-user/v-user.vue';
 import VLink from '@/components/v-link/VLink.vue';
 import Search from '@/modules/Navigation/Search.vue';
@@ -226,9 +223,6 @@ interface InvoiceSummary {
 export default defineComponent({
   components: {
     VButton,
-    VModal,
-    VAddInvoice,
-    VPreviewInvoice,
     VStatus,
     VUser,
     VLink,
@@ -464,10 +458,13 @@ export default defineComponent({
         });
     });
 
-    const totalPages = computed(() => Math.ceil(filteredInvoices.value.length / itemsPerPage.value));
+    const totalPages = computed(() => {
+      return Math.ceil(filteredInvoices.value.length / itemsPerPage.value);
+    });
     const paginatedInvoices = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage.value;
-      return filteredInvoices.value.slice(start, start + itemsPerPage.value);
+      const end = start + itemsPerPage.value;
+      return filteredInvoices.value.slice(start, end);
     });
 
     const handleClientSelected = (item: ClientOption) => {
@@ -542,16 +539,22 @@ export default defineComponent({
       // Implement delete click handling
     };
 
-    const prevPage = () => {
-      // Implement previous page logic
+    const changePage = (step: number, event: Event) => {
+      const newPage = currentPage.value + step;
+      if (newPage >= 1 && newPage <= totalPages.value) {
+        currentPage.value = newPage;
+      }
+      event.preventDefault();
     };
 
-    const nextPage = () => {
-      // Implement next page logic
-    };
+    watch([selectedStatus, selectedTimeFrame, searchTerm], () => {
+      currentPage.value = 1;
+    }, { deep: true });
 
     const updatePage = (newPage: number) => {
-      // Implement page update logic
+      if (newPage >= 1 && newPage <= totalPages.value) {
+        currentPage.value = newPage;
+      }
     };
 
     const updateSearchTerm = (value: string) => {
@@ -581,8 +584,7 @@ export default defineComponent({
       handleFilterStatus,
       handleDownloadClick,
       handleDeleteClick,
-      prevPage,
-      nextPage,
+      changePage,
       updatePage,
       sortTime,
       sortStatus,

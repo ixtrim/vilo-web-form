@@ -60,7 +60,7 @@
       </table>
     </div>
 
-    <div class="row" style="opacity: 0;">
+    <div class="row">
       <div class="col-lg-5"></div>
       <div class="col-lg-7">
         <div class="invoice__summary">
@@ -69,7 +69,15 @@
               <span>Sub total:</span>
             </div>
             <div class="col-lg-3">
-              <span>$6,000.00</span>
+              <span>{{ typeof invoiceSubtotalAmount === 'number' ? formatCurrency(invoiceSubtotalAmount) : invoiceSubtotalAmount }}</span>
+            </div>
+          </div>
+          <div class="row" v-if="Number(invoiceTotalDiscount) > 0">
+            <div class="col-lg-9">
+              <span>Total discount:</span>
+            </div>
+            <div class="col-lg-3">
+              <span>{{ typeof invoiceTotalDiscount === 'number' ? formatCurrency(invoiceTotalDiscount) : invoiceTotalDiscount }}</span>
             </div>
           </div>
           <div class="row">
@@ -77,15 +85,15 @@
               <span>Sales Taxes:</span>
             </div>
             <div class="col-lg-3">
-              <span>$60.00</span>
+              <span>{{ typeof invoiceSalesTaxes === 'number' ? formatCurrency(invoiceSalesTaxes) : invoiceSalesTaxes }}</span>
             </div>
           </div>
           <div class="row">
             <div class="col-lg-9">
-              <strong>Amount due on 20 Jan 2023:</strong>
+              <strong>Amount due on {{ formatDate(invoiceDueDate) }}:</strong>
             </div>
             <div class="col-lg-3">
-              <strong>$6,060.00</strong>
+              <strong>{{ typeof invoiceTotalAmount === 'number' ? formatCurrency(invoiceTotalAmount) : invoiceTotalAmount }}</strong>
             </div>
           </div>
         </div>
@@ -131,6 +139,10 @@
     due_date: Timestamp;
     status: number;
     client_id: string;
+    sales_taxes: number;
+    subtotal_amount: number;
+    total_amount: number;
+    total_discount: number;
     clientName: string;
     clientEmail: string;
     clientPhone: string;
@@ -170,12 +182,23 @@
   const invoiceStatus = computed(() => props.invoice?.status || 'Unknown');
   const invoiceCreated = computed(() => props.invoice?.created || undefined);
   const invoiceDueDate = computed(() => props.invoice?.due_date || undefined);
+  const invoiceSalesTaxes = computed(() => props.invoice?.sales_taxes || 'Unknown');
+  const invoiceSubtotalAmount = computed(() => props.invoice?.subtotal_amount || 'Unknown');
+  const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
+  const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
 
   const emit = defineEmits(['close-modal', 'mark-paid']);
 
   function formatDate(timestamp: Timestamp | undefined) {
     return timestamp ? timestamp.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown Date';
   }
+
+  function formatCurrency(amount: number): string {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(amount);
+    }
 
   function closeModal() {
     emit('close-modal');

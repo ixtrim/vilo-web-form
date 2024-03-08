@@ -82,7 +82,7 @@ interface File {
   date_uploaded: string;
   last_updated: string;
   createdBy: string;
-  createdByDetails: { // Add a new property to hold user details
+  createdByDetails: {
     name: string;
     email: string;
     avatar: string;

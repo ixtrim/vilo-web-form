@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-body invoice" style="opacity: 0;">
+  <div class="modal-body invoice">
     <div class="row invoice__meta">
       <div class="col-lg-12">
         <h4>Billed to:</h4>
@@ -95,12 +95,12 @@
     <div class="row invoice__payment">
       <div class="col-lg-12">
         <h5>PAYMENT INSTRUCTIONS</h5>
-        <p>Vilo, Inc<br/>
-          Bank name: ABC Bank limited<br/>
-          SWIFT/IBAN: NZ0201230012<br/>
-          Account number: 12-1234-123456-12<br/>
+        <p>{{ appName }}<br/>
+          Bank name: {{ bankName }}<br/>
+          SWIFT/IBAN: {{ swiftIban }}<br/>
+          Account number: {{ accountNumber }}<br/>
         </p>
-        <p>For any questions please contact us at hi@vilo.com</p>
+        <p>For any questions please contact us at <a href="mailto:hi@vilo.com">hi@vilo.com</a></p>
       </div>
     </div>
 
@@ -118,10 +118,31 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, watch, computed } from 'vue';
+  import { defineEmits, defineProps, ref, watch, computed } from 'vue';
   import type { PropType } from 'vue';
-  import { defineEmits, defineProps } from 'vue';
   import VButton from '@/components/v-button/VButton.vue';
+
+  const props = defineProps({
+    generalSettings: {
+      type: Object as PropType<{
+        app_name?: string;
+      }>,
+      default: () => ({})
+    },
+    billingSettings: {
+      type: Object as PropType<{
+        bank_name?: string;
+        swift_iban?: string;
+        account_number?: string;
+      }>,
+      default: () => ({})
+    }
+  });
+
+  const appName = computed(() => props.generalSettings?.app_name || 'Default App Name');
+  const bankName = computed(() => props.billingSettings?.bank_name || 'Default Bank Name');
+  const swiftIban = computed(() => props.billingSettings?.swift_iban || 'Default SWIFT/IBAN');
+  const accountNumber = computed(() => props.billingSettings?.account_number || 'Default Account Number');
 
   const emit = defineEmits(['close-modal', 'mark-paid']);
 

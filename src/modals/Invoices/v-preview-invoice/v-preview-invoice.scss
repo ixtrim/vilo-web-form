@@ -136,6 +136,15 @@
           color: var(--v-gray-900);
           margin: 8px 0 0;
         }
+
+        a {
+          color: var(--v-primary-indigo-700);
+          text-decoration: none;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
       }
     }
   }

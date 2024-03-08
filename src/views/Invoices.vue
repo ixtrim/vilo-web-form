@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="col-lg-3 align-right">
-        <ul class="dashboard__actions">
+        <ul class="dashboard__actions" v-if="notClient">
           <li>
             <VLink 
               to="/invoices-reports" 
@@ -86,10 +86,10 @@
             <div class="col col--inv-reminder">
               <h4>Reminder</h4>
             </div>
-            <div class="col col--inv-action">
+            <div class="col col--inv-action" v-if="notClient">
               &nbsp;
             </div>
-            <div class="col col--inv-action">
+            <div class="col col--inv-action" v-if="notClient">
               &nbsp;
             </div>
             <div class="col col--inv-action">
@@ -132,10 +132,10 @@
               <div class="col col--inv-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="download" styled="simple-icon" @click="handleDownloadClick" text=""></VButton>
               </div>
-              <div class="col col--inv-action">
+              <div class="col col--inv-action" v-if="notClient">
                 <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleDeleteClick" text=""></VButton>
               </div>
-              <div class="col col--inv-action">
+              <div class="col col--inv-action" v-if="notClient">
                 <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openAddInvoiceModal" text=""></VButton>
               </div>
             </div>
@@ -161,7 +161,7 @@
 
     <VModal :show="showAddInvoiceModal || showPreviewInvoiceModal" :title="modalAddInvoiceTitle || modalPreviewInvoiceTitle" @update:show="handleModalClose">
       <VAddInvoice v-if="showAddInvoiceModal" :title="modalAddInvoiceTitle" @close-modal="showAddInvoiceModal = false" @save-clicked="handleAddInvoiceCase" />
-      <VPreviewInvoice v-if="showPreviewInvoiceModal" :title="modalPreviewInvoiceTitle" @close-modal="showPreviewInvoiceModal = false" @save-clicked="handlePreviewInvoiceCase" />
+      <VPreviewInvoice v-if="showPreviewInvoiceModal" :title="modalPreviewInvoiceTitle" :generalSettings="generalSettings" :billingSettings="billingSettings" @close-modal="showPreviewInvoiceModal = false" />
     </VModal>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
@@ -183,6 +183,7 @@ import VLink from '@/components/v-link/VLink.vue';
 import Search from '@/modules/Navigation/Search.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
+import { useUserStore } from '@/stores/userStore';
 
 interface Invoice {
   id: string;
@@ -219,6 +220,34 @@ export default defineComponent({
     const showPreviewInvoiceModal = ref(false);
     const modalAddInvoiceTitle = ref('');
     const modalPreviewInvoiceTitle = ref('');
+
+    const billingSettings = ref({});
+    const fetchBillingSettings = async () => {
+      const billingDocRef = doc(db, "settings", "billing");
+      const billingDocSnap = await getDoc(billingDocRef);
+
+      if (billingDocSnap.exists()) {
+        billingSettings.value = billingDocSnap.data();
+      } else {
+        console.log("No such document!");
+      }
+    };
+    const generalSettings = ref({});
+    const fetchGeneralSettings = async () => {
+      const generalDocRef = doc(db, "settings", "general");
+      const generalDocSnap = await getDoc(generalDocRef);
+
+      if (generalDocSnap.exists()) {
+        generalSettings.value = generalDocSnap.data();
+      } else {
+        console.log("No such document!");
+      }
+    };
+
+    const { user } = useUserStore();
+    const notClient = computed(() => {
+      return [0, 1, 2].includes(user.value?.role ?? 0);
+    });
 
     const sortTime = ref([
       { label: 'All', value: 'all' },
@@ -280,8 +309,6 @@ export default defineComponent({
       invoices.value = await Promise.all(invoicePromises);
     };
 
-    onMounted(fetchInvoices);
-
     const sortStatus = ref([
       { label: 'All', value: null },
       { label: 'Draft', value: 0 },
@@ -335,7 +362,13 @@ export default defineComponent({
     });
 
     const openAddInvoiceModal = () => showAddInvoiceModal.value = true;
-    const openPreviewInvoiceModal = () => showPreviewInvoiceModal.value = true;
+
+    const openPreviewInvoiceModal = (invoice: any) => {
+      const currentInvoice = ref(null);
+      currentInvoice.value = invoice;
+      showPreviewInvoiceModal.value = true;
+    };
+
     const handleModalClose = () => {
       showAddInvoiceModal.value = false;
       showPreviewInvoiceModal.value = false;
@@ -391,6 +424,12 @@ export default defineComponent({
       // Implement preview invoice case handling
     };
 
+    onMounted(() => {
+      fetchInvoices();
+      fetchBillingSettings();
+      fetchGeneralSettings();
+    });
+
     return {
       invoices,
       currentPage,
@@ -421,6 +460,9 @@ export default defineComponent({
       notificationHeader,
       notificationMessage,
       updateSearchTerm,
+      billingSettings,
+      generalSettings,
+      notClient,
     };
   },
   methods: {

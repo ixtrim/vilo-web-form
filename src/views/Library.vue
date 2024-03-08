@@ -87,25 +87,26 @@
           <div class="dashboard__table__page">
 
             <div class="dashboard__table__page">
-              <div class="dashboard__table__page__item" v-for="document in documents" :key="document.id">
+              <div class="dashboard__table__page__item" v-for="file in files" :key="file.id">
                 <div class="col col--checkbox">
-                  <input type="checkbox" :id="'checkbox-' + document.id" />
-                  <label :for="'checkbox-' + document.id"></label>
+                  <input type="checkbox" :id="'checkbox-' + file.id" />
+                  <label :for="'checkbox-' + file.id"></label>
                 </div>
                 <div class="col col--l-document">
-                  <VFile :file-extension="document.fileExtension" :file-name="document.fileName" :file-size="document.fileSize" />
+                  <VFile :file-extension="file.extension" :file-name="file.document_name" :file-size="file.size" />
                 </div>
                 <div class="col col--l-status">
-                  <VBadge :variant="document.badgeVariant">{{ document.status }}</VBadge>
+                  <VBadge :variant="'primary'" v-if="file.status == 1">Active</VBadge>
+                  <VBadge :variant="'primary'" v-if="file.status == 0">Pending</VBadge>
                 </div>
                 <div class="col col--l-uploaded">
-                  <p>{{ document.uploadedDate }}</p>
+                  <p>{{ file.date_uploaded }}</p>
                 </div>
                 <div class="col col--l-updated">
-                  <p>{{ document.updatedDate }}</p>
+                  <p>{{ file.last_updated }}</p>
                 </div>
                 <div class="col col--l-created">
-                  <VUser :userName="document.userName" :userEmail="document.userEmail" />
+                  <VUser :userName="file.createdByDetails.name" :userEmail="file.createdByDetails.email" :userAvatar="file.createdByDetails.avatar" />
                 </div>
                 <div class="col col--l-delete">
                   <VLink to="#" styled="secondary">Delete</VLink>
@@ -165,6 +166,26 @@ import VNotification from '@/components/v-notification/VNotification.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
 import VAddDocument from '@/modals/Library/v-add-document/v-add-document.vue';
 import VEditDocument from '@/modals/Library/v-edit-document/v-edit-document.vue';
+
+import { db } from '@/firebase.js';
+import { doc, getDoc, query, collection, orderBy, limit, getDocs, where } from 'firebase/firestore';
+
+
+interface File {
+  id: string;
+  document_name: string;
+  extension: string;
+  size: string;
+  date_uploaded: string;
+  last_updated: string;
+  createdBy: string;
+  createdByDetails: { // Add a new property to hold user details
+    name: string;
+    email: string;
+    avatar: string;
+  };
+  status: number;
+}
 
 interface DropdownItem {
   label: string;
@@ -300,6 +321,8 @@ export default defineComponent({
           userEmail: 'george@lawfirm.com',
         }
       ],
+
+      files: [] as File[],
       currentPage: 1,
       itemsPerPage: 10,
     };
@@ -313,6 +336,9 @@ export default defineComponent({
       const end = start + this.itemsPerPage;
       return this.documents.slice(start, end);
     },
+  },
+  mounted() {
+    this.fetchFiles();
   },
   methods: {
     triggerNotification(type: string, header: string, message: string) {
@@ -360,6 +386,49 @@ export default defineComponent({
       this.showAddDocumentModal = false;
       this.showEditDocumentModal = false;
     },
+    async fetchFiles() {
+      const filesQuery = query(collection(db, "files"), where("status", "==", 1), limit(8));
+      const querySnapshot = await getDocs(filesQuery);
+      const filesWithUserDetails = await Promise.all(querySnapshot.docs.map(async (docSnapshot) => {
+        const fileData = docSnapshot.data();
+        const userDocRef = doc(db, "users", fileData.created_by);
+        const userDocSnap = await getDoc(userDocRef);
+        let createdByDetails = {
+          name: "Unknown User",
+          email: "No Email",
+          avatar: "Default Avatar URL"
+        };
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          createdByDetails = {
+            name: userData.full_name || "Unknown User",
+            email: userData.email || "No Email",
+            avatar: userData.avatar || "Default Avatar URL"
+          };
+        }
+        return {
+          id: docSnapshot.id,
+          document_name: fileData.document_name,
+          extension: fileData.extension,
+          size: "2MB", // Adjust as needed
+          date_uploaded: fileData.date_uploaded.toDate().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          }),
+          last_updated: fileData.last_updated.toDate().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          }),
+          createdBy: fileData.created_by,
+          createdByDetails, // Add user details to the file object
+          status: fileData.status,
+        };
+      }));
+      this.files = filesWithUserDetails;
+      console.log(this.files);
+    }
   },
 });
 </script>

@@ -105,7 +105,7 @@
     </div>
 
   </div>
-  <div class="modal-footer">
+  <div class="modal-footer" v-if="userRole !== 3 && userRole !== 4">
     <ul class="modal-footer__actions">
       <li>
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
@@ -136,7 +136,8 @@
         account_number?: string;
       }>,
       default: () => ({})
-    }
+    },
+    userRole: Number
   });
 
   const appName = computed(() => props.generalSettings?.app_name || 'Default App Name');

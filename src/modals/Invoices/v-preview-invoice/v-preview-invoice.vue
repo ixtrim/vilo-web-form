@@ -7,26 +7,26 @@
     </div>
     <div class="row invoice__meta">
       <div class="col-lg-7">
-        <span>John Doe</span>
+        <span>{{ clientName }}</span>
       </div>
       <div class="col-lg-5">
-        <span>Invoice number: INV-0002</span>
+        <span>Invoice number: {{ invoiceNumber }}</span>
       </div>
     </div>
     <div class="row invoice__meta">
       <div class="col-lg-7">
-        <span>johndoe@vilo.com | +64 123 1234 123</span>
+        <span>{{ clientEmail }} | </span>
       </div>
       <div class="col-lg-5">
-        <span>Invoice Date: 02 Jan 2023</span>
+        <span>Invoice Date: </span>
       </div>
     </div>
     <div class="row invoice__meta">
       <div class="col-lg-7">
-        <span>132, My Street, Kingston, New York 12401, USA</span>
+        <span></span>
       </div>
       <div class="col-lg-5">
-        <span>Due: 20 Jan 2023</span>
+        <span>Due: </span>
       </div>
     </div>
 
@@ -119,10 +119,25 @@
 
 <script setup lang="ts">
   import { defineEmits, defineProps, ref, watch, computed } from 'vue';
+  import { Timestamp } from 'firebase/firestore';
   import type { PropType } from 'vue';
   import VButton from '@/components/v-button/VButton.vue';
 
+  type Invoice = {
+    id: string;
+    number: string;
+    case: string;
+    due_date: Timestamp;
+    status: number;
+    client_id: string;
+    clientName: string;
+    clientEmail: string;
+    clientAvatar: string;
+    caseTitle: string;
+  };
+
   const props = defineProps({
+    invoice: Object as PropType<Invoice>,
     generalSettings: {
       type: Object as PropType<{
         app_name?: string;
@@ -144,6 +159,9 @@
   const bankName = computed(() => props.billingSettings?.bank_name || 'Default Bank Name');
   const swiftIban = computed(() => props.billingSettings?.swift_iban || 'Default SWIFT/IBAN');
   const accountNumber = computed(() => props.billingSettings?.account_number || 'Default Account Number');
+  const clientName = computed(() => props.invoice?.clientName || 'Unknown');
+  const clientEmail = computed(() => props.invoice?.clientEmail || 'Unknown');
+  const invoiceNumber = computed(() => props.invoice?.number || 'Unknown');
 
   const emit = defineEmits(['close-modal', 'mark-paid']);
 

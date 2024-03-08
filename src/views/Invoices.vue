@@ -193,6 +193,10 @@ interface Invoice {
   due_date: Timestamp;
   status: number;
   client_id: string;
+  sales_taxes: number;
+  subtotal_amount: number;
+  total_amount: number;
+  total_discount: number;
   clientName: string;
   clientEmail: string;
   clientPhone: string;
@@ -309,6 +313,10 @@ export default defineComponent({
           due_date: invoiceData.due_date,
           status: invoiceData.status,
           client_id: invoiceData.client_id,
+          sales_taxes: invoiceData.sales_taxes,
+          subtotal_amount: invoiceData.subtotal_amount,
+          total_amount: invoiceData.total_amount,
+          total_discount: invoiceData.total_discount,
           clientName,
           clientEmail,
           clientPhone,

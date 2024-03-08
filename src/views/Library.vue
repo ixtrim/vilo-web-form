@@ -32,17 +32,17 @@
           <div class="row">
             <div class="col-lg-3">
               <div class="dashboard__filters">
-                <Search />
+                <Search :value="searchTerm" @update-search="updateSearchTerm" />
               </div>
             </div>
             <div class="col-lg-6"></div>
             <div class="col-lg-3">
               <ul class="dashboard__actions">
                 <li>
-                  <VDropdown :title="'Sort by date'" :items="sortTime" @item-clicked="handleDropdownClick" />
+                  <VDropdown :title="'Sort by date'" :items="sortTime" @item-clicked="handleFilterTime" />
                 </li>
                 <li>
-                  <VDropdown :title="'All cases'" :items="sortTime" @item-clicked="handleDropdownClick" />
+                  <VDropdown :title="'All cases'" :items="sortStatus" @item-clicked="handleFilterStatus" />
                 </li>
               </ul>
             </div>
@@ -87,7 +87,7 @@
           <div class="dashboard__table__page">
 
             <div class="dashboard__table__page">
-              <div class="dashboard__table__page__item" v-for="file in files" :key="file.id">
+              <div class="dashboard__table__page__item" v-for="file in paginatedFiles" :key="file.id">
                 <div class="col col--checkbox">
                   <input type="checkbox" :id="'checkbox-' + file.id" />
                   <label :for="'checkbox-' + file.id"></label>
@@ -96,8 +96,9 @@
                   <VFile :file-extension="file.extension" :file-name="file.document_name" :file-size="file.size" />
                 </div>
                 <div class="col col--l-status">
-                  <VBadge :variant="'primary'" v-if="file.status == 1">Active</VBadge>
-                  <VBadge :variant="'primary'" v-if="file.status == 0">Pending</VBadge>
+                  <VBadge :variant="'primary'" v-if="file.status == 0">Draft</VBadge>
+                  <VBadge :variant="'primary'" v-if="file.status == 1">Pending</VBadge>
+                  <VBadge :variant="'primary'" v-if="file.status == 2">Signed</VBadge>
                 </div>
                 <div class="col col--l-uploaded">
                   <p>{{ file.date_uploaded }}</p>
@@ -151,7 +152,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
+import { defineComponent, ref, computed,onMounted, watch } from 'vue';
 import VLink from '@/components/v-link/VLink.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import Search from '@/modules/Navigation/Search.vue';
@@ -222,171 +223,85 @@ export default defineComponent({
       notificationMessage: 'This account has been successfully edited.',
       userName: 'Olivia Rhye',
       userEmail: 'olivia@untitledui.com',
-      sortTime: [
-        { label: 'All' },
-        { label: 'Last year' },
-        { label: 'Last three months' },
-        { label: 'Last month' },
-        { label: 'This week' },
-      ],
       sortCases: [
         { label: 'Internal user' },
         { label: 'Client (individual)' },
         { label: 'Client (company)' },
         { label: 'Admin' },
       ],
-      documents: [
-        {
-          id: 1,
-          fileExtension: 'pdf',
-          fileName: 'Mergers_Acquisitions_Report_2022.pdf',
-          fileSize: '5 MB',
-          badgeVariant: 'warning',
-          status: 'Review',
-          uploadedDate: 'Feb 12, 2023',
-          updatedDate: 'Mar 5, 2023',
-          userName: 'Adrian Stone',
-          userEmail: 'adrian@lawfirm.com',
-        },
-        {
-          id: 2,
-          fileExtension: 'docx',
-          fileName: 'Client_Contract_John_Doe.docx',
-          fileSize: '2 MB',
-          badgeVariant: 'success',
-          status: 'Signed',
-          uploadedDate: 'Jan 20, 2023',
-          updatedDate: 'Jan 22, 2023',
-          userName: 'Brenda Walsh',
-          userEmail: 'brenda@lawfirm.com',
-        },
-        {
-          id: 3,
-          fileExtension: 'docx',
-          fileName: 'Case_Expenses_2023.docx',
-          fileSize: '1 MB',
-          badgeVariant: 'primary',
-          status: 'Updated',
-          uploadedDate: 'Mar 1, 2023',
-          updatedDate: 'Mar 1, 2023',
-          userName: 'Carlos Diaz',
-          userEmail: 'carlos@lawfirm.com',
-        },
-        {
-          id: 4,
-          fileExtension: 'doc',
-          fileName: 'Litigation_Strategies_2023.doc',
-          fileSize: '6 MB', 
-          badgeVariant: 'light',
-          status: 'Draft',
-          uploadedDate: 'Apr 10, 2023',
-          updatedDate: 'Apr 15, 2023',
-          userName: 'Diana Reed',
-          userEmail: 'diana@lawfirm.com',
-        },
-        {
-          id: 5,
-          fileExtension: 'pdf',
-          fileName: 'Non_Disclosure_Agreement_Globex.pdf',
-          fileSize: '2.5 MB', 
-          badgeVariant: 'danger',
-          status: 'Urgent',
-          uploadedDate: 'Feb 28, 2023',
-          updatedDate: 'Mar 2, 2023',
-          userName: 'Evan Wright',
-          userEmail: 'evan@lawfirm.com',
-        },
-        {
-          id: 6,
-          fileExtension: 'docx',
-          fileName: 'Settlement_Agreement_Case_4321.docx',
-          fileSize: '3 MB', 
-          badgeVariant: 'success',
-          status: 'Final',
-          uploadedDate: 'Jan 5, 2023',
-          updatedDate: 'Jan 6, 2023',
-          userName: 'Fiona Grant',
-          userEmail: 'fiona@lawfirm.com',
-        },
-        {
-          id: 7,
-          fileExtension: 'pdf',
-          fileName: 'Meeting_Minutes_030323.pdf',
-          fileSize: '512 KB', 
-          badgeVariant: 'success',
-          status: 'Completed',
-          uploadedDate: 'Mar 3, 2023',
-          updatedDate: 'Mar 4, 2023',
-          userName: 'George Hanson',
-          userEmail: 'george@lawfirm.com',
-        }
-      ],
-
-      files: [] as File[],
-      currentPage: 1,
-      itemsPerPage: 10,
     };
   },
-  computed: {
-    totalPages() {
-      return Math.ceil(this.documents.length / this.itemsPerPage);
-    },
-    paginatedItems() {
-      const start = (this.currentPage - 1) * this.itemsPerPage;
-      const end = start + this.itemsPerPage;
-      return this.documents.slice(start, end);
-    },
-  },
-  mounted() {
-    this.fetchFiles();
-  },
-  methods: {
-    triggerNotification(type: string, header: string, message: string) {
-      this.notificationType = type;
-      this.notificationHeader = header;
-      this.notificationMessage = message;
-      (this.$refs.notificationRef as NotificationRef).showNotification();
-    },
-    handleDropdownClick(item: DropdownItem) {
-      console.log('Dropdown item clicked:', item);
-    },
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage -= 1;
-      }
-    },
-    nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage += 1;
-      }
-    },
-    handleButtonClick() {
-      // Logic for handling button click
-      console.log('Button clicked');
-    },
-    updatePage(newPage: number) {
-      this.currentPage = newPage;
-    },
-    addDocument() {
-      this.$router.push('/library-document');
-    },
-    handleAddDocument() {
-      this.showAddDocumentModal = false;
-      this.triggerNotification('success', 'Changes saved', 'Case board modified successfully.');
-    },
-    openEditDocumentModal() {
-      this.modalEditDocumentTitle = 'Create task';
-      this.showEditDocumentModal = true;
-    },
-    handleEditDocument() {
-      this.showEditDocumentModal = false;
-      this.triggerNotification('success', 'You successfully created new task', 'Your task will be added to Vilo board.');
-    },
-    handleModalClose(value: boolean) {
-      this.showAddDocumentModal = false;
-      this.showEditDocumentModal = false;
-    },
-    async fetchFiles() {
+  setup() {
+
+    const files = ref<File[]>([]);
+    const currentPage = ref(1);
+    const itemsPerPage = ref(1);
+    const searchTerm = ref('');
+    const selectedTimeFrame = ref('all');
+    const selectedStatus = ref(null);
+
+    const sortTime = ref([
+      { label: 'All', value: 'all' },
+      { label: 'Last year', value: 'lastYear' },
+      { label: 'Last three months', value: 'lastThreeMonths' },
+      { label: 'Last two months', value: 'lastTwoMonths' },
+      { label: 'Last month', value: 'lastMonth' },
+      { label: 'This week', value: 'thisWeek' },
+    ]);
+
+    const sortStatus = ref([
+      { label: 'All', value: null },
+      { label: 'Draft', value: 0 },
+      { label: 'Pending', value: 1 },
+      { label: 'Signed', value: 2 },
+    ]);
+
+    const filteredFiles = computed(() => {
+      const now = new Date();
+      return files.value
+        .filter(file => {
+
+          // Filter by search term and status as before
+          const matchesSearchTerm = String(file.document_name).toLowerCase().includes(searchTerm.value.toLowerCase());
+          const matchesStatus = selectedStatus.value === null || file.status === selectedStatus.value;
+
+          // Determine if the invoice matches the selected time frame
+          let matchesTimeFrame = true;
+          if (selectedTimeFrame.value !== 'all') {
+            const invoiceDate = new Date(file.date_uploaded);
+
+            switch (selectedTimeFrame.value) {
+              case 'lastYear':
+                matchesTimeFrame = invoiceDate >= new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+                break;
+              case 'lastThreeMonths':
+                matchesTimeFrame = invoiceDate >= new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+                break;
+              case 'lastTwoMonths':
+                matchesTimeFrame = invoiceDate >= new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
+                break;
+              case 'lastMonth':
+                matchesTimeFrame = invoiceDate >= new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+                break;
+              case 'thisWeek':
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(now.getDate() - 7);
+                matchesTimeFrame = invoiceDate >= oneWeekAgo;
+                break;
+            }
+          }
+          
+          return matchesSearchTerm && matchesStatus && matchesTimeFrame;
+        });
+    });
+
+    const totalPages = computed(() => Math.ceil(filteredFiles.value.length / itemsPerPage.value));
+    const paginatedFiles = computed(() => {
+      const start = (currentPage.value - 1) * itemsPerPage.value;
+      return filteredFiles.value.slice(start, start + itemsPerPage.value);
+    });
+
+    const fetchFiles = async() => {
       const filesQuery = query(collection(db, "files"), where("status", "==", 1), limit(8));
       const querySnapshot = await getDocs(filesQuery);
       const filesWithUserDetails = await Promise.all(querySnapshot.docs.map(async (docSnapshot) => {
@@ -426,9 +341,97 @@ export default defineComponent({
           status: fileData.status,
         };
       }));
-      this.files = filesWithUserDetails;
-      console.log(this.files);
+
+      files.value = filesWithUserDetails;
     }
+    
+    onMounted(fetchFiles);
+
+    const updateSearchTerm = (value: string) => {
+      searchTerm.value = value;
+    };
+    
+    const nextPage = () => {
+      if (currentPage.value * itemsPerPage.value < files.value.length) {
+        currentPage.value++;
+      }
+    };
+  
+    const prevPage = () => {
+      if (currentPage.value > 1) {
+        currentPage.value--;
+      }
+    };
+    const updatePage = (newPage: number) => {
+      currentPage.value = newPage;
+    };
+
+    const handleFilterTime = (item: any) => {
+      selectedTimeFrame.value = item.value;
+    };
+
+    const handleFilterStatus = (item: any) => {
+      selectedStatus.value = item.value;
+    };
+
+    watch([selectedStatus, selectedTimeFrame, searchTerm], () => {
+      currentPage.value = 1;
+    }, { deep: true });
+
+
+    return {
+      paginatedFiles,
+      nextPage,
+      prevPage,
+      totalPages,
+      updatePage,
+      searchTerm,
+      updateSearchTerm,
+      sortTime,
+      handleFilterTime,
+      sortStatus,
+      handleFilterStatus
+    }
+
+  },
+  // computed: {
+    
+  //   paginatedItems() {
+  //     const start = (this.currentPage - 1) * this.itemsPerPage;
+  //     const end = start + this.itemsPerPage;
+  //     return this.documents.slice(start, end);
+  //   },
+  // },
+  methods: {
+    triggerNotification(type: string, header: string, message: string) {
+      this.notificationType = type;
+      this.notificationHeader = header;
+      this.notificationMessage = message;
+      (this.$refs.notificationRef as NotificationRef).showNotification();
+    },
+    handleButtonClick() {
+      // Logic for handling button click
+      console.log('Button clicked');
+    },
+    addDocument() {
+      this.$router.push('/library-document');
+    },
+    handleAddDocument() {
+      this.showAddDocumentModal = false;
+      this.triggerNotification('success', 'Changes saved', 'Case board modified successfully.');
+    },
+    openEditDocumentModal() {
+      this.modalEditDocumentTitle = 'Create task';
+      this.showEditDocumentModal = true;
+    },
+    handleEditDocument() {
+      this.showEditDocumentModal = false;
+      this.triggerNotification('success', 'You successfully created new task', 'Your task will be added to Vilo board.');
+    },
+    handleModalClose(value: boolean) {
+      this.showAddDocumentModal = false;
+      this.showEditDocumentModal = false;
+    },
   },
 });
 </script>

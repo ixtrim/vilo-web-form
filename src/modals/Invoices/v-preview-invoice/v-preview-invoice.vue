@@ -15,18 +15,18 @@
     </div>
     <div class="row invoice__meta">
       <div class="col-lg-7">
-        <span>{{ clientEmail }} | </span>
+        <span>{{ clientEmail }} | {{ clientPhone }}</span>
       </div>
       <div class="col-lg-5">
-        <span>Invoice Date: </span>
+        <span>Invoice Date: {{ formatDate(invoiceCreated) }}</span>
       </div>
     </div>
     <div class="row invoice__meta">
       <div class="col-lg-7">
-        <span></span>
+        <span>{{ clientAddress }}</span>
       </div>
       <div class="col-lg-5">
-        <span>Due: {{ invoiceDueDate }}</span>
+        <span>Due: {{ formatDate(invoiceDueDate) }}</span>
       </div>
     </div>
 
@@ -127,11 +127,14 @@
     id: string;
     number: string;
     case: string;
+    created: Timestamp;
     due_date: Timestamp;
     status: number;
     client_id: string;
     clientName: string;
     clientEmail: string;
+    clientPhone: string;
+    clientAddress: string;
     clientAvatar: string;
     caseTitle: string;
   };
@@ -161,11 +164,18 @@
   const accountNumber = computed(() => props.billingSettings?.account_number || 'Default Account Number');
   const clientName = computed(() => props.invoice?.clientName || 'Unknown');
   const clientEmail = computed(() => props.invoice?.clientEmail || 'Unknown');
+  const clientPhone = computed(() => props.invoice?.clientPhone || 'Unknown');
+  const clientAddress = computed(() => props.invoice?.clientAddress || 'Unknown');
   const invoiceNumber = computed(() => props.invoice?.number || 'Unknown');
   const invoiceStatus = computed(() => props.invoice?.status || 'Unknown');
-  const invoiceDueDate = computed(() => props.invoice?.due_date || 'Unknown');
+  const invoiceCreated = computed(() => props.invoice?.created || undefined);
+  const invoiceDueDate = computed(() => props.invoice?.due_date || undefined);
 
   const emit = defineEmits(['close-modal', 'mark-paid']);
+
+  function formatDate(timestamp: Timestamp | undefined) {
+    return timestamp ? timestamp.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown Date';
+  }
 
   function closeModal() {
     emit('close-modal');

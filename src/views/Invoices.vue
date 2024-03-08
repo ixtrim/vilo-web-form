@@ -189,11 +189,14 @@ interface Invoice {
   id: string;
   number: string;
   case: string;
+  created: Timestamp;
   due_date: Timestamp;
   status: number;
   client_id: string;
   clientName: string;
   clientEmail: string;
+  clientPhone: string;
+  clientAddress: string;
   clientAvatar: string;
   caseTitle: string;
 }
@@ -276,12 +279,16 @@ export default defineComponent({
         const clientDocSnap = await getDoc(clientDocRef);
         let clientName = "Unknown";
         let clientEmail = "No Email";
+        let clientPhone = "No phone";
+        let clientAddress = "No address";
         let clientAvatar = "Default Avatar URL";
 
         if (clientDocSnap.exists()) {
           const clientData = clientDocSnap.data();
           clientName = clientData.full_name || "Unknown";
           clientEmail = clientData.email || "No Email";
+          clientPhone = clientData.phone || "No phone";
+          clientAddress = clientData.address || "No address";
           clientAvatar = clientData.avatar || "Default Avatar URL";
         }
 
@@ -296,13 +303,16 @@ export default defineComponent({
         // Ensure all required properties are included
         return {
           id: docSnapshot.id,
-          number: invoiceData.number, // Ensure this exists in your document
-          case: invoiceData.case, // Ensure this exists in your document
-          due_date: invoiceData.due_date, // Ensure this exists in your document and is a Timestamp
-          status: invoiceData.status, // Ensure this is a number
-          client_id: invoiceData.client_id, // Ensure this exists in your document
+          number: invoiceData.number,
+          case: invoiceData.case,
+          created: invoiceData.created,
+          due_date: invoiceData.due_date,
+          status: invoiceData.status,
+          client_id: invoiceData.client_id,
           clientName,
           clientEmail,
+          clientPhone,
+          clientAddress,
           clientAvatar,
           caseTitle,
         };

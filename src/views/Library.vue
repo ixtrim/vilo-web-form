@@ -110,7 +110,8 @@
                   <VUser :userName="file.createdByDetails.name" :userEmail="file.createdByDetails.email" :userAvatar="file.createdByDetails.avatar" />
                 </div>
                 <div class="col col--l-delete">
-                  <VLink to="#" styled="secondary">Delete</VLink>
+                  <VLink to="#" styled="secondary" @click="deleteDocumentAction(file)">Delete</VLink>
+                  
                 </div>
                 <div class="col col--l-edit">
                   <VLink to="#" @click="addDocument" styled="primary">Edit</VLink>
@@ -147,7 +148,18 @@
       <VEditDocument v-if="showEditDocumentModal" :title="modalEditDocumentTitle" @close-modal="showEditDocumentModal = false" @save-clicked="handleEditDocument" />
     </VModal>
 
-    <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
+    <VModal :show="showDeleteModal" :title="'Delete File'" @update:show="showDeleteModal = $event">
+      <VDeleteDocument :title="'Delete File'" :fileId="selectedFileId" :files="files" @close-modal="showDeleteModal = false" @delete-clicked="handleDeleteDocument" />
+    </VModal>
+
+    <!-- :type="notificationType" 
+    :header="notificationHeader" 
+    :message="notificationMessage"  -->
+    <VNotification 
+      ref="notificationRef" 
+      :duration="7000"
+      @save-clicked="handleDeleteDocument"
+      />
   </div>
 </template>
 
@@ -167,6 +179,7 @@ import VNotification from '@/components/v-notification/VNotification.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
 import VAddDocument from '@/modals/Library/v-add-document/v-add-document.vue';
 import VEditDocument from '@/modals/Library/v-edit-document/v-edit-document.vue';
+import VDeleteDocument from '@/modals/Library/v-delete-document/v-delete-document.vue';
 
 import { db } from '@/firebase.js';
 import { doc, getDoc, query, collection, orderBy, limit, getDocs, where } from 'firebase/firestore';
@@ -211,6 +224,7 @@ export default defineComponent({
     VModal,
     VAddDocument,
     VEditDocument,
+    VDeleteDocument,
   },
   data() {
     return {
@@ -218,9 +232,9 @@ export default defineComponent({
       showEditDocumentModal: false,
       modalAddDocumentTitle: '',
       modalEditDocumentTitle: '',
-      notificationType: 'success',
-      notificationHeader: 'Changes saved',
-      notificationMessage: 'This account has been successfully edited.',
+      // notificationType: 'success',
+      // notificationHeader: 'Changes saved',
+      // notificationMessage: 'This account has been successfully edited.',
       userName: 'Olivia Rhye',
       userEmail: 'olivia@untitledui.com',
       sortCases: [
@@ -233,12 +247,17 @@ export default defineComponent({
   },
   setup() {
 
+
     const files = ref<File[]>([]);
     const currentPage = ref(1);
     const itemsPerPage = ref(10);
     const searchTerm = ref('');
     const selectedTimeFrame = ref('all');
     const selectedStatus = ref(null);
+    const modalTitle = ref('');
+    const showDeleteModal = ref(false);
+
+    const selectedFileId = ref<string>('');
 
     const sortTime = ref([
       { label: 'All', value: 'all' },
@@ -255,6 +274,12 @@ export default defineComponent({
       { label: 'Pending', value: 1 },
       { label: 'Signed', value: 2 },
     ]);
+
+    const deleteDocumentAction = (file: File) => {
+      modalTitle.value = 'Edit user';
+      selectedFileId.value = file.id; 
+      showDeleteModal.value = true;
+    };
 
     const filteredFiles = computed(() => {
       const now = new Date();
@@ -302,7 +327,7 @@ export default defineComponent({
     });
 
     const fetchFiles = async() => {
-      const filesQuery = query(collection(db, "files"), where("status", "==", 1), limit(8));
+      const filesQuery = query(collection(db, "files"), where("status", "==", 1), limit(10));
       const querySnapshot = await getDocs(filesQuery);
       const filesWithUserDetails = await Promise.all(querySnapshot.docs.map(async (docSnapshot) => {
         const fileData = docSnapshot.data();
@@ -374,12 +399,14 @@ export default defineComponent({
       selectedStatus.value = item.value;
     };
 
+
     watch([selectedStatus, selectedTimeFrame, searchTerm], () => {
       currentPage.value = 1;
     }, { deep: true });
 
 
     return {
+      files,
       paginatedFiles,
       nextPage,
       prevPage,
@@ -390,23 +417,19 @@ export default defineComponent({
       sortTime,
       handleFilterTime,
       sortStatus,
-      handleFilterStatus
+      handleFilterStatus,
+      showDeleteModal,
+      deleteDocumentAction,
+      selectedFileId,
     }
 
   },
-  // computed: {
-    
-  //   paginatedItems() {
-  //     const start = (this.currentPage - 1) * this.itemsPerPage;
-  //     const end = start + this.itemsPerPage;
-  //     return this.documents.slice(start, end);
-  //   },
-  // },
   methods: {
     triggerNotification(type: string, header: string, message: string) {
-      this.notificationType = type;
-      this.notificationHeader = header;
-      this.notificationMessage = message;
+      // this.notificationType = type;
+      // this.notificationHeader = header;
+      // this.notificationMessage = message;
+
       (this.$refs.notificationRef as NotificationRef).showNotification();
     },
     handleButtonClick() {
@@ -419,6 +442,16 @@ export default defineComponent({
     handleAddDocument() {
       this.showAddDocumentModal = false;
       this.triggerNotification('success', 'Changes saved', 'Case board modified successfully.');
+    },
+    handleDeleteDocument(){
+      const index = this.files.findIndex(file => file.id === this.selectedFileId);
+      if (index !== -1) {
+          this.files.splice(index, 1); // Remove the deleted record
+      } else {
+          console.warn("File not found in the documents array.");
+      }
+      this.showDeleteModal = false;
+      // this.triggerNotification('success', 'Document deleted', 'File deleted successfully.');
     },
     openEditDocumentModal() {
       this.modalEditDocumentTitle = 'Create task';

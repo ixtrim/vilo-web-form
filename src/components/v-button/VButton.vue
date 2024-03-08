@@ -1,4 +1,5 @@
 <template>
+  <!-- @click="handleClick" -->
   <button
     :class="[
       'v-button',
@@ -12,7 +13,6 @@
     ]"
     :disabled="disabled || loading"
     :type="type"
-    @click="handleClick"
   >
     <i v-if="icon === 'left'" :class="iconStyle"></i>
     <span v-if="loading" class="v-button-loader"></span>

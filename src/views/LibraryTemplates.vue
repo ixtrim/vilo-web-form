@@ -32,18 +32,18 @@
           <div class="row">
             <div class="col-lg-3">
               <div class="dashboard__filters">
-                <Search />
+                <Search :value="searchTerm" @update-search="updateSearchTerm" />
               </div>
             </div>
             <div class="col-lg-6"></div>
             <div class="col-lg-3">
               <ul class="dashboard__actions">
                 <li>
-                  <VDropdown :title="'Sort by date'" :items="sortTime" @item-clicked="handleDropdownClick" />
+                  <VDropdown :title="'Filter by date'" :items="sortTime" @item-clicked="handleFilterTime" />
                 </li>
-                <li>
+                <!-- <li>
                   <VDropdown :title="'All templates'" :items="sortTime" @item-clicked="handleDropdownClick" />
-                </li>
+                </li> -->
               </ul>
             </div>
           </div>
@@ -56,28 +56,33 @@
       <div class="col-lg-12">
         
         <div class="row">
-          <div class="col-md-4 col-lg-4" v-for="template in templates" :key="template.id">
+          <div class="col-md-4 col-lg-4" v-for="template in paginatedTemplates" :key="template.id">
             <FileTemplateCard
-              :icon="template.icon"
+              :icon="'red'"
               :title="template.title"
-              :createdDate="template.createdDate"
-              :creatorName="template.creatorName"
-              @preview="handlePreview(template.id)"
-              @create-new-document="handleCreateNewDocument(template.id)"
+              :createdDate="template.created_at"
+              :creatorName="template.createdByDetails.name"
+              @preview="handlePreview(parseInt(template.id))"
+              @create-new-document="handleCreateNewDocument(parseInt(template.id))"
               @delete-template="handleDelete(template.id)"
-              @edit-template="handleEdit(template.id)"
-              @duplicate-template="handleDuplicate(template.id)"
+              @edit-template="handleEdit(parseInt(template.id))"
+              @duplicate-template="handleDuplicate(parseInt(template.id))"
             />
           </div>
         </div>
 
       </div>
     </div>
+
+    <VModal :show="showDeleteModal" :title="'Delete Template'" @update:show="showDeleteModal = $event">
+      <VDeleteTemplate :title="'Delete File'" :fileId="selectedFileId" @close-modal="showDeleteModal = false" @delete-clicked="handleDeleteTemplate" />
+    </VModal>
+
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
+import { defineComponent, ref, computed, onMounted } from 'vue';
 import VLink from '@/components/v-link/VLink.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import Search   from '@/modules/Navigation/Search.vue';
@@ -87,6 +92,26 @@ import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
 import TabsLibrary from '@/modules/TabsLibrary.vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import FileTemplateCard from '@/modules/Library/FileTemplateCard/FileTemplateCard.vue';
+import VModal from '@/components/v-modal/v-modal.vue';
+import VDeleteTemplate from '@/modals/Library/v-delete-template/v-delete-template.vue';
+
+import { db } from '@/firebase.js';
+import { doc, getDoc, query, collection, orderBy, limit, getDocs, where } from 'firebase/firestore';
+
+interface Template {
+    id: string,
+    content: string,
+    created_at: string,
+    footer: string,
+    header: string,
+    title: string,
+    createdBy: string,
+    createdByDetails: { 
+      name: string;
+      email: string;
+      avatar: string;
+    };
+}
 
 export default defineComponent({
   components: {
@@ -95,101 +120,182 @@ export default defineComponent({
     VButton,
     VUser,
     VPaginationList,
+    VModal,
     VModalSmall,
     TabsLibrary,
     VDropdown,
     FileTemplateCard,
+    VDeleteTemplate,
   },
   data() {
     return {
       userName: 'Olivia Rhye',
       userEmail: 'olivia@untitledui.com',
-      sortTime: [
-        { label: 'All' },
-        { label: 'Last year' },
-        { label: 'Last three months' },
-        { label: 'Last two months' },
-        { label: 'Last month' },
-        { label: 'This week' },
-      ],
       sortCases: [
         { label: 'Internal user' },
         { label: 'Client (individual)' },
         { label: 'Client (company)' },
         { label: 'Admin' },
       ],
-      templates: [
-      {
-        id: 1,
-        icon: 'red',
-        title: 'Employment Contract Template',
-        createdDate: '2023-04-12',
-        creatorName: 'John Doe'
-      },
-      {
-        id: 2,
-        icon: 'red',
-        title: 'Non-Disclosure Agreement (NDA) Template',
-        createdDate: '2023-03-05',
-        creatorName: 'Jane Smith'
-      },
-      {
-        id: 3,
-        icon: 'blue',
-        title: 'Merger Acquisition Checklist',
-        createdDate: '2023-02-20',
-        creatorName: 'Edward Norman'
-      },
-      {
-        id: 4,
-        icon: 'red',
-        title: 'Intellectual Property Rights Presentation',
-        createdDate: '2023-01-15',
-        creatorName: 'Nancy Drew'
-      },
-      {
-        id: 5,
-        icon: 'blue',
-        title: 'Client Case History Log',
-        createdDate: '2023-05-10',
-        creatorName: 'Oliver Twist'
-      }
-      ]
     };
   },
   setup() {
-    const itemsPerPage = 10;
-    const allItems = ref([
-      { id: 1, name: 'Page 1' },
-      { id: 2, name: 'Page 2' },
-      { id: 3, name: 'Page 3' },
-      { id: 4, name: 'Page 4' },
-      { id: 5, name: 'Page 5' },
-      { id: 6, name: 'Page 6' },
-      { id: 7, name: 'Page 7' },
-      { id: 8, name: 'Page 8' },
-      { id: 9, name: 'Page 9' },
-      { id: 10, name: 'Page 10' },
-      { id: 11, name: 'Page 11' },
-      { id: 12, name: 'Page 12' },
-    ]);
+
+    const templateRows = ref<Template[]>([]);
     const currentPage = ref(1);
+    const itemsPerPage = ref(10);
+    const searchTerm = ref('');
+    const selectedTimeFrame = ref('all');
+    const sortTime = ref([
+      { label: 'All', value: 'all' },
+      { label: 'Last year', value: 'lastYear' },
+      { label: 'Last three months', value: 'lastThreeMonths' },
+      { label: 'Last two months', value: 'lastTwoMonths' },
+      { label: 'Last month', value: 'lastMonth' },
+      { label: 'This week', value: 'thisWeek' },
+    ]);
 
-    const totalPages = computed(() => Math.ceil(allItems.value.length / itemsPerPage));
+    const modalTitle = ref('');
+    const showDeleteModal = ref(false);
+    const selectedFileId = ref<string>('');
 
-    const paginatedItems = computed(() => {
-      const start = (currentPage.value - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      return allItems.value.slice(start, end);
+    const filteredTemplates = computed(() => {
+      const now = new Date();
+      return templateRows.value
+        .filter(file => {
+          // Filter by search term and status as before
+          const matchesSearchTerm = String(file.title).toLowerCase().includes(searchTerm.value.toLowerCase());
+          // const matchesStatus = selectedStatus.value === null || file.status === selectedStatus.value;
+
+          // Determine if the invoice matches the selected time frame
+          let matchesTimeFrame = true;
+          if (selectedTimeFrame.value !== 'all') {
+            const createdDate = new Date(file.created_at);
+           
+            switch (selectedTimeFrame.value) {
+              case 'lastYear':
+                matchesTimeFrame = createdDate >= new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+                break;
+              case 'lastThreeMonths':
+                matchesTimeFrame = createdDate >= new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+                break;
+              case 'lastTwoMonths':
+                matchesTimeFrame = createdDate >= new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
+                break;
+              case 'lastMonth':
+                matchesTimeFrame = createdDate >= new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+                break;
+              case 'thisWeek':
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(now.getDate() - 7);
+                matchesTimeFrame = createdDate >= oneWeekAgo;
+                break;
+            }
+          }
+          
+          return matchesSearchTerm && matchesTimeFrame;
+        });
+    }); 
+
+
+    const totalPages = computed(() => Math.ceil(filteredTemplates.value.length / itemsPerPage.value));
+    const paginatedTemplates = computed(() => {
+      const start = (currentPage.value - 1) * itemsPerPage.value;
+      return filteredTemplates.value.slice(start, start + itemsPerPage.value);
     });
+
+    const fetchTemplates = async() => {
+      const filesQuery = query(collection(db, "templates"), limit(10));
+      const querySnapshot = await getDocs(filesQuery);
+      const templates = await Promise.all(querySnapshot.docs.map(async (docSnapshot) => {
+        const Data = docSnapshot.data();
+
+        let createdByDetails = {
+          name: "Unknown User",
+          email: "No Email",
+          avatar: "Default Avatar URL"
+        };
+        
+        if(Data.created_by)
+        {
+          const userDocRef = doc(db, "users", Data.created_by);
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            createdByDetails = {
+              name: userData.full_name || "Unknown User",
+              email: userData.email || "No Email",
+              avatar: userData.avatar || "Default Avatar URL"
+            };
+          }
+        }
+
+        // Date String
+        let timestamp = Data.created.toDate().toLocaleString();
+
+        return {
+          id: docSnapshot.id,
+          content: Data.content,
+          created_at: timestamp,
+          footer: Data.footer,
+          header: Data.header,
+          title: Data.title,
+          createdBy: Data.created_by,
+          createdByDetails, // Add user details to the file object
+        };
+      }));
+
+      templateRows.value = templates;
+    }
+    
+    onMounted(fetchTemplates);    
+
+    const updateSearchTerm = (value: string) => {
+      searchTerm.value = value;
+    };
+
+    const handleFilterTime = (item: any) => {
+      selectedTimeFrame.value = item.value;
+    };
 
     const updatePage = (newPage: number) => {
       currentPage.value = newPage;
     };
 
+    const handleDelete = (id: any) => {
+
+      // Show Modal
+      modalTitle.value = 'Delete Template';
+      selectedFileId.value = id; 
+      showDeleteModal.value = true;
+
+    }
+
+    const handleDeleteTemplate = () => {
+      const index = templateRows.value.findIndex(file => file.id === selectedFileId.value);
+      if (index !== -1) {
+        templateRows.value.splice(index, 1); // Remove the deleted record
+      } else {
+          console.warn("File not found in the documents array.");
+      }
+      showDeleteModal.value = false;
+    }
       // Handle preview action
     return {
-      paginatedItems,
+      templateRows,
+      sortTime,
+      searchTerm,
+      selectedTimeFrame,
+      paginatedTemplates,
+      updateSearchTerm,
+      handleFilterTime,
+      modalTitle,
+      showDeleteModal,
+      selectedFileId,
+      handleDelete,
+      handleDeleteTemplate,
+
       totalPages,
       currentPage,
       updatePage
@@ -208,8 +314,6 @@ export default defineComponent({
     },
     handleCreateNewDocument(id: number) {
       this.$router.push('/library-document');
-    },
-    handleDelete(id: number) {
     },
     handleEdit(id: number) {
     },

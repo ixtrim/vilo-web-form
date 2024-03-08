@@ -11,11 +11,9 @@
         <p class="v-template-card__top__info__owner">by <strong>{{ creatorName }}</strong></p>
       </div>
       <div class="v-template-card__top__settings">
-        <VButton :block="false" size="sm" icon="left" icon-style="settings-dots" styled="simple-icon" @click="toggleDropdown" text=""></VButton>
-        <div class="dropdown-menu" v-if="showDropdown">
-          <button @click="deleteTemplate">Delete</button>
-          <button @click="editTemplate">Edit</button>
-          <button @click="duplicateTemplate">Duplicate</button>
+        <VButton :block="false" size="sm" icon="left" icon-style="settings-dots" styled="simple-icon" @click="toggleDropdown" ></VButton>
+        <div class="dropdown-menu px-4 py-2" v-if="showDropdown">
+          <button style="background: none;border: none;" @click="deleteTemplate">Delete</button>
         </div>
       </div>
     </div>
@@ -68,6 +66,7 @@ export default defineComponent({
     const toggleDropdown = () => {
       console.log('Dropdown toggled');
       showDropdown.value = !showDropdown.value;
+      console.log(showDropdown.value)
     };
 
     return {

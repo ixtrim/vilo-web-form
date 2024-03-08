@@ -30,7 +30,7 @@
       </div>
     </div>
 
-    <div class="invoice__table">
+    <div class="invoice__table" style="opacity: 0;">
       <table class="table table-bordered">
         <thead>
           <tr>
@@ -60,7 +60,7 @@
       </table>
     </div>
 
-    <div class="row">
+    <div class="row" style="opacity: 0;">
       <div class="col-lg-5"></div>
       <div class="col-lg-7">
         <div class="invoice__summary">

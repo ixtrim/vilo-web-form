@@ -75,7 +75,7 @@
               <h4>Case</h4>
             </div>
             <div class="col col--inv-date">
-              <h4>Date</h4>
+              <h4>Due date</h4>
             </div>
             <div class="col col--inv-status">
               <h4>Status</h4>

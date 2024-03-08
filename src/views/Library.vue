@@ -87,26 +87,26 @@
           <div class="dashboard__table__page">
 
             <div class="dashboard__table__page">
-              <div class="dashboard__table__page__item" v-for="document in files" :key="document.id">
+              <div class="dashboard__table__page__item" v-for="file in files" :key="file.id">
                 <div class="col col--checkbox">
-                  <input type="checkbox" :id="'checkbox-' + document.id" />
-                  <label :for="'checkbox-' + document.id"></label>
+                  <input type="checkbox" :id="'checkbox-' + file.id" />
+                  <label :for="'checkbox-' + file.id"></label>
                 </div>
                 <div class="col col--l-document">
-                  <VFile :file-extension="document.extension" :file-name="document.document_name" :file-size="document.size" />
+                  <VFile :file-extension="file.extension" :file-name="file.document_name" :file-size="file.size" />
                 </div>
                 <div class="col col--l-status">
-                  <VBadge :variant="document.badgeVariant" v-if="document.status == 1">Active</VBadge>
-                  <VBadge :variant="document.badgeVariant" v-if="document.status == 0">Pending</VBadge>
+                  <VBadge :variant="'primary'" v-if="file.status == 1">Active</VBadge>
+                  <VBadge :variant="'primary'" v-if="file.status == 0">Pending</VBadge>
                 </div>
                 <div class="col col--l-uploaded">
-                  <p>{{ document.date_uploaded }}</p>
+                  <p>{{ file.date_uploaded }}</p>
                 </div>
                 <div class="col col--l-updated">
-                  <p>{{ document.last_updated }}</p>
+                  <p>{{ file.last_updated }}</p>
                 </div>
                 <div class="col col--l-created">
-                  <VUser :userName="document.createdByDetails.name" :userEmail="document.createdByDetails.email" :userAvatar="document.createdByDetails.avatar" />
+                  <VUser :userName="file.createdByDetails.name" :userEmail="file.createdByDetails.email" :userAvatar="file.createdByDetails.avatar" />
                 </div>
                 <div class="col col--l-delete">
                   <VLink to="#" styled="secondary">Delete</VLink>
@@ -322,7 +322,7 @@ export default defineComponent({
         }
       ],
 
-      files: {},
+      files: [] as File[],
       currentPage: 1,
       itemsPerPage: 10,
     };
@@ -426,7 +426,6 @@ export default defineComponent({
           status: fileData.status,
         };
       }));
-      console.log(filesWithUserDetails[0])
       this.files = filesWithUserDetails;
       console.log(this.files);
     }

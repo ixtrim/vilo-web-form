@@ -26,7 +26,7 @@
         <span></span>
       </div>
       <div class="col-lg-5">
-        <span>Due: </span>
+        <span>Due: {{ invoiceDueDate }}</span>
       </div>
     </div>
 
@@ -162,6 +162,8 @@
   const clientName = computed(() => props.invoice?.clientName || 'Unknown');
   const clientEmail = computed(() => props.invoice?.clientEmail || 'Unknown');
   const invoiceNumber = computed(() => props.invoice?.number || 'Unknown');
+  const invoiceStatus = computed(() => props.invoice?.status || 'Unknown');
+  const invoiceDueDate = computed(() => props.invoice?.due_date || 'Unknown');
 
   const emit = defineEmits(['close-modal', 'mark-paid']);
 

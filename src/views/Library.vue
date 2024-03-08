@@ -87,7 +87,7 @@
           <div class="dashboard__table__page">
 
             <div class="dashboard__table__page">
-              <div class="dashboard__table__page__item" v-for="document in documents" :key="document.id" style="display: none;">
+              <div class="dashboard__table__page__item" v-for="document in documents" :key="document.id">
                 <div class="col col--checkbox">
                   <input type="checkbox" :id="'checkbox-' + document.id" />
                   <label :for="'checkbox-' + document.id"></label>

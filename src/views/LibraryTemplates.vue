@@ -56,7 +56,7 @@
       <div class="col-lg-12">
         
         <div class="row">
-          <div class="col-md-4 col-lg-4" v-for="template in templates" :key="template.id" style="display: none;">
+          <div class="col-md-4 col-lg-4" v-for="template in templates" :key="template.id">
             <FileTemplateCard
               :icon="template.icon"
               :title="template.title"

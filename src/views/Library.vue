@@ -110,11 +110,12 @@
                   <VUser :userName="file.createdByDetails.name" :userEmail="file.createdByDetails.email" :userAvatar="file.createdByDetails.avatar" />
                 </div>
                 <div class="col col--l-delete">
-                  <VLink to="#" styled="secondary" @click="deleteDocumentAction(file)">Delete</VLink>
-                  
+                  <!-- <VLink to="#" styled="secondary" @click="deleteDocumentAction(file)">Delete</VLink> -->
+                  <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="deleteDocumentAction(file)" text=""></VButton>
                 </div>
                 <div class="col col--l-edit">
-                  <VLink to="#" @click="addDocument" styled="primary">Edit</VLink>
+                  <!-- <VLink to="#" @click="addDocument" styled="primary">Edit</VLink> -->
+                  <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="addDocument" text=""></VButton>
                 </div>
               </div>
             </div>

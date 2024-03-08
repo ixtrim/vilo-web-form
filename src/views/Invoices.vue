@@ -213,7 +213,7 @@ export default defineComponent({
   setup() {
     const invoices = ref<Invoice[]>([]);
     const currentPage = ref(1);
-    const itemsPerPage = ref(2);
+    const itemsPerPage = ref(10);
     const searchTerm = ref('');
     const showAddInvoiceModal = ref(false);
     const showPreviewInvoiceModal = ref(false);

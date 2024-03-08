@@ -235,7 +235,7 @@ export default defineComponent({
 
     const files = ref<File[]>([]);
     const currentPage = ref(1);
-    const itemsPerPage = ref(1);
+    const itemsPerPage = ref(10);
     const searchTerm = ref('');
     const selectedTimeFrame = ref('all');
     const selectedStatus = ref(null);

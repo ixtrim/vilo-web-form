@@ -127,7 +127,7 @@
               </div>
               <!-- Assuming you have different methods for different buttons -->
               <div class="col col--inv-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="openPreviewInvoiceModal" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="openPreviewInvoiceModal(invoice)" text=""></VButton>
               </div>
               <div class="col col--inv-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="download" styled="simple-icon" @click="handleDownloadClick" text=""></VButton>
@@ -161,7 +161,7 @@
 
     <VModal :show="showAddInvoiceModal || showPreviewInvoiceModal" :title="modalAddInvoiceTitle || modalPreviewInvoiceTitle" @update:show="handleModalClose">
       <VAddInvoice v-if="showAddInvoiceModal" :title="modalAddInvoiceTitle" @close-modal="showAddInvoiceModal = false" @save-clicked="handleAddInvoiceCase" />
-      <VPreviewInvoice v-if="showPreviewInvoiceModal" :title="modalPreviewInvoiceTitle" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @close-modal="showPreviewInvoiceModal = false" />
+      <VPreviewInvoice v-if="showPreviewInvoiceModal && currentInvoice" :title="modalPreviewInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @close-modal="showPreviewInvoiceModal = false" />
     </VModal>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
@@ -220,6 +220,7 @@ export default defineComponent({
     const showPreviewInvoiceModal = ref(false);
     const modalAddInvoiceTitle = ref('');
     const modalPreviewInvoiceTitle = ref('');
+    const currentInvoice = ref<Invoice | null>(null);
 
     const billingSettings = ref({});
     const fetchBillingSettings = async () => {
@@ -364,8 +365,7 @@ export default defineComponent({
 
     const openAddInvoiceModal = () => showAddInvoiceModal.value = true;
 
-    const openPreviewInvoiceModal = (invoice: any) => {
-      const currentInvoice = ref(null);
+    const openPreviewInvoiceModal = (invoice: Invoice) => {
       currentInvoice.value = invoice;
       showPreviewInvoiceModal.value = true;
     };
@@ -444,6 +444,7 @@ export default defineComponent({
       modalAddInvoiceTitle,
       modalPreviewInvoiceTitle,
       openAddInvoiceModal,
+      currentInvoice,
       openPreviewInvoiceModal,
       handleModalClose,
       handleDropdownClick,

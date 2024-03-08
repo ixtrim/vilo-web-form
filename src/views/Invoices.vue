@@ -161,7 +161,7 @@
 
     <VModal :show="showAddInvoiceModal || showPreviewInvoiceModal" :title="modalAddInvoiceTitle || modalPreviewInvoiceTitle" @update:show="handleModalClose">
       <VAddInvoice v-if="showAddInvoiceModal" :title="modalAddInvoiceTitle" @close-modal="showAddInvoiceModal = false" @save-clicked="handleAddInvoiceCase" />
-      <VPreviewInvoice v-if="showPreviewInvoiceModal" :title="modalPreviewInvoiceTitle" :generalSettings="generalSettings" :billingSettings="billingSettings" @close-modal="showPreviewInvoiceModal = false" />
+      <VPreviewInvoice v-if="showPreviewInvoiceModal" :title="modalPreviewInvoiceTitle" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @close-modal="showPreviewInvoiceModal = false" />
     </VModal>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
@@ -245,6 +245,7 @@ export default defineComponent({
     };
 
     const { user } = useUserStore();
+    const userRole = computed(() => user.value?.role ?? 0);
     const notClient = computed(() => {
       return [0, 1, 2].includes(user.value?.role ?? 0);
     });
@@ -463,6 +464,7 @@ export default defineComponent({
       billingSettings,
       generalSettings,
       notClient,
+      userRole,
     };
   },
   methods: {

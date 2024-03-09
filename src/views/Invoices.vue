@@ -133,7 +133,7 @@
                 <VButton :block="false" size="sm" icon="left" icon-style="download" styled="simple-icon" @click="handleDownloadClick" text=""></VButton>
               </div>
               <div class="col col--inv-action" v-if="notClient">
-                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleDeleteClick" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleDeleteClick()" text=""></VButton>
               </div>
               <div class="col col--inv-action" v-if="notClient">
                 <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openAddInvoiceModal" text=""></VButton>
@@ -172,7 +172,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed, watch } from 'vue';
 import { db } from '@/firebase.js';
-import { collection, query, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
+import { deleteDoc, collection, query, getDocs, doc, getDoc, Timestamp, writeBatch } from 'firebase/firestore';
 import VStatus from '@/components/v-status/VStatus.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import VModal from '@/components/v-modal/v-modal.vue';

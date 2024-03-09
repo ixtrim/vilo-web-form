@@ -2,18 +2,48 @@
   <div class="container-fluid">
 
     <div class="row">
-      <div class="col-lg-10">
+      <div class="col-lg-9">
         <div class="dashboard__heading mb-0">
-          <h1>Library</h1>
-          <p> Create and manage your team documents and templates.</p>
+
+          <div class="row">
+            <div class="col-lg-12 mt-5">
+              Here VInput with title of document
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-12 mt-5">
+              Here information abou last update of this document (if available)
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-12 mt-5">
+              Here VImage Upload to heder field
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-lg-12 mt-5">
+              In editor is code from 'content' field
+              <QuillEditor theme="snow" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-lg-12 mt-5">
+              Here VImage Upload to footer field
+            </div>
+          </div>
+
+
         </div>
       </div>
-      <div class="col-lg-2 align-right">
-        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="addDocument" text="Add new document"></VButton>
+      <div class="col-lg-3 align-right">
+        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="addDocument" text="Create new document"></VButton>
       </div>
     </div>
 
-    <QuillEditor theme="snow" />
   </div>
 </template>
 

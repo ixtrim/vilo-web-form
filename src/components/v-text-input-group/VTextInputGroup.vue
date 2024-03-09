@@ -1,7 +1,7 @@
 <template>
   <div class="v-text-input-group">
     <div v-for="input in localInputs" :key="input.id" class="input-row">
-      <VInput label="" placeholder="" v-model="input.value" />
+      <VInput label="" placeholder="" v-model="input.value" @change="emitUpdateInputs" />
       <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="removeInput(input.id)" text=""></VButton>
     </div>
 
@@ -12,6 +12,7 @@
 <script setup lang="ts">
   import { ref, watch } from 'vue';
   import type { PropType } from 'vue';
+  import { debounce } from 'lodash';
   import VInput from '@/components/v-input/VInput.vue';
   import VLink from '@/components/v-link/VLink.vue';
   import VButton from '@/components/v-button/VButton.vue';
@@ -30,13 +31,31 @@
 
   const emit = defineEmits(['update-inputs']);
   const localInputs = ref(props.inputs.map(input => ({ ...input, id: input.id || generateUniqueId() })));
-  
+
+  // const emitUpdateInputsDebounced = debounce((inputs) => {
+  //   emit('update-inputs', inputs.map(({ id, ...rest }) => rest));
+  // }, 300);
+
+  const emitUpdateInputsDebounced = debounce((inputs: InputItem[]) => {
+    emit('update-inputs', inputs.map(({ id, ...rest }: InputItem) => rest));
+  }, 300);
+
+
   watch(() => props.inputs, (newInputs) => {
     localInputs.value = newInputs.map(input => ({ ...input, id: input.id || generateUniqueId() }));
   }, { deep: true });
 
   // watch(localInputs, () => {
   //   emit('update-inputs', localInputs.value.map(({ id, ...rest }) => rest));
+  // }, { deep: true });
+
+  const emitUpdateInputs = () => {
+    // emit('update-inputs', localInputs.value.map(({ id, ...rest }) => rest));
+    emitUpdateInputsDebounced(localInputs.value);
+  };
+
+  // watch(localInputs, () => {
+  //   emitUpdateInputsDebounced(localInputs.value);
   // }, { deep: true });
 
   const addInput = () => {

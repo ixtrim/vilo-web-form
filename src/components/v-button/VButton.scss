@@ -151,6 +151,27 @@
     }
   }
 
+  &--red {
+    border: 1px solid var(--v-red-500);
+    background-color: var(--v-red-500);
+    color: var(--v-white);
+
+    &:hover {
+      background-color: var(--v-red-400);
+    }
+  }
+
+  &--orange {
+    border: 1px solid var(--v-orange-400);
+    background-color: var(--v-orange-400);
+    color: var(--v-white);
+
+    &:hover {
+      border: 1px solid var(--v-orange-700);
+      background-color: var(--v-orange-700);
+    }
+  }
+
   &--icon-left,
   &--icon-right {
     i {

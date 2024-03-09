@@ -84,7 +84,7 @@
               <h4>Customer</h4>
             </div>
             <div class="col col--inv-reminder">
-              <h4>Reminder</h4>
+              &nbsp;
             </div>
             <div class="col col--inv-action" v-if="notClient">
               &nbsp;
@@ -203,6 +203,16 @@ interface Invoice {
   clientAddress: string;
   clientAvatar: string;
   caseTitle: string;
+  invoiceItems: InvoiceItem[];
+}
+
+interface InvoiceItem {
+  id: string;
+  item: string;
+  quantity: number;
+  price: number;
+  discount: number;
+  amount: number;
 }
 
 export default defineComponent({
@@ -277,8 +287,8 @@ export default defineComponent({
     const fetchInvoices = async () => {
       const querySnapshot = await getDocs(collection(db, "invoices"));
       const invoicePromises = querySnapshot.docs.map(async (docSnapshot) => {
-        const invoiceData = docSnapshot.data() as any; // Use `as any` temporarily to bypass TypeScript checks
-        // Assuming invoiceData contains all required fields directly
+        const invoiceData = docSnapshot.data() as any;
+        
         const clientDocRef = doc(db, "users", invoiceData.client_id);
         const clientDocSnap = await getDoc(clientDocRef);
         let clientName = "Unknown";
@@ -304,6 +314,12 @@ export default defineComponent({
           caseTitle = caseDocSnap.data().title || "Unknown Case";
         }
 
+        const invoiceItemsSnapshot = await getDocs(collection(db, `invoices/${docSnapshot.id}/invoice_items`));
+        const invoiceItems: InvoiceItem[] = invoiceItemsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as InvoiceItem[];
+
         // Ensure all required properties are included
         return {
           id: docSnapshot.id,
@@ -323,6 +339,7 @@ export default defineComponent({
           clientAddress,
           clientAvatar,
           caseTitle,
+          invoiceItems,
         };
       });
 

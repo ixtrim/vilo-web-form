@@ -32,10 +32,6 @@
   const emit = defineEmits(['update-inputs']);
   const localInputs = ref(props.inputs.map(input => ({ ...input, id: input.id || generateUniqueId() })));
 
-  // const emitUpdateInputsDebounced = debounce((inputs) => {
-  //   emit('update-inputs', inputs.map(({ id, ...rest }) => rest));
-  // }, 300);
-
   const emitUpdateInputsDebounced = debounce((inputs: InputItem[]) => {
     emit('update-inputs', inputs.map(({ id, ...rest }: InputItem) => rest));
   }, 300);
@@ -45,18 +41,10 @@
     localInputs.value = newInputs.map(input => ({ ...input, id: input.id || generateUniqueId() }));
   }, { deep: true });
 
-  // watch(localInputs, () => {
-  //   emit('update-inputs', localInputs.value.map(({ id, ...rest }) => rest));
-  // }, { deep: true });
-
   const emitUpdateInputs = () => {
     // emit('update-inputs', localInputs.value.map(({ id, ...rest }) => rest));
     emitUpdateInputsDebounced(localInputs.value);
   };
-
-  // watch(localInputs, () => {
-  //   emitUpdateInputsDebounced(localInputs.value);
-  // }, { deep: true });
 
   const addInput = () => {
     localInputs.value.push({ value: '', id: generateUniqueId() });

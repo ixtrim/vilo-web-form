@@ -57,7 +57,6 @@
             </div>
             <div class="dashboard__form__section__input">
               <VTextInputGroup :inputs="appServices" @update-inputs="appServices = $event" @input-blur="handleServicesUpdate" />
-              <!-- <VTextInputGroup :inputs="appServices" @update-inputs="appServices = $event" @input-blur="handleServicesUpdate" /> -->
             </div>
           </div>
 

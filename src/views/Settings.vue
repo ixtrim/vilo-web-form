@@ -298,7 +298,6 @@ export default defineComponent({
     appServices: {
       deep: true,
       handler(newServices) {
-        console.log('handler working')
         if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
           this.debouncedUpdateAppServices()?.catch(e => console.error(e));
         }

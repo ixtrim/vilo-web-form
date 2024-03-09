@@ -30,31 +30,24 @@
       </div>
     </div>
 
-    <div class="invoice__table" style="opacity: 0;">
+    <div class="invoice__table">
       <table class="table table-bordered">
         <thead>
           <tr>
             <th scope="col">Description</th>
-            <th scope="col">Qty</th>
+            <th scope="col" class="align-center">Qty</th>
             <th scope="col">Price</th>
             <th scope="col">Discount</th>
             <th scope="col">Amount</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Legal Advising</td>
-            <td>1</td>
-            <td>2000.00</td>
-            <td>0.00</td>
-            <td>2,000.00</td>
-          </tr>
-          <tr>
-            <td>Expert Consulting</td>
-            <td>1</td>
-            <td>2000.00</td>
-            <td>0.00</td>
-            <td>2,000.00</td>
+            <tr v-for="item in invoice?.invoiceItems" :key="item.id">
+            <td>{{ item.item }}</td>
+            <td class="align-center">{{ item.quantity }}</td>
+            <td>{{ formatCurrency(item.price) }}</td>
+            <td>{{ formatCurrency(item.discount) }}</td>
+            <td>{{ formatCurrency(item.amount) }}</td>
           </tr>
         </tbody>
       </table>
@@ -111,9 +104,18 @@
         <p>For any questions please contact us at <a href="mailto:hi@vilo.com">hi@vilo.com</a></p>
       </div>
     </div>
-
   </div>
-  <div class="modal-footer" v-if="userRole !== 3 && userRole !== 4">
+  <div class="modal-footer" v-if="userRole === 0 && invoiceStatus === '0'">
+    <ul class="modal-footer__actions">
+      <li>
+        <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
+      </li>
+      <li>
+        <v-button :block="false" size="md" styled="green" @click="saveAndClose" text="SendToClient"></v-button>
+      </li>
+    </ul>
+  </div>
+  <div class="modal-footer" v-if="userRole === 0 && invoiceStatus === 1">
     <ul class="modal-footer__actions">
       <li>
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
@@ -121,6 +123,28 @@
       <li>
         <v-button :block="false" size="md" styled="green" @click="saveAndClose" text="Mark as paid"></v-button>
       </li>
+    </ul>
+  </div>
+  <div class="modal-footer" v-if="userRole === 0 && invoiceStatus === 2">
+    <ul class="modal-footer__actions">
+      <li>
+        <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
+      </li>
+      <li>
+        <v-button :block="false" size="md" styled="orange" @click="saveAndClose" text="Mark as refunded"></v-button>
+      </li>
+      <li>
+        <v-button :block="false" size="md" styled="red" @click="saveAndClose" text="Mark as cancelled"></v-button>
+      </li>
+    </ul>
+  </div>
+  <div class="modal-footer align-center" v-if="userRole === 0 && (invoiceStatus === 3 || invoiceStatus === 4)">
+    <ul class="modal-footer__actions align-center">
+      <li>&nbsp;</li>
+      <li>
+        <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
+      </li>
+      <li>&nbsp;</li>
     </ul>
   </div>
 </template>
@@ -149,7 +173,17 @@
     clientAddress: string;
     clientAvatar: string;
     caseTitle: string;
+    invoiceItems: InvoiceItem[];
   };
+
+  interface InvoiceItem {
+    id: string;
+    item: string;
+    quantity: number;
+    price: number;
+    discount: number;
+    amount: number;
+  }
 
   const props = defineProps({
     invoice: Object as PropType<Invoice>,
@@ -179,7 +213,7 @@
   const clientPhone = computed(() => props.invoice?.clientPhone || 'Unknown');
   const clientAddress = computed(() => props.invoice?.clientAddress || 'Unknown');
   const invoiceNumber = computed(() => props.invoice?.number || 'Unknown');
-  const invoiceStatus = computed(() => props.invoice?.status || 'Unknown');
+  const invoiceStatus = computed(() => props.invoice?.status || '0');
   const invoiceCreated = computed(() => props.invoice?.created || undefined);
   const invoiceDueDate = computed(() => props.invoice?.due_date || undefined);
   const invoiceSalesTaxes = computed(() => props.invoice?.sales_taxes || 'Unknown');

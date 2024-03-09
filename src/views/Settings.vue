@@ -256,12 +256,11 @@ export default defineComponent({
     },
     async userInitiatedUpdateAppServices() {
       try {
-        console.log('hello World')
-        // const docRef = doc(db, "settings", "general");
-        // await updateDoc(docRef, {
-        //   app_services: this.appServices.map(service => service.value)
-        // });
-        // this.triggerNotification('success', 'Changes saved', 'Services were updated successfully.');
+        const docRef = doc(db, "settings", "general");
+        await updateDoc(docRef, {
+          app_services: this.appServices.map(service => service.value)
+        });
+        this.triggerNotification('success', 'Changes saved', 'Services were updated successfully.');
       } catch (error) {
         console.error("Error updating document:", error);
         this.triggerNotification('error', 'Error!', 'Something went wrong.');
@@ -297,11 +296,12 @@ export default defineComponent({
       }
     },
     appServices: {
-      deep: true,
+      // deep: true,
       handler(newServices) {
-        if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
-          this.debouncedUpdateAppServices()?.catch(e => console.error(e));
-        }
+        console.log('handler working')
+        // if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
+        //   this.debouncedUpdateAppServices()?.catch(e => console.error(e));
+        // }
       }
     }
   }

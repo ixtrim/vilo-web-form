@@ -133,7 +133,7 @@
                 <VButton :block="false" size="sm" icon="left" icon-style="download" styled="simple-icon" @click="handleDownloadClick" text=""></VButton>
               </div>
               <div class="col col--inv-action" v-if="notClient">
-                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="handleDeleteClick()" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="deleteInvoice(invoice.id)" text=""></VButton>
               </div>
               <div class="col col--inv-action" v-if="notClient">
                 <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openAddInvoiceModal" text=""></VButton>
@@ -430,8 +430,28 @@ export default defineComponent({
       // Implement download click handling
     };
 
-    const handleDeleteClick = () => {
-      // Implement delete click handling
+    const deleteInvoice = async (invoiceId: string) => {
+      const batch = writeBatch(db);
+
+      // Delete invoice items
+      const invoiceItemsRef = collection(db, `invoices/${invoiceId}/invoice_items`);
+      const invoiceItemsSnapshot = await getDocs(invoiceItemsRef);
+      invoiceItemsSnapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+
+      // Delete the invoice itself
+      const invoiceRef = doc(db, "invoices", invoiceId);
+      batch.delete(invoiceRef);
+
+      // Commit the batch
+      await batch.commit();
+
+      // Show a notification and refresh the invoice list
+      notificationType.value = 'success';
+      notificationHeader.value = 'Invoice Deleted';
+      notificationMessage.value = 'The invoice and its items have been successfully deleted.';
+      await fetchInvoices(); // Refresh the list of invoices
     };
 
     const changePage = (step: number, event: Event) => {
@@ -456,6 +476,7 @@ export default defineComponent({
       // Implement add invoice case handling
     };
 
+    fetchInvoices();
     const handlePreviewInvoiceCase = () => {
       // Implement preview invoice case handling
     };
@@ -484,7 +505,7 @@ export default defineComponent({
       handleModalClose,
       handleDropdownClick,
       handleDownloadClick,
-      handleDeleteClick,
+      deleteInvoice,
       handleFilterTime,
       handleFilterStatus,
       changePage,

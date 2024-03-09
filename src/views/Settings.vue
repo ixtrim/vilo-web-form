@@ -56,7 +56,7 @@
               <p>Add types of services your company provides</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VTextInputGroup :inputs="appServices" @input-blur="handleServicesUpdate" />
+              <VTextInputGroup :inputs="appServices" @update-inputs="appServices = $event" @input-blur="handleServicesUpdate" />
               <!-- <VTextInputGroup :inputs="appServices" @update-inputs="appServices = $event" @input-blur="handleServicesUpdate" /> -->
             </div>
           </div>
@@ -256,11 +256,12 @@ export default defineComponent({
     },
     async userInitiatedUpdateAppServices() {
       try {
-        const docRef = doc(db, "settings", "general");
-        await updateDoc(docRef, {
-          app_services: this.appServices.map(service => service.value)
-        });
-        this.triggerNotification('success', 'Changes saved', 'Services were updated successfully.');
+        console.log('hello World')
+        // const docRef = doc(db, "settings", "general");
+        // await updateDoc(docRef, {
+        //   app_services: this.appServices.map(service => service.value)
+        // });
+        // this.triggerNotification('success', 'Changes saved', 'Services were updated successfully.');
       } catch (error) {
         console.error("Error updating document:", error);
         this.triggerNotification('error', 'Error!', 'Something went wrong.');

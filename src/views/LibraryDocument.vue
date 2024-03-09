@@ -48,7 +48,8 @@
 <script>
 import { db, storage } from '@/firebase.js';
 import { uploadBytes, ref as storageRef, getDownloadURL } from 'firebase/storage';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { onMounted, ref, defineComponent, computed } from 'vue';
 import { QuillEditor } from '@vueup/vue-quill';
 import VLink from '@/components/v-link/VLink.vue';
@@ -58,7 +59,6 @@ import VButton from '@/components/v-button/VButton.vue';
 import VNotification from '@/components/v-notification/VNotification.vue';
 
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
-
 
 export default {
   components: {
@@ -77,6 +77,7 @@ export default {
     const notificationType = ref('');
     const notificationHeader = ref('');
     const notificationMessage = ref('');
+    const auth = getAuth();
 
     async function handleImageCropped(blob) {
       const imageRef = storageRef(storage, `document_headers/${Math.random().toString(22).slice(2)}.jpg`);
@@ -104,13 +105,22 @@ export default {
     }
 
     const addDocument = async() => {
+      const createdAt = Timestamp.now(); 
+      const user = auth.currentUser;
+      if(user)
+      {
+        var userId = user.uid;
+      }
       try {
         await addDoc(collection(db, "templates"), {
           title: title.value,
           content: content.value,
           header: header.value,
           footer: footer.value,
+          created_by: userId,
+          created_at: createdAt
         });
+
         title.value = '';
         title.content = '';
         title.header = '';

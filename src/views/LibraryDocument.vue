@@ -118,7 +118,7 @@ export default {
           header: header.value,
           footer: footer.value,
           created_by: userId,
-          created_at: createdAt
+          created: createdAt
         });
 
         title.value = '';

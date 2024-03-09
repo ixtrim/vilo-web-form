@@ -14,7 +14,7 @@ import 'cropperjs/dist/cropper.css';
 
 const imageData = ref<string>('');
 const imageElement = ref<HTMLImageElement | null>(null);
-const emit = defineEmits(['image-cropped']);
+const emit = defineEmits(['image-cropped', 'image-selected']);
 
 function onFileChange(event: Event) {
   const input = event.target as HTMLInputElement;
@@ -30,6 +30,7 @@ function onFileChange(event: Event) {
       const result = e.target?.result;
       if (typeof result === 'string') {
         imageData.value = result;
+        emit('image-selected', result);
         initializeCropper();
       }
     };

@@ -26,7 +26,7 @@
               <p>Choose the name or your organization which will be displayed through the app.</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VInput :label="'Application Name'" :placeholder="'Vilo'" v-model="appName" />
+              <VInput label="Application Name" placeholder="Vilo" v-model="appName" />
             </div>
           </div>
 
@@ -36,7 +36,7 @@
               <p>Choose the timezone for your team.</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VDropdown :title="appTimezone" :items="dropdownTimezone" @item-clicked="" />
+              <VDropdown :title="appTimezone" :items="dropdownTimezone" @item-clicked="changeTimezone" />
             </div>
           </div>
 
@@ -46,7 +46,7 @@
               <p>Choose the timezone for your team.</p>
             </div>
             <div class="dashboard__form__section__input">
-              <VDropdown :title="appTimeFormat" :items="dropdownTimeFormat" @item-clicked="" />
+              <VDropdown :title="appTimeFormat" :items="dropdownTimeFormat" @item-clicked="changeTimeFormat" />
             </div>
           </div>
 
@@ -56,9 +56,10 @@
               <p>Add types of services your company provides</p>
             </div>
             <div class="dashboard__form__section__input">
-              <!-- <VTextInputGroup :inputs="appServices" @update-inputs="appServices = $event" @input-blur="" /> -->
+              <!-- <VTextInputGroup :inputs="appServices" @update-inputs="appServices = $event" @input-blur="handleServicesUpdate" /> -->
             </div>
           </div>
+
 
         </div>
       </div>
@@ -73,7 +74,7 @@
 <script lang="ts">
   import { db } from '@/firebase.js';
   import { doc, getDoc, updateDoc } from 'firebase/firestore';
-  // import { debounce } from 'lodash';
+  import { debounce } from 'lodash';
   import { defineComponent, ref, onMounted } from 'vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
   import VInput from '@/components/v-input/VInput.vue';
@@ -108,10 +109,10 @@ export default defineComponent({
       appTimezone: '',
       appTimeFormat: '',
       appServices: [] as Array<{ value: string }>,
-      // debouncedUpdateAppName: null as ((...args: any[]) => Promise<void> | undefined) | null,
-      // debouncedUpdateTimezone: null as ((...args: any[]) => Promise<void> | undefined) | null,
-      // debouncedUpdateTimeFormat: null as ((...args: any[]) => Promise<void> | undefined) | null,
-      // debouncedUpdateAppServices: null as ((...args: any[]) => Promise<void> | undefined) | null,
+      debouncedUpdateAppName: null as ((...args: any[]) => Promise<void> | undefined) | null,
+      debouncedUpdateTimezone: null as ((...args: any[]) => Promise<void> | undefined) | null,
+      debouncedUpdateTimeFormat: null as ((...args: any[]) => Promise<void> | undefined) | null,
+      debouncedUpdateAppServices: null as ((...args: any[]) => Promise<void> | undefined) | null,
       initialDataLoaded: false,
       notificationType: 'success',
       notificationHeader: 'Changes saved',
@@ -173,69 +174,60 @@ export default defineComponent({
         (this.$refs.notificationRef as NotificationRef).showNotification();
       }
     },
-    // async changeTimezone(item: DropdownItem) {
-    //   this.appTimezone = item.value;
-    //   if (this.debouncedUpdateTimezone) {
-    //     try {
-    //       await this.debouncedUpdateTimezone();
-    //     } catch (e) {
-    //       console.error(e);
-    //     }
-    //   }
-    // },
-    // async userInitiatedUpdateTimezone() {
-    //   try {
-    //     const docRef = doc(db, "settings", "general");
-    //     await updateDoc(docRef, {
-    //       app_timezone: this.appTimezone
-    //     });
-    //     this.triggerNotification('success', 'Changes saved', 'Timezone was changed successfully.');
-    //   } catch (error) {
-    //     console.error("Error updating document:", error);
-    //     this.triggerNotification('error', 'Error!', 'Something went wrong.');
-    //   }
-    // },
-    // async changeTimeFormat(item: DropdownItem) {
-    //   this.appTimeFormat = item.value;
-    //   if (this.debouncedUpdateTimeFormat) {
-    //     try {
-    //       await this.debouncedUpdateTimeFormat();
-    //     } catch (e) {
-    //       console.error(e);
-    //     }
-    //   }
-    // },
-    // async userInitiatedUpdateTimeFormat() {
-    //   try {
-    //     const docRef = doc(db, "settings", "general");
-    //     await updateDoc(docRef, {
-    //       app_timeformat: this.appTimeFormat
-    //     });
-    //     this.triggerNotification('success', 'Changes saved', 'Date format was changed successfully.');
-    //   } catch (error) {
-    //     console.error("Error updating document:", error);
-    //     this.triggerNotification('error', 'Error!', 'Something went wrong.');
-    //   }
-    // },
-    
+    async changeTimezone(item: DropdownItem) {
+      this.appTimezone = item.value;
+      if (this.debouncedUpdateTimezone) {
+        try {
+          await this.debouncedUpdateTimezone();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    },
+    async userInitiatedUpdateTimezone() {
+      try {
+        const docRef = doc(db, "settings", "general");
+        await updateDoc(docRef, {
+          app_timezone: this.appTimezone
+        });
+        this.triggerNotification('success', 'Changes saved', 'Timezone was changed successfully.');
+      } catch (error) {
+        console.error("Error updating document:", error);
+        this.triggerNotification('error', 'Error!', 'Something went wrong.');
+      }
+    },
+    async changeTimeFormat(item: DropdownItem) {
+      this.appTimeFormat = item.value;
+      if (this.debouncedUpdateTimeFormat) {
+        try {
+          await this.debouncedUpdateTimeFormat();
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    },
+    async userInitiatedUpdateTimeFormat() {
+      try {
+        const docRef = doc(db, "settings", "general");
+        await updateDoc(docRef, {
+          app_timeformat: this.appTimeFormat
+        });
+        this.triggerNotification('success', 'Changes saved', 'Date format was changed successfully.');
+      } catch (error) {
+        console.error("Error updating document:", error);
+        this.triggerNotification('error', 'Error!', 'Something went wrong.');
+      }
+    },
     async fetchViewData() {
       try {
         const docRef = doc(db, "settings", "general");
         const docSnap = await getDoc(docRef);
-       
+
         if (docSnap.exists()) {
           this.appName = docSnap.data().app_name;
           this.appTimezone = docSnap.data().app_timezone || 'Select Timezone';
           this.appTimeFormat = docSnap.data().app_timeformat || 'Select Date format';
           this.appServices = (docSnap.data().app_services as string[]).map(service => ({ value: service }));
-
-          setTimeout(() => {
-            this.initialDataLoaded = true;
-            console.log(docSnap.data());
-            console.log('timeout passed');
-          }, 750);
-
-
         } else {
           console.log("No such document!");
           this.triggerNotification('error', 'Error!', 'Error while connecting with database.');
@@ -243,71 +235,74 @@ export default defineComponent({
       } catch (error) {
         console.log("Error getting document:", error);
         this.triggerNotification('error', 'Error!', 'Error while connecting with database.');
+      } finally {
+        setTimeout(() => {
+          this.initialDataLoaded = true;
+        }, 750);
       }
     },
-    // async userInitiatedUpdateAppName() {
-    //   try {
-    //     console.log('timeout passed');
-    //     const docRef = doc(db, "settings", "general");
-    //     await updateDoc(docRef, {
-    //       app_name: this.appName
-    //     });
-    //     this.triggerNotification('success', 'Changes saved', 'Application name was changed successfully.');
-    //   } catch (error) {
-    //     console.error("Error updating document:", error);
-    //     this.triggerNotification('error', 'Error!', 'Something went wrong.');
-    //   }
-    // },
-    // async userInitiatedUpdateAppServices() {
-    //   try {
-    //     const docRef = doc(db, "settings", "general");
-    //     await updateDoc(docRef, {
-    //       app_services: this.appServices.map(service => service.value)
-    //     });
-    //     this.triggerNotification('success', 'Changes saved', 'Services were updated successfully.');
-    //   } catch (error) {
-    //     console.error("Error updating document:", error);
-    //     this.triggerNotification('error', 'Error!', 'Something went wrong.');
-    //   }
-    // },
-    // handleServicesUpdate() {
-    //   if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
-    //     this.debouncedUpdateAppServices();
-    //   }
-    // },
+    async userInitiatedUpdateAppName() {
+      try {
+        const docRef = doc(db, "settings", "general");
+        await updateDoc(docRef, {
+          app_name: this.appName
+        });
+        this.triggerNotification('success', 'Changes saved', 'Application name was changed successfully.');
+      } catch (error) {
+        console.error("Error updating document:", error);
+        this.triggerNotification('error', 'Error!', 'Something went wrong.');
+      }
+    },
+    async userInitiatedUpdateAppServices() {
+      try {
+        const docRef = doc(db, "settings", "general");
+        await updateDoc(docRef, {
+          app_services: this.appServices.map(service => service.value)
+        });
+        this.triggerNotification('success', 'Changes saved', 'Services were updated successfully.');
+      } catch (error) {
+        console.error("Error updating document:", error);
+        this.triggerNotification('error', 'Error!', 'Something went wrong.');
+      }
+    },
+    handleServicesUpdate() {
+      if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
+        this.debouncedUpdateAppServices();
+      }
+    },
   },
   mounted() {
     this.fetchViewData();
-    // this.debouncedUpdateAppName = debounce(this.userInitiatedUpdateAppName, 1000);
-    // this.debouncedUpdateTimezone = debounce(this.userInitiatedUpdateTimezone, 600);
-    // this.debouncedUpdateTimeFormat = debounce(this.userInitiatedUpdateTimeFormat, 600);
-    // this.debouncedUpdateAppServices = debounce(this.userInitiatedUpdateAppServices, 1200);
+    this.debouncedUpdateAppName = debounce(this.userInitiatedUpdateAppName, 1000);
+    this.debouncedUpdateTimezone = debounce(this.userInitiatedUpdateTimezone, 600);
+    this.debouncedUpdateTimeFormat = debounce(this.userInitiatedUpdateTimeFormat, 600);
+    this.debouncedUpdateAppServices = debounce(this.userInitiatedUpdateAppServices, 1200);
   },
-  // watch: {
-  //   appName(newVal, oldVal) {
-  //     if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateAppName) {
-  //       this.debouncedUpdateAppName()?.catch(e => console.error(e));
-  //     }
-  //   },
-  //   appTimezone(newVal, oldVal) {
-  //     if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimezone) {
-  //       this.debouncedUpdateTimezone()?.catch(e => console.error(e));
-  //     }
-  //   },
-  //   appTimeFormat(newVal, oldVal) {
-  //     if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimeFormat) {
-  //       this.debouncedUpdateTimeFormat()?.catch(e => console.error(e));
-  //     }
-  //   },
-  //   appServices: {
-  //     deep: true,
-  //     handler(newServices) {
-  //       if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
-  //         this.debouncedUpdateAppServices()?.catch(e => console.error(e));
-  //       }
-  //     }
-  //   }
-  // }
+  watch: {
+    appName(newVal, oldVal) {
+      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateAppName) {
+        this.debouncedUpdateAppName()?.catch(e => console.error(e));
+      }
+    },
+    appTimezone(newVal, oldVal) {
+      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimezone) {
+        this.debouncedUpdateTimezone()?.catch(e => console.error(e));
+      }
+    },
+    appTimeFormat(newVal, oldVal) {
+      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimeFormat) {
+        this.debouncedUpdateTimeFormat()?.catch(e => console.error(e));
+      }
+    },
+    appServices: {
+      deep: true,
+      handler(newServices) {
+        if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
+          this.debouncedUpdateAppServices()?.catch(e => console.error(e));
+        }
+      }
+    }
+  }
 });
 </script>
 

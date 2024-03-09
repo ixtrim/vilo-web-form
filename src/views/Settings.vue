@@ -222,13 +222,20 @@ export default defineComponent({
       try {
         const docRef = doc(db, "settings", "general");
         const docSnap = await getDoc(docRef);
-        console.log("test 1")
-        console.log(docSnap.data())
+       
         if (docSnap.exists()) {
           this.appName = docSnap.data().app_name;
           this.appTimezone = docSnap.data().app_timezone || 'Select Timezone';
           this.appTimeFormat = docSnap.data().app_timeformat || 'Select Date format';
           this.appServices = (docSnap.data().app_services as string[]).map(service => ({ value: service }));
+
+          setTimeout(() => {
+            this.initialDataLoaded = true;
+            console.log(docSnap.data());
+            console.log('timeout passed');
+          }, 750);
+
+
         } else {
           console.log("No such document!");
           this.triggerNotification('error', 'Error!', 'Error while connecting with database.');
@@ -236,14 +243,11 @@ export default defineComponent({
       } catch (error) {
         console.log("Error getting document:", error);
         this.triggerNotification('error', 'Error!', 'Error while connecting with database.');
-      } finally {
-        setTimeout(() => {
-          this.initialDataLoaded = true;
-        }, 750);
       }
     },
     async userInitiatedUpdateAppName() {
       try {
+        console.log('timeout passed');
         const docRef = doc(db, "settings", "general");
         await updateDoc(docRef, {
           app_name: this.appName

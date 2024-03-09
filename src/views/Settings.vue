@@ -278,31 +278,7 @@ export default defineComponent({
     this.debouncedUpdateTimeFormat = debounce(this.userInitiatedUpdateTimeFormat, 600);
     this.debouncedUpdateAppServices = debounce(this.userInitiatedUpdateAppServices, 1200);
   },
-  watch: {
-    appName(newVal, oldVal) {
-      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateAppName) {
-        this.debouncedUpdateAppName()?.catch(e => console.error(e));
-      }
-    },
-    appTimezone(newVal, oldVal) {
-      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimezone) {
-        this.debouncedUpdateTimezone()?.catch(e => console.error(e));
-      }
-    },
-    appTimeFormat(newVal, oldVal) {
-      if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateTimeFormat) {
-        this.debouncedUpdateTimeFormat()?.catch(e => console.error(e));
-      }
-    },
-    appServices: {
-      deep: true,
-      handler(newServices) {
-        if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
-          this.debouncedUpdateAppServices()?.catch(e => console.error(e));
-        }
-      }
-    }
-  }
+  
 });
 </script>
 

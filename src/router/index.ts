@@ -125,8 +125,8 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/viloapp',
-      name: 'viloapp',
+      path: '/settings',
+      name: 'settings',
       component: () => import('../views/Settings.vue'),
       meta: { requiresAuth: true }
     },

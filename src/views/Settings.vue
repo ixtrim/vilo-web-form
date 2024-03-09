@@ -222,7 +222,8 @@ export default defineComponent({
       try {
         const docRef = doc(db, "settings", "general");
         const docSnap = await getDoc(docRef);
-
+        console.log("test 1")
+        console.log(docSnap.data())
         if (docSnap.exists()) {
           this.appName = docSnap.data().app_name;
           this.appTimezone = docSnap.data().app_timezone || 'Select Timezone';
@@ -273,10 +274,10 @@ export default defineComponent({
   },
   mounted() {
     this.fetchViewData();
-    // this.debouncedUpdateAppName = debounce(this.userInitiatedUpdateAppName, 1000);
-    // this.debouncedUpdateTimezone = debounce(this.userInitiatedUpdateTimezone, 600);
-    // this.debouncedUpdateTimeFormat = debounce(this.userInitiatedUpdateTimeFormat, 600);
-    // this.debouncedUpdateAppServices = debounce(this.userInitiatedUpdateAppServices, 1200);
+    this.debouncedUpdateAppName = debounce(this.userInitiatedUpdateAppName, 1000);
+    this.debouncedUpdateTimezone = debounce(this.userInitiatedUpdateTimezone, 600);
+    this.debouncedUpdateTimeFormat = debounce(this.userInitiatedUpdateTimeFormat, 600);
+    this.debouncedUpdateAppServices = debounce(this.userInitiatedUpdateAppServices, 1200);
   },
   watch: {
     appName(newVal, oldVal) {
@@ -300,7 +301,7 @@ export default defineComponent({
         if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
           this.debouncedUpdateAppServices()?.catch(e => console.error(e));
         }
-      }https://vilo.nestvested.co/viloapp
+      }
     }
   }
 });

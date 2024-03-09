@@ -296,12 +296,12 @@ export default defineComponent({
       }
     },
     appServices: {
-      // deep: true,
+      deep: true,
       handler(newServices) {
-        console.log('handler working')
-        // if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
+        if (this.initialDataLoaded && this.debouncedUpdateAppServices) {
+          console.log('handler working')
         //   this.debouncedUpdateAppServices()?.catch(e => console.error(e));
-        // }
+        }
       }
     }
   }

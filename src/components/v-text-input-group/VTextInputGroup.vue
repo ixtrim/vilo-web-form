@@ -35,9 +35,9 @@
     localInputs.value = newInputs.map(input => ({ ...input, id: input.id || generateUniqueId() }));
   }, { deep: true });
 
-  watch(localInputs, () => {
-    emit('update-inputs', localInputs.value.map(({ id, ...rest }) => rest));
-  }, { deep: true });
+  // watch(localInputs, () => {
+  //   emit('update-inputs', localInputs.value.map(({ id, ...rest }) => rest));
+  // }, { deep: true });
 
   const addInput = () => {
     localInputs.value.push({ value: '', id: generateUniqueId() });

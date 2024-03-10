@@ -36,6 +36,8 @@
       </div>
       <div class="col-lg-3 align-right">
         <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="addDocument" text="Create new document"></VButton>
+        <br/>
+        <VButton :block="true" size="sm" icon="left" icon-style="add-blue" styled="secondary" @click="addPage" text="Add another page"></VButton>
       </div>
     </div>
 

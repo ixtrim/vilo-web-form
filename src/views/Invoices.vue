@@ -48,7 +48,7 @@
                   <VDropdown :title="'Filter by date'" :items="sortTime" @item-clicked="handleFilterTime" />
                 </li>
                 <li>
-                  <VDropdown :title="'All invoices'" :items="sortStatus" @item-clicked="handleFilterStatus" />
+                  <VDropdown :title="currentStatusTitle" :items="sortStatus" @item-clicked="handleFilterStatus" />
                 </li>
               </ul>
             </div>
@@ -271,6 +271,7 @@ export default defineComponent({
       notificationType: 'success',
       notificationHeader: 'Changes saved',
       notificationMessage: 'This invoice has been successfully edited.',
+      currentStatusTitle: 'All invoices',
     };
   },
   setup() {
@@ -421,10 +422,10 @@ export default defineComponent({
     },
     paginatedInvoices() {
       const filteredInvoices = this.invoices.filter(invoice => {
-        // Adjust this condition based on how you want to search (e.g., by number, clientName, etc.)
-        // This example searches by clientName and invoice number
-        return invoice.clientName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-              invoice.number.toLowerCase().includes(this.searchTerm.toLowerCase());
+        const matchesSearchTerm = invoice.clientName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                                  invoice.number.toLowerCase().includes(this.searchTerm.toLowerCase());
+        const matchesStatus = this.selectedStatus === null || invoice.status === this.selectedStatus;
+        return matchesSearchTerm && matchesStatus;
       });
 
       // Then, calculate the start and end indices for pagination
@@ -486,8 +487,7 @@ export default defineComponent({
             id: doc.id,
             ...doc.data()
           })) as InvoiceItem[];
-    
-          // Combine all fetched data into a single object conforming to the Invoice interface
+
           invoicesData.push({
             id: docSnapshot.id,
             ...invoiceData,
@@ -500,7 +500,6 @@ export default defineComponent({
         this.invoices = invoicesData;
       } catch (error) {
         console.error("Error fetching invoices: ", error);
-        // Handle the error appropriately
       }
     },    
     async fetchBillingSettings() {
@@ -511,11 +510,10 @@ export default defineComponent({
           this.billingSettings = billingDocSnap.data();
         } else {
           console.log("No billing settings document found!");
-          this.billingSettings = {}; // Reset to default or keep previous state
+          this.billingSettings = {};
         }
       } catch (error) {
         console.error("Error fetching billing settings: ", error);
-        // Handle the error appropriately
       }
     },
     async fetchGeneralSettings() {
@@ -526,19 +524,18 @@ export default defineComponent({
           this.generalSettings = generalDocSnap.data();
         } else {
           console.log("No general settings document found!");
-          this.generalSettings = {}; // Reset to default or keep previous state
+          this.generalSettings = {};
         }
       } catch (error) {
         console.error("Error fetching general settings: ", error);
-        // Handle the error appropriately
       }
     },
     truncateEmail(email: string) {
-      const maxLength = 35; // Define the maximum length of the email to display
+      const maxLength = 35;
       if (email.length > maxLength) {
-        return `${email.substring(0, maxLength - 3)}...`; // Truncate and add ellipsis
+        return `${email.substring(0, maxLength - 3)}...`;
       }
-      return email; // Return the original email if it's short enough
+      return email;
     },
     openEditInvoiceModal() {
       this.showAddInvoiceModal = true;
@@ -559,6 +556,8 @@ export default defineComponent({
     },
     handleFilterStatus(item: any) {
       this.selectedStatus = item.value;
+      const selectedItem = this.sortStatus.find(status => status.value === item.value);
+      this.currentStatusTitle = selectedItem ? selectedItem.label : 'All invoices';
     },
     async refreshData() {
       await this.fetchInvoices();
@@ -638,20 +637,13 @@ export default defineComponent({
     async deleteInvoice(invoiceId: string) {
       try {
         await deleteDoc(doc(db, "invoices", invoiceId));
-        setTimeout(() => {
-          this.refreshData();
-        }, 1000);
 
-        this.notificationType = 'success';
-        this.notificationHeader = 'Invoice Deleted';
-        this.notificationMessage = 'The invoice has been successfully deleted.';
+        // Remove the invoice from the local state immediately
+        this.invoices = this.invoices.filter(invoice => invoice.id !== invoiceId);
+
         this.triggerNotification('success', 'Invoice Deleted', 'The invoice has been successfully deleted.');
       } catch (error) {
         console.error("Error deleting invoice: ", error);
-
-        this.notificationType = 'error';
-        this.notificationHeader = 'Error';
-        this.notificationMessage = 'Failed to delete the invoice.';
         this.triggerNotification('error', 'Error', 'Failed to delete the invoice.');
       }
     },

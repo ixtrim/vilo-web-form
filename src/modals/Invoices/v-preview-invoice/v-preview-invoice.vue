@@ -111,7 +111,7 @@
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
       </li>
       <li>
-        <v-button :block="false" size="md" styled="green" @click="saveAndClose" text="SendToClient"></v-button>
+        <v-button :block="false" size="md" styled="green" @click="statusChangeToPending" text="SendToClient"></v-button>
       </li>
     </ul>
   </div>
@@ -121,7 +121,7 @@
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
       </li>
       <li>
-        <v-button :block="false" size="md" styled="green" @click="saveAndClose" text="Mark as paid"></v-button>
+        <v-button :block="false" size="md" styled="green" @click="statusChangeToPending" text="Mark as paid"></v-button>
       </li>
     </ul>
   </div>
@@ -221,7 +221,7 @@
   const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
   const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
 
-  const emit = defineEmits(['close-modal', 'mark-paid']);
+  const emit = defineEmits(['close-modal', 'invoice-pending']);
 
   function formatDate(timestamp: Timestamp | undefined) {
     return timestamp ? timestamp.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown Date';
@@ -238,8 +238,12 @@
     emit('close-modal');
   }
 
+  function statusChangeToPending() {
+    emit('invoice-pending', props.invoice?.id);
+    closeModal();
+  }
+
   function saveAndClose() {
-    emit('mark-paid');
     closeModal();
   }
 </script>

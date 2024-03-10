@@ -105,7 +105,7 @@
       </div>
     </div>
   </div>
-  <div class="modal-footer" v-if="userRole === 0 && invoiceStatus === '0'">
+  <div class="modal-footer" v-if="(userRole === 0 || userRole === 2)  && invoiceStatus === '0'">
     <ul class="modal-footer__actions">
       <li>
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
@@ -115,30 +115,39 @@
       </li>
     </ul>
   </div>
-  <div class="modal-footer" v-if="userRole === 0 && invoiceStatus === 1">
+  <div class="modal-footer" v-if="(userRole === 0 || userRole === 2) && invoiceStatus === 1">
     <ul class="modal-footer__actions">
       <li>
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
       </li>
       <li>
-        <v-button :block="false" size="md" styled="green" @click="statusChangeToPending" text="Mark as paid"></v-button>
+        <v-button :block="false" size="md" styled="green" @click="statusChangeToPaid" text="Mark as paid"></v-button>
       </li>
     </ul>
   </div>
-  <div class="modal-footer" v-if="userRole === 0 && invoiceStatus === 2">
+  <div class="modal-footer" v-if="(userRole === 0 || userRole === 2) && invoiceStatus === 2">
     <ul class="modal-footer__actions">
       <li>
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
       </li>
       <li>
-        <v-button :block="false" size="md" styled="orange" @click="saveAndClose" text="Mark as refunded"></v-button>
+        <v-button :block="false" size="md" styled="orange" @click="statusChangeToRefunded" text="Mark as refunded"></v-button>
       </li>
       <li>
-        <v-button :block="false" size="md" styled="red" @click="saveAndClose" text="Mark as cancelled"></v-button>
+        <v-button :block="false" size="md" styled="red" @click="statusChangeToCancelled" text="Mark as cancelled"></v-button>
       </li>
     </ul>
   </div>
-  <div class="modal-footer align-center" v-if="userRole === 0 && (invoiceStatus === 3 || invoiceStatus === 4)">
+  <div class="modal-footer align-center" v-if="(userRole === 0 || userRole === 2) && (invoiceStatus === 3 || invoiceStatus === 4)">
+    <ul class="modal-footer__actions align-center">
+      <li>&nbsp;</li>
+      <li>
+        <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
+      </li>
+      <li>&nbsp;</li>
+    </ul>
+  </div>
+  <div class="modal-footer align-center" v-if="userRole === 1 || userRole === 3 || userRole === 4">
     <ul class="modal-footer__actions align-center">
       <li>&nbsp;</li>
       <li>
@@ -221,7 +230,7 @@
   const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
   const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
 
-  const emit = defineEmits(['close-modal', 'invoice-pending']);
+  const emit = defineEmits(['close-modal', 'invoice-pending', 'invoice-paid', 'invoice-refunded', 'invoice-cancelled']);
 
   function formatDate(timestamp: Timestamp | undefined) {
     return timestamp ? timestamp.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown Date';
@@ -240,6 +249,21 @@
 
   function statusChangeToPending() {
     emit('invoice-pending', props.invoice?.id);
+    closeModal();
+  }
+
+  function statusChangeToPaid() {
+    emit('invoice-paid', props.invoice?.id);
+    closeModal();
+  }
+
+  function statusChangeToRefunded() {
+    emit('invoice-refunded', props.invoice?.id);
+    closeModal();
+  }
+
+  function statusChangeToCancelled() {
+    emit('invoice-cancelled', props.invoice?.id);
     closeModal();
   }
 

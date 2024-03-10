@@ -45,7 +45,7 @@
             <div class="col-lg-3">
               <ul class="dashboard__actions">
                 <li>
-                  <VDropdown :title="'Filter by date'" :items="sortTime" @item-clicked="handleFilterTime" />
+                  <VDropdown :title="currentDateTitle" :items="sortTime" @item-clicked="handleFilterTime" />
                 </li>
                 <li>
                   <VDropdown :title="currentStatusTitle" :items="sortStatus" @item-clicked="handleFilterStatus" />
@@ -272,6 +272,7 @@ export default defineComponent({
       notificationHeader: 'Changes saved',
       notificationMessage: 'This invoice has been successfully edited.',
       currentStatusTitle: 'All invoices',
+      currentDateTitle: 'Filter by date',
     };
   },
   setup() {
@@ -553,6 +554,8 @@ export default defineComponent({
     },
     handleFilterTime(item: any) {
       this.selectedTimeFrame = item.value;
+      const selectedItem = this.sortTime.find(time => time.value === item.value);
+      this.currentDateTitle = selectedItem ? selectedItem.label : 'Filter by date';
     },
     handleFilterStatus(item: any) {
       this.selectedStatus = item.value;

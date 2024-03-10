@@ -101,6 +101,10 @@
           </div>
 
           <div class="dashboard__table__page">
+            <div v-if="isLoading" class="loading-indicator">
+              <img src="@/assets/loading.gif" alt="Loading...">
+              <span>Loading invoices...</span>
+            </div>
             <div 
               class="dashboard__table__page__item"
               v-for="invoice in paginatedInvoices" :key="invoice.id"
@@ -182,6 +186,7 @@ import VUser from '@/components/v-user/v-user.vue';
 import VLink from '@/components/v-link/VLink.vue';
 import Search from '@/modules/Navigation/Search.vue';
 import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
+import VNotification from '@/components/v-notification/VNotification.vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import { useUserStore } from '@/stores/userStore';
 
@@ -215,12 +220,17 @@ interface InvoiceItem {
   amount: number;
 }
 
+interface NotificationRef {
+  showNotification: () => void;
+}
+
 export default defineComponent({
   components: {
     VStatus,
     VButton,
     VModal,
     VAddInvoice,
+    VNotification,
     VPreviewInvoice,
     VUser,
     VLink,
@@ -259,8 +269,8 @@ export default defineComponent({
       ],
       selectedStatus: null,
       notificationType: 'success',
-      notificationHeader: '',
-      notificationMessage: '',
+      notificationHeader: 'Changes saved',
+      notificationMessage: 'This invoice has been successfully edited.',
     };
   },
   setup() {
@@ -271,12 +281,15 @@ export default defineComponent({
     const invoices = ref<Invoice[]>([]);
     const billingSettings = ref({});
     const generalSettings = ref({});
+    
+    const isLoading = ref(false);
 
     const fetchInvoices = async () => {
-      invoices.value = []; // Reset invoices before fetching new ones
+      isLoading.value = true;
+      invoices.value = [];
       try {
         const querySnapshot = await getDocs(collection(db, "invoices"));
-        const invoicesData: Invoice[] = []; // Prepare an array to hold the fetched invoices
+        const invoicesData: Invoice[] = [];
 
         for (const docSnapshot of querySnapshot.docs) {
           const invoiceData = docSnapshot.data();
@@ -326,8 +339,8 @@ export default defineComponent({
             id: docSnapshot.id,
             number: invoiceData.number,
             case: invoiceData.case,
-            created: invoiceData.created, // Assuming this is already a Timestamp
-            due_date: invoiceData.due_date, // Assuming this is already a Timestamp
+            created: invoiceData.created,
+            due_date: invoiceData.due_date,
             status: invoiceData.status,
             client_id: invoiceData.client_id,
             sales_taxes: invoiceData.sales_taxes,
@@ -349,6 +362,8 @@ export default defineComponent({
         invoices.value = invoicesData;
       } catch (error) {
         console.error("Error fetching invoices: ", error);
+      } finally {
+        isLoading.value = false; // End loading
       }
     };
 
@@ -392,6 +407,7 @@ export default defineComponent({
       invoices,
       billingSettings,
       generalSettings,
+      isLoading,
     };
   },
   computed: {
@@ -405,6 +421,12 @@ export default defineComponent({
     },
   },
   methods: {
+    triggerNotification(type: string, header: string, message: string) {
+      this.notificationType = type;
+      this.notificationHeader = header;
+      this.notificationMessage = message;
+      (this.$refs.notificationRef as NotificationRef).showNotification();
+    },
     async fetchInvoices() {
       this.invoices = [];
       try {
@@ -523,37 +545,23 @@ export default defineComponent({
     handleFilterStatus(item: any) {
       this.selectedStatus = item.value;
     },
+
     async deleteInvoice(invoiceId: string) {
       try {
-        const batch = writeBatch(db);
-    
-        // Optionally delete subcollections of the invoice here
-        // For example, deleting all items associated with the invoice
-        const invoiceItemsRef = collection(db, `invoices/${invoiceId}/items`);
-        const snapshot = await getDocs(invoiceItemsRef);
-        snapshot.forEach(doc => {
-          batch.delete(doc.ref);
-        });
-    
-        // Delete the invoice document
-        const invoiceRef = doc(db, "invoices", invoiceId);
-        batch.delete(invoiceRef);
-    
-        // Commit the batch operation
-        await batch.commit();
-    
-        // Notify the user of success
+        await deleteDoc(doc(db, "invoices", invoiceId));
+        this.invoices = this.invoices.filter(invoice => invoice.id !== invoiceId);
+
         this.notificationType = 'success';
-        this.notificationHeader = 'Success';
-        this.notificationMessage = 'Invoice successfully deleted.';
-        // Refresh the invoice list
-        await this.fetchInvoices();
+        this.notificationHeader = 'Invoice Deleted';
+        this.notificationMessage = 'The invoice has been successfully deleted.';
+        this.triggerNotification('success', 'Invoice Deleted', 'The invoice has been successfully deleted.');
       } catch (error) {
         console.error("Error deleting invoice: ", error);
-        // Notify the user of the error
+
         this.notificationType = 'error';
         this.notificationHeader = 'Error';
-        this.notificationMessage = 'Failed to delete invoice.';
+        this.notificationMessage = 'Failed to delete the invoice.';
+        this.triggerNotification('error', 'Error', 'Failed to delete the invoice.');
       }
     },
     changePage(step: number) {

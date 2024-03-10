@@ -165,7 +165,7 @@
 
     <VModal :show="showAddInvoiceModal || showPreviewInvoiceModal" :title="modalAddInvoiceTitle || modalPreviewInvoiceTitle" @update:show="handleModalClose">
       <VAddInvoice v-if="showAddInvoiceModal" :title="modalAddInvoiceTitle" @close-modal="showAddInvoiceModal = false" @save-clicked="handleAddInvoiceCase" />
-      <VPreviewInvoice v-if="showPreviewInvoiceModal && currentInvoice" :title="modalPreviewInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @close-modal="showPreviewInvoiceModal = false" />
+      <VPreviewInvoice v-if="showPreviewInvoiceModal && currentInvoice" :title="modalPreviewInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @invoice-pending="markInvoiceAsPending" @close-modal="showPreviewInvoiceModal = false" />
     </VModal>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
@@ -176,7 +176,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed } from 'vue';
 import { db } from '@/firebase.js';
-import { orderBy, collection, query, getDocs, doc, getDoc, Timestamp, writeBatch, deleteDoc } from 'firebase/firestore';
+import { orderBy, collection, query, getDocs, doc, getDoc, Timestamp, writeBatch, deleteDoc, updateDoc } from 'firebase/firestore';
 import VStatus from '@/components/v-status/VStatus.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
@@ -560,11 +560,34 @@ export default defineComponent({
     handleFilterStatus(item: any) {
       this.selectedStatus = item.value;
     },
+    async refreshData() {
+      await this.fetchInvoices();
+    },
+    async markInvoiceAsPending(invoiceId: string) {
+      try {
+        const invoiceRef = doc(db, "invoices", invoiceId);
+        await updateDoc(invoiceRef, {
+          status: 2 // Mark as pending
+        });
 
+        // Find the invoice in the local state and update its status
+        const invoiceIndex = this.invoices.findIndex(invoice => invoice.id === invoiceId);
+        if (invoiceIndex !== -1) {
+          this.invoices[invoiceIndex].status = 2; // Update the status locally
+        }
+
+        this.triggerNotification('success', 'Invoice sent to client', 'This invoice has been successfully sent to client and its status is now pending.');
+      } catch (error) {
+        console.error("Error updating invoice status: ", error);
+        this.triggerNotification('error', 'Error', 'Failed to update the invoice status.');
+      }
+    },
     async deleteInvoice(invoiceId: string) {
       try {
         await deleteDoc(doc(db, "invoices", invoiceId));
-        this.invoices = this.invoices.filter(invoice => invoice.id !== invoiceId);
+        setTimeout(() => {
+          this.refreshData();
+        }, 1000);
 
         this.notificationType = 'success';
         this.notificationHeader = 'Invoice Deleted';

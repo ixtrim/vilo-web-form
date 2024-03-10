@@ -358,18 +358,19 @@ export default defineComponent({
               const auth = getAuth();
               const createdAt = Timestamp.now(); 
               let user = auth.currentUser;
-              var userId = user.uid;
-
-              console.log(userId);
-              
-              await addDoc(collection(db, "templates"), {
-                title: 'Duplicate of '+templateData.title,
-                content: templateData.content,
-                header: templateData.header,
-                footer: templateData.footer,
-                created_by: userId,
-                created: createdAt
-              });
+              if(user)
+              {
+                var userId = user.uid;
+                
+                await addDoc(collection(db, "templates"), {
+                  title: 'Duplicate of '+templateData.title,
+                  content: templateData.content,
+                  header: templateData.header,
+                  footer: templateData.footer,
+                  created_by: userId,
+                  created: createdAt
+                });
+              }
 
               this.fetchTemplates();
 

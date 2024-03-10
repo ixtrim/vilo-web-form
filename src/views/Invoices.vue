@@ -102,7 +102,7 @@
 
           <div class="dashboard__table__page">
             <div v-if="isLoading" class="loading-indicator">
-              <img src="@/assets/loading.gif" alt="Loading...">
+              <img src="@/assets/loader.gif" alt="Loading...">
               <span>Loading invoices...</span>
             </div>
             <div 
@@ -176,7 +176,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed } from 'vue';
 import { db } from '@/firebase.js';
-import { collection, query, getDocs, doc, getDoc, Timestamp, writeBatch, deleteDoc } from 'firebase/firestore';
+import { orderBy, collection, query, getDocs, doc, getDoc, Timestamp, writeBatch, deleteDoc } from 'firebase/firestore';
 import VStatus from '@/components/v-status/VStatus.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
@@ -288,7 +288,8 @@ export default defineComponent({
       isLoading.value = true;
       invoices.value = [];
       try {
-        const querySnapshot = await getDocs(collection(db, "invoices"));
+        const q = query(collection(db, "invoices"), orderBy("due_date", "asc"));
+        const querySnapshot = await getDocs(q);
         const invoicesData: Invoice[] = [];
 
         for (const docSnapshot of querySnapshot.docs) {

@@ -66,7 +66,7 @@
               @create-new-document="handleCreateNewDocument(parseInt(template.id))"
               @delete-template="handleDelete(template.id)"
               @edit-template="handleEdit(parseInt(template.id))"
-              @duplicate-template="handleDuplicate(parseInt(template.id))"
+              @duplicate-template="handleDuplicate(template.id)"
             />
           </div>
         </div>
@@ -78,11 +78,18 @@
       <VDeleteTemplate :title="'Delete File'" :fileId="selectedFileId" @close-modal="showDeleteModal = false" @delete-clicked="handleDeleteTemplate" />
     </VModal>
 
+    <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader"
+      :message="notificationMessage" :duration="7000" />
+
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted } from 'vue';
+import { db } from '@/firebase.js';
+import { doc, getDoc, query, collection, orderBy, limit, getDocs, addDoc, Timestamp  } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+
 import VLink from '@/components/v-link/VLink.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import Search   from '@/modules/Navigation/Search.vue';
@@ -94,9 +101,7 @@ import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import FileTemplateCard from '@/modules/Library/FileTemplateCard/FileTemplateCard.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
 import VDeleteTemplate from '@/modals/Library/v-delete-template/v-delete-template.vue';
-
-import { db } from '@/firebase.js';
-import { doc, getDoc, query, collection, orderBy, limit, getDocs, where } from 'firebase/firestore';
+import VNotification from '@/components/v-notification/VNotification.vue';
 
 interface Template {
     id: string,
@@ -113,6 +118,10 @@ interface Template {
     };
 }
 
+interface NotificationRef {
+  showNotification: () => void;
+}
+
 export default defineComponent({
   components: {
     Search,
@@ -126,6 +135,7 @@ export default defineComponent({
     VDropdown,
     FileTemplateCard,
     VDeleteTemplate,
+    VNotification,
   },
   data() {
     return {
@@ -137,6 +147,9 @@ export default defineComponent({
         { label: 'Client (company)' },
         { label: 'Admin' },
       ],
+      notificationType: 'success',
+      notificationHeader: 'Changes saved',
+      notificationMessage: 'This account has been successfully edited.',
     };
   },
   setup() {
@@ -146,6 +159,7 @@ export default defineComponent({
     const itemsPerPage = ref(10);
     const searchTerm = ref('');
     const selectedTimeFrame = ref('all');
+ 
     const sortTime = ref([
       { label: 'All', value: 'all' },
       { label: 'Last year', value: 'lastYear' },
@@ -208,7 +222,7 @@ export default defineComponent({
       const filesQuery = query(collection(db, "templates"), limit(10));
       const querySnapshot = await getDocs(filesQuery);
       const templates = await Promise.all(querySnapshot.docs.map(async (docSnapshot) => {
-        const Data = docSnapshot.data();
+      const Data = docSnapshot.data();
 
         let createdByDetails = {
           name: "Unknown User",
@@ -233,11 +247,17 @@ export default defineComponent({
 
         // Date String
         let timestamp = Data.created.toDate().toLocaleString();
+        let createdDate = new Date(timestamp);
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        let month = months[createdDate.getMonth()];
+        let day = createdDate.getDate();
+        let year = createdDate.getFullYear();
+        let formattedDate = `${month} ${day}, ${year}`;
 
         return {
           id: docSnapshot.id,
           content: Data.content,
-          created_at: timestamp,
+          created_at: formattedDate,
           footer: Data.footer,
           header: Data.header,
           title: Data.title,
@@ -280,8 +300,8 @@ export default defineComponent({
           console.warn("File not found in the documents array.");
       }
       showDeleteModal.value = false;
-    }
-      // Handle preview action
+    } 
+
     return {
       templateRows,
       sortTime,
@@ -295,13 +315,19 @@ export default defineComponent({
       selectedFileId,
       handleDelete,
       handleDeleteTemplate,
-
+    
       totalPages,
       currentPage,
       updatePage
     };
   },
   methods: {
+    triggerNotification(type: string, header: string, message: string) {
+      this.notificationType = type;
+      this.notificationHeader = header;
+      this.notificationMessage = message;
+      (this.$refs.notificationRef as NotificationRef).showNotification();
+    },
     addDocument() {
       this.$router.push('/library-document');
     },
@@ -317,7 +343,44 @@ export default defineComponent({
     },
     handleEdit(id: number) {
     },
-    handleDuplicate(id: number) {
+    async handleDuplicate(id: string) {
+      // Get the data
+      try {
+          // Get the document with the specified ID
+          const docRef = doc(db, "templates", id);
+          const docSnapshot = await getDoc(docRef);
+
+          if (docSnapshot.exists()) {
+              // Document exists, you can access its data using docSnapshot.data()
+              const templateData = docSnapshot.data();
+              
+              const auth = getAuth();
+              const createdAt = Timestamp.now(); 
+              let user = auth.currentUser;
+              var userId = user.uid;
+
+              console.log(userId);
+              
+              await addDoc(collection(db, "templates"), {
+                title: templateData.title,
+                content: templateData.content,
+                header: templateData.header,
+                footer: templateData.footer,
+                created_by: userId,
+                created: createdAt
+              });
+
+              this.triggerNotification('success', 'Success!', 'Template duplicated successfully!');
+
+              // Now you can use templateData in your application
+              console.log("Template data:", templateData);
+          } else {
+              console.log("Document not found!");
+              // Handle the case where the document doesn't exist
+          }
+      } catch (error) {
+          console.error("Error fetching document:", error);
+      }    
     },
   },
 });

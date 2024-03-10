@@ -330,17 +330,17 @@ export default defineComponent({
       (this.$refs.notificationRef as NotificationRef).showNotification();
     },
     addDocument() {
-      this.$router.push('/library-document');
+      this.$router.push('/new-library-template');
     },
     handleButtonClick() {
     },
     handleDropdownClick(item: any) { 
     },
     handlePreview(id: number) {
-      this.$router.push('/library-document');
+      this.$router.push('/new-library-template');
     },
     handleCreateNewDocument(id: number) {
-      this.$router.push('/library-document');
+      this.$router.push('/new-library-template');
     },
     handleEdit(id: number) {
     },

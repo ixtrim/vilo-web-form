@@ -165,7 +165,7 @@
 
     <VModal :show="showAddInvoiceModal || showPreviewInvoiceModal" :title="modalAddInvoiceTitle || modalPreviewInvoiceTitle" @update:show="handleModalClose">
       <VAddInvoice v-if="showAddInvoiceModal" :title="modalAddInvoiceTitle" @close-modal="showAddInvoiceModal = false" @save-clicked="handleAddInvoiceCase" />
-      <VPreviewInvoice v-if="showPreviewInvoiceModal && currentInvoice" :title="modalPreviewInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @invoice-pending="markInvoiceAsPending" @close-modal="showPreviewInvoiceModal = false" />
+      <VPreviewInvoice v-if="showPreviewInvoiceModal && currentInvoice" :title="modalPreviewInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @invoice-pending="markInvoiceAsPending" @invoice-paid="markInvoiceAsPaid"  @invoice-refunded="markInvoiceAsRefunded" @invoice-cancelled="markInvoiceAsCancelled" @close-modal="showPreviewInvoiceModal = false" />
     </VModal>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
@@ -567,16 +567,69 @@ export default defineComponent({
       try {
         const invoiceRef = doc(db, "invoices", invoiceId);
         await updateDoc(invoiceRef, {
-          status: 2 // Mark as pending
+          status: 1
         });
-
-        // Find the invoice in the local state and update its status
+        
         const invoiceIndex = this.invoices.findIndex(invoice => invoice.id === invoiceId);
         if (invoiceIndex !== -1) {
-          this.invoices[invoiceIndex].status = 2; // Update the status locally
+          this.invoices[invoiceIndex].status = 1;
         }
 
         this.triggerNotification('success', 'Invoice sent to client', 'This invoice has been successfully sent to client and its status is now pending.');
+      } catch (error) {
+        console.error("Error updating invoice status: ", error);
+        this.triggerNotification('error', 'Error', 'Failed to update the invoice status.');
+      }
+    },
+    async markInvoiceAsPaid(invoiceId: string) {
+      try {
+        const invoiceRef = doc(db, "invoices", invoiceId);
+        await updateDoc(invoiceRef, {
+          status: 2
+        });
+
+        const invoiceIndex = this.invoices.findIndex(invoice => invoice.id === invoiceId);
+        if (invoiceIndex !== -1) {
+          this.invoices[invoiceIndex].status = 2;
+        }
+
+        this.triggerNotification('success', 'Invoice status updated', 'This invoice status has been successfully updated as paid.');
+      } catch (error) {
+        console.error("Error updating invoice status: ", error);
+        this.triggerNotification('error', 'Error', 'Failed to update the invoice status.');
+      }
+    },
+    async markInvoiceAsCancelled(invoiceId: string) {
+      try {
+        const invoiceRef = doc(db, "invoices", invoiceId);
+        await updateDoc(invoiceRef, {
+          status: 3
+        });
+
+        const invoiceIndex = this.invoices.findIndex(invoice => invoice.id === invoiceId);
+        if (invoiceIndex !== -1) {
+          this.invoices[invoiceIndex].status = 3;
+        }
+
+        this.triggerNotification('success', 'Invoice status updated', 'This invoice status has been successfully updated as cancelled.');
+      } catch (error) {
+        console.error("Error updating invoice status: ", error);
+        this.triggerNotification('error', 'Error', 'Failed to update the invoice status.');
+      }
+    },
+    async markInvoiceAsRefunded(invoiceId: string) {
+      try {
+        const invoiceRef = doc(db, "invoices", invoiceId);
+        await updateDoc(invoiceRef, {
+          status: 4
+        });
+
+        const invoiceIndex = this.invoices.findIndex(invoice => invoice.id === invoiceId);
+        if (invoiceIndex !== -1) {
+          this.invoices[invoiceIndex].status = 4;
+        }
+
+        this.triggerNotification('success', 'Invoice status updated', 'This invoice status has been successfully updated as refunded.');
       } catch (error) {
         console.error("Error updating invoice status: ", error);
         this.triggerNotification('error', 'Error', 'Failed to update the invoice status.');

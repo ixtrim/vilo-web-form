@@ -315,6 +315,7 @@ export default defineComponent({
       selectedFileId,
       handleDelete,
       handleDeleteTemplate,
+      fetchTemplates,
     
       totalPages,
       currentPage,
@@ -362,13 +363,15 @@ export default defineComponent({
               console.log(userId);
               
               await addDoc(collection(db, "templates"), {
-                title: templateData.title,
+                title: 'Duplicate of '+templateData.title,
                 content: templateData.content,
                 header: templateData.header,
                 footer: templateData.footer,
                 created_by: userId,
                 created: createdAt
               });
+
+              this.fetchTemplates();
 
               this.triggerNotification('success', 'Success!', 'Template duplicated successfully!');
 

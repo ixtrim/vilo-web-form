@@ -150,13 +150,13 @@
 
           <div class="dashboard__pagination-below-table">
             <div class="dashboard__pagination-below-table__prev">
-              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="() => changePage(-1, $event)" text="Previous" v-if="currentPage > 1"></v-button>
+              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="() => changePage(-1)" text="Previous" v-if="currentPage > 1"></v-button>
             </div>
             <div class="dashboard__pagination-below-table__pages">
               <v-pagination-list :total-pages="totalPages" :initial-page="currentPage" @update:currentPage="updatePage" />
             </div>
             <div class="dashboard__pagination-below-table__next">
-              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="() => changePage(1, $event)" text="Next" v-if="currentPage < totalPages"></v-button>
+              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="() => changePage(1)" text="Next" v-if="currentPage < totalPages"></v-button>
             </div>
           </div>
 
@@ -413,12 +413,26 @@ export default defineComponent({
   },
   computed: {
     totalPages() {
-      return Math.ceil(this.invoices.length / this.itemsPerPage);
+      const filteredInvoices = this.invoices.filter(invoice => {
+        return invoice.clientName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+              invoice.number.toLowerCase().includes(this.searchTerm.toLowerCase());
+      });
+      return Math.ceil(filteredInvoices.length / this.itemsPerPage);
     },
     paginatedInvoices() {
+      const filteredInvoices = this.invoices.filter(invoice => {
+        // Adjust this condition based on how you want to search (e.g., by number, clientName, etc.)
+        // This example searches by clientName and invoice number
+        return invoice.clientName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+              invoice.number.toLowerCase().includes(this.searchTerm.toLowerCase());
+      });
+
+      // Then, calculate the start and end indices for pagination
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
-      return this.invoices.slice(start, end);
+
+      // Return the slice of filtered invoices for the current page
+      return filteredInvoices.slice(start, end);
     },
   },
   methods: {
@@ -569,13 +583,11 @@ export default defineComponent({
       const newPage = this.currentPage + step;
       if (newPage >= 1 && newPage <= this.totalPages) {
         this.currentPage = newPage;
-        // Optionally, fetch or update data based on the new page
       }
     },
     updatePage(newPage: number) {
       if (newPage >= 1 && newPage <= this.totalPages) {
         this.currentPage = newPage;
-        // Optionally, fetch or update data based on the new page
       }
     },
     handleAddInvoiceCase() {

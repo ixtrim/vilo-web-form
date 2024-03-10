@@ -12,8 +12,19 @@
       </div>
       <div class="v-template-card__top__settings">
         <VButton :block="false" size="sm" icon="left" icon-style="settings-dots" styled="simple-icon" @click="toggleDropdown" ></VButton>
-        <div class="dropdown-menu px-4 py-2" v-if="showDropdown">
-          <button style="background: none;border: none;" @click="deleteTemplate">Delete</button>
+        <div class="dropdown-menu px-2 py-2" v-if="showDropdown">
+          <ul class="dropdown-inline-list">
+            <li>
+              <button style="background: none;border: none;" @click="deleteTemplate">
+                Delete
+              </button>
+            </li>
+            <li>
+              <button style="background: none;border: none;" @click="duplicateTemplate">
+                Duplicate
+              </button>
+            </li>
+          </ul>
         </div>
       </div>
     </div>

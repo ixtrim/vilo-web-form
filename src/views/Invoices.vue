@@ -19,7 +19,7 @@
             >Reports</VLink>
           </li>
           <li>
-            <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="openAddInvoiceModal" text="Add new invoice"></VButton>
+            <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="openEditInvoiceModal" text="Add new invoice"></VButton>
           </li>
         </ul>
       </div>
@@ -130,13 +130,13 @@
                 <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="openPreviewInvoiceModal(invoice)" text=""></VButton>
               </div>
               <div class="col col--inv-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="download" styled="simple-icon" @click="handleDownloadClick" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="download" styled="simple-icon" text=""></VButton>
               </div>
               <div class="col col--inv-action" v-if="notClient">
                 <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="deleteInvoice(invoice.id)" text=""></VButton>
               </div>
               <div class="col col--inv-action" v-if="notClient">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openAddInvoiceModal" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditInvoiceModal" text=""></VButton>
               </div>
             </div>
 
@@ -146,13 +146,13 @@
 
           <div class="dashboard__pagination-below-table">
             <div class="dashboard__pagination-below-table__prev">
-              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="changePage(-1, $event)" text="Previous" v-if="currentPage > 1"></v-button>
+              <v-button :block="false" size="sm" icon="left" icon-style="arrow-left" styled="outlined" @click="() => changePage(-1, $event)" text="Previous" v-if="currentPage > 1"></v-button>
             </div>
             <div class="dashboard__pagination-below-table__pages">
               <v-pagination-list :total-pages="totalPages" :initial-page="currentPage" @update:currentPage="updatePage" />
             </div>
             <div class="dashboard__pagination-below-table__next">
-              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="changePage(1, $event)" text="Next" v-if="currentPage < totalPages"></v-button>
+              <v-button :block="false" size="sm" icon="right" icon-style="arrow-right" styled="outlined" @click="() => changePage(1, $event)" text="Next" v-if="currentPage < totalPages"></v-button>
             </div>
           </div>
 
@@ -170,9 +170,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed, watch } from 'vue';
+import { defineComponent, ref, onMounted, computed } from 'vue';
 import { db } from '@/firebase.js';
-import { deleteDoc, collection, query, getDocs, doc, getDoc, Timestamp, writeBatch } from 'firebase/firestore';
+import { collection, query, getDocs, doc, getDoc, Timestamp, writeBatch, deleteDoc } from 'firebase/firestore';
 import VStatus from '@/components/v-status/VStatus.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
@@ -217,314 +217,361 @@ interface InvoiceItem {
 
 export default defineComponent({
   components: {
+    VStatus,
     VButton,
     VModal,
     VAddInvoice,
     VPreviewInvoice,
-    VStatus,
     VUser,
     VLink,
     Search,
     VPaginationList,
     VDropdown,
   },
-  setup() {
-    const invoices = ref<Invoice[]>([]);
-    const currentPage = ref(1);
-    const itemsPerPage = ref(10);
-    const searchTerm = ref('');
-    const showAddInvoiceModal = ref(false);
-    const showPreviewInvoiceModal = ref(false);
-    const modalAddInvoiceTitle = ref('');
-    const modalPreviewInvoiceTitle = ref('');
-    const currentInvoice = ref<Invoice | null>(null);
-
-    const billingSettings = ref({});
-    const fetchBillingSettings = async () => {
-      const billingDocRef = doc(db, "settings", "billing");
-      const billingDocSnap = await getDoc(billingDocRef);
-
-      if (billingDocSnap.exists()) {
-        billingSettings.value = billingDocSnap.data();
-      } else {
-        console.log("No such document!");
-      }
-    };
-    const generalSettings = ref({});
-    const fetchGeneralSettings = async () => {
-      const generalDocRef = doc(db, "settings", "general");
-      const generalDocSnap = await getDoc(generalDocRef);
-
-      if (generalDocSnap.exists()) {
-        generalSettings.value = generalDocSnap.data();
-      } else {
-        console.log("No such document!");
-      }
-    };
-
-    const { user } = useUserStore();
-    const userRole = computed(() => user.value?.role ?? 0);
-    const notClient = computed(() => {
-      return [0, 1, 2].includes(user.value?.role ?? 0);
-    });
-
-    const sortTime = ref([
-      { label: 'All', value: 'all' },
-      { label: 'Last year', value: 'lastYear' },
-      { label: 'Last three months', value: 'lastThreeMonths' },
-      { label: 'Last two months', value: 'lastTwoMonths' },
-      { label: 'Last month', value: 'lastMonth' },
-      { label: 'This week', value: 'thisWeek' },
-    ]);
-    const selectedTimeFrame = ref('all');
-
-    const notificationType = ref('success');
-    const notificationHeader = ref('Changes saved');
-    const notificationMessage = ref('This account has been successfully edited.');
-
-    const truncateEmail = (email: string) => email.length > 35 ? `${email.substring(0, 32)}...` : email;
-
-    const fetchInvoices = async () => {
-      const querySnapshot = await getDocs(collection(db, "invoices"));
-      const invoicePromises = querySnapshot.docs.map(async (docSnapshot) => {
-        const invoiceData = docSnapshot.data() as any;
-        
-        const clientDocRef = doc(db, "users", invoiceData.client_id);
-        const clientDocSnap = await getDoc(clientDocRef);
-        let clientName = "Unknown";
-        let clientEmail = "No Email";
-        let clientPhone = "No phone";
-        let clientAddress = "No address";
-        let clientAvatar = "Default Avatar URL";
-
-        if (clientDocSnap.exists()) {
-          const clientData = clientDocSnap.data();
-          clientName = clientData.full_name || "Unknown";
-          clientEmail = clientData.email || "No Email";
-          clientPhone = clientData.phone || "No phone";
-          clientAddress = clientData.address || "No address";
-          clientAvatar = clientData.avatar || "Default Avatar URL";
-        }
-
-        const caseDocRef = doc(db, "cases", invoiceData.case);
-        const caseDocSnap = await getDoc(caseDocRef);
-        let caseTitle = "Unknown Case";
-
-        if (caseDocSnap.exists()) {
-          caseTitle = caseDocSnap.data().title || "Unknown Case";
-        }
-
-        const invoiceItemsSnapshot = await getDocs(collection(db, `invoices/${docSnapshot.id}/invoice_items`));
-        const invoiceItems: InvoiceItem[] = invoiceItemsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as InvoiceItem[];
-
-        // Ensure all required properties are included
-        return {
-          id: docSnapshot.id,
-          number: invoiceData.number,
-          case: invoiceData.case,
-          created: invoiceData.created,
-          due_date: invoiceData.due_date,
-          status: invoiceData.status,
-          client_id: invoiceData.client_id,
-          sales_taxes: invoiceData.sales_taxes,
-          subtotal_amount: invoiceData.subtotal_amount,
-          total_amount: invoiceData.total_amount,
-          total_discount: invoiceData.total_discount,
-          clientName,
-          clientEmail,
-          clientPhone,
-          clientAddress,
-          clientAvatar,
-          caseTitle,
-          invoiceItems,
-        };
-      });
-
-      invoices.value = await Promise.all(invoicePromises);
-    };
-
-    const sortStatus = ref([
-      { label: 'All', value: null },
-      { label: 'Draft', value: 0 },
-      { label: 'Paid', value: 2 },
-      { label: 'Cancelled', value: 3 },
-      { label: 'Refunded', value: 4 },
-    ]);
-    const selectedStatus = ref(null);
-
-    const filteredInvoices = computed(() => {
-      const now = new Date();
-      return invoices.value
-        .filter(invoice => {
-          // Filter by search term and status as before
-          const matchesSearchTerm = invoice.number.toLowerCase().includes(searchTerm.value.toLowerCase()) || invoice.client_id.toLowerCase().includes(searchTerm.value.toLowerCase());
-          const matchesStatus = selectedStatus.value === null || invoice.status === selectedStatus.value;
-          
-          // Determine if the invoice matches the selected time frame
-          let matchesTimeFrame = true;
-          if (selectedTimeFrame.value !== 'all') {
-            const invoiceDate = invoice.due_date.toDate();
-            switch (selectedTimeFrame.value) {
-              case 'lastYear':
-                matchesTimeFrame = invoiceDate >= new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-                break;
-              case 'lastThreeMonths':
-                matchesTimeFrame = invoiceDate >= new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
-                break;
-              case 'lastTwoMonths':
-                matchesTimeFrame = invoiceDate >= new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
-                break;
-              case 'lastMonth':
-                matchesTimeFrame = invoiceDate >= new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-                break;
-              case 'thisWeek':
-                const oneWeekAgo = new Date();
-                oneWeekAgo.setDate(now.getDate() - 7);
-                matchesTimeFrame = invoiceDate >= oneWeekAgo;
-                break;
-            }
-          }
-          
-          return matchesSearchTerm && matchesStatus && matchesTimeFrame;
-        });
-    });
-
-    const totalPages = computed(() => Math.ceil(filteredInvoices.value.length / itemsPerPage.value));
-    const paginatedInvoices = computed(() => {
-      const start = (currentPage.value - 1) * itemsPerPage.value;
-      return filteredInvoices.value.slice(start, start + itemsPerPage.value);
-    });
-
-    const openAddInvoiceModal = () => showAddInvoiceModal.value = true;
-
-    const openPreviewInvoiceModal = (invoice: Invoice) => {
-      currentInvoice.value = invoice;
-      showPreviewInvoiceModal.value = true;
-    };
-
-    const handleModalClose = () => {
-      showAddInvoiceModal.value = false;
-      showPreviewInvoiceModal.value = false;
-    };
-
-    const updateSearchTerm = (value: string) => {
-      searchTerm.value = value;
-    };
-
-    const handleFilterTime = (item: any) => {
-      selectedTimeFrame.value = item.value;
-    };
-
-    const handleFilterStatus = (item: any) => {
-      selectedStatus.value = item.value;
-    };
-
-    const handleDropdownClick = () => {
-      // Implement dropdown click handling
-    };
-
-    const handleDownloadClick = () => {
-      // Implement download click handling
-    };
-
-    const deleteInvoice = async (invoiceId: string) => {
-      const batch = writeBatch(db);
-
-      // Delete invoice items
-      const invoiceItemsRef = collection(db, `invoices/${invoiceId}/invoice_items`);
-      const invoiceItemsSnapshot = await getDocs(invoiceItemsRef);
-      invoiceItemsSnapshot.forEach((doc) => {
-        batch.delete(doc.ref);
-      });
-
-      // Delete the invoice itself
-      const invoiceRef = doc(db, "invoices", invoiceId);
-      batch.delete(invoiceRef);
-
-      // Commit the batch
-      await batch.commit();
-
-      // Show a notification and refresh the invoice list
-      notificationType.value = 'success';
-      notificationHeader.value = 'Invoice Deleted';
-      notificationMessage.value = 'The invoice and its items have been successfully deleted.';
-      await fetchInvoices(); // Refresh the list of invoices
-    };
-
-    const changePage = (step: number, event: Event) => {
-      const newPage = currentPage.value + step;
-      if (newPage >= 1 && newPage <= totalPages.value) {
-        currentPage.value = newPage;
-      }
-      event.preventDefault();
-    };
-
-    watch([selectedStatus, selectedTimeFrame, searchTerm], () => {
-      currentPage.value = 1;
-    }, { deep: true });
-
-    const updatePage = (newPage: number) => {
-      if (newPage >= 1 && newPage <= totalPages.value) {
-        currentPage.value = newPage;
-      }
-    };
-
-    const handleAddInvoiceCase = () => {
-      // Implement add invoice case handling
-    };
-
-    fetchInvoices();
-    const handlePreviewInvoiceCase = () => {
-      // Implement preview invoice case handling
-    };
-
-    onMounted(() => {
-      fetchInvoices();
-      fetchBillingSettings();
-      fetchGeneralSettings();
-    });
-
+  data() {
     return {
-      invoices,
-      currentPage,
-      itemsPerPage,
-      paginatedInvoices,
-      totalPages,
-      searchTerm,
-      truncateEmail,
-      showAddInvoiceModal,
-      showPreviewInvoiceModal,
-      modalAddInvoiceTitle,
-      modalPreviewInvoiceTitle,
-      openAddInvoiceModal,
-      currentInvoice,
-      openPreviewInvoiceModal,
-      handleModalClose,
-      handleDropdownClick,
-      handleDownloadClick,
-      deleteInvoice,
-      handleFilterTime,
-      handleFilterStatus,
-      changePage,
-      updatePage,
-      handleAddInvoiceCase,
-      handlePreviewInvoiceCase,
-      sortTime,
-      sortStatus,
-      notificationType,
-      notificationHeader,
-      notificationMessage,
-      updateSearchTerm,
-      billingSettings,
-      generalSettings,
-      notClient,
-      userRole,
+      invoices: [] as Invoice[],
+      currentPage: 1,
+      itemsPerPage: 10,
+      searchTerm: '',
+      showAddInvoiceModal: false,
+      showPreviewInvoiceModal: false,
+      modalAddInvoiceTitle: '',
+      modalPreviewInvoiceTitle: '',
+      currentInvoice: null as Invoice | null,
+      billingSettings: {},
+      generalSettings: {},
+      sortTime: [
+        { label: 'All', value: 'all' },
+        { label: 'Last year', value: 'lastYear' },
+        { label: 'Last three months', value: 'lastThreeMonths' },
+        { label: 'Last two months', value: 'lastTwoMonths' },
+        { label: 'Last month', value: 'lastMonth' },
+        { label: 'This week', value: 'thisWeek' },
+      ],
+      selectedTimeFrame: 'all',
+      sortStatus: [
+        { label: 'All', value: null },
+        { label: 'Draft', value: 0 },
+        { label: 'Paid', value: 2 },
+        { label: 'Cancelled', value: 3 },
+        { label: 'Refunded', value: 4 },
+      ],
+      selectedStatus: null,
+      notificationType: 'success',
+      notificationHeader: '',
+      notificationMessage: '',
     };
   },
+  setup() {
+    const userStore = useUserStore();
+    const userRole = computed(() => userStore.user.value?.role ?? 0);
+    const notClient = computed(() => [0, 1, 2].includes(userRole.value));
+
+    const invoices = ref<Invoice[]>([]);
+    const billingSettings = ref({});
+    const generalSettings = ref({});
+
+    const fetchInvoices = async () => {
+      invoices.value = []; // Reset invoices before fetching new ones
+      try {
+        const querySnapshot = await getDocs(collection(db, "invoices"));
+        const invoicesData: Invoice[] = []; // Prepare an array to hold the fetched invoices
+
+        for (const docSnapshot of querySnapshot.docs) {
+          const invoiceData = docSnapshot.data();
+          
+          // Fetch client details
+          const clientDocRef = doc(db, "users", invoiceData.client_id);
+          const clientDocSnap = await getDoc(clientDocRef);
+          let clientDetails = {
+            clientName: "Unknown",
+            clientEmail: "No Email",
+            clientPhone: "No Phone",
+            clientAddress: "No Address",
+            clientAvatar: "Default Avatar URL",
+          };
+          if (clientDocSnap.exists()) {
+            const clientData = clientDocSnap.data();
+            clientDetails = {
+              clientName: clientData.full_name || "Unknown",
+              clientEmail: clientData.email || "No Email",
+              clientPhone: clientData.phone || "No Phone",
+              clientAddress: clientData.address || "No Address",
+              clientAvatar: clientData.avatar || "Default Avatar URL",
+            };
+          }
+
+          // Fetch case title
+          const caseDocRef = doc(db, "cases", invoiceData.case);
+          const caseDocSnap = await getDoc(caseDocRef);
+          let caseTitle = "Unknown Case";
+          if (caseDocSnap.exists()) {
+            caseTitle = caseDocSnap.data().title || "Unknown Case";
+          }
+
+          // Fetch invoice items
+          const invoiceItemsSnapshot = await getDocs(collection(db, `invoices/${docSnapshot.id}/invoice_items`));
+          const invoiceItems: InvoiceItem[] = invoiceItemsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            item: doc.data().item,
+            quantity: doc.data().quantity,
+            price: doc.data().price,
+            discount: doc.data().discount,
+            amount: doc.data().amount,
+          }));
+
+          // Construct the Invoice object
+          const invoice: Invoice = {
+            id: docSnapshot.id,
+            number: invoiceData.number,
+            case: invoiceData.case,
+            created: invoiceData.created, // Assuming this is already a Timestamp
+            due_date: invoiceData.due_date, // Assuming this is already a Timestamp
+            status: invoiceData.status,
+            client_id: invoiceData.client_id,
+            sales_taxes: invoiceData.sales_taxes,
+            subtotal_amount: invoiceData.subtotal_amount,
+            total_amount: invoiceData.total_amount,
+            total_discount: invoiceData.total_discount,
+            clientName: clientDetails.clientName,
+            clientEmail: clientDetails.clientEmail,
+            clientPhone: clientDetails.clientPhone,
+            clientAddress: clientDetails.clientAddress,
+            clientAvatar: clientDetails.clientAvatar,
+            caseTitle: caseTitle,
+            invoiceItems: invoiceItems,
+          };
+
+          invoicesData.push(invoice);
+        }
+
+        invoices.value = invoicesData;
+      } catch (error) {
+        console.error("Error fetching invoices: ", error);
+      }
+    };
+
+    const fetchBillingSettings = async () => {
+      try {
+        const billingDocRef = doc(db, "settings", "billing");
+        const billingDocSnap = await getDoc(billingDocRef);
+        if (billingDocSnap.exists()) {
+          billingSettings.value = billingDocSnap.data();
+        } else {
+          console.log("No billing settings document found!");
+        }
+      } catch (error) {
+        console.error("Error fetching billing settings: ", error);
+      }
+    };
+
+    const fetchGeneralSettings = async () => {
+      try {
+        const generalDocRef = doc(db, "settings", "general");
+        const generalDocSnap = await getDoc(generalDocRef);
+        if (generalDocSnap.exists()) {
+          generalSettings.value = generalDocSnap.data();
+        } else {
+          console.log("No general settings document found!");
+        }
+      } catch (error) {
+        console.error("Error fetching general settings: ", error);
+      }
+    };
+
+    onMounted(async () => {
+      await fetchInvoices();
+      await fetchBillingSettings();
+      await fetchGeneralSettings();
+    });
+
+    return { 
+      userRole, 
+      notClient,
+      invoices,
+      billingSettings,
+      generalSettings,
+    };
+  },
+  computed: {
+    totalPages() {
+      return Math.ceil(this.invoices.length / this.itemsPerPage);
+    },
+    paginatedInvoices() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.invoices.slice(start, end);
+    },
+  },
   methods: {
+    async fetchInvoices() {
+      this.invoices = [];
+      try {
+        const querySnapshot = await getDocs(collection(db, "invoices"));
+        const invoicesData: Invoice[] = []; // Typed according to the Invoice interface
+    
+        for (const docSnapshot of querySnapshot.docs) {
+          const invoiceData = docSnapshot.data() as Omit<Invoice, 'id' | 'invoiceItems'>; // Assuming direct mapping except 'id' and 'invoiceItems'
+          
+          // Fetch client details
+          const clientDocRef = doc(db, "users", invoiceData.client_id);
+          const clientDocSnap = await getDoc(clientDocRef);
+          let clientDetails = {
+            clientName: "Unknown",
+            clientEmail: "No Email",
+            clientPhone: "No Phone",
+            clientAddress: "No Address",
+            clientAvatar: "Default Avatar URL",
+          };
+          if (clientDocSnap.exists()) {
+            const clientData = clientDocSnap.data();
+            clientDetails = {
+              clientName: clientData.full_name || "Unknown",
+              clientEmail: clientData.email || "No Email",
+              clientPhone: clientData.phone || "No Phone",
+              clientAddress: clientData.address || "No Address",
+              clientAvatar: clientData.avatar || "Default Avatar URL",
+            };
+          }
+    
+          // Fetch case title
+          const caseDocRef = doc(db, "cases", invoiceData.case);
+          const caseDocSnap = await getDoc(caseDocRef);
+          let caseTitle = "Unknown Case";
+          if (caseDocSnap.exists()) {
+            caseTitle = caseDocSnap.data().title || "Unknown Case";
+          }
+    
+          // Fetch invoice items
+          const invoiceItemsSnapshot = await getDocs(collection(db, `invoices/${docSnapshot.id}/invoice_items`));
+          const invoiceItems: InvoiceItem[] = invoiceItemsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          })) as InvoiceItem[];
+    
+          // Combine all fetched data into a single object conforming to the Invoice interface
+          invoicesData.push({
+            id: docSnapshot.id,
+            ...invoiceData,
+            ...clientDetails,
+            caseTitle,
+            invoiceItems,
+          });
+        }
+    
+        this.invoices = invoicesData;
+      } catch (error) {
+        console.error("Error fetching invoices: ", error);
+        // Handle the error appropriately
+      }
+    },    
+    async fetchBillingSettings() {
+      try {
+        const billingDocRef = doc(db, "settings", "billing");
+        const billingDocSnap = await getDoc(billingDocRef);
+        if (billingDocSnap.exists()) {
+          this.billingSettings = billingDocSnap.data();
+        } else {
+          console.log("No billing settings document found!");
+          this.billingSettings = {}; // Reset to default or keep previous state
+        }
+      } catch (error) {
+        console.error("Error fetching billing settings: ", error);
+        // Handle the error appropriately
+      }
+    },
+    async fetchGeneralSettings() {
+      try {
+        const generalDocRef = doc(db, "settings", "general");
+        const generalDocSnap = await getDoc(generalDocRef);
+        if (generalDocSnap.exists()) {
+          this.generalSettings = generalDocSnap.data();
+        } else {
+          console.log("No general settings document found!");
+          this.generalSettings = {}; // Reset to default or keep previous state
+        }
+      } catch (error) {
+        console.error("Error fetching general settings: ", error);
+        // Handle the error appropriately
+      }
+    },
+    truncateEmail(email: string) {
+      const maxLength = 35; // Define the maximum length of the email to display
+      if (email.length > maxLength) {
+        return `${email.substring(0, maxLength - 3)}...`; // Truncate and add ellipsis
+      }
+      return email; // Return the original email if it's short enough
+    },
+    openEditInvoiceModal() {
+      this.showAddInvoiceModal = true;
+    },
+    openPreviewInvoiceModal(invoice: Invoice) {
+      this.currentInvoice = invoice;
+      this.showPreviewInvoiceModal = true;
+    },
+    handleModalClose() {
+      this.showAddInvoiceModal = false;
+      this.showPreviewInvoiceModal = false;
+    },
+    updateSearchTerm(value: string) {
+      this.searchTerm = value;
+    },
+    handleFilterTime(item: any) {
+      this.selectedTimeFrame = item.value;
+    },
+    handleFilterStatus(item: any) {
+      this.selectedStatus = item.value;
+    },
+    async deleteInvoice(invoiceId: string) {
+      try {
+        const batch = writeBatch(db);
+    
+        // Optionally delete subcollections of the invoice here
+        // For example, deleting all items associated with the invoice
+        const invoiceItemsRef = collection(db, `invoices/${invoiceId}/items`);
+        const snapshot = await getDocs(invoiceItemsRef);
+        snapshot.forEach(doc => {
+          batch.delete(doc.ref);
+        });
+    
+        // Delete the invoice document
+        const invoiceRef = doc(db, "invoices", invoiceId);
+        batch.delete(invoiceRef);
+    
+        // Commit the batch operation
+        await batch.commit();
+    
+        // Notify the user of success
+        this.notificationType = 'success';
+        this.notificationHeader = 'Success';
+        this.notificationMessage = 'Invoice successfully deleted.';
+        // Refresh the invoice list
+        await this.fetchInvoices();
+      } catch (error) {
+        console.error("Error deleting invoice: ", error);
+        // Notify the user of the error
+        this.notificationType = 'error';
+        this.notificationHeader = 'Error';
+        this.notificationMessage = 'Failed to delete invoice.';
+      }
+    },
+    changePage(step: number) {
+      const newPage = this.currentPage + step;
+      if (newPage >= 1 && newPage <= this.totalPages) {
+        this.currentPage = newPage;
+        // Optionally, fetch or update data based on the new page
+      }
+    },
+    updatePage(newPage: number) {
+      if (newPage >= 1 && newPage <= this.totalPages) {
+        this.currentPage = newPage;
+        // Optionally, fetch or update data based on the new page
+      }
+    },
+    handleAddInvoiceCase() {
+      // Method logic to handle add invoice case
+    },
     formatDate(timestamp: Timestamp) {
       return timestamp ? timestamp.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
     },
@@ -538,7 +585,7 @@ export default defineComponent({
       };
       return statusMap[status] || { text: 'Unknown', variant: 'unknown' };
     },
-  }
+  },
 });
 </script>
 

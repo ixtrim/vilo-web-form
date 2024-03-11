@@ -115,7 +115,7 @@
                 </div>
                 <div class="col col--l-edit">
                   <!-- <VLink to="#" @click="addDocument" styled="primary">Edit</VLink> -->
-                  <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="addDocument" text=""></VButton>
+                  <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="editDocument(file.id)" text=""></VButton>
                 </div>
               </div>
             </div>
@@ -451,8 +451,8 @@ export default defineComponent({
       } else {
           console.warn("File not found in the documents array.");
       }
-      this.showDeleteModal = false;
-      // this.triggerNotification('success', 'Document deleted', 'File deleted successfully.');
+      // this.showDeleteModal = false;
+      this.triggerNotification('success', 'Document deleted', 'Document deleted successfully.');
     },
     openEditDocumentModal() {
       this.modalEditDocumentTitle = 'Create task';
@@ -477,6 +477,9 @@ export default defineComponent({
         const newUrl = `${currentPath}`;
         history.replaceState({}, '', newUrl);
       }
+    },
+    editDocument(id: any){
+      this.$router.push('/edit-library-document/'+id);
     }
   },
   mounted() {

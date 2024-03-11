@@ -89,6 +89,7 @@ import { defineComponent, ref, computed, onMounted } from 'vue';
 import { db } from '@/firebase.js';
 import { doc, getDoc, query, collection, orderBy, limit, getDocs, addDoc, Timestamp  } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import { useRoute } from 'vue-router';
 
 import VLink from '@/components/v-link/VLink.vue';
 import VButton from '@/components/v-button/VButton.vue';
@@ -150,7 +151,9 @@ export default defineComponent({
       notificationType: 'success',
       notificationHeader: 'Changes saved',
       notificationMessage: 'This account has been successfully edited.',
+      queryMessage: '',
     };
+
   },
   setup() {
 
@@ -159,7 +162,12 @@ export default defineComponent({
     const itemsPerPage = ref(10);
     const searchTerm = ref('');
     const selectedTimeFrame = ref('all');
- 
+    const route = useRoute();
+    const notificationRef = ref(null);
+    const notificationType = ref('');
+    const notificationHeader = ref('');
+    const notificationMessage = ref('');
+
     const sortTime = ref([
       { label: 'All', value: 'all' },
       { label: 'Last year', value: 'lastYear' },
@@ -302,6 +310,12 @@ export default defineComponent({
       showDeleteModal.value = false;
     } 
 
+    computed(()=>{
+      // get success message from route
+      const message = route.query.message;
+      console.log(message)
+    })    
+
     return {
       templateRows,
       sortTime,
@@ -316,7 +330,6 @@ export default defineComponent({
       handleDelete,
       handleDeleteTemplate,
       fetchTemplates,
-    
       totalPages,
       currentPage,
       updatePage
@@ -386,7 +399,23 @@ export default defineComponent({
           console.error("Error fetching document:", error);
       }    
     },
+    getMessageFromURL() {
+      // Accessing message parameter from URL
+      let query = this.$route.query.message;
+      if(typeof query === 'string')
+      {
+        this.triggerNotification('success', 'Success!', query);
+
+        const currentPath = this.$route.path;
+        const newUrl = `${currentPath}`;
+        history.replaceState({}, '', newUrl);
+      }
+    }
   },
+  mounted() {
+    // Call the method to get the message from the URL when the component is mounted
+    this.getMessageFromURL();
+  }
 });
 </script>
 

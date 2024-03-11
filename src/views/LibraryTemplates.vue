@@ -308,13 +308,7 @@ export default defineComponent({
           console.warn("File not found in the documents array.");
       }
       showDeleteModal.value = false;
-    } 
-
-    computed(()=>{
-      // get success message from route
-      const message = route.query.message;
-      console.log(message)
-    })    
+    }
 
     return {
       templateRows,

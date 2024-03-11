@@ -222,7 +222,11 @@
       created: updatedCreated,
       due_date: updatedDueDate,
     }).then(() => {
-      emit('save-changes', props.invoice?.id);
+      emit('save-changes', {
+        ...props.invoice,
+        created: updatedCreated,
+        due_date: updatedDueDate,
+      });
       closeModal();
     }).catch((error) => {
       console.error("Error updating document: ", error);

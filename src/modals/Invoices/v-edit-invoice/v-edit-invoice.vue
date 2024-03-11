@@ -2,31 +2,28 @@
   <div class="modal-body invoice">
     <div class="row invoice__meta">
       <div class="col-lg-12">
-        <h4>Billed to:</h4>
+        <h4>Edit Invoice number: {{ invoiceNumber }}</h4>
       </div>
     </div>
     <div class="row invoice__meta">
       <div class="col-lg-7">
-        <span>{{ clientName }}</span>
+        <strong>Billed to:</strong>
+        <span>{{ clientName }}<br/>{{ clientEmail }} | {{ clientPhone }}<br/>{{ clientAddress }}</span>
       </div>
       <div class="col-lg-5">
-        <span>Invoice number: {{ invoiceNumber }}</span>
+        <div class="form-group">
+          <label>Invoice Date: </label>
+          <VueDatePicker label="Invoice Date" v-model="invoiceCreated"></VueDatePicker>
+        </div>
       </div>
     </div>
     <div class="row invoice__meta">
-      <div class="col-lg-7">
-        <span>{{ clientEmail }} | {{ clientPhone }}</span>
-      </div>
+      <div class="col-lg-7"></div>
       <div class="col-lg-5">
-        <span>Invoice Date: {{ formatDate(invoiceCreated) }}</span>
-      </div>
-    </div>
-    <div class="row invoice__meta">
-      <div class="col-lg-7">
-        <span>{{ clientAddress }}</span>
-      </div>
-      <div class="col-lg-5">
-        <span>Due: {{ formatDate(invoiceDueDate) }}</span>
+        <div class="form-group">
+          <label>Due Date: </label>
+          <VueDatePicker label="Due Date" v-model="invoiceDueDate"></VueDatePicker>
+        </div>
       </div>
     </div>
 
@@ -83,7 +80,7 @@
           </div>
           <div class="row">
             <div class="col-lg-9">
-              <strong>Amount due on {{ formatDate(invoiceDueDate) }}:</strong>
+              <strong>Amount due:</strong>
             </div>
             <div class="col-lg-3">
               <strong>{{ typeof invoiceTotalAmount === 'number' ? formatCurrency(invoiceTotalAmount) : invoiceTotalAmount }}</strong>
@@ -93,44 +90,29 @@
       </div>
     </div>
 
-    <div class="row invoice__payment">
-      <div class="col-lg-12">
-        <h5>PAYMENT INSTRUCTIONS</h5>
-        <p>{{ appName }}<br/>
-          Bank name: {{ bankName }}<br/>
-          SWIFT/IBAN: {{ swiftIban }}<br/>
-          Account number: {{ accountNumber }}<br/>
-        </p>
-        <p>For any questions please contact us at <a href="mailto:hi@vilo.com">hi@vilo.com</a></p>
-      </div>
-    </div>
   </div>
-  <div class="modal-footer" v-if="(userRole === 0 || userRole === 2)  && invoiceStatus === '0'">
+  <div class="modal-footer">
     <ul class="modal-footer__actions">
       <li>
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
       </li>
       <li>
-        <v-button :block="false" size="md" styled="green" @click="statusChangeToPending" text="SendToClient"></v-button>
-      </li>
-    </ul>
-  </div>
-  <div class="modal-footer" v-if="(userRole === 0 || userRole === 2) && invoiceStatus === 1">
-    <ul class="modal-footer__actions">
-      <li>
-        <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
-      </li>
-      <li>
-        <v-button :block="false" size="md" styled="green" @click="statusChangeToPaid" text="Mark as paid"></v-button>
+        <v-button :block="false" size="md" styled="green" @click="statusChanges" text="Save Changes"></v-button>
       </li>
     </ul>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { defineEmits, defineProps, ref, watch, computed } from 'vue';
+  import firebase from 'firebase/app';
+  import 'firebase/firestore';
   import { Timestamp } from 'firebase/firestore';
+  import { defineEmits, defineProps, ref, watch, computed } from 'vue';
   import type { PropType } from 'vue';
+  import VInput from '@/components/v-input/VInput.vue';
+  import VDropdown from '@/components/v-dropdown/VDropdown.vue';
+  import VueDatePicker from '@vuepic/vue-datepicker';
+  import '@vuepic/vue-datepicker/dist/main.css';
   import VButton from '@/components/v-button/VButton.vue';
 
   type Invoice = {
@@ -163,6 +145,11 @@
     amount: number;
   }
 
+  interface DropdownItem {
+    label: string;
+    value: string;
+  }
+
   const props = defineProps({
     invoice: Object as PropType<Invoice>,
     generalSettings: {
@@ -192,14 +179,27 @@
   const clientAddress = computed(() => props.invoice?.clientAddress || 'Unknown');
   const invoiceNumber = computed(() => props.invoice?.number || 'Unknown');
   const invoiceStatus = computed(() => props.invoice?.status || '0');
-  const invoiceCreated = computed(() => props.invoice?.created || undefined);
-  const invoiceDueDate = computed(() => props.invoice?.due_date || undefined);
+  const invoiceCreated = computed({
+    get: () => props.invoice?.created.toDate() || new Date(), // Convert to JavaScript Date
+    set: (newValue) => {
+      // Assuming you have a method to update the invoice's created date in Firestore
+      // updateInvoiceCreatedDate(props.invoice.id, newValue);
+    }
+  });
+
+  const invoiceDueDate = computed({
+    get: () => props.invoice?.due_date.toDate() || new Date(), // Convert to JavaScript Date
+    set: (newValue) => {
+      // Assuming you have a method to update the invoice's due date in Firestore
+      // updateInvoiceDueDate(props.invoice.id, newValue);
+    }
+  });
   const invoiceSalesTaxes = computed(() => props.invoice?.sales_taxes || 'Unknown');
   const invoiceSubtotalAmount = computed(() => props.invoice?.subtotal_amount || 'Unknown');
   const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
   const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
 
-  const emit = defineEmits(['close-modal', 'invoice-pending', 'invoice-paid', 'invoice-refunded', 'invoice-cancelled']);
+  const emit = defineEmits(['close-modal', 'save-changes']);
 
   function formatDate(timestamp: Timestamp | undefined) {
     return timestamp ? timestamp.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown Date';
@@ -216,23 +216,8 @@
     emit('close-modal');
   }
 
-  function statusChangeToPending() {
-    emit('invoice-pending', props.invoice?.id);
-    closeModal();
-  }
-
-  function statusChangeToPaid() {
-    emit('invoice-paid', props.invoice?.id);
-    closeModal();
-  }
-
-  function statusChangeToRefunded() {
-    emit('invoice-refunded', props.invoice?.id);
-    closeModal();
-  }
-
-  function statusChangeToCancelled() {
-    emit('invoice-cancelled', props.invoice?.id);
+  function statusChanges() {
+    emit('save-changes', props.invoice?.id);
     closeModal();
   }
 

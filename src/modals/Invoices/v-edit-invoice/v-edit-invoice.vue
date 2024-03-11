@@ -28,6 +28,7 @@
     
 
     <div class="invoice__table">
+      <!-- Inside your <template> tag, within the <div class="invoice__table"> -->
       <table class="table table-bordered">
         <thead>
           <tr>
@@ -36,18 +37,23 @@
             <th scope="col">Price</th>
             <th scope="col">Discount</th>
             <th scope="col">Amount</th>
+            <th scope="col">Actions</th>
           </tr>
         </thead>
         <tbody>
-            <tr v-for="item in invoice?.invoiceItems" :key="item.id">
-            <td>{{ item.item }}</td>
-            <td class="align-center">{{ item.quantity }}</td>
-            <td>{{ formatCurrency(item.price) }}</td>
-            <td>{{ formatCurrency(item.discount) }}</td>
+          <tr v-for="(item, index) in invoiceItems" :key="item.id">
+            <td><input v-model="item.item" type="text" class="form-control" /></td>
+            <td><input v-model="item.quantity" type="number" class="form-control" /></td>
+            <td><input v-model="item.price" type="number" class="form-control" /></td>
+            <td><input v-model="item.discount" type="number" class="form-control" /></td>
             <td>{{ formatCurrency(item.amount) }}</td>
+            <td>
+              <v-button :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="removeItem(index)" text=""></v-button>
+            </td>
           </tr>
         </tbody>
       </table>
+      <v-button :block="true" size="md" icon="left" icon-style="add" styled="primary" @click="addItem" text="Add Item"></v-button>
     </div>
 
     <div class="row">
@@ -189,6 +195,27 @@
 
   const emit = defineEmits(['close-modal', 'save-changes']);
 
+  const invoiceItems = ref([...props.invoice.invoiceItems]);
+
+  const addItem = () => {
+    invoiceItems.value.push({
+      id: generateUniqueId(),
+      item: '',
+      quantity: 1,
+      price: 0,
+      discount: 0,
+      amount: 0,
+    });
+  };
+
+  const removeItem = (index) => {
+    invoiceItems.value.splice(index, 1);
+  };
+
+  function generateUniqueId() {
+    return Date.now().toString(36) + Math.random().toString(36).substring(2);
+  }
+
   function formatDate(timestamp: Timestamp | undefined) {
     return timestamp ? timestamp.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown Date';
   }
@@ -204,7 +231,7 @@
     emit('close-modal');
   }
 
-  function statusChanges() {
+  async function statusChanges() {
     if (!props.invoice) {
       console.error("Invoice data is not available.");
       return;
@@ -217,20 +244,26 @@
     // Firestore document reference
     const invoiceRef = doc(db, "invoices", props.invoice.id);
 
-    // Update the document
-    updateDoc(invoiceRef, {
-      created: updatedCreated,
-      due_date: updatedDueDate,
-    }).then(() => {
+    try {
+      await updateDoc(invoiceRef, {
+        created: updatedCreated,
+        due_date: updatedDueDate,
+        // Include any other invoice fields you wish to update
+      });
+
+      // Here, add logic to update invoice items in your database
+      // This might involve a batch operation or individual updates
+
       emit('save-changes', {
         ...props.invoice,
         created: updatedCreated,
         due_date: updatedDueDate,
+        invoiceItems: invoiceItems.value, // Ensure this matches your backend structure
       });
       closeModal();
-    }).catch((error) => {
+    } catch (error) {
       console.error("Error updating document: ", error);
-    });
+    }
   }
 
   function saveAndClose() {

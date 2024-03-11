@@ -2,31 +2,34 @@
   <div class="modal-body invoice">
     <div class="row invoice__meta">
       <div class="col-lg-12">
+        <h4>Edit Invoice number: {{ invoiceNumber }}</h4>
+      </div>
+    </div>
+    <div class="row invoice__meta">
+      <div class="col-lg-12">
         <h4>Billed to:</h4>
       </div>
     </div>
     <div class="row invoice__meta">
       <div class="col-lg-7">
-        <span>{{ clientName }}</span>
+        <span>{{ clientName }}<br/>{{ clientEmail }} | {{ clientPhone }}<br/>{{ clientAddress }}</span>
       </div>
       <div class="col-lg-5">
-        <span>Invoice number: {{ invoiceNumber }}</span>
+        <div class="form-group">
+          <label>Invoice Date</label>
+          <VueDatePicker label="Due Date" v-model="invoiceCreated"></VueDatePicker>
+          {{ formatDate(invoiceCreated) }}
+        </div>
       </div>
     </div>
     <div class="row invoice__meta">
-      <div class="col-lg-7">
-        <span>{{ clientEmail }} | {{ clientPhone }}</span>
-      </div>
+      <div class="col-lg-7"></div>
       <div class="col-lg-5">
-        <span>Invoice Date: {{ formatDate(invoiceCreated) }}</span>
-      </div>
-    </div>
-    <div class="row invoice__meta">
-      <div class="col-lg-7">
-        <span>{{ clientAddress }}</span>
-      </div>
-      <div class="col-lg-5">
-        <span>Due: {{ formatDate(invoiceDueDate) }}</span>
+        <span>Due: </span>
+        <div class="form-group">
+          <VueDatePicker label="Due Date" v-model="localDueDate"></VueDatePicker>
+          {{ formatDate(invoiceDueDate) }}
+        </div>
       </div>
     </div>
 
@@ -94,7 +97,7 @@
     </div>
 
   </div>
-  <div class="modal-footer" v-if="(userRole === 0 || userRole === 2)  && invoiceStatus === '0'">
+  <div class="modal-footer">
     <ul class="modal-footer__actions">
       <li>
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
@@ -110,6 +113,10 @@
   import { defineEmits, defineProps, ref, watch, computed } from 'vue';
   import { Timestamp } from 'firebase/firestore';
   import type { PropType } from 'vue';
+  import VInput from '@/components/v-input/VInput.vue';
+  import VDropdown from '@/components/v-dropdown/VDropdown.vue';
+  import VueDatePicker from '@vuepic/vue-datepicker';
+  import '@vuepic/vue-datepicker/dist/main.css';
   import VButton from '@/components/v-button/VButton.vue';
 
   type Invoice = {
@@ -140,6 +147,11 @@
     price: number;
     discount: number;
     amount: number;
+  }
+
+  interface DropdownItem {
+    label: string;
+    value: string;
   }
 
   const props = defineProps({

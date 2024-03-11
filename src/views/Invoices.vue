@@ -134,7 +134,7 @@
                 <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" @click="openPreviewInvoiceModal(invoice)" text=""></VButton>
               </div>
               <div class="col col--inv-action">
-                <VButton :block="false" size="sm" icon="left" icon-style="download" styled="simple-icon" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="download" styled="simple-icon" @click="openDownloadInvoiceModal(invoice)" text=""></VButton>
               </div>
               <div class="col col--inv-action" v-if="notClient">
                 <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="deleteInvoice(invoice.id)" text=""></VButton>
@@ -163,9 +163,10 @@
       </div>
     </div>
 
-    <VModal :show="showAddInvoiceModal || showPreviewInvoiceModal" :title="modalAddInvoiceTitle || modalPreviewInvoiceTitle" @update:show="handleModalClose">
+    <VModal :show="showAddInvoiceModal || showPreviewInvoiceModal || showDownloadInvoiceModal" :title="modalAddInvoiceTitle || modalPreviewInvoiceTitle || modalDownloadInvoiceTitle" @update:show="handleModalClose">
       <VAddInvoice v-if="showAddInvoiceModal" :title="modalAddInvoiceTitle" @close-modal="showAddInvoiceModal = false" @save-clicked="handleAddInvoiceCase" />
       <VPreviewInvoice v-if="showPreviewInvoiceModal && currentInvoice" :title="modalPreviewInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @invoice-pending="markInvoiceAsPending" @invoice-paid="markInvoiceAsPaid"  @invoice-refunded="markInvoiceAsRefunded" @invoice-cancelled="markInvoiceAsCancelled" @close-modal="showPreviewInvoiceModal = false" />
+      <VDownloadInvoice v-if="showDownloadInvoiceModal && currentInvoice" :title="modalDownloadInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @close-modal="showDownloadInvoiceModal = false" />
     </VModal>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
@@ -182,6 +183,7 @@ import VButton from '@/components/v-button/VButton.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
 import VAddInvoice from '@/modals/Invoices/v-add-invoice/v-add-invoice.vue';
 import VPreviewInvoice from '@/modals/Invoices/v-preview-invoice/v-preview-invoice.vue';
+import VDownloadInvoice from '@/modals/Invoices/v-download-invoice/v-download-invoice.vue';
 import VUser from '@/components/v-user/v-user.vue';
 import VLink from '@/components/v-link/VLink.vue';
 import Search from '@/modules/Navigation/Search.vue';
@@ -232,6 +234,7 @@ export default defineComponent({
     VAddInvoice,
     VNotification,
     VPreviewInvoice,
+    VDownloadInvoice,
     VUser,
     VLink,
     Search,
@@ -246,8 +249,10 @@ export default defineComponent({
       searchTerm: '',
       showAddInvoiceModal: false,
       showPreviewInvoiceModal: false,
+      showDownloadInvoiceModal: false,
       modalAddInvoiceTitle: '',
       modalPreviewInvoiceTitle: '',
+      modalDownloadInvoiceTitle: '',
       currentInvoice: null as Invoice | null,
       billingSettings: {},
       generalSettings: {},
@@ -545,9 +550,14 @@ export default defineComponent({
       this.currentInvoice = invoice;
       this.showPreviewInvoiceModal = true;
     },
+    openDownloadInvoiceModal(invoice: Invoice) {
+      this.currentInvoice = invoice;
+      this.showDownloadInvoiceModal = true;
+    },
     handleModalClose() {
       this.showAddInvoiceModal = false;
       this.showPreviewInvoiceModal = false;
+      this.showDownloadInvoiceModal = false;
     },
     updateSearchTerm(value: string) {
       this.searchTerm = value;

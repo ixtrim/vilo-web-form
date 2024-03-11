@@ -1,4 +1,10 @@
 {
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "*": ["types/*"]
+    }
+  },
   "files": [],
   "references": [
     {
@@ -10,5 +16,9 @@
     {
       "path": "./tsconfig.vitest.json"
     }
+  ],
+  "include": [
+    "src/**/*",
+    "types/**/*"
   ]
 }

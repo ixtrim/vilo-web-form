@@ -165,7 +165,7 @@
 
     <VModal :show="showAddInvoiceModal || showEditInvoiceModal  || showPreviewInvoiceModal || showDownloadInvoiceModal" :title="modalAddInvoiceTitle || modalEditInvoiceTitle || modalPreviewInvoiceTitle || modalDownloadInvoiceTitle" @update:show="handleModalClose">
       <VAddInvoice v-if="showAddInvoiceModal" :title="modalAddInvoiceTitle" @close-modal="showAddInvoiceModal = false" @save-clicked="handleAddInvoiceCase" />
-      <VEditInvoice v-if="showEditInvoiceModal && currentInvoice" :title="modalEditInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @save-changes="editSaveChanges" @close-modal="showEditInvoiceModal = false" />
+      <VEditInvoice v-if="showEditInvoiceModal && currentInvoice" :title="modalEditInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @save-changes="handleInvoiceUpdate" @close-modal="showEditInvoiceModal = false" />
       <VPreviewInvoice v-if="showPreviewInvoiceModal && currentInvoice" :title="modalPreviewInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @invoice-pending="markInvoiceAsPending" @invoice-paid="markInvoiceAsPaid"  @invoice-refunded="markInvoiceAsRefunded" @invoice-cancelled="markInvoiceAsCancelled" @close-modal="showPreviewInvoiceModal = false" />
       <VDownloadInvoice v-if="showDownloadInvoiceModal && currentInvoice" :title="modalDownloadInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @close-modal="showDownloadInvoiceModal = false" />
     </VModal>
@@ -582,12 +582,14 @@ export default defineComponent({
     async refreshData() {
       await this.fetchInvoices();
     },
-    async editSaveChanges(invoiceId: string) {
-      try {
-        this.triggerNotification('success', 'Changes saved!', 'This invoice information has been successfully edited.');
-      } catch (error) {
-        console.error("Error updating invoice status: ", error);
-        this.triggerNotification('error', 'Error', 'Failed to edit the invoice information.');
+    handleInvoiceUpdate(updatedInvoice: any) {
+      // Find the index of the invoice that was updated
+      const index = this.invoices.findIndex(invoice => invoice.id === updatedInvoice.id);
+      if (index !== -1) {
+        // Update the invoice in the local state
+        this.invoices[index] = updatedInvoice;
+        // Optionally, you can trigger a notification to inform the user of the successful update
+        this.triggerNotification('success', 'Invoice Updated', 'The invoice has been successfully updated.');
       }
     },
     async markInvoiceAsPending(invoiceId: string) {

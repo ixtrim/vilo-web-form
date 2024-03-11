@@ -20,6 +20,11 @@
               </button>
             </li>
             <li>
+              <button style="background: none;border: none;" @click="editTemplate">
+                Edit
+              </button>
+            </li>
+            <li>
               <button style="background: none;border: none;" @click="duplicateTemplate">
                 Duplicate
               </button>

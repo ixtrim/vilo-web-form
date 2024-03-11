@@ -368,7 +368,7 @@ export default defineComponent({
     handleDropdownClick(item: any) { 
     },
     handlePreview(id: number) {
-      this.$router.push('/new-library-template');
+      this.$router.push('/edit-library-template');
     },
     handleCreateNewDocument(id: number) {
       this.$router.push('/new-library-template');

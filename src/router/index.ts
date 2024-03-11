@@ -89,6 +89,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/edit-library-template',
+      name: 'edit-library-template',
+      component: () => import('../views/LibraryEditTemplate.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/invoices',
       name: 'invoices',
       component: () => import('../views/Invoices.vue'),

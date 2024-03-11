@@ -6,29 +6,23 @@
       </div>
     </div>
     <div class="row invoice__meta">
-      <div class="col-lg-12">
-        <h4>Billed to:</h4>
-      </div>
-    </div>
-    <div class="row invoice__meta">
       <div class="col-lg-7">
+        <strong>Billed to:</strong>
         <span>{{ clientName }}<br/>{{ clientEmail }} | {{ clientPhone }}<br/>{{ clientAddress }}</span>
       </div>
       <div class="col-lg-5">
         <div class="form-group">
-          <label>Invoice Date</label>
-          <VueDatePicker label="Due Date" v-model="invoiceCreated"></VueDatePicker>
-          {{ formatDate(invoiceCreated) }}
+          <label>Invoice Date: </label>
+          <VueDatePicker label="Invoice Date" v-model="invoiceCreated"></VueDatePicker>
         </div>
       </div>
     </div>
     <div class="row invoice__meta">
       <div class="col-lg-7"></div>
       <div class="col-lg-5">
-        <span>Due: </span>
         <div class="form-group">
-          <VueDatePicker label="Due Date" v-model="localDueDate"></VueDatePicker>
-          {{ formatDate(invoiceDueDate) }}
+          <label>Due Date: </label>
+          <VueDatePicker label="Due Date" v-model="invoiceDueDate"></VueDatePicker>
         </div>
       </div>
     </div>
@@ -86,7 +80,7 @@
           </div>
           <div class="row">
             <div class="col-lg-9">
-              <strong>Amount due on {{ formatDate(invoiceDueDate) }}:</strong>
+              <strong>Amount due:</strong>
             </div>
             <div class="col-lg-3">
               <strong>{{ typeof invoiceTotalAmount === 'number' ? formatCurrency(invoiceTotalAmount) : invoiceTotalAmount }}</strong>
@@ -110,8 +104,10 @@
 </template>
 
 <script setup lang="ts">
-  import { defineEmits, defineProps, ref, watch, computed } from 'vue';
+  import firebase from 'firebase/app';
+  import 'firebase/firestore';
   import { Timestamp } from 'firebase/firestore';
+  import { defineEmits, defineProps, ref, watch, computed } from 'vue';
   import type { PropType } from 'vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
@@ -183,8 +179,21 @@
   const clientAddress = computed(() => props.invoice?.clientAddress || 'Unknown');
   const invoiceNumber = computed(() => props.invoice?.number || 'Unknown');
   const invoiceStatus = computed(() => props.invoice?.status || '0');
-  const invoiceCreated = computed(() => props.invoice?.created || undefined);
-  const invoiceDueDate = computed(() => props.invoice?.due_date || undefined);
+  const invoiceCreated = computed({
+    get: () => props.invoice?.created.toDate() || new Date(), // Convert to JavaScript Date
+    set: (newValue) => {
+      // Assuming you have a method to update the invoice's created date in Firestore
+      // updateInvoiceCreatedDate(props.invoice.id, newValue);
+    }
+  });
+
+  const invoiceDueDate = computed({
+    get: () => props.invoice?.due_date.toDate() || new Date(), // Convert to JavaScript Date
+    set: (newValue) => {
+      // Assuming you have a method to update the invoice's due date in Firestore
+      // updateInvoiceDueDate(props.invoice.id, newValue);
+    }
+  });
   const invoiceSalesTaxes = computed(() => props.invoice?.sales_taxes || 'Unknown');
   const invoiceSubtotalAmount = computed(() => props.invoice?.subtotal_amount || 'Unknown');
   const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
@@ -219,4 +228,5 @@
 
 <style>
   @import url(@/components/v-modal/v-modal.scss);
+  @import url(./v-edit-invoice.scss);
 </style>

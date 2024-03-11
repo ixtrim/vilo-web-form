@@ -4,6 +4,10 @@
 .modal-backdrop {
   background-color:rgba(0, 0, 0, 0.5);
 
+  .modal-body {
+    margin-top: 0!important;
+  }
+
   .modal-content {
     width: 90%;
     max-width: 640px;
@@ -22,7 +26,8 @@
       margin: 0;
       padding: 0;
 
-      &::before {
+      &::before,
+      &::after {
         display: none!important;
       }
       
@@ -35,15 +40,29 @@
       &__meta {
 
         h4 {
-          font-size: 14px;
+          position: relative;
+          top: 0px;
+          font-size: 20px!important;
           line-height: 20px;
           color: var(--v-gray-900);
+          margin-bottom: 24px;
+        }
+
+        strong{
+          font-size: 14px;
+          font-weight: 500;
+          line-height: 20px;
+          color: var(--v-gray-900);
+          display: inline-block;
+          margin-bottom: 10px;
         }
 
         span {
+          width: 100%;
           font-size: 12px;
           line-height: 20px;
           color: var(--v-gray-900);
+          display: inline-block;
         }
       }
       

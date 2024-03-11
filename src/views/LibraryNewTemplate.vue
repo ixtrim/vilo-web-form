@@ -14,20 +14,22 @@
           <div class="row">
             <div class="col-lg-12 mb-4">
               <label style="font-weight: 500;margin-bottom: 6px;">Header</label>
-              <VImageUploader @image-cropped="handleImageCropped" />
+              <VImageUploaderNoCropped v-model="header" @image-selected="HeaderHandler"/>
             </div>
           </div>
           
           <div class="row">
-            <div class="col-lg-12 mb-5">
-              <QuillEditor theme="snow" v-model:content="content" contentType="html" />
+            <div class="col-lg-12 mb-5" v-for="(item, index) in editorCount">
+              <QuillEditor toolbar="essential" theme="snow" :ref="el => { quill[index] = el }" @change="updateContent" contentType="html" />
             </div>
           </div>
+
+          <!-- v-model:content="content" -->
 
           <div class="row">
             <div class="col-lg-12 mb-4 mt-2">
               <label style="font-weight: 500;margin-bottom: 6px;">Footer</label>
-              <VImageUploader v-model="footer" @image-cropped="handleFooterImageCropped"/>
+              <VImageUploaderNoCropped v-model="footer" @image-selected="FooterHandler"/>
             </div>
           </div>
 
@@ -48,106 +50,166 @@
 </template>
 
 <script>
-import { db, storage } from '@/firebase.js';
-import { uploadBytes, ref as storageRef, getDownloadURL } from 'firebase/storage';
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-import { onMounted, ref, defineComponent, computed } from 'vue';
-import { QuillEditor } from '@vueup/vue-quill';
-import VLink from '@/components/v-link/VLink.vue';
-import VImageUploader from '@/components/v-image-uploader/VImageUploader.vue';
-import VInput from '@/components/v-input/VInput.vue';
-import VButton from '@/components/v-button/VButton.vue';
-import VNotification from '@/components/v-notification/VNotification.vue';
+  import { db, storage } from '@/firebase.js';
+  import { uploadBytes, ref as storageRef, getDownloadURL } from 'firebase/storage';
+  import { collection, addDoc, Timestamp } from 'firebase/firestore';
+  import { getAuth } from 'firebase/auth';
+  import { onMounted, ref, defineComponent, computed } from 'vue';
+  import { QuillEditor } from '@vueup/vue-quill';
+  import VLink from '@/components/v-link/VLink.vue';
+  import VImageUploader from '@/components/v-image-uploader/VImageUploader.vue'
+  import VImageUploaderNoCropped from '@/components/v-image-uploader-no-cropped/VImageUploaderNoCropped.vue';
+  import VInput from '@/components/v-input/VInput.vue';
+  import VButton from '@/components/v-button/VButton.vue';
+  import VNotification from '@/components/v-notification/VNotification.vue';
 
-import '@vueup/vue-quill/dist/vue-quill.snow.css';
+  import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
-export default {
-  components: {
-    VInput,
-    VImageUploader,
-    QuillEditor,
-    VButton,
-    VNotification
-  },
-  setup() {
-    const title = ref('');
-    const header = ref('');
-    const footer = ref('');
-    const content = ref('');
-    const notificationRef = ref(null);
-    const notificationType = ref('');
-    const notificationHeader = ref('');
-    const notificationMessage = ref('');
-    const auth = getAuth();
+  export default {
+    components: {
+      VInput,
+      VImageUploader,
+      VImageUploaderNoCropped,
+      QuillEditor,
+      VButton,
+      VNotification,
+    },
+    setup() {
+      const title = ref('');
+      const header = ref('');
+      const footer = ref('');
+      const content = ref([]);
+      const notificationRef = ref(null);
+      const notificationType = ref('');
+      const notificationHeader = ref('');
+      const notificationMessage = ref('');
+      const editorCount = ref(1);
+      const quill = ref([]);
+      const quillContent = ref([]);
+      const auth = getAuth();
 
-    async function handleImageCropped(blob) {
-      const imageRef = storageRef(storage, `document_headers/${Math.random().toString(22).slice(2)}.jpg`);
-      await uploadBytes(imageRef, blob);
-      header.value = await getDownloadURL(imageRef);
-    }
+      async function handleImageCropped(blob) {
+        const imageRef = storageRef(storage, `document_headers/${Math.random().toString(22).slice(2)}.jpg`);
+        await uploadBytes(imageRef, blob);
+        header.value = await getDownloadURL(imageRef);
+      }
 
-    async function handleFooterImageCropped(blob) {
-      const imageRef = storageRef(storage, `document_footers/${Math.random().toString(22).slice(2)}.jpg`);
-      await uploadBytes(imageRef, blob);
-      footer.value = await getDownloadURL(imageRef);
-    }
+      async function handleFooterImageCropped(blob) {
+        const imageRef = storageRef(storage, `document_footers/${Math.random().toString(22).slice(2)}.jpg`);
+        await uploadBytes(imageRef, blob);
+        footer.value = await getDownloadURL(imageRef);
+      }
 
-    const triggerNotification = (type, header, message) => {
-    
-        notificationType.value = type;
-        notificationHeader.value = header;
-        notificationMessage.value = message;
-
-        if (notificationRef.value !== null) {
-          notificationRef.value.showNotification();
-        } else {
-          console.error('Notification reference is null.');
+      const FooterHandler = async (dataUrl) =>{
+        
+        const base64String = dataUrl.split(',')[1];
+        const byteCharacters = atob(base64String);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+        let loc = `files/document_footers/${Math.random().toString(22).slice(2)}.jpg`;
+        const imageRef = storageRef(storage, loc);
+        await uploadBytes(imageRef, blob);
+        footer.value = await getDownloadURL(imageRef);
+      }
+
+      const HeaderHandler = async (dataUrl) =>{
+
+        const base64String = dataUrl.split(',')[1];
+        const byteCharacters = atob(base64String);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+        let loc = `files/document_headers/${Math.random().toString(22).slice(2)}.jpg`;
+        const imageRef = storageRef(storage, loc);
+        await uploadBytes(imageRef, blob);
+        header.value = await getDownloadURL(imageRef);
+      }
+
+      const triggerNotification = (type, header, message) => {
+      
+          notificationType.value = type;
+          notificationHeader.value = header;
+          notificationMessage.value = message;
+
+          if (notificationRef.value !== null) {
+            notificationRef.value.showNotification();
+          } else {
+            console.error('Notification reference is null.');
+          }
+      }
+
+      const addDocument = async() => {
+
+        let quillContentArray = [];
+        for(let i=0;i<quill.value.length;i++)
+        {
+          quillContentArray.push(quill.value[i].getHTML())
+          
+        }
+      
+        const createdAt = Timestamp.now(); 
+        const user = auth.currentUser;
+        if(user)
+        {
+          var userId = user.uid;
+        }
+        try {
+          await addDoc(collection(db, "templates"), {
+            title: title.value,
+            content: quillContentArray,
+            header: header.value,
+            footer: footer.value,
+            created_by: userId,
+            created: createdAt
+          });
+
+          title.value = '';
+          title.content = '';
+          title.header = '';
+          title.footer = '';
+          triggerNotification('success', 'Success!', 'Template created successfully!');
+        } catch (error) {
+          console.log("Error getting document:", error);
+          triggerNotification('error', 'Error!', 'Error while connecting with database.');
+        }
+
+      };
+
+      const addPage = () => {
+        editorCount.value++;
+      }
+
+      return {
+        title,
+        header,
+        footer,
+        content,
+        handleImageCropped,
+        handleFooterImageCropped,
+        FooterHandler,
+        HeaderHandler,
+        notificationRef,
+        addDocument,
+        addPage,
+        quill,
+        editorCount,
+      };
+    },
+    methods: {
+      updateContent(value){
+        console.log(value)
+      }
     }
-
-    const addDocument = async() => {
-      const createdAt = Timestamp.now(); 
-      const user = auth.currentUser;
-      if(user)
-      {
-        var userId = user.uid;
-      }
-      try {
-        await addDoc(collection(db, "templates"), {
-          title: title.value,
-          content: content.value,
-          header: header.value,
-          footer: footer.value,
-          created_by: userId,
-          created: createdAt
-        });
-
-        title.value = '';
-        title.content = '';
-        title.header = '';
-        title.footer = '';
-        triggerNotification('success', 'Success!', 'Template created successfully!');
-      } catch (error) {
-        console.log("Error getting document:", error);
-        triggerNotification('error', 'Error!', 'Error while connecting with database.');
-      }
-
-    };
-
-    return {
-      title,
-      header,
-      footer,
-      content,
-      handleImageCropped,
-      handleFooterImageCropped,
-      notificationRef,
-      addDocument,
-    };
   }
-
-}
 </script>
 
 <style>

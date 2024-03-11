@@ -59,7 +59,7 @@
               <VTextInputGroup :inputs="appServices" @update-inputs="appServices = $event" @input-blur="handleServicesUpdate" />
             </div>
           </div>
-
+          
 
         </div>
       </div>

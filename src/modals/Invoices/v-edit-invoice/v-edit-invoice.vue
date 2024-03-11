@@ -30,30 +30,52 @@
     <div class="invoice__table">
       <!-- Inside your <template> tag, within the <div class="invoice__table"> -->
       <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th scope="col">Description</th>
-            <th scope="col" class="align-center">Qty</th>
-            <th scope="col">Price</th>
-            <th scope="col">Discount</th>
-            <th scope="col">Amount</th>
-            <th scope="col">Actions</th>
-          </tr>
-        </thead>
         <tbody>
           <tr v-for="(item, index) in invoiceItems" :key="item.id">
-            <td><input v-model="item.item" type="text" class="form-control" /></td>
-            <td><input v-model="item.quantity" type="number" class="form-control" /></td>
-            <td><input v-model="item.price" type="number" class="form-control" /></td>
-            <td><input v-model="item.discount" type="number" class="form-control" /></td>
-            <td>{{ formatCurrency(item.amount) }}</td>
+            <td>
+              <div class="form-group">
+                <label>Item</label>
+                <input v-model="item.item" type="text" class="form-control" />
+              </div>
+            </td>
+            <td style="width: 70px">
+              <div class="form-group">
+                <label>Qty</label>
+                <input v-model="item.quantity" type="number" class="form-control" @change="validateQuantity(item, index)" />
+              </div>
+            </td>
+            <td style="width: 90px">
+              <div class="form-group">
+                <label>Price</label>
+                <input v-model="item.price" type="number" class="form-control" @change="validatePrice(item, index)" />
+              </div>
+            </td>
+            <td style="width: 90px">
+              <div class="form-group">
+                <label>Discount (%)</label>
+                <input v-model="item.discount" type="number" class="form-control" @change="validateDiscount(item, index)" />
+              </div>
+            </td>
+            <td style="width: 90px">
+              <div class="form-group">
+                <label>Total price</label>
+                {{ calculateAmount(item) }}
+              </div>
+            </td>
             <td>
               <v-button :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="removeItem(index)" text=""></v-button>
             </td>
           </tr>
         </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4"></td>
+            <td colspan="2">
+              <VLink @click="addItem" styled="primary" icon="left" icon-style="add-blue" to="#">Add Item</VLink>
+          </td>
+          </tr>
+        </tfoot>
       </table>
-      <v-button :block="true" size="md" icon="left" icon-style="add" styled="primary" @click="addItem" text="Add Item"></v-button>
     </div>
 
     <div class="row">
@@ -121,6 +143,7 @@
   import VueDatePicker from '@vuepic/vue-datepicker';
   import '@vuepic/vue-datepicker/dist/main.css';
   import VButton from '@/components/v-button/VButton.vue';
+  import VLink from '@/components/v-link/VLink.vue';
 
   type Invoice = {
     id: string;
@@ -195,7 +218,7 @@
 
   const emit = defineEmits(['close-modal', 'save-changes']);
 
-  const invoiceItems = ref([...props.invoice.invoiceItems]);
+  const invoiceItems = ref(props.invoice ? [...props.invoice.invoiceItems] : []);
 
   const addItem = () => {
     invoiceItems.value.push({
@@ -208,7 +231,7 @@
     });
   };
 
-  const removeItem = (index) => {
+  const removeItem = (index: number) => {
     invoiceItems.value.splice(index, 1);
   };
 
@@ -216,16 +239,42 @@
     return Date.now().toString(36) + Math.random().toString(36).substring(2);
   }
 
+  function validateQuantity(item: InvoiceItem, index: number) {
+    if (item.quantity < 1) {
+      item.quantity = 1;
+      invoiceItems.value[index] = { ...item };
+    }
+  }
+
+  function validatePrice(item: InvoiceItem, index: number) {
+    if (item.price < 0) {
+      item.price = 0;
+      invoiceItems.value[index] = { ...item };
+    }
+  }
+
+  function validateDiscount(item: InvoiceItem, index: number) {
+    if (item.discount < 0) {
+      item.discount = 0;
+      invoiceItems.value[index] = { ...item };
+    }
+  }
+
   function formatDate(timestamp: Timestamp | undefined) {
     return timestamp ? timestamp.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown Date';
   }
 
   function formatCurrency(amount: number): string {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      }).format(amount);
-    }
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  }
+
+  function calculateAmount(item: InvoiceItem): string {
+    const amount = (item.quantity * item.price) - ((item.quantity * item.price) * (item.discount / 100));
+    return formatCurrency(amount);
+  }
 
   function closeModal() {
     emit('close-modal');

@@ -588,7 +588,6 @@ export default defineComponent({
       if (index !== -1) {
         // Update the invoice in the local state
         this.invoices[index] = updatedInvoice;
-        // Optionally, you can trigger a notification to inform the user of the successful update
         this.triggerNotification('success', 'Invoice Updated', 'The invoice has been successfully updated.');
       }
     },

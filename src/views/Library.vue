@@ -156,11 +156,14 @@
     <!-- :type="notificationType" 
     :header="notificationHeader" 
     :message="notificationMessage"  -->
-    <VNotification 
+    <!-- <VNotification 
       ref="notificationRef" 
       :duration="7000"
       @save-clicked="handleDeleteDocument"
-      />
+      /> -->
+
+    <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader"
+      :message="notificationMessage" :duration="7000" />
   </div>
 </template>
 
@@ -202,10 +205,6 @@ interface File {
   status: number;
 }
 
-interface DropdownItem {
-  label: string;
-}
-
 interface NotificationRef {
   showNotification: () => void;
 }
@@ -226,6 +225,7 @@ export default defineComponent({
     VAddDocument,
     VEditDocument,
     VDeleteDocument,
+    VNotification
   },
   data() {
     return {
@@ -233,9 +233,9 @@ export default defineComponent({
       showEditDocumentModal: false,
       modalAddDocumentTitle: '',
       modalEditDocumentTitle: '',
-      // notificationType: 'success',
-      // notificationHeader: 'Changes saved',
-      // notificationMessage: 'This account has been successfully edited.',
+      notificationType: 'success',
+      notificationHeader: 'Changes saved',
+      notificationMessage: 'This account has been successfully edited.',
       userName: 'Olivia Rhye',
       userEmail: 'olivia@untitledui.com',
       sortCases: [
@@ -427,9 +427,9 @@ export default defineComponent({
   },
   methods: {
     triggerNotification(type: string, header: string, message: string) {
-      // this.notificationType = type;
-      // this.notificationHeader = header;
-      // this.notificationMessage = message;
+      this.notificationType = type;
+      this.notificationHeader = header;
+      this.notificationMessage = message;
 
       (this.$refs.notificationRef as NotificationRef).showNotification();
     },
@@ -466,6 +466,22 @@ export default defineComponent({
       this.showAddDocumentModal = false;
       this.showEditDocumentModal = false;
     },
+    getMessageFromURL() {
+      // Accessing message parameter from URL
+      let query = this.$route.query.message;
+      if(typeof query === 'string')
+      {
+        this.triggerNotification('success', 'Success!', query);
+
+        const currentPath = this.$route.path;
+        const newUrl = `${currentPath}`;
+        history.replaceState({}, '', newUrl);
+      }
+    }
+  },
+  mounted() {
+    // Call the method to get the message from the URL when the component is mounted
+    this.getMessageFromURL();
   },
 });
 </script>

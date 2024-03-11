@@ -65,7 +65,7 @@
               @preview="handlePreview(parseInt(template.id))"
               @create-new-document="handleCreateNewDocument(parseInt(template.id))"
               @delete-template="handleDelete(template.id)"
-              @edit-template="handleEdit(parseInt(template.id))"
+              @edit-template="handleEdit(template.id)"
               @duplicate-template="handleDuplicate(template.id)"
             />
           </div>
@@ -373,7 +373,8 @@ export default defineComponent({
     handleCreateNewDocument(id: number) {
       this.$router.push('/new-library-template');
     },
-    handleEdit(id: number) {
+    handleEdit(id: string) {
+      this.$router.push('/edit-library-template/'+id);
     },
     async handleDuplicate(id: string) {
       // Get the data

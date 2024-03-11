@@ -38,10 +38,11 @@
       <div class="col-lg-3 align-right">
         <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="saveTemplateChanges" text="Save Changes"></VButton>
         <br/>
-        Awais please display here value of Created: field in format Jan 3, 2024, 12:00 PM
+        Created: {{  created }}
+        <!-- Awais please display here value of Created: field in format Jan 3, 2024, 12:00 PM -->
         <br/>
-        Awais please display here value of Last updated: field in format Jan 3, 2024, 12:00 PM
-        <br/>
+        Created By: {{ created_by }}
+        <br/><br/>
         <VButton :block="true" size="sm" icon="left" icon-style="add-blue" styled="secondary" @click="addPage" text="Add another page"></VButton>
       </div>
     </div>
@@ -55,10 +56,10 @@
 <script>
   import { db, storage } from '@/firebase.js';
   import { uploadBytes, ref as storageRef, getDownloadURL } from 'firebase/storage';
-  import { collection, addDoc, Timestamp } from 'firebase/firestore';
+  import { collection, addDoc, Timestamp, doc, getDoc,updateDoc } from 'firebase/firestore';
   import { getAuth } from 'firebase/auth';
   import { onMounted, ref, defineComponent, computed } from 'vue';
-  import { useRouter } from 'vue-router';
+  import { useRouter, useRoute } from 'vue-router';
   import { QuillEditor } from '@vueup/vue-quill';
   import VLink from '@/components/v-link/VLink.vue';
   import VImageUploader from '@/components/v-image-uploader/VImageUploader.vue'
@@ -80,10 +81,13 @@
     },
     setup() {
       const router = useRouter();
+      const route = useRoute();
       const title = ref('');
       const header = ref('');
       const footer = ref('');
       const content = ref([]);
+      const created = ref(null);
+      const created_by = ref(null);
       const notificationRef = ref(null);
       const notificationType = ref('');
       const notificationHeader = ref('');
@@ -93,18 +97,6 @@
       const quillContent = ref([]);
       const auth = getAuth();
       const hiddenEditors = ref([]);
-
-      async function handleImageCropped(blob) {
-        const imageRef = storageRef(storage, `document_headers/${Math.random().toString(22).slice(2)}.jpg`);
-        await uploadBytes(imageRef, blob);
-        header.value = await getDownloadURL(imageRef);
-      }
-
-      async function handleFooterImageCropped(blob) {
-        const imageRef = storageRef(storage, `document_footers/${Math.random().toString(22).slice(2)}.jpg`);
-        await uploadBytes(imageRef, blob);
-        footer.value = await getDownloadURL(imageRef);
-      }
 
       const FooterHandler = async (dataUrl) =>{
         
@@ -156,6 +148,7 @@
       const saveTemplateChanges = async() => {
 
         let quillContentArray = [];
+        const id = route.params.id;
 
         for(let i=0;i<quill.value.length;i++)
         {
@@ -165,23 +158,18 @@
           }
         }
 
-        const createdAt = Timestamp.now(); 
-        const user = auth.currentUser;
-        if(user)
-        {
-          var userId = user.uid;
-        }
+       
         try {
-          await addDoc(collection(db, "templates"), {
+          const docRef = doc(db, "templates", id);
+
+          await updateDoc(docRef, {
             title: title.value,
             content: quillContentArray,
             header: header.value,
             footer: footer.value,
-            created_by: userId,
-            created: createdAt
           });
 
-          let message = 'Template created successfully!';
+          let message = 'Template updated successfully!';
           router.push({ path: '/library-templates', query: { message } });
 
         } catch (error) {
@@ -200,13 +188,74 @@
         hiddenEditors.value[index] = !hiddenEditors.value[index];
       };
 
+      const fetchTemplate = async() => {
+        const id = route.params.id;
+
+        try {
+          // Get the template with the specified ID
+          const docRef = doc(db, "templates", id);
+          const docSnapshot = await getDoc(docRef);
+
+          if (docSnapshot.exists()) {
+              // Document exists, you can access its data using docSnapshot.data()
+              const templateData = docSnapshot.data();
+              
+              title.value = templateData.title;
+              if(templateData.created_by)
+              {
+                const userDocRef = doc(db, "users", templateData.created_by);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (userDocSnap.exists()) {
+                  const userData = userDocSnap.data();
+                  created_by.value = userData.full_name;
+                  console.log(created_by.value)
+                  
+                }
+              }
+
+              let contents = templateData.content;
+              let contentsLength = contents.length;
+              editorCount.value = contentsLength;
+
+              contents.forEach((_, index) => {
+                quill.value.push(null); // Push null for each content item
+              });
+
+              setTimeout(() => {
+                for(let i=0; i < contents.length; i++)
+                {
+                  quill.value[i].setHTML(contents[i]);
+                }
+              }, 1000)
+              
+              
+              let timestamp = templateData.created.toDate().toLocaleString();
+              let createdDate = new Date(timestamp);
+              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+              let month = months[createdDate.getMonth()];
+              let day = createdDate.getDate();
+              let year = createdDate.getFullYear();
+              created.value = `${month} ${day}, ${year}`;
+
+          } else {
+              console.log("Document not found!");
+          }
+        } catch (error) {
+            console.error("Error fetching document:", error);
+        } 
+
+        }
+
+      onMounted(fetchTemplate)
+
       return {
         title,
         header,
         footer,
         content,
-        handleImageCropped,
-        handleFooterImageCropped,
+        created,
+        created_by,
         FooterHandler,
         HeaderHandler,
         notificationRef,

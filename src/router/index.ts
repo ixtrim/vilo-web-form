@@ -83,9 +83,9 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/library-document',
-      name: 'library-document',
-      component: () => import('../views/LibraryDocument.vue'),
+      path: '/new-library-template',
+      name: 'new-library-template',
+      component: () => import('../views/LibraryNewTemplate.vue'),
       meta: { requiresAuth: true }
     },
     {

@@ -140,7 +140,7 @@
                 <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="deleteInvoice(invoice.id)" text=""></VButton>
               </div>
               <div class="col col--inv-action" v-if="notClient">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditInvoiceModal" text=""></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditInvoiceModal(invoice)" text=""></VButton>
               </div>
             </div>
 
@@ -163,8 +163,9 @@
       </div>
     </div>
 
-    <VModal :show="showAddInvoiceModal || showPreviewInvoiceModal || showDownloadInvoiceModal" :title="modalAddInvoiceTitle || modalPreviewInvoiceTitle || modalDownloadInvoiceTitle" @update:show="handleModalClose">
+    <VModal :show="showAddInvoiceModal || showEditInvoiceModal  || showPreviewInvoiceModal || showDownloadInvoiceModal" :title="modalAddInvoiceTitle || modalEditInvoiceTitle || modalPreviewInvoiceTitle || modalDownloadInvoiceTitle" @update:show="handleModalClose">
       <VAddInvoice v-if="showAddInvoiceModal" :title="modalAddInvoiceTitle" @close-modal="showAddInvoiceModal = false" @save-clicked="handleAddInvoiceCase" />
+      <VEditInvoice v-if="showEditInvoiceModal && currentInvoice" :title="modalEditInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @close-modal="showDownloadInvoiceModal = false" />
       <VPreviewInvoice v-if="showPreviewInvoiceModal && currentInvoice" :title="modalPreviewInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @invoice-pending="markInvoiceAsPending" @invoice-paid="markInvoiceAsPaid"  @invoice-refunded="markInvoiceAsRefunded" @invoice-cancelled="markInvoiceAsCancelled" @close-modal="showPreviewInvoiceModal = false" />
       <VDownloadInvoice v-if="showDownloadInvoiceModal && currentInvoice" :title="modalDownloadInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @close-modal="showDownloadInvoiceModal = false" />
     </VModal>
@@ -182,6 +183,7 @@ import VStatus from '@/components/v-status/VStatus.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
 import VAddInvoice from '@/modals/Invoices/v-add-invoice/v-add-invoice.vue';
+import VEditInvoice from '@/modals/Invoices/v-edit-invoice/v-edit-invoice.vue';
 import VPreviewInvoice from '@/modals/Invoices/v-preview-invoice/v-preview-invoice.vue';
 import VDownloadInvoice from '@/modals/Invoices/v-download-invoice/v-download-invoice.vue';
 import VUser from '@/components/v-user/v-user.vue';
@@ -232,6 +234,7 @@ export default defineComponent({
     VButton,
     VModal,
     VAddInvoice,
+    VEditInvoice,
     VNotification,
     VPreviewInvoice,
     VDownloadInvoice,
@@ -248,9 +251,11 @@ export default defineComponent({
       itemsPerPage: 10,
       searchTerm: '',
       showAddInvoiceModal: false,
+      showEditInvoiceModal: false,
       showPreviewInvoiceModal: false,
       showDownloadInvoiceModal: false,
       modalAddInvoiceTitle: '',
+      modalEditInvoiceTitle: '',
       modalPreviewInvoiceTitle: '',
       modalDownloadInvoiceTitle: '',
       currentInvoice: null as Invoice | null,
@@ -543,8 +548,9 @@ export default defineComponent({
       }
       return email;
     },
-    openEditInvoiceModal() {
-      this.showAddInvoiceModal = true;
+    openEditInvoiceModal(invoice: Invoice) {
+      this.currentInvoice = invoice;
+      this.showEditInvoiceModal = true;
     },
     openPreviewInvoiceModal(invoice: Invoice) {
       this.currentInvoice = invoice;
@@ -556,6 +562,7 @@ export default defineComponent({
     },
     handleModalClose() {
       this.showAddInvoiceModal = false;
+      this.showEditInvoiceModal = false;
       this.showPreviewInvoiceModal = false;
       this.showDownloadInvoiceModal = false;
     },

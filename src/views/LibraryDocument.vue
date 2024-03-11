@@ -27,7 +27,7 @@
           <div class="row">
             <div class="col-lg-12 mb-4 mt-2">
               <label style="font-weight: 500;margin-bottom: 6px;">Footer</label>
-              <VImageUploader v-model="footer" @image-cropped="handleFooterImageCropped"/>
+              <VImageUploader v-model="footer"/>
             </div>
           </div>
 

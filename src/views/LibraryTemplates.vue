@@ -56,13 +56,13 @@
       <div class="col-lg-12">
         
         <div class="row">
-          <div class="col-md-4 col-lg-4" v-for="template in paginatedTemplates" :key="template.id">
+          <div class="col-md-4 col-lg-4" v-for="(template, index) in paginatedTemplates" :key="template.id">
             <FileTemplateCard
               :icon="'red'"
               :title="template.title"
               :createdDate="template.created_at"
               :creatorName="template.createdByDetails.name"
-              @preview="handlePreview(parseInt(template.id))"
+              @preview="handlePreview(index)"
               @create-new-document="handleCreateNewDocument(parseInt(template.id))"
               @delete-template="handleDelete(template.id)"
               @edit-template="handleEdit(template.id)"
@@ -74,8 +74,14 @@
       </div>
     </div>
 
+    <!-- Delete Modal -->
     <VModal :show="showDeleteModal" :title="'Delete Template'" @update:show="showDeleteModal = $event">
       <VDeleteTemplate :title="'Delete File'" :fileId="selectedFileId" @close-modal="showDeleteModal = false" @delete-clicked="handleDeleteTemplate" />
+    </VModal>
+
+    <!-- Preview Modal -->
+    <VModal :show="showPreviewModal" :title="previewTitle" @update:show="showPreviewModal = $event">
+      <VPreviewTemplate :content="previewContent" :header="previewHeader" :footer="previewFooter" @close-modal="closePreviewModal" />
     </VModal>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader"
@@ -105,6 +111,7 @@ import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import FileTemplateCard from '@/modules/Library/FileTemplateCard/FileTemplateCard.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
 import VDeleteTemplate from '@/modals/Library/v-delete-template/v-delete-template.vue';
+import VPreviewTemplate from '@/modals/Library/v-preview-template/v-preview-template.vue';
 import VNotification from '@/components/v-notification/VNotification.vue';
 
 interface Template {
@@ -141,6 +148,7 @@ export default defineComponent({
     FileTemplateCard,
     VDeleteTemplate,
     VNotification,
+    VPreviewTemplate,
   },
   data() {
     return {
@@ -172,6 +180,12 @@ export default defineComponent({
     const notification2Type = ref('');
     const notification2Header = ref('');
     const notification2Message = ref('');
+    const showPreviewModal = ref(false);
+    const previewTitle = ref('');
+    const previewHeader = ref('');
+    const previewFooter = ref('');
+    const previewContent = ref('');
+    
 
     const sortTime = ref([
       { label: 'All', value: 'all' },
@@ -232,6 +246,7 @@ export default defineComponent({
     });
 
     const fetchTemplates = async() => {
+    
       const filesQuery = query(collection(db, "templates"), orderBy("created", "desc"), limit(10));
       const querySnapshot = await getDocs(filesQuery);
       const templates = await Promise.all(querySnapshot.docs.map(async (docSnapshot) => {
@@ -328,6 +343,19 @@ export default defineComponent({
       }
     }
 
+    const handlePreview = (index: any) => {
+      let data = filteredTemplates.value[index];
+      previewTitle.value = data.title;
+      previewContent.value = data.content;
+      previewHeader.value = data.header;
+      previewFooter.value = data.footer;
+      showPreviewModal.value = true;
+    }
+
+    const closePreviewModal = () => {
+      showPreviewModal.value = false;
+    }
+
     return {
       templateRows,
       sortTime,
@@ -350,7 +378,14 @@ export default defineComponent({
       notification2Ref,
       notification2Type,
       notification2Header,
-      notification2Message
+      notification2Message,
+      showPreviewModal,
+      handlePreview,
+      closePreviewModal,
+      previewTitle,
+      previewContent,
+      previewHeader,
+      previewFooter
     };
   },
   methods: {
@@ -366,9 +401,6 @@ export default defineComponent({
     handleButtonClick() {
     },
     handleDropdownClick(item: any) { 
-    },
-    handlePreview(id: number) {
-      this.$router.push('/edit-library-template');
     },
     handleCreateNewDocument(id: number) {
       this.$router.push('/new-library-template');

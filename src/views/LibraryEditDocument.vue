@@ -40,7 +40,7 @@
         </div>
       </div>
       <div class="col-lg-3 align-right">
-        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="saveTemplateChanges" text="Save Changes"></VButton>
+        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="saveFileChanges" text="Save Changes"></VButton>
         <br/>
         Created: {{  created }}
         <!-- Awais please display here value of Created: field in format Jan 3, 2024, 12:00 PM -->
@@ -149,7 +149,7 @@
           }
       }
 
-      const saveTemplateChanges = async() => {
+      const saveFileChanges = async() => {
 
         let quillContentArray = [];
         const id = route.params.id;
@@ -162,19 +162,21 @@
           }
         }
 
-       
+        const createdAt = Timestamp.now(); 
+
         try {
-          const docRef = doc(db, "templates", id);
+          const docRef = doc(db, "files", id);
 
           await updateDoc(docRef, {
-            title: title.value,
+            document_name: title.value,
             content: quillContentArray,
             header: header.value,
             footer: footer.value,
+            last_updated: createdAt,
           });
 
-          let message = 'Template updated successfully!';
-          router.push({ path: '/library-templates', query: { message } });
+          let message = 'Document updated successfully!';
+          router.push({ path: '/library', query: { message } });
 
         } catch (error) {
           console.log("Error getting document:", error);
@@ -197,14 +199,14 @@
 
         try {
           // Get the template with the specified ID
-          const docRef = doc(db, "templates", id);
+          const docRef = doc(db, "files", id);
           const docSnapshot = await getDoc(docRef);
 
           if (docSnapshot.exists()) {
               // Document exists, you can access its data using docSnapshot.data()
               const templateData = docSnapshot.data();
               
-              title.value = templateData.title;
+              title.value = templateData.document_name;
               header.value = templateData.header;
               footer.value = templateData.footer;
 
@@ -266,7 +268,7 @@
         FooterHandler,
         HeaderHandler,
         notificationRef,
-        saveTemplateChanges,
+        saveFileChanges,
         addPage,
         quill,
         editorCount,

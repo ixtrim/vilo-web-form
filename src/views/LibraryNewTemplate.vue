@@ -18,13 +18,12 @@
             </div>
           </div>
           
-          <div class="row">
-            <div class="col-lg-12 mb-5" v-for="(item, index) in editorCount">
-              <QuillEditor toolbar="essential" theme="snow" :ref="el => { quill[index] = el }" @change="updateContent" contentType="html" />
+          <div class="row mb-5">
+            <div class="col-lg-12 relative" v-for="(item, index) in editorCount">
+              <QuillEditor v-if="!hiddenEditors[index]" toolbar="essential" theme="snow" :ref="el => { quill[index] = el }" @change="updateContent" contentType="html" />
+              <button class="quitBtn" v-if="!hiddenEditors[index] && index != 0" @click="toggleEditor(index)">X</button>
             </div>
           </div>
-
-          <!-- v-model:content="content" -->
 
           <div class="row">
             <div class="col-lg-12 mb-4 mt-2">
@@ -89,6 +88,7 @@
       const quill = ref([]);
       const quillContent = ref([]);
       const auth = getAuth();
+      const hiddenEditors = ref([]);
 
       async function handleImageCropped(blob) {
         const imageRef = storageRef(storage, `document_headers/${Math.random().toString(22).slice(2)}.jpg`);
@@ -152,12 +152,15 @@
       const addDocument = async() => {
 
         let quillContentArray = [];
+
         for(let i=0;i<quill.value.length;i++)
         {
-          quillContentArray.push(quill.value[i].getHTML())
-          
+          if(quill.value[i])
+          {
+            quillContentArray.push(quill.value[i].getHTML())
+          }
         }
-      
+
         const createdAt = Timestamp.now(); 
         const user = auth.currentUser;
         if(user)
@@ -176,7 +179,7 @@
 
           let message = 'Template created successfully!';
           router.push({ path: '/library-templates', query: { message } });
-          // triggerNotification('success', 'Success!', 'Template created successfully!');
+
         } catch (error) {
           console.log("Error getting document:", error);
           triggerNotification('error', 'Error!', 'Error while connecting with database.');
@@ -187,6 +190,11 @@
       const addPage = () => {
         editorCount.value++;
       }
+
+      const toggleEditor = (index) => {
+        quill.value = quill.value.splice(index, 1);
+        hiddenEditors.value[index] = !hiddenEditors.value[index];
+      };
 
       return {
         title,
@@ -202,6 +210,8 @@
         addPage,
         quill,
         editorCount,
+        toggleEditor,
+        hiddenEditors,
       };
     },
     methods: {
@@ -214,4 +224,15 @@
 
 <style>
   @import url(./styles/dashboard.scss);
+  .relative{
+    position: relative;
+  }
+  .quitBtn{
+    position: absolute;
+    right: -30px;
+    top: 0;
+  }
+  .space-20{
+    margin-bottom: 4  0px;
+  }
 </style>

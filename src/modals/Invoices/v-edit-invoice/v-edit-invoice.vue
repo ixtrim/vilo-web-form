@@ -5,27 +5,27 @@
         <h4>Edit Invoice number: {{ invoiceNumber }}</h4>
       </div>
     </div>
+    <div class="row invoice__meta mt-2 mb-2">
+      <div class="col-lg-6">
+        <div class="form-group">
+          <label>Invoice Date: </label>
+          <VueDatePicker v-model="invoiceCreated" format="yyyy-MM-dd"></VueDatePicker>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="form-group">
+          <label>Due Date: </label>
+          <VueDatePicker v-model="invoiceDueDate" format="yyyy-MM-dd"></VueDatePicker>
+        </div>
+      </div>
+    </div>
     <div class="row invoice__meta">
-      <div class="col-lg-7">
+      <div class="col-lg-12">
         <strong>Billed to:</strong>
         <span>{{ clientName }}<br/>{{ clientEmail }} | {{ clientPhone }}<br/>{{ clientAddress }}</span>
       </div>
-      <div class="col-lg-5">
-        <div class="form-group">
-          <label>Invoice Date: </label>
-          <VueDatePicker label="Invoice Date" v-model="invoiceCreated"></VueDatePicker>
-        </div>
-      </div>
     </div>
-    <div class="row invoice__meta">
-      <div class="col-lg-7"></div>
-      <div class="col-lg-5">
-        <div class="form-group">
-          <label>Due Date: </label>
-          <VueDatePicker label="Due Date" v-model="invoiceDueDate"></VueDatePicker>
-        </div>
-      </div>
-    </div>
+    
 
     <div class="invoice__table">
       <table class="table table-bordered">
@@ -106,7 +106,8 @@
 <script setup lang="ts">
   import firebase from 'firebase/app';
   import 'firebase/firestore';
-  import { Timestamp } from 'firebase/firestore';
+  import { db } from '@/firebase.js';
+  import { updateDoc, doc, Timestamp } from 'firebase/firestore';
   import { defineEmits, defineProps, ref, watch, computed } from 'vue';
   import type { PropType } from 'vue';
   import VInput from '@/components/v-input/VInput.vue';
@@ -179,21 +180,8 @@
   const clientAddress = computed(() => props.invoice?.clientAddress || 'Unknown');
   const invoiceNumber = computed(() => props.invoice?.number || 'Unknown');
   const invoiceStatus = computed(() => props.invoice?.status || '0');
-  const invoiceCreated = computed({
-    get: () => props.invoice?.created.toDate() || new Date(), // Convert to JavaScript Date
-    set: (newValue) => {
-      // Assuming you have a method to update the invoice's created date in Firestore
-      // updateInvoiceCreatedDate(props.invoice.id, newValue);
-    }
-  });
-
-  const invoiceDueDate = computed({
-    get: () => props.invoice?.due_date.toDate() || new Date(), // Convert to JavaScript Date
-    set: (newValue) => {
-      // Assuming you have a method to update the invoice's due date in Firestore
-      // updateInvoiceDueDate(props.invoice.id, newValue);
-    }
-  });
+  const invoiceCreated = ref(props.invoice?.created.toDate() || new Date());
+  const invoiceDueDate = ref(props.invoice?.due_date.toDate() || new Date());
   const invoiceSalesTaxes = computed(() => props.invoice?.sales_taxes || 'Unknown');
   const invoiceSubtotalAmount = computed(() => props.invoice?.subtotal_amount || 'Unknown');
   const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
@@ -217,8 +205,28 @@
   }
 
   function statusChanges() {
-    emit('save-changes', props.invoice?.id);
-    closeModal();
+    if (!props.invoice) {
+      console.error("Invoice data is not available.");
+      return;
+    }
+
+    // Convert JavaScript Date to Firestore Timestamp
+    const updatedCreated = Timestamp.fromDate(new Date(invoiceCreated.value));
+    const updatedDueDate = Timestamp.fromDate(new Date(invoiceDueDate.value));
+
+    // Firestore document reference
+    const invoiceRef = doc(db, "invoices", props.invoice.id);
+
+    // Update the document
+    updateDoc(invoiceRef, {
+      created: updatedCreated,
+      due_date: updatedDueDate,
+    }).then(() => {
+      emit('save-changes', props.invoice?.id);
+      closeModal();
+    }).catch((error) => {
+      console.error("Error updating document: ", error);
+    });
   }
 
   function saveAndClose() {

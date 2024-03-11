@@ -62,8 +62,8 @@
                 {{ calculateAmount(item) }}
               </div>
             </td>
-            <td>
-              <v-button :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="removeItem(index)" text=""></v-button>
+            <td style="width: 16px; padding: 10px 0 0;">
+              <v-button v-if="invoiceItems.length > 1" :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="removeItem(index)" text=""></v-button>
             </td>
           </tr>
         </tbody>
@@ -79,7 +79,12 @@
     </div>
 
     <div class="row">
-      <div class="col-lg-5"></div>
+      <div class="col-lg-5">
+        <div class="form-group">
+          <label>Tax (%)</label>
+          <input type="number" class="form-control" v-model.number="taxRate" />
+        </div>
+      </div>
       <div class="col-lg-7">
         <div class="invoice__summary">
           <div class="row">
@@ -87,15 +92,15 @@
               <span>Sub total:</span>
             </div>
             <div class="col-lg-3">
-              <span>{{ typeof invoiceSubtotalAmount === 'number' ? formatCurrency(invoiceSubtotalAmount) : invoiceSubtotalAmount }}</span>
+              <span>{{ formatCurrency(subtotal) }}</span>
             </div>
           </div>
-          <div class="row" v-if="Number(invoiceTotalDiscount) > 0">
+          <div class="row" v-if="totalDiscount > 0">
             <div class="col-lg-9">
               <span>Total discount:</span>
             </div>
             <div class="col-lg-3">
-              <span>{{ typeof invoiceTotalDiscount === 'number' ? formatCurrency(invoiceTotalDiscount) : invoiceTotalDiscount }}</span>
+              <span>{{ formatCurrency(totalDiscount) }}</span>
             </div>
           </div>
           <div class="row">
@@ -103,7 +108,7 @@
               <span>Sales Taxes:</span>
             </div>
             <div class="col-lg-3">
-              <span>{{ typeof invoiceSalesTaxes === 'number' ? formatCurrency(invoiceSalesTaxes) : invoiceSalesTaxes }}</span>
+              <span>{{ formatCurrency(salesTaxes) }}</span>
             </div>
           </div>
           <div class="row">
@@ -111,10 +116,11 @@
               <strong>Amount due:</strong>
             </div>
             <div class="col-lg-3">
-              <strong>{{ typeof invoiceTotalAmount === 'number' ? formatCurrency(invoiceTotalAmount) : invoiceTotalAmount }}</strong>
+              <strong>{{ formatCurrency(totalAmount) }}</strong>
             </div>
           </div>
         </div>
+
       </div>
     </div>
 
@@ -215,6 +221,7 @@
   const invoiceSubtotalAmount = computed(() => props.invoice?.subtotal_amount || 'Unknown');
   const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
   const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
+  const taxRate = ref(25);
 
   const emit = defineEmits(['close-modal', 'save-changes']);
 
@@ -234,6 +241,28 @@
   const removeItem = (index: number) => {
     invoiceItems.value.splice(index, 1);
   };
+
+  const subtotal = computed(() => {
+    return invoiceItems.value.reduce((acc, item) => {
+      const itemTotal = (item.quantity * item.price) - ((item.quantity * item.price) * (item.discount / 100));
+      return acc + itemTotal;
+    }, 0);
+  });
+
+  const totalDiscount = computed(() => {
+    return invoiceItems.value.reduce((acc, item) => {
+      const discountAmount = (item.quantity * item.price) * (item.discount / 100);
+      return acc + discountAmount;
+    }, 0);
+  });
+
+  const salesTaxes = computed(() => {
+    return subtotal.value * (taxRate.value / 100);
+  });
+
+  const totalAmount = computed(() => {
+    return subtotal.value + salesTaxes.value - totalDiscount.value;
+  });
 
   function generateUniqueId() {
     return Date.now().toString(36) + Math.random().toString(36).substring(2);

@@ -14,6 +14,8 @@
           <div class="row">
             <div class="col-lg-12 mb-4">
               <label style="font-weight: 500;margin-bottom: 6px;">Header</label>
+              <br v-if="header != ''"/>
+              <img :src="header" v-if="header != ''" width="70" style="margin-bottom:20px"/>
               <VImageUploaderNoCropped v-model="header" @image-selected="HeaderHandler"/>
             </div>
           </div>
@@ -28,6 +30,8 @@
           <div class="row">
             <div class="col-lg-12 mb-4 mt-2">
               <label style="font-weight: 500;margin-bottom: 6px;">Footer</label>
+              <br v-if="footer != ''"/>
+              <img :src="footer" v-if="footer != ''" width="70" style="margin-bottom:20px"/>
               <VImageUploaderNoCropped v-model="footer" @image-selected="FooterHandler"/>
             </div>
           </div>
@@ -51,10 +55,10 @@
 <script>
   import { db, storage } from '@/firebase.js';
   import { uploadBytes, ref as storageRef, getDownloadURL } from 'firebase/storage';
-  import { collection, addDoc, Timestamp } from 'firebase/firestore';
+  import { collection, doc, getDoc, addDoc, Timestamp } from 'firebase/firestore';
   import { getAuth } from 'firebase/auth';
   import { onMounted, ref, defineComponent, computed } from 'vue';
-  import { useRouter } from 'vue-router';
+  import { useRouter, useRoute } from 'vue-router';
   import { QuillEditor } from '@vueup/vue-quill';
   import VLink from '@/components/v-link/VLink.vue';
   import VImageUploader from '@/components/v-image-uploader/VImageUploader.vue'
@@ -76,6 +80,7 @@
     },
     setup() {
       const router = useRouter();
+      const route = useRoute();
       const title = ref('');
       const header = ref('');
       const footer = ref('');
@@ -136,6 +141,53 @@
         header.value = await getDownloadURL(imageRef);
       }
 
+      const fetchTemplate = async() => {
+        const id = route.params.id;
+        try {
+          // Get the template with the specified ID
+          const docRef = doc(db, "templates", id);
+          const docSnapshot = await getDoc(docRef);
+
+          if (docSnapshot.exists()) {
+              // Document exists, you can access its data using docSnapshot.data()
+              const templateData = docSnapshot.data();
+              console.log(templateData);
+              
+              title.value = templateData.title;
+              header.value = templateData.header;
+              footer.value = templateData.footer;
+              let contents = templateData.content;
+              let contentsLength = contents.length;
+              editorCount.value = contentsLength;
+
+              contents.forEach((_, index) => {
+                quill.value.push(null); // Push null for each content item
+              });
+
+              setTimeout(() => {
+                for(let i=0; i < contents.length; i++)
+                {
+                  quill.value[i].setHTML(contents[i]);
+                }
+              }, 1000)
+              
+              
+              let timestamp = templateData.created.toDate().toLocaleString();
+              let createdDate = new Date(timestamp);
+              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+              let month = months[createdDate.getMonth()];
+              let day = createdDate.getDate();
+              let year = createdDate.getFullYear();
+              created.value = `${month} ${day}, ${year}`;
+
+          } else {
+              console.log("Document not found!");
+          }
+        } catch (error) {
+            console.error("Error fetching document:", error);
+        } 
+      }
+
       const triggerNotification = (type, header, message) => {
       
           notificationType.value = type;
@@ -168,17 +220,20 @@
           var userId = user.uid;
         }
         try {
-          await addDoc(collection(db, "templates"), {
-            title: title.value,
+          await addDoc(collection(db, "files"), {
+            document_name: title.value,
             content: quillContentArray,
             header: header.value,
             footer: footer.value,
             created_by: userId,
-            created: createdAt
+            created: createdAt,
+            last_updated: createdAt,
+            date_uploaded: createdAt,
+            status: 1
           });
 
-          let message = 'Template created successfully!';
-          router.push({ path: '/library-templates', query: { message } });
+          let message = 'Document created successfully!';
+          router.push({ path: '/library', query: { message } });
 
         } catch (error) {
           console.log("Error getting document:", error);
@@ -195,6 +250,8 @@
         quill.value = quill.value.splice(index, 1);
         hiddenEditors.value[index] = !hiddenEditors.value[index];
       };
+
+      onMounted(fetchTemplate)
 
       return {
         title,

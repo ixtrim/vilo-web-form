@@ -63,7 +63,7 @@
               :createdDate="template.created_at"
               :creatorName="template.createdByDetails.name"
               @preview="handlePreview(index)"
-              @create-new-document="handleCreateNewDocument(parseInt(template.id))"
+              @create-new-document="handleCreateNewDocument(template.id)"
               @delete-template="handleDelete(template.id)"
               @edit-template="handleEdit(template.id)"
               @duplicate-template="handleDuplicate(template.id)"
@@ -402,8 +402,8 @@ export default defineComponent({
     },
     handleDropdownClick(item: any) { 
     },
-    handleCreateNewDocument(id: number) {
-      this.$router.push('/new-library-template');
+    handleCreateNewDocument(id: any) {
+      this.$router.push('/new-library-document/'+id);
     },
     handleEdit(id: string) {
       this.$router.push('/edit-library-template/'+id);

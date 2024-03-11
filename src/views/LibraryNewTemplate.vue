@@ -55,6 +55,7 @@
   import { collection, addDoc, Timestamp } from 'firebase/firestore';
   import { getAuth } from 'firebase/auth';
   import { onMounted, ref, defineComponent, computed } from 'vue';
+  import { useRouter } from 'vue-router';
   import { QuillEditor } from '@vueup/vue-quill';
   import VLink from '@/components/v-link/VLink.vue';
   import VImageUploader from '@/components/v-image-uploader/VImageUploader.vue'
@@ -75,6 +76,7 @@
       VNotification,
     },
     setup() {
+      const router = useRouter();
       const title = ref('');
       const header = ref('');
       const footer = ref('');
@@ -172,11 +174,9 @@
             created: createdAt
           });
 
-          title.value = '';
-          title.content = '';
-          title.header = '';
-          title.footer = '';
-          triggerNotification('success', 'Success!', 'Template created successfully!');
+          let message = 'Template created successfully!';
+          router.push({ path: '/library-templates', query: { message } });
+          // triggerNotification('success', 'Success!', 'Template created successfully!');
         } catch (error) {
           console.log("Error getting document:", error);
           triggerNotification('error', 'Error!', 'Error while connecting with database.');

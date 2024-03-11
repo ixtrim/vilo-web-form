@@ -14,6 +14,8 @@
           <div class="row">
             <div class="col-lg-12 mb-4">
               <label style="font-weight: 500;margin-bottom: 6px;">Header</label>
+              <br v-if="header != ''"/>
+              <img :src="header" v-if="header != ''" width="70" style="margin-bottom:20px" />
               <VImageUploaderNoCropped v-model="header" @image-selected="HeaderHandler"/>
             </div>
           </div>
@@ -28,6 +30,8 @@
           <div class="row">
             <div class="col-lg-12 mb-4 mt-2">
               <label style="font-weight: 500;margin-bottom: 6px;">Footer</label>
+              <br v-if="footer != ''"/>
+              <img :src="footer" v-if="footer != ''" width="70" style="margin-bottom:20px" />
               <VImageUploaderNoCropped v-model="footer" @image-selected="FooterHandler"/>
             </div>
           </div>
@@ -201,6 +205,9 @@
               const templateData = docSnapshot.data();
               
               title.value = templateData.title;
+              header.value = templateData.header;
+              footer.value = templateData.footer;
+
               if(templateData.created_by)
               {
                 const userDocRef = doc(db, "users", templateData.created_by);
@@ -245,7 +252,7 @@
             console.error("Error fetching document:", error);
         } 
 
-        }
+      }
 
       onMounted(fetchTemplate)
 

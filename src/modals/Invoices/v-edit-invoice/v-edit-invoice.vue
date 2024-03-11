@@ -93,17 +93,6 @@
       </div>
     </div>
 
-    <div class="row invoice__payment">
-      <div class="col-lg-12">
-        <h5>PAYMENT INSTRUCTIONS</h5>
-        <p>{{ appName }}<br/>
-          Bank name: {{ bankName }}<br/>
-          SWIFT/IBAN: {{ swiftIban }}<br/>
-          Account number: {{ accountNumber }}<br/>
-        </p>
-        <p>For any questions please contact us at <a href="mailto:hi@vilo.com">hi@vilo.com</a></p>
-      </div>
-    </div>
   </div>
   <div class="modal-footer" v-if="(userRole === 0 || userRole === 2)  && invoiceStatus === '0'">
     <ul class="modal-footer__actions">
@@ -111,17 +100,7 @@
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
       </li>
       <li>
-        <v-button :block="false" size="md" styled="green" @click="statusChangeToPending" text="SendToClient"></v-button>
-      </li>
-    </ul>
-  </div>
-  <div class="modal-footer" v-if="(userRole === 0 || userRole === 2) && invoiceStatus === 1">
-    <ul class="modal-footer__actions">
-      <li>
-        <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
-      </li>
-      <li>
-        <v-button :block="false" size="md" styled="green" @click="statusChangeToPaid" text="Mark as paid"></v-button>
+        <v-button :block="false" size="md" styled="green" @click="statusChanges" text="Save Changes"></v-button>
       </li>
     </ul>
   </div>
@@ -199,7 +178,7 @@
   const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
   const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
 
-  const emit = defineEmits(['close-modal', 'invoice-pending', 'invoice-paid', 'invoice-refunded', 'invoice-cancelled']);
+  const emit = defineEmits(['close-modal', 'save-changes']);
 
   function formatDate(timestamp: Timestamp | undefined) {
     return timestamp ? timestamp.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown Date';
@@ -216,23 +195,8 @@
     emit('close-modal');
   }
 
-  function statusChangeToPending() {
-    emit('invoice-pending', props.invoice?.id);
-    closeModal();
-  }
-
-  function statusChangeToPaid() {
-    emit('invoice-paid', props.invoice?.id);
-    closeModal();
-  }
-
-  function statusChangeToRefunded() {
-    emit('invoice-refunded', props.invoice?.id);
-    closeModal();
-  }
-
-  function statusChangeToCancelled() {
-    emit('invoice-cancelled', props.invoice?.id);
+  function statusChanges() {
+    emit('save-changes', props.invoice?.id);
     closeModal();
   }
 
@@ -243,5 +207,4 @@
 
 <style>
   @import url(@/components/v-modal/v-modal.scss);
-  @import url(./v-edit-invoice.scss);
 </style>

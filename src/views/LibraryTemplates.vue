@@ -232,7 +232,7 @@ export default defineComponent({
     });
 
     const fetchTemplates = async() => {
-      const filesQuery = query(collection(db, "templates"), limit(10));
+      const filesQuery = query(collection(db, "templates"), orderBy("created", "desc"), limit(10));
       const querySnapshot = await getDocs(filesQuery);
       const templates = await Promise.all(querySnapshot.docs.map(async (docSnapshot) => {
       const Data = docSnapshot.data();

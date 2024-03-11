@@ -81,6 +81,9 @@
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader"
       :message="notificationMessage" :duration="7000" />
 
+    <VNotification ref="notification2Ref" :type="notification2Type" :header="notification2Header"
+      :message="notification2Message" :duration="7000" />
+
   </div>
 </template>
 
@@ -123,6 +126,7 @@ interface NotificationRef {
   showNotification: () => void;
 }
 
+
 export default defineComponent({
   components: {
     Search,
@@ -162,11 +166,12 @@ export default defineComponent({
     const itemsPerPage = ref(10);
     const searchTerm = ref('');
     const selectedTimeFrame = ref('all');
+    const isNotify = ref(false);
     const route = useRoute();
-    const notificationRef = ref(null);
-    const notificationType = ref('');
-    const notificationHeader = ref('');
-    const notificationMessage = ref('');
+    const notification2Ref = ref<any>(null);
+    const notification2Type = ref('');
+    const notification2Header = ref('');
+    const notification2Message = ref('');
 
     const sortTime = ref([
       { label: 'All', value: 'all' },
@@ -308,6 +313,19 @@ export default defineComponent({
           console.warn("File not found in the documents array.");
       }
       showDeleteModal.value = false;
+      triggerNotifications('success', 'Success', 'Template deleted successfully!');
+    }
+
+    const triggerNotifications = (type: string, header: string, message: string) => {
+      notification2Type.value = type;
+      notification2Header.value = header;
+      notification2Message.value = message;
+      
+      if (notification2Ref.value !== null) {
+        notification2Ref.value.showNotification();
+      } else {
+        console.error('Notification reference is null.');
+      }
     }
 
     return {
@@ -326,7 +344,13 @@ export default defineComponent({
       fetchTemplates,
       totalPages,
       currentPage,
-      updatePage
+      updatePage,
+      isNotify,
+      triggerNotifications,
+      notification2Ref,
+      notification2Type,
+      notification2Header,
+      notification2Message
     };
   },
   methods: {
@@ -409,7 +433,7 @@ export default defineComponent({
   mounted() {
     // Call the method to get the message from the URL when the component is mounted
     this.getMessageFromURL();
-  }
+  },
 });
 </script>
 

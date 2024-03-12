@@ -1,5 +1,8 @@
 <template>
-  <div class="container-fluid">
+  <div class="container-fluid library-document-template">
+
+
+    SSSSFEE
 
     <div class="row">
       <div class="col-lg-9">

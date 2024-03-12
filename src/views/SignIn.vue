@@ -40,62 +40,68 @@
 </template>
 
 <script lang="ts">
-  import { auth } from '@/firebase';
-  import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence, browserLocalPersistence } from 'firebase/auth';
-  import VButton from '@/components/v-button/VButton.vue';
-  import VInput from '@/components/v-input/VInput.vue';
-  import VLink from '@/components/v-link/VLink.vue';
+import { auth } from '@/firebase';
+import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence, browserLocalPersistence } from 'firebase/auth';
+import VButton from '@/components/v-button/VButton.vue';
+import VInput from '@/components/v-input/VInput.vue';
+import VLink from '@/components/v-link/VLink.vue';
 
-  export default {
-    components: {
-      VButton,
-      VInput,
-      VLink
+export default {
+  components: {
+    VButton,
+    VInput,
+    VLink
+  },
+  data() {
+    return {
+      email: '',
+      emailValidationMessage: '',
+      password: '',
+      passwordValidationMessage: '',
+      rememberMe: false,
+      loginErrorMessage: '',
+    };
+  },
+  methods: {
+    validateEmail() {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(this.email)) {
+        this.emailValidationMessage = 'Please enter a valid email address';
+      } else {
+        this.emailValidationMessage = '';
+      }
     },
-    data() {
-      return {
-        email: '',
-        emailValidationMessage: '',
-        password: '',
-        passwordValidationMessage: '',
-        rememberMe: false,
-        loginErrorMessage: '',
-      };
+    validatePassword() {
+      // Implement password validation logic here if needed
     },
-    methods: {
-      validateEmail() {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(this.email)) {
-          this.emailValidationMessage = 'Please enter a valid email address';
-        } else {
-          this.emailValidationMessage = '';
-        }
-      },
-      validatePassword() {
-      },
-      async handleSignIn() {
-        if (this.email && this.password) {
-          try {
-            const persistenceType = this.rememberMe ? browserLocalPersistence : browserSessionPersistence;
-            await setPersistence(auth, persistenceType);
+    SignInWithGoogle() {
+      console.log('Sign in with Google button clicked');
+    },
+    async handleSignIn() {
+      if (this.email && this.password) {
+        try {
+          // Set persistence based on the rememberMe checkbox
+          const persistenceType = this.rememberMe ? browserLocalPersistence : browserSessionPersistence;
+          await setPersistence(auth, persistenceType);
 
-            await signInWithEmailAndPassword(auth, this.email, this.password);
-            // Redirect the user after successful login
-            this.$router.push('/dashboard'); // Adjust the path as needed
-          } catch (error) {
-            if ((error as Error).message === 'Firebase: Error (auth/invalid-credential).') {
-              this.loginErrorMessage = 'Error: Wrong email address or password entered.';
-            } else {
-              this.loginErrorMessage = (error as Error).message;
-            }
+          await signInWithEmailAndPassword(auth, this.email, this.password);
+          // Redirect the user after successful login
+          this.$router.push('/dashboard'); // Adjust the path as needed
+        } catch (error) {
+          if ((error as Error).message === 'Firebase: Error (auth/invalid-credential).') {
+            this.loginErrorMessage = 'Error: Wrong email address or password entered.';
+          } else {
+            this.loginErrorMessage = (error as Error).message;
           }
-        } else {
-          this.loginErrorMessage = 'Please enter both email and password.';
         }
-      },
+      } else {
+        this.loginErrorMessage = 'Please enter both email and password.';
+      }
     },
-  };
+  },
+};
 </script>
+
 
 <style>
   @import url(./styles/sign-in.scss);

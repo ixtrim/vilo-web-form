@@ -41,7 +41,7 @@
 
 <script lang="ts">
   import { auth } from '@/firebase';
-  import { signInWithEmailAndPassword } from 'firebase/auth';
+  import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence, browserLocalPersistence } from 'firebase/auth';
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VLink from '@/components/v-link/VLink.vue';
@@ -73,12 +73,12 @@
       },
       validatePassword() {
       },
-      SignInWithGoogle() {
-        console.log('Sign in with Google button clicked');
-      },
       async handleSignIn() {
         if (this.email && this.password) {
           try {
+            const persistenceType = this.rememberMe ? browserLocalPersistence : browserSessionPersistence;
+            await setPersistence(auth, persistenceType);
+
             await signInWithEmailAndPassword(auth, this.email, this.password);
             // Redirect the user after successful login
             this.$router.push('/dashboard'); // Adjust the path as needed

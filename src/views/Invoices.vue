@@ -298,7 +298,6 @@ export default defineComponent({
     const isLoading = ref(false);
 
     const fetchInvoices = async () => {
-      alert(userStore.user.value?.id);
       isLoading.value = true;
       invoices.value = [];
       try {

@@ -299,9 +299,10 @@
       caseInvCode = caseDocSnap.data().inv_code || '';
     }
 
-    // Generate the invoice number
+    // Generate the invoice number with only the last two digits of the current year
+    const currentYear = new Date().getFullYear().toString().slice(-2); // Get last two digits of the year
     const currentDate = new Date();
-    const formattedDate = `${currentDate.getDate().toString().padStart(2, '0')}/${(currentDate.getMonth() + 1).toString().padStart(2, '0')}/${currentDate.getFullYear()}`;
+    const formattedDate = `${currentDate.getDate().toString().padStart(2, '0')}${(currentDate.getMonth() + 1).toString().padStart(2, '0')}${currentYear}`;
     invoiceNumber.value = `${clientInvCode}-${caseInvCode}-${formattedDate}`;
   }
 

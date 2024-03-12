@@ -26,6 +26,12 @@
           <VDropdown :title="dropdownClientTitle" :items="dropdownClient" @item-clicked="onClientChanged" />
         </div>
       </div>
+      <div class="col-lg-6">
+        <div class="form-group">
+          <label>Case:</label>
+          <VDropdown :title="dropdownCaseTitle" :items="dropdownCase" @item-clicked="onCaseChanged" />
+        </div>
+      </div>
     </div>
     
 
@@ -33,6 +39,7 @@
       <!-- Inside your <template> tag, within the <div class="invoice__table"> -->
       <table class="table table-bordered">
         <tbody>
+          
           <tr v-for="(item, index) in invoiceItems" :key="item.id">
             <td>
               <div class="form-group">
@@ -133,7 +140,7 @@
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
       </li>
       <li>
-        <v-button :block="false" size="md" styled="green" @click="saveInvoice" text="Save Changes"></v-button>
+        <v-button :block="false" size="md" styled="green" @click="addInvoice" text="Add Invoice"></v-button>
       </li>
     </ul>
   </div>
@@ -233,6 +240,9 @@
   const dropdownClientTitle = ref('Your clients');
   const localClient = ref('0');
   const dropdownClient: Ref<DropdownItem[]> = ref([]);
+  const dropdownCaseTitle = ref('Cases');
+  const localCase = ref('0');
+  const dropdownCase: Ref<DropdownItem[]> = ref([]);
 
   const fetchClients = async () => {
     const clientsQuery = query(collection(db, "users"), where("role", "in", [3, 4]));
@@ -248,11 +258,28 @@
     localClient.value = item.value;
   }
 
+  const fetchCases = async () => {
+    //const casesQuery = query(collection(db, "users"), where("role", "in", [3, 4]));
+    const casesQuery = query(collection(db, "cases"));
+    const querySnapshot = await getDocs(casesQuery);
+    dropdownCase.value = querySnapshot.docs.map(doc => ({
+      label: doc.data().title as string,
+      value: doc.id
+    }));
+  };
+
+  function onCaseChanged(item: DropdownItem) {
+    dropdownCaseTitle.value = item.label;
+    localCase.value = item.value;
+  }
+
   onMounted(async () => {
+    addItem();
     await fetchClients();
+    await fetchCases();
   });
 
-  const emit = defineEmits(['close-modal', 'save-changes']);
+  const emit = defineEmits(['close-modal', 'add-invoice']);
 
   const invoiceItems = ref(props.invoice ? [...props.invoice.invoiceItems] : []);
 
@@ -338,7 +365,7 @@
     emit('close-modal');
   }
 
-  async function saveInvoice() {
+  async function addInvoice() {
     // Check if props.invoice is defined and has an id
     const invoiceId = props.invoice?.id;
     if (!invoiceId) {
@@ -389,7 +416,7 @@
 
     try {
       await batch.commit();
-      emit('save-changes', {
+      emit('add-invoice', {
         ...props.invoice,
         ...updatedInvoiceData,
         invoiceItems: invoiceItems.value,

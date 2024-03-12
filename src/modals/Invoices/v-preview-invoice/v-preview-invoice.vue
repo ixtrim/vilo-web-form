@@ -237,7 +237,7 @@ watch(() => props.invoice, (newInvoice) => {
   console.log("Invoice prop updated", newInvoice);
 }, { deep: true });
 
-function calculateItemAmount(item) {
+function calculateItemAmount(item: any) {
   const amount = (item.price * item.quantity) - (item.price * item.quantity * item.discount / 100);
   return amount;
 }

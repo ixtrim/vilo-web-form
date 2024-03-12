@@ -48,6 +48,49 @@
           </div>
 
           <div class="row">
+            <div class="col-lg-6">
+              <div class="row">
+                <div class="form-group">
+                  <label>Client signature</label>
+                  <br v-if="client_signature != ''"/>
+                  <img :src="client_signature" v-if="client_signature != ''" width="100" style="margin-bottom:20px" />
+                  <VImageUploaderNoCropped v-model="client_signature" @image-selected="ClientSignatureHandler"/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="form-group">
+                  <VInput label="Client name:" placeholder="ex. William Jackson" v-model="client_name" />
+                </div>
+              </div>
+              <div class="row">
+                <div class="form-group">
+                  <VInput label="Document title" placeholder="ex. CTO" v-model="client_title" />
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="row">
+                <div class="form-group">
+                  <label>Consultant signature</label>
+                  <br v-if="consultant_signature != ''"/>
+                  <img :src="consultant_signature" v-if="consultant_signature != ''" width="100" style="margin-bottom:20px" />
+                  <VImageUploaderNoCropped v-model="consultant_signature" @image-selected="ConsultantSignatureHandler"/>
+                </div>
+              </div>
+              <div class="row">
+                <div class="form-group">
+                  <VInput label="Consultant name:" placeholder="ex. William Jackson" v-model="consultant_name" />
+                </div>
+              </div>
+              <div class="row">
+                <div class="form-group">
+                  <VInput label="Document title" placeholder="ex. CTO" v-model="consultant_title" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
             <div class="col-lg-12 mb-4 mt-5">
               <div class="form-group">
                 <label>Document footer image</label>
@@ -113,6 +156,12 @@
       const content = ref([]);
       const created = ref(null);
       const created_by = ref(null);
+      const client_name = ref('');
+      const client_title = ref('');
+      const client_signature = ref('');
+      const consultant_name = ref('');
+      const consultant_title = ref('');
+      const consultant_signature = ref('');
       const notificationRef = ref(null);
       const notificationType = ref('');
       const notificationHeader = ref('');
@@ -127,6 +176,40 @@
         { text: 'Library', to: '/library' },
         { text: 'Edit document' || 'Loading case...' }
       ]);
+
+      const ConsultantSignatureHandler = async (dataUrl) =>{
+        
+        const base64String = dataUrl.split(',')[1];
+        const byteCharacters = atob(base64String);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+        let loc = `files/consultants_signatures/${Math.random().toString(22).slice(2)}.jpg`;
+        const imageRef = storageRef(storage, loc);
+        await uploadBytes(imageRef, blob);
+        consultant_signature.value = await getDownloadURL(imageRef);
+      }
+
+      const ClientSignatureHandler = async (dataUrl) =>{
+        
+        const base64String = dataUrl.split(',')[1];
+        const byteCharacters = atob(base64String);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+        let loc = `files/clients_signatures/${Math.random().toString(22).slice(2)}.jpg`;
+        const imageRef = storageRef(storage, loc);
+        await uploadBytes(imageRef, blob);
+        client_signature.value = await getDownloadURL(imageRef);
+      }
 
       const FooterHandler = async (dataUrl) =>{
         
@@ -198,6 +281,12 @@
             content: quillContentArray,
             header: header.value,
             footer: footer.value,
+            client_name: client_name.value,
+            client_title: client_title.value,
+            client_signature: client_signature.value,
+            consultant_name: consultant_name.value,
+            consultant_title: consultant_title.value,
+            consultant_signature: consultant_signature.value,
             last_updated: createdAt,
           });
 
@@ -233,6 +322,12 @@
               const templateData = docSnapshot.data();
               
               title.value = templateData.document_name;
+              client_name.value = templateData.client_name;
+              client_title.value = templateData.client_title;
+              client_signature.value = templateData.client_signature;
+              consultant_name.value = templateData.consultant_name;
+              consultant_signature.value = templateData.consultant_signature;
+              consultant_title.value = templateData.consultant_title;
               header.value = templateData.header;
               footer.value = templateData.footer;
 
@@ -289,10 +384,18 @@
         header,
         footer,
         content,
+        client_name,
+        client_title,
+        client_signature,
+        consultant_name,
+        consultant_title,
+        consultant_signature,
         created,
         created_by,
         FooterHandler,
         HeaderHandler,
+        ClientSignatureHandler,
+        ConsultantSignatureHandler,
         notificationRef,
         saveFileChanges,
         addPage,

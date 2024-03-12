@@ -111,11 +111,11 @@
                 </div>
                 <div class="col col--l-delete">
                   <!-- <VLink to="#" styled="secondary" @click="deleteDocumentAction(file)">Delete</VLink> -->
-                  <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="deleteDocumentAction(file)" text=""></VButton>
+                  <VButton :block="false" size="sm" styled="link-gray" @click="deleteDocumentAction(file)" text="Delete"></VButton>
                 </div>
                 <div class="col col--l-edit">
                   <!-- <VLink to="#" @click="addDocument" styled="primary">Edit</VLink> -->
-                  <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="editDocument(file.id)" text=""></VButton>
+                  <VButton :block="false" size="sm" styled="link" @click="editDocument(file.id)" text="Edit"></VButton>
                 </div>
               </div>
             </div>

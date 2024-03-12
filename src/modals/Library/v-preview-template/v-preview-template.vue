@@ -2,21 +2,23 @@
     <div class="modal-body">
       <div class="row">
         <div class="col-md-12">
-            <img :src="header" width="120" />
+            <img :src="header" style="width: 100%; max-width: 100%; height: auto; max-height: 120px; margin: 0 auto 20px auto;" />
         </div>
         <div class="col-md-12" v-if="content">
             <div v-for="(item, index) in content" v-html="item"></div>
         </div>
         <div class="col-md-12">
-            <img :src="footer || ''" width="120" />
+            <img :src="footer || ''" style="width: 100%; max-width: 100%; height: auto; max-height: 120px; margin: 0 auto 20px auto;" />
         </div>
       </div>
     </div>
     <div class="modal-footer">
       <ul class="modal-footer__actions">
+        <li></li>
         <li>
           <v-button :block="true" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
         </li>
+        <li></li>
       </ul>
     </div>
   </template>

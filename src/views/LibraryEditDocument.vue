@@ -51,7 +51,7 @@
             <div class="col-lg-6">
               <div class="row">
                 <div class="form-group">
-                  <label>Client signature</label>
+                  <label>Signature</label>
                   <br v-if="client_signature != ''"/>
                   <img :src="client_signature" v-if="client_signature != ''" width="100" style="margin-bottom:20px" />
                   <VImageUploaderNoCropped v-model="client_signature" @image-selected="ClientSignatureHandler"/>
@@ -59,19 +59,19 @@
               </div>
               <div class="row">
                 <div class="form-group">
-                  <VInput label="Client name:" placeholder="ex. William Jackson" v-model="client_name" />
+                  <VInput label="Full name:" placeholder="ex. William Jackson" v-model="client_name" />
                 </div>
               </div>
               <div class="row">
                 <div class="form-group">
-                  <VInput label="Document title" placeholder="ex. CTO" v-model="client_title" />
+                  <VInput label="Title" placeholder="ex. CTO" v-model="client_title" />
                 </div>
               </div>
             </div>
             <div class="col-lg-6">
               <div class="row">
                 <div class="form-group">
-                  <label>Consultant signature</label>
+                  <label>Signature</label>
                   <br v-if="consultant_signature != ''"/>
                   <img :src="consultant_signature" v-if="consultant_signature != ''" width="100" style="margin-bottom:20px" />
                   <VImageUploaderNoCropped v-model="consultant_signature" @image-selected="ConsultantSignatureHandler"/>
@@ -79,12 +79,12 @@
               </div>
               <div class="row">
                 <div class="form-group">
-                  <VInput label="Consultant name:" placeholder="ex. William Jackson" v-model="consultant_name" />
+                  <VInput label="Full name:" placeholder="ex. William Jackson" v-model="consultant_name" />
                 </div>
               </div>
               <div class="row">
                 <div class="form-group">
-                  <VInput label="Document title" placeholder="ex. CTO" v-model="consultant_title" />
+                  <VInput label="Title" placeholder="ex. CTO" v-model="consultant_title" />
                 </div>
               </div>
             </div>

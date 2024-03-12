@@ -438,17 +438,16 @@
 
     // Prepare the invoice data
     const newInvoiceData = {
-      client_id: localClient.value, // Assuming you've set this from dropdown
-      case: localCase.value, // Assuming you've set this from dropdown
+      client_id: localClient.value,
+      case: localCase.value,
       created: Timestamp.fromDate(new Date(invoiceCreated.value)),
       due_date: Timestamp.fromDate(new Date(invoiceDueDate.value)),
       number: String(invoiceNumber.value),
-      status: 0, // Assuming 0 is the default status for new invoices
+      status: 0,
       sales_taxes: Number(salesTaxes.value),
       subtotal_amount: Number(subtotal.value),
       total_amount: Number(totalAmount.value),
       total_discount: Number(totalDiscount.value),
-      // Add any other fields you need
     };
 
     try {

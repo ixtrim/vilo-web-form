@@ -2,6 +2,18 @@
   <div class="container-fluid library-document-template">
 
     <div class="row">
+      <div class="col-lg-12">
+        <VBreadcrumbs :breadcrumbItems="breadcrumbs" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 dashboard__line mt-0">
+        <hr />
+      </div>
+    </div>
+
+    <div class="row">
       <div class="col-lg-9">
         <div class="dashboard__heading mb-0">
 
@@ -71,17 +83,18 @@
   import VInput from '@/components/v-input/VInput.vue';
   import VButton from '@/components/v-button/VButton.vue';
   import VNotification from '@/components/v-notification/VNotification.vue';
+  import VBreadcrumbs from '@/components/v-breadcrumbs/VBreadcrumbs.vue';
 
   import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
   export default {
     components: {
       VInput,
-      VImageUploader,
       VImageUploaderNoCropped,
       QuillEditor,
       VButton,
       VNotification,
+      VBreadcrumbs,
     },
     setup() {
       const router = useRouter();
@@ -101,6 +114,13 @@
       const quillContent = ref([]);
       const auth = getAuth();
       const hiddenEditors = ref([]);
+
+
+
+      const breadcrumbs = computed(() => [
+      { text: 'Library Templates', to: '/library-templates' },
+        { text: 'Edit template' || 'Loading case...' }
+      ]);
 
       const FooterHandler = async (dataUrl) =>{
         
@@ -272,6 +292,7 @@
         editorCount,
         toggleEditor,
         hiddenEditors,
+        breadcrumbs,
       };
     },
     methods: {

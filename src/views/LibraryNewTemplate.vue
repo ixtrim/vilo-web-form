@@ -25,32 +25,46 @@
 
           <div class="row">
             <div class="col-lg-12 mb-4">
-              <label style="font-weight: 500;margin-bottom: 6px;">Header</label>
-              <VImageUploaderNoCropped v-model="header" @image-selected="HeaderHandler"/>
+              <div class="form-group">
+                <label>Header image:</label>
+                <br v-if="header != ''"/>
+                <img :src="header" v-if="header != ''" style="margin-bottom:20px" />
+                <VImageUploaderNoCropped v-model="header" @image-selected="HeaderHandler"/>
+              </div>
             </div>
           </div>
           
-          <div class="row mb-5">
+          <div class="row mb-2 editors">
             <div class="col-lg-12 relative" v-for="(item, index) in editorCount">
               <QuillEditor v-if="!hiddenEditors[index]" toolbar="essential" theme="snow" :ref="el => { quill[index] = el }" @change="updateContent" contentType="html" />
-              <button class="quitBtn" v-if="!hiddenEditors[index] && index != 0" @click="toggleEditor(index)">X</button>
+              <div class="page_delete" v-if="!hiddenEditors[index] && index != 0">
+                <v-button v-if="!hiddenEditors[index] && index != 0" :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="toggleEditor(index)" text=""></v-button>
+              </div>
             </div>
+          </div>
+
+          <div class="row mb-5 add-new-page">
+            <VButton :block="true" size="sm" icon="left" icon-style="add-blue" styled="secondary" @click="addPage" text="Add another page"></VButton>
           </div>
 
           <div class="row">
             <div class="col-lg-12 mb-4 mt-2">
-              <label style="font-weight: 500;margin-bottom: 6px;">Footer</label>
-              <VImageUploaderNoCropped v-model="footer" @image-selected="FooterHandler"/>
+              <div class="form-group">
+                <label>Document footer image</label>
+                <br v-if="footer != ''"/>
+                <img :src="footer" v-if="footer != ''" width="100" style="margin-bottom:20px" />
+                <VImageUploaderNoCropped v-model="footer" @image-selected="FooterHandler"/>
+              </div>
             </div>
           </div>
 
 
         </div>
       </div>
-      <div class="col-lg-3 align-right">
-        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="addDocument" text="Create new document"></VButton>
-        <br/>
-        <VButton :block="true" size="sm" icon="left" icon-style="add-blue" styled="secondary" @click="addPage" text="Add another page"></VButton>
+      <div class="col-lg-3 align-right meta-column">
+        <div class="meta-column__fixed">
+          <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="addDocument" text="Create new document"></VButton>
+        </div>
       </div>
     </div>
 

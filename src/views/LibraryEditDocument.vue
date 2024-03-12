@@ -28,7 +28,7 @@
               <div class="form-group">
                 <label>Header image:</label>
                 <br v-if="header != ''"/>
-                <img :src="header" v-if="header != ''" width="70" style="margin-bottom:20px" />
+                <img :src="header" v-if="header != ''" style="margin-bottom:20px" />
                 <VImageUploaderNoCropped v-model="header" @image-selected="HeaderHandler"/>
               </div>
             </div>

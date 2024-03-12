@@ -403,7 +403,7 @@ export default defineComponent({
     handleDropdownClick(item: any) { 
     },
     handleCreateNewDocument(id: any) {
-      this.$router.push('/new-library-document/'+id);
+      this.$router.push('/new-library-template-document/'+id);
     },
     handleEdit(id: string) {
       this.$router.push('/edit-library-template/'+id);

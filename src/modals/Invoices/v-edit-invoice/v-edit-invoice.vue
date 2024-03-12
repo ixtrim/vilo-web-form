@@ -141,7 +141,7 @@
   import firebase from 'firebase/app';
   import 'firebase/firestore';
   import { db } from '@/firebase.js';
-  import { updateDoc, doc, Timestamp } from 'firebase/firestore';
+  import { updateDoc, doc, Timestamp, collection, writeBatch, getDocs } from 'firebase/firestore';
   import { defineEmits, defineProps, ref, watch, computed } from 'vue';
   import type { PropType } from 'vue';
   import VInput from '@/components/v-input/VInput.vue';
@@ -315,32 +315,56 @@
       return;
     }
 
-    // Convert JavaScript Date to Firestore Timestamp
-    const updatedCreated = Timestamp.fromDate(new Date(invoiceCreated.value));
-    const updatedDueDate = Timestamp.fromDate(new Date(invoiceDueDate.value));
+    // Ensure all recalculations are done directly here
+    const recalculatedSubtotal = invoiceItems.value.reduce((acc, item) => acc + (item.quantity * item.price) - (item.quantity * item.price * item.discount / 100), 0);
+    const recalculatedTotalDiscount = invoiceItems.value.reduce((acc, item) => acc + (item.quantity * item.price * item.discount / 100), 0);
+    const recalculatedSalesTaxes = recalculatedSubtotal * (taxRate.value / 100);
+    const recalculatedTotalAmount = recalculatedSubtotal + recalculatedSalesTaxes - recalculatedTotalDiscount;
 
-    // Firestore document reference
+    const updatedInvoiceData = {
+      created: Timestamp.fromDate(new Date(invoiceCreated.value)),
+      due_date: Timestamp.fromDate(new Date(invoiceDueDate.value)),
+      sales_taxes: Number(recalculatedSalesTaxes),
+      subtotal_amount: Number(recalculatedSubtotal),
+      total_amount: Number(recalculatedTotalAmount),
+      total_discount: Number(recalculatedTotalDiscount),
+    };
+
+    const batch = writeBatch(db);
+
+    // Update the main invoice document
     const invoiceRef = doc(db, "invoices", props.invoice.id);
+    batch.update(invoiceRef, updatedInvoiceData);
+
+    // Delete existing invoice items
+    const existingItemsRef = collection(db, `invoices/${props.invoice.id}/invoice_items`);
+    const existingItemsSnapshot = await getDocs(existingItemsRef);
+    existingItemsSnapshot.forEach((docSnapshot) => {
+      batch.delete(doc(db, `invoices/${props.invoice.id}/invoice_items`, docSnapshot.id));
+    });
+
+    // Add new/updated invoice items
+    invoiceItems.value.forEach((item) => {
+      const newItemRef = doc(collection(db, `invoices/${props.invoice.id}/invoice_items`));
+      batch.set(newItemRef, {
+        item: item.item,
+        quantity: item.quantity,
+        price: item.price,
+        discount: item.discount,
+        amount: (item.quantity * item.price) - (item.quantity * item.price * item.discount / 100),
+      });
+    });
 
     try {
-      await updateDoc(invoiceRef, {
-        created: updatedCreated,
-        due_date: updatedDueDate,
-        // Include any other invoice fields you wish to update
-      });
-
-      // Here, add logic to update invoice items in your database
-      // This might involve a batch operation or individual updates
-
+      await batch.commit();
       emit('save-changes', {
         ...props.invoice,
-        created: updatedCreated,
-        due_date: updatedDueDate,
-        invoiceItems: invoiceItems.value, // Ensure this matches your backend structure
+        ...updatedInvoiceData,
+        invoiceItems: invoiceItems.value,
       });
       closeModal();
     } catch (error) {
-      console.error("Error updating document: ", error);
+      console.error("Error saving changes to Firestore: ", error);
     }
   }
 

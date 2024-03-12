@@ -36,6 +36,12 @@
       }
     }
 
+    .dropdown-toggle,
+    .dropdown-item {
+      font-size: 12px!important;
+      color: var(--v-gray-600)!important;
+    }
+
     .invoice {
       &__meta {
 

@@ -1,5 +1,11 @@
 <template>
-  <div class="container-fluid">
+  <div class="container-fluid library-document-template">
+
+    <div class="row">
+      <div class="col-lg-12">
+        <VBreadcrumbs :breadcrumbItems="breadcrumbs" />
+      </div>
+    </div>
 
     <div class="row">
       <div class="col-lg-9">

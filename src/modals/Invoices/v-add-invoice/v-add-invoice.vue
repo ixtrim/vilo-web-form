@@ -2,7 +2,7 @@
   <div class="modal-body invoice">
     <div class="row invoice__meta">
       <div class="col-lg-12">
-        <h4>Edit Invoice number: {{ invoiceNumber }}</h4>
+        <h4>Add New Invoice: </h4>
       </div>
     </div>
     <div class="row invoice__meta mt-2 mb-2">
@@ -19,10 +19,12 @@
         </div>
       </div>
     </div>
-    <div class="row invoice__meta">
-      <div class="col-lg-12">
-        <strong>Billed to:</strong>
-        <span>{{ clientName }}<br/>{{ clientEmail }} | {{ clientPhone }}<br/>{{ clientAddress }}</span>
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="form-group">
+          <label>Billed to:</label>
+          <VDropdown :title="dropdownClientTitle" :items="dropdownClient" @item-clicked="onClientChanged" />
+        </div>
       </div>
     </div>
     
@@ -141,8 +143,9 @@
   import firebase from 'firebase/app';
   import 'firebase/firestore';
   import { db } from '@/firebase.js';
-  import { updateDoc, doc, Timestamp, collection, writeBatch, getDocs } from 'firebase/firestore';
-  import { defineEmits, defineProps, ref, watch, computed } from 'vue';
+  import { updateDoc, doc, Timestamp, collection, writeBatch, getDocs, query, where } from 'firebase/firestore';
+  import { defineEmits, defineProps, ref, watch, computed, onMounted, } from 'vue';
+  import type { Ref } from 'vue';
   import type { PropType } from 'vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
@@ -186,6 +189,11 @@
     value: string;
   }
 
+  interface User {
+    full_name: string;
+    id: string;
+  }
+
   const props = defineProps({
     invoice: Object as PropType<Invoice>,
     generalSettings: {
@@ -222,6 +230,27 @@
   const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
   const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
   const taxRate = ref(25);
+  const dropdownClientTitle = ref('Your clients');
+  const localClient = ref('0');
+  const dropdownClient: Ref<DropdownItem[]> = ref([]);
+
+  const fetchClients = async () => {
+    const clientsQuery = query(collection(db, "users"), where("role", "in", [3, 4]));
+    const querySnapshot = await getDocs(clientsQuery);
+    dropdownClient.value = querySnapshot.docs.map(doc => ({
+      label: doc.data().full_name as string,
+      value: doc.id
+    }));
+  };
+
+  function onClientChanged(item: DropdownItem) {
+    dropdownClientTitle.value = item.label;
+    localClient.value = item.value;
+  }
+
+  onMounted(async () => {
+    await fetchClients();
+  });
 
   const emit = defineEmits(['close-modal', 'save-changes']);
 

@@ -310,12 +310,14 @@
   }
 
   async function statusChanges() {
-    if (!props.invoice) {
+    // Check if props.invoice is defined and has an id
+    const invoiceId = props.invoice?.id;
+    if (!invoiceId) {
       console.error("Invoice data is not available.");
       return;
     }
 
-    // Ensure all recalculations are done directly here
+    // Proceed with recalculations and Firestore operations
     const recalculatedSubtotal = invoiceItems.value.reduce((acc, item) => acc + (item.quantity * item.price) - (item.quantity * item.price * item.discount / 100), 0);
     const recalculatedTotalDiscount = invoiceItems.value.reduce((acc, item) => acc + (item.quantity * item.price * item.discount / 100), 0);
     const recalculatedSalesTaxes = recalculatedSubtotal * (taxRate.value / 100);
@@ -332,20 +334,20 @@
 
     const batch = writeBatch(db);
 
-    // Update the main invoice document
-    const invoiceRef = doc(db, "invoices", props.invoice.id);
+    // Update the main invoice document using invoiceId
+    const invoiceRef = doc(db, "invoices", invoiceId);
     batch.update(invoiceRef, updatedInvoiceData);
 
-    // Delete existing invoice items
-    const existingItemsRef = collection(db, `invoices/${props.invoice.id}/invoice_items`);
+    // Delete existing invoice items using invoiceId
+    const existingItemsRef = collection(db, `invoices/${invoiceId}/invoice_items`);
     const existingItemsSnapshot = await getDocs(existingItemsRef);
     existingItemsSnapshot.forEach((docSnapshot) => {
-      batch.delete(doc(db, `invoices/${props.invoice.id}/invoice_items`, docSnapshot.id));
+      batch.delete(doc(db, `invoices/${invoiceId}/invoice_items`, docSnapshot.id));
     });
 
-    // Add new/updated invoice items
+    // Add new/updated invoice items using invoiceId
     invoiceItems.value.forEach((item) => {
-      const newItemRef = doc(collection(db, `invoices/${props.invoice.id}/invoice_items`));
+      const newItemRef = doc(collection(db, `invoices/${invoiceId}/invoice_items`));
       batch.set(newItemRef, {
         item: item.item,
         quantity: item.quantity,
@@ -367,6 +369,7 @@
       console.error("Error saving changes to Firestore: ", error);
     }
   }
+
 
   function saveAndClose() {
     closeModal();

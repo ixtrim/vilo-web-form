@@ -117,7 +117,7 @@
           </div>
           <div class="row">
             <div class="col-lg-9">
-              <span>Sales Taxes:</span>
+              <span>GCT Tax:</span>
             </div>
             <div class="col-lg-3">
               <span>{{ formatCurrency(salesTaxes) }}</span>

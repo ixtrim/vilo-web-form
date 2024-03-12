@@ -2,7 +2,7 @@
   <div class="modal-body invoice">
     <div class="row invoice__meta">
       <div class="col-lg-12">
-        <h4>Add New Invoice: </h4>
+        <h4>Add New Invoice: <span class="clientCode">VILO</span>-<span class="caseCode">CASE</span>-000</h4>
       </div>
     </div>
     <div class="row invoice__meta mt-2 mb-2">
@@ -150,7 +150,7 @@
   import firebase from 'firebase/app';
   import 'firebase/firestore';
   import { db } from '@/firebase.js';
-  import { updateDoc, doc, Timestamp, collection, writeBatch, getDocs, query, where } from 'firebase/firestore';
+  import { updateDoc, getDoc, doc, Timestamp, collection, writeBatch, getDocs, query, where, addDoc } from 'firebase/firestore';
   import { defineEmits, defineProps, ref, watch, computed, onMounted, } from 'vue';
   import type { Ref } from 'vue';
   import type { PropType } from 'vue';
@@ -366,67 +366,45 @@
   }
 
   async function addInvoice() {
-    // Check if props.invoice is defined and has an id
-    const invoiceId = props.invoice?.id;
-    if (!invoiceId) {
-      console.error("Invoice data is not available.");
-      return;
-    }
-
-    // Proceed with recalculations and Firestore operations
-    const recalculatedSubtotal = invoiceItems.value.reduce((acc, item) => acc + (item.quantity * item.price) - (item.quantity * item.price * item.discount / 100), 0);
-    const recalculatedTotalDiscount = invoiceItems.value.reduce((acc, item) => acc + (item.quantity * item.price * item.discount / 100), 0);
-    const recalculatedSalesTaxes = recalculatedSubtotal * (taxRate.value / 100);
-    const recalculatedTotalAmount = recalculatedSubtotal + recalculatedSalesTaxes - recalculatedTotalDiscount;
-
-    const updatedInvoiceData = {
+    // Prepare the invoice data
+    const newInvoiceData = {
+      client_id: localClient.value, // Assuming you've set this from dropdown
+      case: localCase.value, // Assuming you've set this from dropdown
       created: Timestamp.fromDate(new Date(invoiceCreated.value)),
       due_date: Timestamp.fromDate(new Date(invoiceDueDate.value)),
-      sales_taxes: Number(recalculatedSalesTaxes),
-      subtotal_amount: Number(recalculatedSubtotal),
-      total_amount: Number(recalculatedTotalAmount),
-      total_discount: Number(recalculatedTotalDiscount),
+      number: "VILO-SARA-001", // You need to generate or input this
+      status: 0, // Assuming 0 is the default status for new invoices
+      sales_taxes: Number(salesTaxes.value),
+      subtotal_amount: Number(subtotal.value),
+      total_amount: Number(totalAmount.value),
+      total_discount: Number(totalDiscount.value),
+      // Add any other fields you need
     };
 
-    const batch = writeBatch(db);
-
-    // Update the main invoice document using invoiceId
-    const invoiceRef = doc(db, "invoices", invoiceId);
-    batch.update(invoiceRef, updatedInvoiceData);
-
-    // Delete existing invoice items using invoiceId
-    const existingItemsRef = collection(db, `invoices/${invoiceId}/invoice_items`);
-    const existingItemsSnapshot = await getDocs(existingItemsRef);
-    existingItemsSnapshot.forEach((docSnapshot) => {
-      batch.delete(doc(db, `invoices/${invoiceId}/invoice_items`, docSnapshot.id));
-    });
-
-    // Add new/updated invoice items using invoiceId
-    invoiceItems.value.forEach((item) => {
-      const itemAmount = (item.quantity * item.price) - (item.quantity * item.price * (item.discount / 100));
-      const newItemRef = doc(collection(db, `invoices/${invoiceId}/invoice_items`));
-      batch.set(newItemRef, {
-        item: item.item,
-        quantity: item.quantity,
-        price: item.price,
-        discount: item.discount,
-        amount: itemAmount,
-      });
-    });
-
     try {
-      await batch.commit();
-      emit('add-invoice', {
-        ...props.invoice,
-        ...updatedInvoiceData,
-        invoiceItems: invoiceItems.value,
+      // Add the new invoice document to Firestore
+      const invoiceRef = await addDoc(collection(db, "invoices"), newInvoiceData);
+
+      // Add invoice items to the new invoice's subcollection
+      const batch = writeBatch(db);
+      invoiceItems.value.forEach((item) => {
+        const itemRef = doc(collection(db, `invoices/${invoiceRef.id}/invoice_items`));
+        batch.set(itemRef, {
+          item: item.item,
+          quantity: item.quantity,
+          price: item.price,
+          discount: item.discount,
+          amount: (item.quantity * item.price) - (item.quantity * item.price * (item.discount / 100)),
+        });
       });
+      await batch.commit();
+
+      emit('add-invoice', newInvoiceData); // You might want to adjust what you emit here
       closeModal();
     } catch (error) {
-      console.error("Error saving changes to Firestore: ", error);
+      console.error("Error adding new invoice to Firestore: ", error);
     }
   }
-
 
   function saveAndClose() {
     closeModal();

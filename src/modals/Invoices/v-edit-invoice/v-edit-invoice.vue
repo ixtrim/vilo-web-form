@@ -347,13 +347,14 @@
 
     // Add new/updated invoice items using invoiceId
     invoiceItems.value.forEach((item) => {
+      const itemAmount = (item.quantity * item.price) - (item.quantity * item.price * (item.discount / 100));
       const newItemRef = doc(collection(db, `invoices/${invoiceId}/invoice_items`));
       batch.set(newItemRef, {
         item: item.item,
         quantity: item.quantity,
         price: item.price,
         discount: item.discount,
-        amount: (item.quantity * item.price) - (item.quantity * item.price * item.discount / 100),
+        amount: itemAmount,
       });
     });
 

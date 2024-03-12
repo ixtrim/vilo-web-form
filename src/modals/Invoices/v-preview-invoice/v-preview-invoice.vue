@@ -111,7 +111,7 @@
         <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
       </li>
       <li>
-        <v-button :block="false" size="md" styled="green" @click="statusChangeToPending" text="SendToClient"></v-button>
+        <v-button :block="false" size="md" styled="green" @click="statusChangeToPending" text="Send To Client"></v-button>
       </li>
     </ul>
   </div>

@@ -140,7 +140,8 @@
                 <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="deleteInvoice(invoice.id)" text=""></VButton>
               </div>
               <div class="col col--inv-action" v-if="notClient">
-                <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditInvoiceModal(invoice)" text=""></VButton>
+                <VButton v-if="notClient && (invoice.status === 0 || invoice.status === 1)" :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditInvoiceModal(invoice)" text=""></VButton>
+                <span v-else>&nbsp;</span>
               </div>
             </div>
 

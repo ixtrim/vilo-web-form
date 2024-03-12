@@ -47,7 +47,7 @@
             <td class="align-center">{{ item.quantity }}</td>
             <td>{{ formatCurrency(item.price) }}</td>
             <td>{{ formatCurrency(item.discount) }}</td>
-            <td>{{ formatCurrency(item.amount) }}</td>
+            <td>{{ formatCurrency(calculateItemAmount(item)) }}</td>
           </tr>
         </tbody>
       </table>
@@ -159,118 +159,129 @@
 </template>
 
 <script setup lang="ts">
-  import { defineEmits, defineProps, ref, watch, computed } from 'vue';
-  import { Timestamp } from 'firebase/firestore';
-  import type { PropType } from 'vue';
-  import VButton from '@/components/v-button/VButton.vue';
+import { defineEmits, defineProps, computed, watch } from 'vue';
+import { Timestamp } from 'firebase/firestore';
+import type { PropType } from 'vue';
+import VButton from '@/components/v-button/VButton.vue';
 
-  type Invoice = {
-    id: string;
-    number: string;
-    case: string;
-    created: Timestamp;
-    due_date: Timestamp;
-    status: number;
-    client_id: string;
-    sales_taxes: number;
-    subtotal_amount: number;
-    total_amount: number;
-    total_discount: number;
-    clientName: string;
-    clientEmail: string;
-    clientPhone: string;
-    clientAddress: string;
-    clientAvatar: string;
-    caseTitle: string;
-    invoiceItems: InvoiceItem[];
-  };
+type Invoice = {
+  id: string;
+  number: string;
+  case: string;
+  created: Timestamp;
+  due_date: Timestamp;
+  status: number;
+  client_id: string;
+  sales_taxes: number;
+  subtotal_amount: number;
+  total_amount: number;
+  total_discount: number;
+  clientName: string;
+  clientEmail: string;
+  clientPhone: string;
+  clientAddress: string;
+  clientAvatar: string;
+  caseTitle: string;
+  invoiceItems: InvoiceItem[];
+};
 
-  interface InvoiceItem {
-    id: string;
-    item: string;
-    quantity: number;
-    price: number;
-    discount: number;
-    amount: number;
-  }
+interface InvoiceItem {
+  id: string;
+  item: string;
+  quantity: number;
+  price: number;
+  discount: number;
+  amount: number;
+}
 
-  const props = defineProps({
-    invoice: Object as PropType<Invoice>,
-    generalSettings: {
-      type: Object as PropType<{
-        app_name?: string;
-      }>,
-      default: () => ({})
-    },
-    billingSettings: {
-      type: Object as PropType<{
-        bank_name?: string;
-        swift_iban?: string;
-        account_number?: string;
-      }>,
-      default: () => ({})
-    },
-    userRole: Number
-  });
+const props = defineProps({
+  invoice: Object as PropType<Invoice>,
+  generalSettings: {
+    type: Object as PropType<{
+      app_name?: string;
+    }>,
+    default: () => ({})
+  },
+  billingSettings: {
+    type: Object as PropType<{
+      bank_name?: string;
+      swift_iban?: string;
+      account_number?: string;
+    }>,
+    default: () => ({})
+  },
+  userRole: Number
+});
 
-  const appName = computed(() => props.generalSettings?.app_name || 'Default App Name');
-  const bankName = computed(() => props.billingSettings?.bank_name || 'Default Bank Name');
-  const swiftIban = computed(() => props.billingSettings?.swift_iban || 'Default SWIFT/IBAN');
-  const accountNumber = computed(() => props.billingSettings?.account_number || 'Default Account Number');
-  const clientName = computed(() => props.invoice?.clientName || 'Unknown');
-  const clientEmail = computed(() => props.invoice?.clientEmail || 'Unknown');
-  const clientPhone = computed(() => props.invoice?.clientPhone || 'Unknown');
-  const clientAddress = computed(() => props.invoice?.clientAddress || 'Unknown');
-  const invoiceNumber = computed(() => props.invoice?.number || 'Unknown');
-  const invoiceStatus = computed(() => props.invoice?.status || '0');
-  const invoiceCreated = computed(() => props.invoice?.created || undefined);
-  const invoiceDueDate = computed(() => props.invoice?.due_date || undefined);
-  const invoiceSalesTaxes = computed(() => props.invoice?.sales_taxes || 'Unknown');
-  const invoiceSubtotalAmount = computed(() => props.invoice?.subtotal_amount || 'Unknown');
-  const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
-  const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
+const appName = computed(() => props.generalSettings?.app_name || 'Default App Name');
+const bankName = computed(() => props.billingSettings?.bank_name || 'Default Bank Name');
+const swiftIban = computed(() => props.billingSettings?.swift_iban || 'Default SWIFT/IBAN');
+const accountNumber = computed(() => props.billingSettings?.account_number || 'Default Account Number');
+const clientName = computed(() => props.invoice?.clientName || 'Unknown');
+const clientEmail = computed(() => props.invoice?.clientEmail || 'Unknown');
+const clientPhone = computed(() => props.invoice?.clientPhone || 'Unknown');
+const clientAddress = computed(() => props.invoice?.clientAddress || 'Unknown');
+const invoiceNumber = computed(() => props.invoice?.number || 'Unknown');
+const invoiceStatus = computed(() => props.invoice?.status || '0');
+const invoiceCreated = computed(() => props.invoice?.created || undefined);
+const invoiceDueDate = computed(() => props.invoice?.due_date || undefined);
+const invoiceSalesTaxes = computed(() => props.invoice?.sales_taxes || 'Unknown');
+const invoiceSubtotalAmount = computed(() => props.invoice?.subtotal_amount || 'Unknown');
+const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
+const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
 
-  const emit = defineEmits(['close-modal', 'invoice-pending', 'invoice-paid', 'invoice-refunded', 'invoice-cancelled']);
+const emit = defineEmits(['close-modal', 'invoice-pending', 'invoice-paid', 'invoice-refunded', 'invoice-cancelled']);
 
-  function formatDate(timestamp: Timestamp | undefined) {
-    return timestamp ? timestamp.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown Date';
-  }
+// Watcher to react to changes in the invoice prop
+watch(() => props.invoice, (newInvoice) => {
+  console.log("Invoice prop updated", newInvoice);
+}, { deep: true });
 
-  function formatCurrency(amount: number): string {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-      }).format(amount);
-    }
+function calculateItemAmount(item) {
+  const amount = (item.price * item.quantity) - (item.price * item.quantity * item.discount / 100);
+  return amount;
+}
 
-  function closeModal() {
-    emit('close-modal');
-  }
+function formatDate(timestamp: Timestamp | undefined) {
+  return timestamp ? timestamp.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown Date';
+}
 
-  function statusChangeToPending() {
-    emit('invoice-pending', props.invoice?.id);
-    closeModal();
-  }
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(amount);
+}
 
-  function statusChangeToPaid() {
-    emit('invoice-paid', props.invoice?.id);
-    closeModal();
-  }
+function closeModal() {
+  emit('close-modal');
+}
 
-  function statusChangeToRefunded() {
-    emit('invoice-refunded', props.invoice?.id);
-    closeModal();
-  }
+function statusChangeToPending() {
+  emit('invoice-pending', props.invoice?.id);
+  closeModal();
+}
 
-  function statusChangeToCancelled() {
-    emit('invoice-cancelled', props.invoice?.id);
-    closeModal();
-  }
+function statusChangeToPaid() {
+  emit('invoice-paid', props.invoice?.id);
+  closeModal();
+}
 
-  function saveAndClose() {
-    closeModal();
-  }
+function statusChangeToRefunded() {
+  emit('invoice-refunded', props.invoice?.id);
+  closeModal();
+}
+
+function statusChangeToCancelled() {
+  emit('invoice-cancelled', props.invoice?.id);
+  closeModal();
+}
+
+function saveAndClose() {
+  closeModal();
+}
 </script>
+
 
 <style>
   @import url(@/components/v-modal/v-modal.scss);

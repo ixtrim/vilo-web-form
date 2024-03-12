@@ -77,7 +77,7 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/new-library-document/:id',
+      path: '/new-library-document',
       name: 'new-library-document',
       component: () => import('../views/LibraryNewDocument.vue'),
       meta: { requiresAuth: true }

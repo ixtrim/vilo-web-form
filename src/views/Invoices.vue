@@ -298,12 +298,13 @@ export default defineComponent({
     const isLoading = ref(false);
 
     const fetchInvoices = async () => {
+      alert(userStore.user.value?.id);
       isLoading.value = true;
       invoices.value = [];
       try {
         let q;
         if (userRole.value === 3 || userRole.value === 4) {
-          q = query(collection(db, "invoices"), where("client_id", "==", userStore.user.value?.id), orderBy("due_date", "asc"));
+          q = query(collection(db, "invoices"), where("client_id", "==", userStore.user.value?.id));
         } else {
           q = query(collection(db, "invoices"), orderBy("due_date", "asc"));
         }

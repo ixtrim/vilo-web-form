@@ -2,6 +2,18 @@
   <div class="container-fluid library-document-template">
 
     <div class="row">
+      <div class="col-lg-12">
+        <VBreadcrumbs :breadcrumbItems="breadcrumbs" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 dashboard__line mt-0">
+        <hr />
+      </div>
+    </div>
+
+    <div class="row">
       <div class="col-lg-9">
         <div class="dashboard__heading mb-0">
 
@@ -13,41 +25,48 @@
 
           <div class="row">
             <div class="col-lg-12 mb-4">
-              <label style="font-weight: 500;margin-bottom: 6px;">Header</label>
-              <br v-if="header != ''"/>
-              <img :src="header" v-if="header != ''" width="70" style="margin-bottom:20px" />
-              <VImageUploaderNoCropped v-model="header" @image-selected="HeaderHandler"/>
+              <div class="form-group">
+                <label>Header image:</label>
+                <br v-if="header != ''"/>
+                <img :src="header" v-if="header != ''" style="margin-bottom:20px" />
+                <VImageUploaderNoCropped v-model="header" @image-selected="HeaderHandler"/>
+              </div>
             </div>
           </div>
           
-          <div class="row mb-5">
+          <div class="row mb-2 editors">
             <div class="col-lg-12 relative" v-for="(item, index) in editorCount">
               <QuillEditor v-if="!hiddenEditors[index]" toolbar="essential" theme="snow" :ref="el => { quill[index] = el }" @change="updateContent" contentType="html" />
-              <button class="quitBtn" v-if="!hiddenEditors[index] && index != 0" @click="toggleEditor(index)">X</button>
+                <div class="page_delete" v-if="!hiddenEditors[index] && index != 0">
+                  <v-button v-if="!hiddenEditors[index] && index != 0" :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="toggleEditor(index)" text=""></v-button>
+                </div>
             </div>
+          </div>
+
+          <div class="row mb-5 add-new-page">
+            <VButton :block="true" size="sm" icon="left" icon-style="add-blue" styled="secondary" @click="addPage" text="Add another page"></VButton>
           </div>
 
           <div class="row">
             <div class="col-lg-12 mb-4 mt-2">
-              <label style="font-weight: 500;margin-bottom: 6px;">Footer</label>
-              <br v-if="footer != ''"/>
-              <img :src="footer" v-if="footer != ''" width="70" style="margin-bottom:20px" />
-              <VImageUploaderNoCropped v-model="footer" @image-selected="FooterHandler"/>
+              <div class="form-group">
+                <label>Document footer image</label>
+                <br v-if="footer != ''"/>
+                <img :src="footer" v-if="footer != ''" width="100" style="margin-bottom:20px" />
+                <VImageUploaderNoCropped v-model="footer" @image-selected="FooterHandler"/>
+              </div>
             </div>
           </div>
 
-
         </div>
       </div>
-      <div class="col-lg-3 align-right">
-        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="saveTemplateChanges" text="Save Changes"></VButton>
-        <br/>
-        Created: {{  created }}
-        <!-- Awais please display here value of Created: field in format Jan 3, 2024, 12:00 PM -->
-        <br/>
-        Created By: {{ created_by }}
-        <br/><br/>
-        <VButton :block="true" size="sm" icon="left" icon-style="add-blue" styled="secondary" @click="addPage" text="Add another page"></VButton>
+      <div class="col-lg-3 align-right meta-column">
+        
+        <div class="meta-column__fixed">
+          <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="saveTemplateChanges" text="Save Changes"></VButton>
+          <p class="meta-column__fixed__created"><strong>Created:</strong> <em>{{  created }}</em>, by <span>{{ created_by }}</span></p>
+        </div>
+
       </div>
     </div>
 
@@ -71,17 +90,18 @@
   import VInput from '@/components/v-input/VInput.vue';
   import VButton from '@/components/v-button/VButton.vue';
   import VNotification from '@/components/v-notification/VNotification.vue';
+  import VBreadcrumbs from '@/components/v-breadcrumbs/VBreadcrumbs.vue';
 
   import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
   export default {
     components: {
       VInput,
-      VImageUploader,
       VImageUploaderNoCropped,
       QuillEditor,
       VButton,
       VNotification,
+      VBreadcrumbs,
     },
     setup() {
       const router = useRouter();
@@ -101,6 +121,13 @@
       const quillContent = ref([]);
       const auth = getAuth();
       const hiddenEditors = ref([]);
+
+
+
+      const breadcrumbs = computed(() => [
+      { text: 'Library Templates', to: '/library-templates' },
+        { text: 'Edit template' || 'Loading case...' }
+      ]);
 
       const FooterHandler = async (dataUrl) =>{
         
@@ -272,6 +299,7 @@
         editorCount,
         toggleEditor,
         hiddenEditors,
+        breadcrumbs,
       };
     },
     methods: {

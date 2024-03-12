@@ -2,6 +2,18 @@
   <div class="container-fluid library-document-template">
 
     <div class="row">
+      <div class="col-lg-12">
+        <VBreadcrumbs :breadcrumbItems="breadcrumbs" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12 dashboard__line mt-0">
+        <hr />
+      </div>
+    </div>
+
+    <div class="row">
       <div class="col-lg-9">
         <div class="dashboard__heading mb-0">
 
@@ -16,7 +28,7 @@
               <div class="form-group">
                 <label>Header image:</label>
                 <br v-if="header != ''"/>
-                <img :src="header" v-if="header != ''" width="70" style="margin-bottom:20px" />
+                <img :src="header" v-if="header != ''" style="margin-bottom:20px" />
                 <VImageUploaderNoCropped v-model="header" @image-selected="HeaderHandler"/>
               </div>
             </div>
@@ -50,8 +62,12 @@
         </div>
       </div>
       <div class="col-lg-3 align-right meta-column">
-        <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="saveFileChanges" text="Save Changes"></VButton>
-        <p>Created: <em>{{  created }}</em>, by <span>{{ created_by }}</span></p>
+
+        <div class="meta-column__fixed">
+          <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="saveFileChanges" text="Save Changes"></VButton>
+          <p class="meta-column__fixed__created"><strong>Created:</strong> <em>{{  created }}</em>, by <span>{{ created_by }}</span></p>
+        </div>
+
       </div>
     </div>
 
@@ -108,7 +124,7 @@
       const hiddenEditors = ref([]);
 
       const breadcrumbs = computed(() => [
-        { text: 'Case boards', to: '/case-boards' },
+        { text: 'Library', to: '/library' },
         { text: 'Edit document' || 'Loading case...' }
       ]);
 

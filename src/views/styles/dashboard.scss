@@ -13,6 +13,21 @@
   width: 100%;
   padding: 32px 24px;
 
+
+
+  .form-group {
+    small {
+      width: 100%;
+      font-size: 11px!important;
+      margin: -5px 0 0 0!important;
+      padding: 0!important;
+      position: relative;
+      top: -4px;
+      display: inline-block;
+      text-align: right!important;
+    }
+  }
+
   .align-right {
     text-align: right;
 

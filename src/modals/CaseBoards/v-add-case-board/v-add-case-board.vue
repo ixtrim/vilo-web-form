@@ -14,6 +14,19 @@
     <div class="row">
       <div class="col-lg-12">
         <div class="form-group">
+        <VInput 
+          label="Code" 
+          placeholder="VILO" 
+          v-model="localInvCode"
+        />
+        <small>4 digits for invoicing purpose</small>
+      </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="form-group">
           <label>Client</label>
           <VDropdown :title="dropdownClientTitle" :items="dropdownClient" @item-clicked="onClientChanged" />
         </div>
@@ -76,6 +89,7 @@
   }
   
   const localTitle = ref('');
+  const localInvCode = ref('');
   const localDescription = ref('');
   const localClient = ref('0');
   const dropdownClient: Ref<DropdownItem[]> = ref([]);
@@ -136,6 +150,7 @@
   watch(() => props.caseData, async (newValue) => {
     if (newValue) {
       localTitle.value = newValue.title;
+      localInvCode.value = newValue.inv_code;
       localDescription.value = newValue.description;
       localClient.value = newValue.client_id;
       await fetchClients();
@@ -169,6 +184,7 @@
     try {
       await addDoc(collection(db, "cases"), {
         title: localTitle.value,
+        inv_code: localInvCode.value,
         description: localDescription.value,
         client_id: localClient.value === '0' ? '' : localClient.value,
         team_members: selectedTeamMembers.value.map(member => member.value),
@@ -189,6 +205,7 @@
     try {
       await addDoc(collection(db, "cases"), {
         title: localTitle.value,
+        inv_code: localInvCode.value,
         description: localDescription.value,
         client_id: localClient.value === '0' ? '' : localClient.value,
         team_members: selectedTeamMembers.value.map(member => member.value),

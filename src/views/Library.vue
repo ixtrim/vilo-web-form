@@ -438,7 +438,7 @@ export default defineComponent({
       console.log('Button clicked');
     },
     addDocument() {
-      this.$router.push('/library-document');
+      this.$router.push('/new-library-document');
     },
     handleAddDocument() {
       this.showAddDocumentModal = false;

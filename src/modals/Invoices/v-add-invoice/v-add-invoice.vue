@@ -291,6 +291,8 @@
   function onCaseChanged(item: DropdownItem) {
     dropdownCaseTitle.value = item.label;
     localCase.value = item.value;
+
+    errorClientCase.value = '';
   }
 
   function isFormValid() {

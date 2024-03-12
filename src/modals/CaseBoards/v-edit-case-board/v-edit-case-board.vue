@@ -3,11 +3,26 @@
 
     <div class="row">
       <div class="col-lg-12">
+        <div class="form-group">
         <VInput 
           label="Title" 
           placeholder="Vilo" 
           v-model="localTitle"
         />
+      </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="form-group">
+        <VInput 
+          label="Code" 
+          placeholder="VILO" 
+          v-model="localInvCode"
+        />
+        <small>4 digits for invoicing purpose</small>
+      </div>
       </div>
     </div>
 
@@ -76,6 +91,7 @@
   }
   
   const localTitle = ref('');
+  const localInvCode = ref('');
   const localDescription = ref('');
   const localClient = ref('');
   const dropdownClient: Ref<DropdownItem[]> = ref([]);
@@ -117,6 +133,7 @@
   watch(() => props.caseData, async (newValue) => {
     if (newValue) {
       localTitle.value = newValue.title;
+      localInvCode.value = newValue.inv_code;
       localDescription.value = newValue.description;
       localClient.value = newValue.client_id;
       await fetchClients();
@@ -155,6 +172,7 @@
         const caseRef = doc(db, "cases", props.caseData.id);
         await updateDoc(caseRef, {
           title: localTitle.value,
+          inv_code: localInvCode.value,
           description: localDescription.value,
           client_id: localClient.value,
           team_members: selectedTeamMembers.value.map(member => member.value),

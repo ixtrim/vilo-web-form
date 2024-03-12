@@ -19,10 +19,20 @@
     </div>
 
     <div class="row">
-      <div class="col-lg-12">
+      <div class="col-lg-6">
         <div class="form-group">
           <label>Client type</label>
           <VDropdown :title="getRoleLabel(userRole ?? 0)" :items="dropdownRoleItems" @item-clicked="dropdownRoleChange" />
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="form-group">
+          <VInput 
+            label="Client code" 
+            placeholder="VILO" 
+            v-model="userInvCode"
+          />
+          <small>4 digits for invoicing purpose</small>
         </div>
       </div>
     </div>
@@ -114,6 +124,7 @@
   const props = defineProps({
     userId: String,
     userName: String,
+    userInvCode: String,
     userEmail: String,
     userPhone: String,
     userRole: Number,
@@ -142,6 +153,7 @@
   watch(() => props.userName, (newVal) => {
     userName.value = newVal;
   });
+  const userInvCode = ref(props.userInvCode);
   const userEmail = ref(props.userEmail);
   const userPhone = ref(props.userPhone);
   const userPosition = ref(props.userPosition);
@@ -189,6 +201,7 @@
       const userRef = doc(db, "users", props.userId);
       await updateDoc(userRef, {
         full_name: userName.value,
+        inv_code: userInvCode.value,
         email: userEmail.value,
         phone: userPhone.value,
         position: userPosition.value,

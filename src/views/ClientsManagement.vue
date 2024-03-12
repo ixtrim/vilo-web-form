@@ -81,7 +81,7 @@
     </div>
 
     <VModal :show="showModal" :title="modalTitle" @update:show="showModal = $event">
-      <VEditClient :title="modalTitle" :userId="selectedUserId" :userName="selectedUserFullName" :userEmail="selectedUserEmail" :userPhone="selectedUserPhone" :userPosition="selectedUserPosition"  :userRole="selectedUserRole" :userCompany="selectedUserCompany" :userAddress="selectedUserAddress" :userNotes="selectedUserNotes" @close-modal="showModal = false" @save-clicked="handleSaveClicked" />
+      <VEditClient :title="modalTitle" :userId="selectedUserId" :userName="selectedUserFullName" :userInvCode="selectedUserInvCode" :userEmail="selectedUserEmail" :userPhone="selectedUserPhone" :userPosition="selectedUserPosition"  :userRole="selectedUserRole" :userCompany="selectedUserCompany" :userAddress="selectedUserAddress" :userNotes="selectedUserNotes" @close-modal="showModal = false" @save-clicked="handleSaveClicked" />
     </VModal>
 
     <VNotification 
@@ -112,6 +112,7 @@
   interface User {
     id: string;
     full_name: string;
+    inv_code: string;
     email: string;
     phone: string;
     company: string;
@@ -177,6 +178,7 @@
 
       const selectedUserId = ref<string>('');
       const selectedUserFullName = ref<string>('');
+      const selectedUserInvCode = ref<string>('');
       const selectedUserEmail = ref<string>('');
       const selectedUserPhone = ref<string>('');
       const selectedUserPosition = ref<string>('');
@@ -189,6 +191,7 @@
         modalTitle.value = 'Edit user';
         selectedUserId.value = user.id; 
         selectedUserFullName.value = user.full_name;
+        selectedUserInvCode.value = user.inv_code;
         selectedUserEmail.value = user.email;
         selectedUserPhone.value = user.phone;
         selectedUserPosition.value = user.position;
@@ -271,6 +274,7 @@
         updateSearchTerm,
         selectedUserId,
         selectedUserFullName,
+        selectedUserInvCode,
         selectedUserEmail,
         selectedUserPhone,
         selectedUserRole,

@@ -1,103 +1,126 @@
 <template>
-  <div class="modal-body add-invoice">
-
-    <div class="row">
-      <div class="col-lg-8">
-        <h4 class="add-invoice__nr">Invoice <span></span></h4>
-      </div>
-      <div class="col-lg-4">
-        
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-lg-6">
-        <VInput 
-          label="Recipient Name*" 
-          placeholder="John Doe" 
-          v-model="localUserName"
-        />
-      </div>
-      <div class="col-lg-6">
-        <VInput 
-          label="Recipient email" 
-          placeholder="johndoe@vilo.com" 
-          v-model="localUserName"
-        />
-      </div>
-    </div>
-
-    <div class="row">
+  <div class="modal-body invoice">
+    <div class="row invoice__meta">
       <div class="col-lg-12">
-        <VInput 
-          label="Billing Address" 
-          placeholder="132, My Street, Kingston, New York 12401, USA" 
-          v-model="localUserName"
-        />
+        <h4>Edit Invoice number: {{ invoiceNumber }}</h4>
       </div>
     </div>
-
-    <div class="row" style="display:none;">
-      <div class="col-lg-12">
-        <img src="@/assets/invoice-1.svg" alt="Vilo Icon" style="width: 100%;">
-      </div>
-    </div>
-
-    <div class="row" style="display:none;">
-      <div class="col-lg-12">
-        <img src="@/assets/invoice-3.svg" alt="Vilo Icon" style="width: 100%;">
-      </div>
-    </div>
-
-    <div class="row" style="display:none;">
-      <div class="col-lg-12">
-        <img src="@/assets/invoice-3.svg" alt="Vilo Icon" style="width: 100%;">
-      </div>
-    </div>
-
-    <div class="row mt-3">
+    <div class="row invoice__meta mt-2 mb-2">
       <div class="col-lg-6">
-        <VInput 
-          label="Project Description" 
-          placeholder="Legal Consulting" 
-          v-model="localUserName"
-        />
+        <div class="form-group">
+          <label>Invoice Date: </label>
+          <VueDatePicker v-model="invoiceCreated" format="yyyy-MM-dd"></VueDatePicker>
+        </div>
       </div>
       <div class="col-lg-6">
-        <VInput 
-          label="Due Date" 
-          placeholder="21.10.2023" 
-          v-model="localUserName"
-        />
+        <div class="form-group">
+          <label>Due Date: </label>
+          <VueDatePicker v-model="invoiceDueDate" format="yyyy-MM-dd"></VueDatePicker>
+        </div>
       </div>
     </div>
-
-    <div class="row">
+    <div class="row invoice__meta">
       <div class="col-lg-12">
-        <p>Subtotal: <strong>$1400</strong></p>
+        <strong>Billed to:</strong>
+        <span>{{ clientName }}<br/>{{ clientEmail }} | {{ clientPhone }}<br/>{{ clientAddress }}</span>
       </div>
     </div>
+    
 
-    <div class="row">
-      <div class="col-lg-6">
-        <VInput 
-          label="Taxes" 
-          placeholder="6%" 
-          v-model="localUserName"
-        />
-      </div>
-      <div class="col-lg-6">
-        <VInput 
-          label="Total discount" 
-          placeholder="0%" 
-          v-model="localUserName"
-        />
-      </div>
+    <div class="invoice__table">
+      <!-- Inside your <template> tag, within the <div class="invoice__table"> -->
+      <table class="table table-bordered">
+        <tbody>
+          <tr v-for="(item, index) in invoiceItems" :key="item.id">
+            <td>
+              <div class="form-group">
+                <label>Item</label>
+                <input v-model="item.item" type="text" class="form-control" />
+              </div>
+            </td>
+            <td style="width: 70px">
+              <div class="form-group">
+                <label>Qty</label>
+                <input v-model="item.quantity" type="number" class="form-control" @change="validateQuantity(item, index)" />
+              </div>
+            </td>
+            <td style="width: 90px">
+              <div class="form-group">
+                <label>Price</label>
+                <input v-model="item.price" type="number" class="form-control" @change="validatePrice(item, index)" />
+              </div>
+            </td>
+            <td style="width: 90px">
+              <div class="form-group">
+                <label>Discount (%)</label>
+                <input v-model="item.discount" type="number" class="form-control" @change="validateDiscount(item, index)" />
+              </div>
+            </td>
+            <td style="width: 90px">
+              <div class="form-group">
+                <label>Total price</label>
+                {{ calculateAmount(item) }}
+              </div>
+            </td>
+            <td style="width: 16px; padding: 10px 0 0;">
+              <v-button v-if="invoiceItems.length > 1" :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="removeItem(index)" text=""></v-button>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4"></td>
+            <td colspan="2">
+              <VLink @click="addItem" styled="primary" icon="left" icon-style="add-blue" to="#">Add Item</VLink>
+          </td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
 
     <div class="row">
-      <div class="col-lg-12">
-        <p>Total: <strong></strong></p>
+      <div class="col-lg-5">
+        <div class="form-group">
+          <label>Tax (%)</label>
+          <input type="number" class="form-control" v-model.number="taxRate" />
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="invoice__summary">
+          <div class="row">
+            <div class="col-lg-9">
+              <span>Sub total:</span>
+            </div>
+            <div class="col-lg-3">
+              <span>{{ formatCurrency(subtotal) }}</span>
+            </div>
+          </div>
+          <div class="row" v-if="totalDiscount > 0">
+            <div class="col-lg-9">
+              <span>Total discount:</span>
+            </div>
+            <div class="col-lg-3">
+              <span>{{ formatCurrency(totalDiscount) }}</span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-9">
+              <span>Sales Taxes:</span>
+            </div>
+            <div class="col-lg-3">
+              <span>{{ formatCurrency(salesTaxes) }}</span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-9">
+              <strong>Amount due:</strong>
+            </div>
+            <div class="col-lg-3">
+              <strong>{{ formatCurrency(totalAmount) }}</strong>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -105,77 +128,256 @@
   <div class="modal-footer">
     <ul class="modal-footer__actions">
       <li>
-        <v-button :block="false" size="md" icon="left" icon-style="add" styled="outlined" @click="closeModal" text="Save as draft"></v-button>
+        <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
       </li>
       <li>
-        <v-button :block="false" size="md" styled="Primary" @click="saveAndClose" text="Send to client"></v-button>
+        <v-button :block="false" size="md" styled="green" @click="saveInvoice" text="Save Changes"></v-button>
       </li>
     </ul>
   </div>
 </template>
 
 <script setup lang="ts">
+  import firebase from 'firebase/app';
+  import 'firebase/firestore';
   import { db } from '@/firebase.js';
-  import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
-  import { ref, watch, computed } from 'vue';
+  import { updateDoc, doc, Timestamp, collection, writeBatch, getDocs } from 'firebase/firestore';
+  import { defineEmits, defineProps, ref, watch, computed } from 'vue';
   import type { PropType } from 'vue';
-  import { defineEmits, defineProps } from 'vue';
   import VInput from '@/components/v-input/VInput.vue';
-  import VTextarea from '@/components/v-textarea/v-textarea.vue';
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
+  import VueDatePicker from '@vuepic/vue-datepicker';
+  import '@vuepic/vue-datepicker/dist/main.css';
   import VButton from '@/components/v-button/VButton.vue';
+  import VLink from '@/components/v-link/VLink.vue';
 
-  const localUserName = ref('');
-  const localUserEmail = ref('');
-  const localUserCompany = ref('');
-  const localUserPhone = ref('');
-  const localUserAddress = ref('');
-  const localUserPosition = ref('');
-
-  type DropdownItem = {
-    label: string;
+  type Invoice = {
+    id: string;
+    number: string;
+    case: string;
+    created: Timestamp;
+    due_date: Timestamp;
+    status: number;
+    client_id: string;
+    sales_taxes: number;
+    subtotal_amount: number;
+    total_amount: number;
+    total_discount: number;
+    clientName: string;
+    clientEmail: string;
+    clientPhone: string;
+    clientAddress: string;
+    clientAvatar: string;
+    caseTitle: string;
+    invoiceItems: InvoiceItem[];
   };
 
-  const emit = defineEmits(['close-modal', 'save-clicked', 'role-changed', 'status-changed']);
-  const userNotes = ref();
-  const computedUserNotes = computed({
-    get: () => userNotes.value === 'string' ? '' : userNotes.value,
-    set: (val) => userNotes.value = val
-  });
-
-  const dropdownTeam = ref([
-    { label: 'Sara Kozinska' },
-    { label: 'Matthew Bowman' },
-    { label: 'Bessy Hourigan'  },
-    { label: 'Fiona Rainton'  },
-    
-  ]);
-  const dropdownTeamTitle = ref('Matthew Bowman');
-  function onTeamChanged(item: DropdownItem) {
-    dropdownTeamTitle.value = item.label;
+  interface InvoiceItem {
+    id: string;
+    item: string;
+    quantity: number;
+    price: number;
+    discount: number;
+    amount: number;
   }
 
-  const dropdownClient = ref([
-    { label: 'Valaria Roches' },
-    { label: 'Cooper Houtbie'  },
-    { label: 'Giusto Tomson'  },
-    { label: 'General use'  },
-  ]);
-  const dropdownClientTitle = ref('General use');
-  function onClientChanged(item: DropdownItem) {
-    dropdownClientTitle.value = item.label;
+  interface DropdownItem {
+    label: string;
+    value: string;
+  }
+
+  const props = defineProps({
+    invoice: Object as PropType<Invoice>,
+    generalSettings: {
+      type: Object as PropType<{
+        app_name?: string;
+      }>,
+      default: () => ({})
+    },
+    billingSettings: {
+      type: Object as PropType<{
+        bank_name?: string;
+        swift_iban?: string;
+        account_number?: string;
+      }>,
+      default: () => ({})
+    },
+    userRole: Number
+  });
+
+  const appName = computed(() => props.generalSettings?.app_name || 'Default App Name');
+  const bankName = computed(() => props.billingSettings?.bank_name || 'Default Bank Name');
+  const swiftIban = computed(() => props.billingSettings?.swift_iban || 'Default SWIFT/IBAN');
+  const accountNumber = computed(() => props.billingSettings?.account_number || 'Default Account Number');
+  const clientName = computed(() => props.invoice?.clientName || 'Unknown');
+  const clientEmail = computed(() => props.invoice?.clientEmail || 'Unknown');
+  const clientPhone = computed(() => props.invoice?.clientPhone || 'Unknown');
+  const clientAddress = computed(() => props.invoice?.clientAddress || 'Unknown');
+  const invoiceNumber = computed(() => props.invoice?.number || 'Unknown');
+  const invoiceStatus = computed(() => props.invoice?.status || '0');
+  const invoiceCreated = ref(props.invoice?.created.toDate() || new Date());
+  const invoiceDueDate = ref(props.invoice?.due_date.toDate() || new Date());
+  const invoiceSalesTaxes = computed(() => props.invoice?.sales_taxes || 'Unknown');
+  const invoiceSubtotalAmount = computed(() => props.invoice?.subtotal_amount || 'Unknown');
+  const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
+  const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
+  const taxRate = ref(25);
+
+  const emit = defineEmits(['close-modal', 'save-changes']);
+
+  const invoiceItems = ref(props.invoice ? [...props.invoice.invoiceItems] : []);
+
+  const addItem = () => {
+    invoiceItems.value.push({
+      id: generateUniqueId(),
+      item: '',
+      quantity: 1,
+      price: 0,
+      discount: 0,
+      amount: 0,
+    });
+  };
+
+  const removeItem = (index: number) => {
+    invoiceItems.value.splice(index, 1);
+  };
+
+  const subtotal = computed(() => {
+    return invoiceItems.value.reduce((acc, item) => {
+      const itemTotal = (item.quantity * item.price) - ((item.quantity * item.price) * (item.discount / 100));
+      return acc + itemTotal;
+    }, 0);
+  });
+
+  const totalDiscount = computed(() => {
+    return invoiceItems.value.reduce((acc, item) => {
+      const discountAmount = (item.quantity * item.price) * (item.discount / 100);
+      return acc + discountAmount;
+    }, 0);
+  });
+
+  const salesTaxes = computed(() => {
+    return subtotal.value * (taxRate.value / 100);
+  });
+
+  const totalAmount = computed(() => {
+    return subtotal.value + salesTaxes.value - totalDiscount.value;
+  });
+
+  function generateUniqueId() {
+    return Date.now().toString(36) + Math.random().toString(36).substring(2);
+  }
+
+  function validateQuantity(item: InvoiceItem, index: number) {
+    if (item.quantity < 1) {
+      item.quantity = 1;
+      invoiceItems.value[index] = { ...item };
+    }
+  }
+
+  function validatePrice(item: InvoiceItem, index: number) {
+    if (item.price < 0) {
+      item.price = 0;
+      invoiceItems.value[index] = { ...item };
+    }
+  }
+
+  function validateDiscount(item: InvoiceItem, index: number) {
+    if (item.discount < 0) {
+      item.discount = 0;
+      invoiceItems.value[index] = { ...item };
+    }
+  }
+
+  function formatDate(timestamp: Timestamp | undefined) {
+    return timestamp ? timestamp.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown Date';
+  }
+
+  function formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  }
+
+  function calculateAmount(item: InvoiceItem): string {
+    const amount = (item.quantity * item.price) - ((item.quantity * item.price) * (item.discount / 100));
+    return formatCurrency(amount);
   }
 
   function closeModal() {
     emit('close-modal');
   }
 
+  async function saveInvoice() {
+    // Check if props.invoice is defined and has an id
+    const invoiceId = props.invoice?.id;
+    if (!invoiceId) {
+      console.error("Invoice data is not available.");
+      return;
+    }
+
+    // Proceed with recalculations and Firestore operations
+    const recalculatedSubtotal = invoiceItems.value.reduce((acc, item) => acc + (item.quantity * item.price) - (item.quantity * item.price * item.discount / 100), 0);
+    const recalculatedTotalDiscount = invoiceItems.value.reduce((acc, item) => acc + (item.quantity * item.price * item.discount / 100), 0);
+    const recalculatedSalesTaxes = recalculatedSubtotal * (taxRate.value / 100);
+    const recalculatedTotalAmount = recalculatedSubtotal + recalculatedSalesTaxes - recalculatedTotalDiscount;
+
+    const updatedInvoiceData = {
+      created: Timestamp.fromDate(new Date(invoiceCreated.value)),
+      due_date: Timestamp.fromDate(new Date(invoiceDueDate.value)),
+      sales_taxes: Number(recalculatedSalesTaxes),
+      subtotal_amount: Number(recalculatedSubtotal),
+      total_amount: Number(recalculatedTotalAmount),
+      total_discount: Number(recalculatedTotalDiscount),
+    };
+
+    const batch = writeBatch(db);
+
+    // Update the main invoice document using invoiceId
+    const invoiceRef = doc(db, "invoices", invoiceId);
+    batch.update(invoiceRef, updatedInvoiceData);
+
+    // Delete existing invoice items using invoiceId
+    const existingItemsRef = collection(db, `invoices/${invoiceId}/invoice_items`);
+    const existingItemsSnapshot = await getDocs(existingItemsRef);
+    existingItemsSnapshot.forEach((docSnapshot) => {
+      batch.delete(doc(db, `invoices/${invoiceId}/invoice_items`, docSnapshot.id));
+    });
+
+    // Add new/updated invoice items using invoiceId
+    invoiceItems.value.forEach((item) => {
+      const itemAmount = (item.quantity * item.price) - (item.quantity * item.price * (item.discount / 100));
+      const newItemRef = doc(collection(db, `invoices/${invoiceId}/invoice_items`));
+      batch.set(newItemRef, {
+        item: item.item,
+        quantity: item.quantity,
+        price: item.price,
+        discount: item.discount,
+        amount: itemAmount,
+      });
+    });
+
+    try {
+      await batch.commit();
+      emit('save-changes', {
+        ...props.invoice,
+        ...updatedInvoiceData,
+        invoiceItems: invoiceItems.value,
+      });
+      closeModal();
+    } catch (error) {
+      console.error("Error saving changes to Firestore: ", error);
+    }
+  }
+
+
   function saveAndClose() {
-    emit('save-clicked');
     closeModal();
   }
 </script>
 
 <style>
-@import url(@/components/v-modal/v-modal.scss);
+  @import url(@/components/v-modal/v-modal.scss);
+  @import url(./v-add-invoice.scss);
 </style>

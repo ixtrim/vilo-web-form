@@ -179,7 +179,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed } from 'vue';
 import { db } from '@/firebase.js';
-import { orderBy, collection, query, getDocs, doc, getDoc, Timestamp, writeBatch, deleteDoc, updateDoc } from 'firebase/firestore';
+import { orderBy, collection, query, getDocs, doc, getDoc, Timestamp, writeBatch, deleteDoc, updateDoc, where } from 'firebase/firestore';
 import VStatus from '@/components/v-status/VStatus.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
@@ -301,7 +301,12 @@ export default defineComponent({
       isLoading.value = true;
       invoices.value = [];
       try {
-        const q = query(collection(db, "invoices"), orderBy("due_date", "asc"));
+        let q;
+        if (userRole.value === 3 || userRole.value === 4) {
+          q = query(collection(db, "invoices"), where("client_id", "==", userStore.user.value?.id), orderBy("due_date", "asc"));
+        } else {
+          q = query(collection(db, "invoices"), orderBy("due_date", "asc"));
+        }
         const querySnapshot = await getDocs(q);
         const invoicesData: Invoice[] = [];
 

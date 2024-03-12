@@ -33,13 +33,15 @@
         </div>
       </div>
     </div>
-    
-
+    <div class="row" v-if="errorClientCase">
+      <div class="col-lg-12">
+        <p class="error-message" >{{ errorClientCase }}</p>
+      </div>
+    </div>
     <div class="invoice__table">
       <!-- Inside your <template> tag, within the <div class="invoice__table"> -->
       <table class="table table-bordered">
         <tbody>
-          
           <tr v-for="(item, index) in invoiceItems" :key="item.id">
             <td>
               <div class="form-group">
@@ -85,6 +87,7 @@
           </tr>
         </tfoot>
       </table>
+      <p class="error-message" v-if="errorItems">{{ errorItems }}</p>
     </div>
 
     <div class="row">
@@ -244,6 +247,9 @@
   const localCase = ref('0');
   const dropdownCase: Ref<DropdownItem[]> = ref([]);
 
+  const errorClientCase = ref('');
+  const errorItems = ref('');
+
   const fetchClients = async () => {
     const clientsQuery = query(collection(db, "users"), where("role", "in", [3, 4]));
     const querySnapshot = await getDocs(clientsQuery);
@@ -252,11 +258,6 @@
       value: doc.id
     }));
   };
-
-  function onClientChanged(item: DropdownItem) {
-    dropdownClientTitle.value = item.label;
-    localClient.value = item.value;
-  }
 
   const fetchCases = async () => {
     //const casesQuery = query(collection(db, "users"), where("role", "in", [3, 4]));
@@ -267,6 +268,30 @@
       value: doc.id
     }));
   };
+
+  function onClientChanged(item: DropdownItem) {
+    dropdownClientTitle.value = item.label;
+    localClient.value = item.value;
+  }
+
+  function isFormValid() {
+    errorClientCase.value = '';
+    errorItems.value = '';
+
+    if (localClient.value === '0' || localCase.value === '0') {
+      errorClientCase.value = 'Please select a client and a case.';
+      return false;
+    }
+
+    for (const item of invoiceItems.value) {
+      if (!item.item.trim() || item.quantity <= 0 || item.price < 0) {
+        errorItems.value = 'Please fill in all item fields correctly.';
+        return false;
+      }
+    }
+
+    return true;
+  }
 
   function onCaseChanged(item: DropdownItem) {
     dropdownCaseTitle.value = item.label;
@@ -362,10 +387,19 @@
   }
 
   function closeModal() {
+    errorClientCase.value = '';
+    errorItems.value = '';
     emit('close-modal');
   }
 
   async function addInvoice() {
+    if (!isFormValid()) {
+      return;
+    }
+
+    errorClientCase.value = '';
+    errorItems.value = '';
+
     // Prepare the invoice data
     const newInvoiceData = {
       client_id: localClient.value, // Assuming you've set this from dropdown

@@ -2,7 +2,7 @@
   <div class="modal-body invoice">
     <div class="row invoice__meta">
       <div class="col-lg-12">
-        <h4>Add New Invoice: <span class="clientCode">VILO</span>-<span class="caseCode">CASE</span>-000</h4>
+        <h4>Add New Invoice: {{ invoiceNumber }}</h4>
       </div>
     </div>
     <div class="row invoice__meta mt-2 mb-2">
@@ -223,22 +223,9 @@
     userRole: Number
   });
 
-  const appName = computed(() => props.generalSettings?.app_name || 'Default App Name');
-  const bankName = computed(() => props.billingSettings?.bank_name || 'Default Bank Name');
-  const swiftIban = computed(() => props.billingSettings?.swift_iban || 'Default SWIFT/IBAN');
-  const accountNumber = computed(() => props.billingSettings?.account_number || 'Default Account Number');
-  const clientName = computed(() => props.invoice?.clientName || 'Unknown');
-  const clientEmail = computed(() => props.invoice?.clientEmail || 'Unknown');
-  const clientPhone = computed(() => props.invoice?.clientPhone || 'Unknown');
-  const clientAddress = computed(() => props.invoice?.clientAddress || 'Unknown');
-  const invoiceNumber = computed(() => props.invoice?.number || 'Unknown');
-  const invoiceStatus = computed(() => props.invoice?.status || '0');
+  const invoiceNumber = ref('');
   const invoiceCreated = ref(props.invoice?.created.toDate() || new Date());
   const invoiceDueDate = ref(props.invoice?.due_date.toDate() || new Date());
-  const invoiceSalesTaxes = computed(() => props.invoice?.sales_taxes || 'Unknown');
-  const invoiceSubtotalAmount = computed(() => props.invoice?.subtotal_amount || 'Unknown');
-  const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
-  const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
   const taxRate = ref(25);
   const dropdownClientTitle = ref('Your clients');
   const localClient = ref('0');
@@ -249,6 +236,7 @@
 
   const errorClientCase = ref('');
   const errorItems = ref('');
+  
 
   const fetchClients = async () => {
     const clientsQuery = query(collection(db, "users"), where("role", "in", [3, 4]));
@@ -274,7 +262,7 @@
     }));
   };
 
-  function onClientChanged(item: DropdownItem) {
+  async function onClientChanged(item: DropdownItem) {
     dropdownClientTitle.value = item.label;
     localClient.value = item.value;
 
@@ -282,17 +270,50 @@
     localCase.value = '0';
     dropdownCaseTitle.value = 'You need to choose a case';
 
-    // Fetch cases for the selected client
     if (localClient.value !== '0') {
-      fetchCases();
+      await fetchCases();
+      await generateInvoiceNumber();
     }
   }
 
-  function onCaseChanged(item: DropdownItem) {
+  async function generateInvoiceNumber() {
+    if (localClient.value === '0' || localCase.value === '0') {
+      invoiceNumber.value = '';
+      return;
+    }
+
+    let clientInvCode = '';
+    let caseInvCode = '';
+
+    // Fetch the client's inv_code
+    const clientDocRef = doc(db, "users", localClient.value);
+    const clientDocSnap = await getDoc(clientDocRef);
+    if (clientDocSnap.exists()) {
+      clientInvCode = clientDocSnap.data().inv_code || '';
+    }
+
+    // Fetch the case's inv_code
+    const caseDocRef = doc(db, "cases", localCase.value);
+    const caseDocSnap = await getDoc(caseDocRef);
+    if (caseDocSnap.exists()) {
+      caseInvCode = caseDocSnap.data().inv_code || '';
+    }
+
+    // Generate the invoice number
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.getDate().toString().padStart(2, '0')}/${(currentDate.getMonth() + 1).toString().padStart(2, '0')}/${currentDate.getFullYear()}`;
+    invoiceNumber.value = `${clientInvCode}-${caseInvCode}-${formattedDate}`;
+  }
+
+  async function onCaseChanged(item: DropdownItem) {
     dropdownCaseTitle.value = item.label;
     localCase.value = item.value;
 
     errorClientCase.value = '';
+
+    if (localCase.value !== '0') {
+      await generateInvoiceNumber();
+    }
   }
 
   function isFormValid() {
@@ -421,7 +442,7 @@
       case: localCase.value, // Assuming you've set this from dropdown
       created: Timestamp.fromDate(new Date(invoiceCreated.value)),
       due_date: Timestamp.fromDate(new Date(invoiceDueDate.value)),
-      number: "VILO-SARA-001", // You need to generate or input this
+      number: String(invoiceNumber.value),
       status: 0, // Assuming 0 is the default status for new invoices
       sales_taxes: Number(salesTaxes.value),
       subtotal_amount: Number(subtotal.value),

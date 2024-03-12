@@ -26,7 +26,7 @@
           <VDropdown :title="dropdownClientTitle" :items="dropdownClient" @item-clicked="onClientChanged" />
         </div>
       </div>
-      <div class="col-lg-6">
+      <div class="col-lg-6" v-if="localClient !== '0'">
         <div class="form-group">
           <label>Case:</label>
           <VDropdown :title="dropdownCaseTitle" :items="dropdownCase" @item-clicked="onCaseChanged" />
@@ -243,7 +243,7 @@
   const dropdownClientTitle = ref('Your clients');
   const localClient = ref('0');
   const dropdownClient: Ref<DropdownItem[]> = ref([]);
-  const dropdownCaseTitle = ref('Cases');
+  const dropdownCaseTitle = ref('You need to choose a case');
   const localCase = ref('0');
   const dropdownCase: Ref<DropdownItem[]> = ref([]);
 
@@ -260,8 +260,13 @@
   };
 
   const fetchCases = async () => {
+    if (localClient.value === '0') {
+      dropdownCase.value = [];
+      return;
+    }
+
     //const casesQuery = query(collection(db, "users"), where("role", "in", [3, 4]));
-    const casesQuery = query(collection(db, "cases"));
+    const casesQuery = query(collection(db, "cases"), where("client_id", "==", localClient.value));
     const querySnapshot = await getDocs(casesQuery);
     dropdownCase.value = querySnapshot.docs.map(doc => ({
       label: doc.data().title as string,
@@ -272,6 +277,20 @@
   function onClientChanged(item: DropdownItem) {
     dropdownClientTitle.value = item.label;
     localClient.value = item.value;
+
+    // Reset case selection
+    localCase.value = '0';
+    dropdownCaseTitle.value = 'You need to choose a case';
+
+    // Fetch cases for the selected client
+    if (localClient.value !== '0') {
+      fetchCases();
+    }
+  }
+
+  function onCaseChanged(item: DropdownItem) {
+    dropdownCaseTitle.value = item.label;
+    localCase.value = item.value;
   }
 
   function isFormValid() {
@@ -293,15 +312,9 @@
     return true;
   }
 
-  function onCaseChanged(item: DropdownItem) {
-    dropdownCaseTitle.value = item.label;
-    localCase.value = item.value;
-  }
-
   onMounted(async () => {
     addItem();
     await fetchClients();
-    await fetchCases();
   });
 
   const emit = defineEmits(['close-modal', 'add-invoice']);

@@ -25,7 +25,7 @@ import VBadge from '@/components/v-badge/VBadge.vue';
 
 const links = [
   { name: 'Global Settings', to: '/settings', },
-  { name: 'Team', to: '/settings-team', },
+  { name: 'Users', to: '/settings-team', },
   { name: 'Notifications', to: '/settings-notifications', },
   { name: 'Invoice', to: '/settings-invoice', },
   //{ name: 'Calendar', to: '/settings-calendar', },

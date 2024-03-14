@@ -10,7 +10,7 @@
     <div class="row">
       <div class="col-lg-9">
         <div class="dashboard__heading">
-          <h1>Team management</h1>
+          <h1>Users management</h1>
           <p>Manage your team members and their account permissions here.</p>
         </div>
       </div>

@@ -140,7 +140,7 @@ export default defineComponent({
       caseDetails,
       breadcrumbs,
       userDetails,
-      fetchCaseDetails, // This is not needed to return if you don't use it outside setup
+      fetchCaseDetails,
     };
   },
   data() {

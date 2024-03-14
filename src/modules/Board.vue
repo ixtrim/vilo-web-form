@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from 'vue';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, getDoc, updateDoc, doc } from 'firebase/firestore';
 import { db } from '@/firebase.js';
 import { Sortable } from '@shopify/draggable';
 import List from '@/modules/Board/List.vue';
@@ -46,20 +46,25 @@ export default defineComponent({
   },
   async mounted() {
     await this.fetchTasks();
-    const boardElement = this.$refs.board as HTMLElement;
-    if (boardElement) {
-      new Sortable(boardElement, {
-        draggable: '.list',
-        handle: '.list__drag'
-      });
-    }
 
     const sortable = new Sortable(document.querySelectorAll('.list'), {
-      draggable: '.card'
+      draggable: '.card',
+      handle: '.move-task',
+      mirror: {
+        constrainDimensions: true,
+      },
     });
 
-    sortable.on('sortable:stop', (event) => {
-      
+    sortable.on('sortable:stop', async (event: any) => { // Use 'any' to bypass TypeScript checks
+      const taskId = event.data.dragEvent.data.source.getAttribute('data-task-id');
+      const targetListElement = event.data.newContainer;
+      const targetListId = Array.from(document.querySelectorAll('.list')).indexOf(targetListElement);
+      const newStatus = targetListId;
+
+      if (newStatus >= 0) {
+        await this.updateTaskStatus(taskId, newStatus);
+        await this.fetchTasks();
+      }
     });
   },
   watch: {
@@ -105,7 +110,17 @@ export default defineComponent({
           });
         }
       });
-    }
+    },
+    async updateTaskStatus(taskId: string, newStatus: number) {
+      const taskRef = doc(db, "tasks", taskId);
+      await updateDoc(taskRef, {
+        status: newStatus
+      }).then(() => {
+        console.log('Task status updated');
+      }).catch((error) => {
+        console.error("Error updating task status: ", error);
+      });
+    },
   }
 });
 </script>

@@ -1,5 +1,17 @@
 <template>
-  <div :class="'card priority--' + card.priority">
+  <div :data-task-id="card.id" :class="'card priority--' + card.priority">
+
+    <div class="card__actions">
+      <ul>
+        <li>
+          <VButton :block="false" size="sm" icon="left" icon-style="drag" styled="simple-icon move-task" text=""></VButton>
+        </li>
+        <li>
+          <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" text=""></VButton>
+        </li>
+      </ul>
+    </div>
+
     <div class="card__task-name">
       <h5>{{ card.title }}</h5>
       <p>{{ card.description }}</p>
@@ -20,9 +32,13 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/firebase.js'; // Adjust this import path to where your Firebase configuration and initialization are located
+import { db } from '@/firebase.js';
+import VButton from '@/components/v-button/VButton.vue';
 
 export default defineComponent({
+  components: {
+    VButton,
+  },
   props: {
     card: {
       type: Object,

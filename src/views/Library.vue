@@ -96,9 +96,9 @@
                   <VFile :file-extension="file.extension" :file-name="file.document_name" :file-size="file.size" />
                 </div>
                 <div class="col col--l-status">
-                  <VBadge :variant="'primary'" v-if="file.status == 0">Draft</VBadge>
+                  <VBadge :variant="'light'" v-if="file.status == 0">Draft</VBadge>
                   <VBadge :variant="'primary'" v-if="file.status == 1">Pending</VBadge>
-                  <VBadge :variant="'primary'" v-if="file.status == 2">Signed</VBadge>
+                  <VBadge :variant="'success'" v-if="file.status == 2">Signed</VBadge>
                 </div>
                 <div class="col col--l-uploaded">
                   <p>{{ file.date_uploaded }}</p>
@@ -115,7 +115,7 @@
                 </div>
                 <div class="col col--l-edit">
                   <!-- <VLink to="#" @click="addDocument" styled="primary">Edit</VLink> -->
-                  <VButton :block="false" size="sm" styled="link" @click="editDocument(file.id)" text="Edit"></VButton>
+                  <VButton :block="false" size="sm" styled="link" @click="editDocument(file.id)" text="Edit" v-if="file.status == 0 || file.status == 1"></VButton>
                 </div>
               </div>
             </div>
@@ -328,7 +328,7 @@ export default defineComponent({
     });
 
     const fetchFiles = async() => {
-      const filesQuery = query(collection(db, "files"), where("status", "==", 1), limit(10));
+      const filesQuery = query(collection(db, "files"), where("status", "in", [0, 1, 2]), limit(10));
       const querySnapshot = await getDocs(filesQuery);
       const filesWithUserDetails = await Promise.all(querySnapshot.docs.map(async (docSnapshot) => {
         const fileData = docSnapshot.data();

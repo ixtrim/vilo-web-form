@@ -110,7 +110,7 @@
   const selectedTeamMembers: Ref<DropdownItem[]> = ref([]);
 
   const fetchAllUsers = async () => {
-    const usersQuery = query(collection(db, "users"));
+    const usersQuery = query(collection(db, "users"), where("role", "in", [0, 1, 2]));
     const querySnapshot = await getDocs(usersQuery);
     allUsers.value = querySnapshot.docs.map(doc => ({
       label: doc.data().full_name as string,

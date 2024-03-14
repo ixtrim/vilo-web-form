@@ -56,7 +56,7 @@
   <div class="modal-footer">
     <ul class="modal-footer__actions">
       <li>
-        <v-button :block="false" size="md" styled="outlined" icon="left" icon-style="save" @click="saveAsDraft" text="Save as draft"></v-button>
+        <v-button :block="false" size="md" styled="outlined" icon="left" icon-style="save" @click="saveAndClose" text="Save as draft"></v-button>
       </li>
       <li>
         <v-button :block="false" size="md" styled="Primary" @click="saveAndClose" text="Create a case"></v-button>
@@ -127,7 +127,7 @@
   const selectedTeamMembers: Ref<DropdownItem[]> = ref([]);
 
   const fetchAllUsers = async () => {
-    const usersQuery = query(collection(db, "users"));
+    const usersQuery = query(collection(db, "users"), where("role", "in", [0, 1, 2]));
     const querySnapshot = await getDocs(usersQuery);
     allUsers.value = querySnapshot.docs.map(doc => ({
       label: doc.data().full_name as string,

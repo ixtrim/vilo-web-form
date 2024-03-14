@@ -75,7 +75,7 @@
           </div>
           <div class="row">
             <div class="col-lg-9">
-              <span>GCT Tax:</span>
+              <span>{{ taxLabel }} Tax:</span>
             </div>
             <div class="col-lg-3">
               <span>{{ typeof invoiceSalesTaxes === 'number' ? formatCurrency(invoiceSalesTaxes) : invoiceSalesTaxes }}</span>
@@ -210,7 +210,8 @@ const props = defineProps({
     }>,
     default: () => ({})
   },
-  userRole: Number
+  userRole: Number,
+  taxLabel: String,
 });
 
 const appName = computed(() => props.generalSettings?.app_name || 'Default App Name');

@@ -81,7 +81,7 @@
     <div class="row">
       <div class="col-lg-5">
         <div class="form-group">
-          <label>Tax (%)</label>
+          <label>{{ taxLabel }}  Tax (%)</label>
           <input type="number" class="form-control" v-model.number="taxRate" />
         </div>
       </div>
@@ -105,7 +105,7 @@
           </div>
           <div class="row">
             <div class="col-lg-9">
-              <span>GCT Tax:</span>
+              <span>{{ taxLabel }}  Tax:</span>
             </div>
             <div class="col-lg-3">
               <span>{{ formatCurrency(salesTaxes) }}</span>
@@ -202,7 +202,8 @@
       }>,
       default: () => ({})
     },
-    userRole: Number
+    userRole: Number, 
+    taxLabel: String,
   });
 
   const appName = computed(() => props.generalSettings?.app_name || 'Default App Name');

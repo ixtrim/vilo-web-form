@@ -165,10 +165,10 @@
     </div>
 
     <VModal :show="showAddInvoiceModal || showEditInvoiceModal  || showPreviewInvoiceModal || showDownloadInvoiceModal" :title="modalAddInvoiceTitle || modalEditInvoiceTitle || modalPreviewInvoiceTitle || modalDownloadInvoiceTitle" @update:show="handleModalClose">
-      <VAddInvoice v-if="showAddInvoiceModal" @close-modal="showAddInvoiceModal = false" @add-invoice="handleAddInvoice" />
-      <VEditInvoice v-if="showEditInvoiceModal && currentInvoice" :title="modalEditInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @save-changes="handleInvoiceUpdate" @close-modal="showEditInvoiceModal = false" />
-      <VPreviewInvoice v-if="showPreviewInvoiceModal && currentInvoice" :title="modalPreviewInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @invoice-pending="markInvoiceAsPending" @invoice-paid="markInvoiceAsPaid"  @invoice-refunded="markInvoiceAsRefunded" @invoice-cancelled="markInvoiceAsCancelled" @close-modal="showPreviewInvoiceModal = false" />
-      <VDownloadInvoice v-if="showDownloadInvoiceModal && currentInvoice" :title="modalDownloadInvoiceTitle" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @close-modal="showDownloadInvoiceModal = false" />
+      <VAddInvoice v-if="showAddInvoiceModal" @close-modal="showAddInvoiceModal = false" :taxLabel="taxLabel" @add-invoice="handleAddInvoice" />
+      <VEditInvoice v-if="showEditInvoiceModal && currentInvoice" :title="modalEditInvoiceTitle" :taxLabel="taxLabel" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @save-changes="handleInvoiceUpdate" @close-modal="showEditInvoiceModal = false" />
+      <VPreviewInvoice v-if="showPreviewInvoiceModal && currentInvoice" :title="modalPreviewInvoiceTitle" :taxLabel="taxLabel" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @invoice-pending="markInvoiceAsPending" @invoice-paid="markInvoiceAsPaid"  @invoice-refunded="markInvoiceAsRefunded" @invoice-cancelled="markInvoiceAsCancelled" @close-modal="showPreviewInvoiceModal = false" />
+      <VDownloadInvoice v-if="showDownloadInvoiceModal && currentInvoice" :title="modalDownloadInvoiceTitle" :invoice="currentInvoice" :taxLabel="taxLabel" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @close-modal="showDownloadInvoiceModal = false" />
     </VModal>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
@@ -294,6 +294,7 @@ export default defineComponent({
     const invoices = ref<Invoice[]>([]);
     const billingSettings = ref({});
     const generalSettings = ref({});
+    const taxLabel = ref('');
     
     const isLoading = ref(false);
 
@@ -386,6 +387,20 @@ export default defineComponent({
       }
     };
 
+    const fetchTaxLabel = async () => {
+      try {
+        const docRef = doc(db, "settings", "invoice");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          taxLabel.value = docSnap.data().tax_label; // Set the taxLabel value
+        } else {
+          console.log("No such document!");
+        }
+      } catch (error) {
+        console.error("Error getting document:", error);
+      }
+    };
+
     const fetchBillingSettings = async () => {
       try {
         const billingDocRef = doc(db, "settings", "billing");
@@ -418,6 +433,7 @@ export default defineComponent({
       await fetchInvoices();
       await fetchBillingSettings();
       await fetchGeneralSettings();
+      await fetchTaxLabel();
     });
 
     return { 
@@ -427,6 +443,7 @@ export default defineComponent({
       billingSettings,
       generalSettings,
       isLoading,
+      taxLabel,
     };
   },
   computed: {

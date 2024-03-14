@@ -107,8 +107,11 @@
       <div class="col-lg-3 align-right meta-column">
 
         <div class="meta-column__fixed">
-          <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="primary" @click="saveFileChanges" text="Save Changes"></VButton>
+          <VButton :block="true" size="md" icon="left" icon-style="add-white" styled="secondary" @click="saveFileChanges" text="Save Changes"></VButton>
+
           <p class="meta-column__fixed__created"><strong>Created:</strong> <em>{{  created }}</em>, by <span>{{ created_by }}</span></p>
+
+          <VButton v-if="client_name != '' && client_title != '' && client_signature != '' && consultant_name != '' && consultant_title != '' && consultant_signature != ''" :block="true" size="md" styled="primary" @click="signDocument" text="Sign document"></VButton>
         </div>
 
       </div>
@@ -300,6 +303,49 @@
 
       };
 
+      const signDocument = async() => {
+
+        let quillContentArray = [];
+        const id = route.params.id;
+
+        for(let i=0;i<quill.value.length;i++)
+        {
+          if(quill.value[i])
+          {
+            quillContentArray.push(quill.value[i].getHTML())
+          }
+        }
+
+        const createdAt = Timestamp.now(); 
+
+        try {
+          const docRef = doc(db, "files", id);
+
+          await updateDoc(docRef, {
+            document_name: title.value,
+            status: 2,
+            content: quillContentArray,
+            header: header.value,
+            footer: footer.value,
+            client_name: client_name.value,
+            client_title: client_title.value,
+            client_signature: client_signature.value,
+            consultant_name: consultant_name.value,
+            consultant_title: consultant_title.value,
+            consultant_signature: consultant_signature.value,
+            last_updated: createdAt,
+          });
+
+          let message = 'Document signed successfully!';
+          router.push({ path: '/library', query: { message } });
+
+        } catch (error) {
+          console.log("Error getting document:", error);
+          triggerNotification('error', 'Error!', 'Error while connecting with database.');
+        }
+
+        };
+
       const addPage = () => {
         editorCount.value++;
       }
@@ -398,6 +444,7 @@
         ConsultantSignatureHandler,
         notificationRef,
         saveFileChanges,
+        signDocument,
         addPage,
         quill,
         editorCount,

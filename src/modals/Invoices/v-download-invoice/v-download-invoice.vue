@@ -58,7 +58,7 @@
         <div class="invoice__summary" style="border-radius: 3px; background: #F9FAFB; padding: 12px 16px; font-size: 13px; line-height: 25px;">
           <div class="row">
             <div class="col-lg-9">
-              <span>Sub total:</span>
+              <span> Sub total:</span>
             </div>
             <div class="col-lg-3">
               <span>{{ typeof invoiceSubtotalAmount === 'number' ? formatCurrency(invoiceSubtotalAmount) : invoiceSubtotalAmount }}</span>
@@ -74,7 +74,7 @@
           </div>
           <div class="row">
             <div class="col-lg-9">
-              <span>Sales Taxes:</span>
+              <span>{{ taxLabel }} Taxes:</span>
             </div>
             <div class="col-lg-3">
               <span>{{ typeof invoiceSalesTaxes === 'number' ? formatCurrency(invoiceSalesTaxes) : invoiceSalesTaxes }}</span>
@@ -168,7 +168,8 @@
       }>,
       default: () => ({})
     },
-    userRole: Number
+    userRole: Number,
+    taxLabel: String,
   });
 
   const appName = computed(() => props.generalSettings?.app_name || 'Default App Name');

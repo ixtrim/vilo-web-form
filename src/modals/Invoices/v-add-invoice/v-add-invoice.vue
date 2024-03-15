@@ -300,12 +300,33 @@
       caseInvCode = caseDocSnap.data().inv_code || '';
     }
 
-    // Generate the invoice number with only the last two digits of the current year
+    // Generate the base invoice number
     const currentYear = new Date().getFullYear().toString().slice(-2); // Get last two digits of the year
     const currentDate = new Date();
     const formattedDate = `${currentDate.getDate().toString().padStart(2, '0')}${(currentDate.getMonth() + 1).toString().padStart(2, '0')}${currentYear}`;
-    invoiceNumber.value = `${clientInvCode}-${caseInvCode}-${formattedDate}`;
+    let baseInvoiceNumber = `${clientInvCode}-${caseInvCode}-${formattedDate}`;
+
+    // Check if an invoice with the generated number already exists
+    let counter = 1;
+    let uniqueInvoiceNumberFound = false;
+    while (!uniqueInvoiceNumberFound) {
+      let invoiceNumberToCheck = baseInvoiceNumber;
+      if (counter > 1) {
+        // Append counter if this is not the first iteration
+        invoiceNumberToCheck += `-${String(counter).padStart(2, '0')}`;
+      }
+
+      const invoiceQuery = query(collection(db, "invoices"), where("number", "==", invoiceNumberToCheck));
+      const querySnapshot = await getDocs(invoiceQuery);
+      if (querySnapshot.empty) {
+        uniqueInvoiceNumberFound = true;
+        invoiceNumber.value = invoiceNumberToCheck;
+      } else {
+        counter++;
+      }
+    }
   }
+
 
   async function onCaseChanged(item: DropdownItem) {
     dropdownCaseTitle.value = item.label;

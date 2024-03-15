@@ -193,36 +193,58 @@
   }, { immediate: true });
 
   async function fetchTaskDetails() {
-    if (!props.taskId) {
-      console.error("Task ID is undefined");
-      return;
-    }
-    const taskRef = doc(db, "tasks", props.taskId);
-    const taskSnap = await getDoc(taskRef);
-    if (taskSnap.exists()) {
-      const data = taskSnap.data();
-      taskDetails.value = {
-        title: data.title,
-        description: data.description,
-        user_assigned: data.user_assigned,
-        user_reporting: data.user_reporting,
-        // Assuming due_date is a Firestore Timestamp
-        due_date: data.due_date.toDate().toISOString().substring(0, 10), // Convert to Date and then to ISO string format 'YYYY-MM-DD'
-        priority: data.priority,
-        attachments: data.attachments,
-      };
-      localTitle.value = taskDetails.value.title;
-      localDescription.value = taskDetails.value.description;
-      localUserAssigned.value = taskDetails.value.user_assigned;
-      localUserReporting.value = taskDetails.value.user_reporting;
-      // Set localDueDate.value to a Date object
-      localDueDate.value = data.due_date.toDate(); // Convert Firestore Timestamp to Date
-      localPriority.value = taskDetails.value.priority;
-      // Handle attachments and other fields as needed
-    } else {
-      console.error("Task does not exist!");
-    }
+      if (!props.taskId) {
+        console.error("Task ID is undefined");
+        return;
+      }
+      const taskRef = doc(db, "tasks", props.taskId);
+      const taskSnap = await getDoc(taskRef);
+      if (taskSnap.exists()) {
+        const data = taskSnap.data();
+        taskDetails.value = {
+          title: data.title,
+          description: data.description,
+          user_assigned: data.user_assigned,
+          user_reporting: data.user_reporting,
+          due_date: data.due_date.toDate(),
+          priority: data.priority,
+          attachments: data.attachments,
+        };
+        localTitle.value = taskDetails.value.title;
+        localDescription.value = taskDetails.value.description;
+        localDueDate.value = new Date(taskDetails.value.due_date);
+        localPriority.value = taskDetails.value.priority;
+        initializeDropdownTitles();
+      } else {
+        console.error("Task does not exist!");
+      }
   }
+
+  function initializeDropdownTitles() {
+      // Assuming you have a method to fetch a user's full name by their ID
+      fetchUserName(taskDetails.value.user_assigned).then(name => {
+          dropdownAssignedTitle.value = name;
+      });
+      fetchUserName(taskDetails.value.user_reporting).then(name => {
+          dropdownReporterTitle.value = name;
+      });
+      // Set the priority dropdown title directly since it's a predefined list
+      const priorityItem = dropdownPriority.value.find(item => item.value === taskDetails.value.priority);
+      if (priorityItem) {
+          dropdownPriorityTitle.value = priorityItem.label;
+      }
+  }
+
+  // Example function to fetch a user's full name by their ID
+  async function fetchUserName(userId: string) {
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+          return userSnap.data().full_name; // Assuming the field is named 'full_name'
+      }
+      return 'Unknown'; // Fallback value
+  }
+
 
   onMounted(async () => {
     await fetchTeamMembers();

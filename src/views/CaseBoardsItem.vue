@@ -56,7 +56,7 @@
     </div>
     <VModal :show="showAddTaskModal || showEditTaskModal || showEditModal" :title="modalAddTaskTitle || modalEditTaskTitle || modalEditTitle" @update:show="handleModalClose">
       <VAddTask v-if="showAddTaskModal" :title="modalAddTaskTitle" :caseId="caseDetails.id" @close-modal="showAddTaskModal = false" @save-clicked="handleAddTask" />
-      <VEditTask v-if="showEditTaskModal" :title="modalEditTaskTitle" :taskId="currentTaskId" @close-modal="showEditTaskModal = false" @save-clicked="handleEditTask" />
+      <VEditTask v-if="showEditTaskModal" :title="modalEditTaskTitle" :caseId="caseDetails.id" :taskId="currentTaskId" @close-modal="showEditTaskModal = false" @save-clicked="handleEditTask" />
       <VEditCaseBoard v-if="showEditModal" :title="modalEditTitle" :caseData="editableCaseDetails" @close-modal="showEditModal = false" @save-clicked="handleEditCase" />
     </VModal>
 

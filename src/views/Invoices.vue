@@ -5,7 +5,7 @@
       <div class="col-lg-9">
         <div class="dashboard__heading mb-0">
           <h1>Invoices</h1>
-          <p>Create and manage your team documents and templates.</p>
+          <p>Create and manage invoices.</p>
         </div>
       </div>
       <div class="col-lg-3 align-right">

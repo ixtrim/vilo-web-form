@@ -1,14 +1,41 @@
 .image-uploader {
-  /* Your styles here */
-}
+  font-family: var(--v-font-inter-semi-bold);
+  font-size: 12px;
+  color: var(--v-gray-700);
 
-.image-preview {
-  margin: 10px 0 0 0;
-  border-radius: 8px;
-  overflow: hidden;
+  input {
+    &::file-selector-button {
+      border-radius: 6px;
+      padding: 0 16px 0 35px;
+      height: 40px;
+      cursor: pointer;
+      border: 1px solid var(--v-gray-200);
+      background-color: var(--v-gray-100);
+      background-image: url(../../assets/icons/icon-upload.svg);
+      background-position: 8px 11px;
+      background-repeat: no-repeat;
+      font-family: var(--v-font-inter-semi-bold);
+      color: var(--v-gray-700);
+      margin-right: 10px;
+    }
 
-  img {
-    max-width: 150px;
-    max-height: 150px;
+    &::file-selector-button:hover {
+      background-color: var(--v-gray-200);
+    }
+
+    &::file-selector-button:active {
+      background-color: var(--v-gray-200);
+    }
+  }
+
+  .image-preview {
+    margin: 10px 0 0 0;
+    border-radius: 8px;
+    overflow: hidden;
+  
+    img {
+      max-width: 150px;
+      max-height: 150px;
+    }
   }
 }

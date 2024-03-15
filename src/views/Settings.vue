@@ -50,7 +50,7 @@
             </div>
           </div>
 
-          <div class="dashboard__form__section">
+          <div class="dashboard__form__section" style="display: none;">
             <div class="dashboard__form__section__label">
               <h4>Services</h4>
               <p>Add types of services your company provides</p>

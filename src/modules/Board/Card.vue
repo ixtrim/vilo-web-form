@@ -9,6 +9,9 @@
         <li>
           <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" text="" @click="emitEditTaskEvent"></VButton>
         </li>
+        <li>
+          <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" text="" @click="emitPreviewTaskEvent"></VButton>
+        </li>
       </ul>
     </div>
 
@@ -71,6 +74,9 @@ export default defineComponent({
   methods: {
     emitEditTaskEvent() {
       this.$emit('editTask', this.card.id);
+    },
+    emitPreviewTaskEvent() {
+      this.$emit('previewTask', this.card.id);
     }
   }
 });

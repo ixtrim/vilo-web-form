@@ -1,6 +1,6 @@
 <template>
   <div class="board"> 
-    <List v-for="list in lists" :key="list.id" :list="list" @addTask="$emit('addTask')" @editTask="handleEditTask" />
+    <List v-for="list in lists" :key="list.id" :list="list" @addTask="$emit('addTask')" @editTask="handleEditTask" @previewTask="handlePreviewTask" />
   </div>
 </template>
 
@@ -123,6 +123,9 @@ export default defineComponent({
     },
     handleEditTask(taskId: string) {
       this.$emit('editTask', taskId);
+    },
+    handlePreviewTask(taskId: string) {
+      this.$emit('previewTask', taskId);
     }
   }
 });

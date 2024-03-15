@@ -51,12 +51,13 @@
 
     <div class="row fill-space">
       <div class="col-lg-12"> 
-        <Board ref="boardComponent" :caseId="caseDetails.id" @addTask="openAddTaskModal" @editTask="openEditTaskModal" />
+        <Board ref="boardComponent" :caseId="caseDetails.id" @addTask="openAddTaskModal" @editTask="openEditTaskModal" @previewTask="openPreviewTaskModal" />
       </div>
     </div>
-    <VModal :show="showAddTaskModal || showEditTaskModal || showEditModal" :title="modalAddTaskTitle || modalEditTaskTitle || modalEditTitle" @update:show="handleModalClose">
+    <VModal :show="showAddTaskModal || showEditTaskModal  || showPreviewTaskModal || showEditModal" :title="modalAddTaskTitle || modalEditTaskTitle || modalEditTitle" @update:show="handleModalClose">
       <VAddTask v-if="showAddTaskModal" :title="modalAddTaskTitle" :caseId="caseDetails.id" @close-modal="showAddTaskModal = false" @save-clicked="handleAddTask" />
       <VEditTask v-if="showEditTaskModal" :title="modalEditTaskTitle" :caseId="caseDetails.id" :taskId="currentTaskId" @close-modal="showEditTaskModal = false" @save-clicked="handleEditTask" />
+      <VPreviewTask v-if="showPreviewTaskModal" :title="modalPreviewTaskTitle" :caseId="caseDetails.id" :taskId="currentTaskId" @close-modal="showPreviewTaskModal = false" />
       <VEditCaseBoard v-if="showEditModal" :title="modalEditTitle" :caseData="editableCaseDetails" @close-modal="showEditModal = false" @save-clicked="handleEditCase" />
     </VModal>
 
@@ -82,6 +83,7 @@ import VModal from '@/components/v-modal/v-modal.vue';
 import VEditCaseBoard from '@/modals/CaseBoards/v-edit-case-board/v-edit-case-board.vue';
 import VAddTask from '@/modals/CaseBoards/v-add-task/v-add-task.vue';
 import VEditTask from '@/modals/CaseBoards/v-edit-task/v-edit-task.vue';
+import VPreviewTask from '@/modals/CaseBoards/v-preview-task/v-preview-task.vue';
 import VUserSmall from '@/components/v-user-small/v-user-small.vue';
 
 export default defineComponent({
@@ -93,6 +95,7 @@ export default defineComponent({
     VEditCaseBoard,
     VAddTask,
     VEditTask,
+    VPreviewTask,
     VUserSmall,
     VDropdown,
     Board,
@@ -149,9 +152,11 @@ export default defineComponent({
       showEditModal: false,
       showAddTaskModal: false,
       showEditTaskModal: false,
+      showPreviewTaskModal: false,
       modalEditTitle: '',
       modalAddTaskTitle: '',
       modalEditTaskTitle: '',
+      modalPreviewTaskTitle: '',
       notificationType: 'success',
       notificationHeader: 'Changes saved',
       notificationMessage: 'This account has been successfully edited.',
@@ -228,6 +233,11 @@ export default defineComponent({
       this.currentTaskId = taskId;
       this.modalEditTaskTitle = 'Edit task';
       this.showEditTaskModal = true;
+    },
+    openPreviewTaskModal(taskId: string) {
+      this.currentTaskId = taskId;
+      this.modalEditTaskTitle = 'Task details';
+      this.showPreviewTaskModal = true;
     },
     handleEditTask() {
       this.showEditTaskModal = false;

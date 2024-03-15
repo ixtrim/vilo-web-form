@@ -1,6 +1,6 @@
 <template>
   <div class="board"> 
-    <List v-for="list in lists" :key="list.id" :list="list" @addTask="$emit('addTask')" />
+    <List v-for="list in lists" :key="list.id" :list="list" @addTask="$emit('addTask')" @editTask="handleEditTask" />
   </div>
 </template>
 
@@ -14,7 +14,7 @@ import List from '@/modules/Board/List.vue';
 interface List {
   id: number;
   title: string;
-  cards: Task[]; // Use the Task interface
+  cards: Task[];
 }
 
 interface Task {
@@ -24,7 +24,7 @@ interface Task {
   priority: string;
   due_date: string;
   user_assigned: string;
-  status: number; // Add this line
+  status: number;
 }
 
 export default defineComponent({
@@ -121,6 +121,9 @@ export default defineComponent({
         console.error("Error updating task status: ", error);
       });
     },
+    handleEditTask(taskId: string) {
+      this.$emit('editTask', taskId);
+    }
   }
 });
 </script>

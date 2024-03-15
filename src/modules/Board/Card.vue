@@ -7,7 +7,7 @@
           <VButton :block="false" size="sm" icon="left" icon-style="drag" styled="simple-icon move-task" text=""></VButton>
         </li>
         <li>
-          <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" text=""></VButton>
+          <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" text="" @click="emitEditTaskEvent"></VButton>
         </li>
       </ul>
     </div>
@@ -46,7 +46,7 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const userAvatar = ref(''); // Initialize with an empty string or a default avatar URL
+    const userAvatar = ref('');
 
     // Asynchronously fetch the user's avatar when the component mounts
     onMounted(async () => {
@@ -56,19 +56,22 @@ export default defineComponent({
           const userSnap = await getDoc(userRef);
           if (userSnap.exists()) {
             const userData = userSnap.data();
-            userAvatar.value = userData.avatar; // Assuming 'avatar' is the field name in your user documents
+            userAvatar.value = userData.avatar;
           } else {
             console.error("User document does not exist!");
-            // Set userAvatar.value to a default avatar URL if needed
           }
         } catch (error) {
           console.error("Error fetching user document:", error);
-          // Optionally set userAvatar.value to a default avatar URL in case of error
         }
       }
     });
 
     return { userAvatar };
+  },
+  methods: {
+    emitEditTaskEvent() {
+      this.$emit('editTask', this.card.id);
+    }
   }
 });
 </script>

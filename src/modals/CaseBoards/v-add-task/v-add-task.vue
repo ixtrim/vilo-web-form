@@ -180,11 +180,9 @@
   async function saveAndClose(event: any) {
     // Ensure all required fields are filled
     if (!localTitle.value || !localDescription.value || !localDueDate.value) {
-      alert("Please fill in all required fields.");
       return;
     }
     event.stopPropagation();
-    alert(uploadedFiles.value);
     try {
       const newTask = {
         title: localTitle.value,
@@ -204,7 +202,6 @@
       closeModal();
     } catch (error) {
       console.error("Failed to add new task:", error);
-      alert("Failed to add new task. Please try again.");
     }
   }
 </script>

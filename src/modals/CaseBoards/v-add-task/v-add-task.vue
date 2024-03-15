@@ -57,7 +57,7 @@
     <div class="row">
       <div class="col-lg-12">
         <div class="form-group">
-          <v-button :block="false" size="md" styled="link-gray" icon="left" icon-style="upload" text="Attach file"></v-button>
+          <VMultipleUploader @images-uploaded="handleFilesUploaded" />
         </div>
       </div>
     </div>
@@ -87,6 +87,7 @@
   import VDropdown from '@/components/v-dropdown/VDropdown.vue';
   import VButton from '@/components/v-button/VButton.vue';
   import VueDatePicker from '@vuepic/vue-datepicker';
+  import VMultipleUploader from '@/components/v-multiple-uploader/VMultipleUploader.vue';
   import '@vuepic/vue-datepicker/dist/main.css';
 
   interface DropdownItem {
@@ -111,6 +112,7 @@
   const selectedPriority = ref('low');
   const selectedAssigned = ref('');
   const selectedReporter = ref('');
+  const uploadedFiles: Ref<string[]> = ref([]);
 
   const dropdownReporter: Ref<DropdownItem[]> = ref([]);
   const dropdownAssigned: Ref<DropdownItem[]> = ref([]);
@@ -163,6 +165,10 @@
     dropdownPriorityTitle.value = item.label;
   }
 
+  function handleFilesUploaded(url: string) {
+    uploadedFiles.value.push(url);
+  }
+
   onMounted(async () => {
     await fetchTeamMembers();
   });
@@ -178,6 +184,7 @@
       return;
     }
     event.stopPropagation();
+    alert(uploadedFiles.value);
     try {
       const newTask = {
         title: localTitle.value,
@@ -189,7 +196,7 @@
         created_date: Timestamp.fromDate(new Date()),
         status: 0,
         priority: dropdownPriority.value.find(priority => priority.label === dropdownPriorityTitle.value)?.value || 'low',
-        attachments: [],
+        attachments: uploadedFiles.value,
       };
 
       await addDoc(collection(db, "tasks"), newTask);

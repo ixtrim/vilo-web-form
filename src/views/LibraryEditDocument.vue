@@ -131,8 +131,6 @@
   import { onMounted, ref, defineComponent, computed } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
   import { QuillEditor } from '@vueup/vue-quill';
-  import VLink from '@/components/v-link/VLink.vue';
-  import VImageUploader from '@/components/v-image-uploader/VImageUploader.vue'
   import VImageUploaderNoCropped from '@/components/v-image-uploader-no-cropped/VImageUploaderNoCropped.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VButton from '@/components/v-button/VButton.vue';

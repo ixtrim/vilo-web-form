@@ -22,14 +22,14 @@
             <div class="col col--cm-user">
               <h5>Name</h5>
             </div>
+            <div class="col col--cm-company">
+              <h5>Company</h5>
+            </div>
             <div class="col col--cm-phone">
               <h5>Phone</h5>
             </div>
             <div class="col col--cm-position">
               <h5>Position</h5>
-            </div>
-            <div class="col col--cm-company">
-              <h5>Company</h5>
             </div>
             <div class="col col--cm-address">
               <h5>Address</h5>
@@ -41,9 +41,11 @@
 
           <div class="dashboard__users__page">
             <div class="dashboard__users__page__item" v-for="user in paginatedUsers" :key="user.id">
-
               <div class="col col--cm-user">
                 <VUser :userName="user.full_name" :userEmail="user.email" :userAvatar="user.avatar" />
+              </div>
+              <div class="col col--cm-company">
+                <p>{{ user.company || 'Individual Client' }}</p>
               </div>
               <div class="col col--cm-phone">
                 <p>{{ user.phone }}</p>
@@ -51,9 +53,7 @@
               <div class="col col--cm-position">
                 <p>{{ user.position }}</p>
               </div>
-              <div class="col col--cm-company">
-                <p>{{ user.company || 'Individual Client' }}</p>
-              </div>
+              
               <div class="col col--cm-address">
                 <p>{{ user.address }}</p>
               </div>

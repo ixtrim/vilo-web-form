@@ -73,7 +73,6 @@ import type { DocumentData } from 'firebase/firestore';
 import { db } from '@/firebase.js';
 import VBreadcrumbs from '@/components/v-breadcrumbs/VBreadcrumbs.vue';
 import VButton from '@/components/v-button/VButton.vue';
-import VModalSmall from '@/components/v-modal-small/v-modal-small.vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 import Search from '@/modules/Navigation/Search.vue';
 import Board from '@/modules/Board.vue';
@@ -87,7 +86,6 @@ export default defineComponent({
   components: {
     VBreadcrumbs,
     VButton,
-    VModalSmall,
     VNotification,
     VModal,
     VEditCaseBoard,

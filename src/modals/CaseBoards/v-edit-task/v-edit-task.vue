@@ -101,14 +101,21 @@
   }
 
   const props = defineProps({
-    caseId: String
+    caseId: String,
+    taskId: String,
   });
 
   const emit = defineEmits(['close-modal', 'save-clicked', 'task-added']);
 
   const localTitle = ref('');
   const localDescription = ref('');
+  const localUserAssigned = ref('');
+  const localUserReporting = ref('');
   const localDueDate = ref(new Date());
+  const localPriority = ref('');
+  const localAttachments = ref('');
+
+  
   const selectedPriority = ref('low');
   const selectedAssigned = ref('');
   const selectedReporter = ref('');
@@ -116,6 +123,16 @@
 
   const dropdownReporter: Ref<DropdownItem[]> = ref([]);
   const dropdownAssigned: Ref<DropdownItem[]> = ref([]);
+
+  const taskDetails = ref({
+    title: '',
+    description: '',
+    user_assigned: '',
+    user_reporting: '',
+    due_date: '',
+    priority: '',
+    attachments: '',
+  });
 
   const fetchTeamMembers = async () => {
     if (props.caseId) {
@@ -169,6 +186,66 @@
     uploadedFiles.value.push(url);
   }
 
+  watch(() => props.taskId, async (newVal) => {
+    if (newVal) {
+      await fetchTaskDetails();
+    }
+  }, { immediate: true });
+
+  async function fetchTaskDetails() {
+      if (!props.taskId) {
+        console.error("Task ID is undefined");
+        return;
+      }
+      const taskRef = doc(db, "tasks", props.taskId);
+      const taskSnap = await getDoc(taskRef);
+      if (taskSnap.exists()) {
+        const data = taskSnap.data();
+        taskDetails.value = {
+          title: data.title,
+          description: data.description,
+          user_assigned: data.user_assigned,
+          user_reporting: data.user_reporting,
+          due_date: data.due_date.toDate(),
+          priority: data.priority,
+          attachments: data.attachments,
+        };
+        localTitle.value = taskDetails.value.title;
+        localDescription.value = taskDetails.value.description;
+        localDueDate.value = new Date(taskDetails.value.due_date);
+        localPriority.value = taskDetails.value.priority;
+        initializeDropdownTitles();
+      } else {
+        console.error("Task does not exist!");
+      }
+  }
+
+  function initializeDropdownTitles() {
+      // Assuming you have a method to fetch a user's full name by their ID
+      fetchUserName(taskDetails.value.user_assigned).then(name => {
+          dropdownAssignedTitle.value = name;
+      });
+      fetchUserName(taskDetails.value.user_reporting).then(name => {
+          dropdownReporterTitle.value = name;
+      });
+      // Set the priority dropdown title directly since it's a predefined list
+      const priorityItem = dropdownPriority.value.find(item => item.value === taskDetails.value.priority);
+      if (priorityItem) {
+          dropdownPriorityTitle.value = priorityItem.label;
+      }
+  }
+
+  // Example function to fetch a user's full name by their ID
+  async function fetchUserName(userId: string) {
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+          return userSnap.data().full_name; // Assuming the field is named 'full_name'
+      }
+      return 'Unknown'; // Fallback value
+  }
+
+
   onMounted(async () => {
     await fetchTeamMembers();
   });
@@ -177,33 +254,35 @@
     emit('close-modal');
   }
 
-  async function saveAndClose(event: any) {
-    // Ensure all required fields are filled
-    if (!localTitle.value || !localDescription.value || !localDueDate.value) {
+  async function saveAndClose() {
+    if (!props.taskId) {
+      console.error("Task ID is undefined");
       return;
     }
-    event.stopPropagation();
+    // Ensure all required fields are filled
+    if (!localTitle.value || !localDescription.value || !localDueDate.value) {
+      console.error("Please fill in all required fields.");
+      return;
+    }
+
     try {
-      const newTask = {
+      const taskRef = doc(db, "tasks", props.taskId);
+      await updateDoc(taskRef, {
         title: localTitle.value,
         description: localDescription.value,
         user_assigned: dropdownAssigned.value.find(user => user.label === dropdownAssignedTitle.value)?.value || '',
         user_reporting: dropdownReporter.value.find(user => user.label === dropdownReporterTitle.value)?.value || '',
-        case: props.caseId,
         due_date: Timestamp.fromDate(new Date(localDueDate.value)),
-        created_date: Timestamp.fromDate(new Date()),
-        status: 0,
         priority: dropdownPriority.value.find(priority => priority.label === dropdownPriorityTitle.value)?.value || 'low',
         attachments: uploadedFiles.value,
-      };
-
-      await addDoc(collection(db, "tasks"), newTask);
+      });
       emit('save-clicked');
       closeModal();
     } catch (error) {
-      console.error("Failed to add new task:", error);
+      console.error("Failed to update task:", error);
     }
   }
+
 </script>
 
 <style>

@@ -1,76 +1,70 @@
 <template>
-  <div class="modal-body">
+  <div class="modal-body preview-task">
 
-    <div class="row">
+    <div class="row mb-2">
       <div class="col-lg-12">
-        <VInput 
-          label="Title" 
-          placeholder="New task" 
-          v-model="localTitle"
-        />
+        <h4>{{ localTitle }}</h4>
       </div>
     </div>
 
-    <div class="row">
+    <div class="row mb-4 preview-task__description">
       <div class="col-lg-12">
-        <VTextarea 
-          label="Description" 
-          placeholder="e.g. I joined Stripe’s Customer Success team to help them scale their checkout product. I focused mainly on onboarding new customers and resolving complaints." 
-          v-model="localDescription"
-        />
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-lg-12">
-        <div class="form-group">
-          <label>Assign to</label>
-          <VDropdown :title="dropdownAssignedTitle" :items="dropdownAssigned" @item-clicked="onAssignedChanged" />
-        </div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-lg-12">
-        <div class="form-group">
-          <label>Reporter</label>
-          <VDropdown :title="dropdownReporterTitle" :items="dropdownReporter" @item-clicked="onReporterChanged" />
-        </div>
+        <p>{{ localDescription }}</p>
       </div>
     </div>
 
     <div class="row">
       <div class="col-lg-6">
-        <div class="form-group">
-          <label>Priority</label>
-          <VDropdown :title="dropdownPriorityTitle" :items="dropdownPriority" @item-clicked="onPriorityChanged" />
+        <div class="meta-info">
+          <strong>Assigned to</strong>
+          <p>{{ dropdownAssignedTitle }}</p>
         </div>
       </div>
       <div class="col-lg-6">
-        <div class="form-group">
-          <label>Due Date</label>
-          <VueDatePicker label="Due Date" v-model="localDueDate"></VueDatePicker>
+        <div class="meta-info">
+          <strong>Reported by</strong>
+          <p>{{ dropdownReporterTitle }}</p>
         </div>
       </div>
     </div>
 
-    <div class="row">
+    <div class="row mb-4">
+      <div class="col-lg-6">
+        <div class="meta-info">
+          <strong>Priority</strong>
+          <p>{{ dropdownPriorityTitle }}</p>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="meta-info">
+          <strong>Due Date</strong>
+          <p>{{ formattedDueDate }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row attachments" v-if="localAttachments && localAttachments.length > 0">
       <div class="col-lg-12">
-        <div class="form-group">
-          <VMultipleUploader @images-uploaded="handleFilesUploaded" />
-        </div>
+        <strong>Attachments:</strong>
+        <ul>
+          <li v-for="(attachment, index) in localAttachments" :key="index">
+            <a :href="attachment" download>
+              <div class="img-frame" :style="{ backgroundImage: 'url(' + attachment + ')' }"></div>
+              <span>Download file</span>
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
-
   </div>
+
   <div class="modal-footer">
     <ul class="modal-footer__actions">
+      <li></li>
       <li>
-        <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close"></v-button>
+        <v-button :block="false" size="md" styled="outlined" @click="closeModal" text="Close preview"></v-button>
       </li>
-      <li>
-        <v-button :block="false" size="md" styled="Primary" @click="saveAndClose" text="Save"></v-button>
-      </li>
+      <li></li>
     </ul>
   </div>
 </template>
@@ -101,14 +95,21 @@
   }
 
   const props = defineProps({
-    caseId: String
+    caseId: String,
+    taskId: String,
   });
 
   const emit = defineEmits(['close-modal', 'save-clicked', 'task-added']);
 
   const localTitle = ref('');
   const localDescription = ref('');
+  const localUserAssigned = ref('');
+  const localUserReporting = ref('');
   const localDueDate = ref(new Date());
+  const localPriority = ref('');
+  const localAttachments = ref('');
+
+  
   const selectedPriority = ref('low');
   const selectedAssigned = ref('');
   const selectedReporter = ref('');
@@ -116,6 +117,27 @@
 
   const dropdownReporter: Ref<DropdownItem[]> = ref([]);
   const dropdownAssigned: Ref<DropdownItem[]> = ref([]);
+
+  const formattedDueDate = computed(() => {
+    if (!localDueDate.value) return '';
+
+    const date = new Date(localDueDate.value);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // JavaScript months are 0-indexed.
+    const year = date.getFullYear();
+
+    return `${day}.${month}.${year}`;
+  });
+
+  const taskDetails = ref({
+    title: '',
+    description: '',
+    user_assigned: '',
+    user_reporting: '',
+    due_date: '',
+    priority: '',
+    attachments: '',
+  });
 
   const fetchTeamMembers = async () => {
     if (props.caseId) {
@@ -169,6 +191,67 @@
     uploadedFiles.value.push(url);
   }
 
+  watch(() => props.taskId, async (newVal) => {
+    if (newVal) {
+      await fetchTaskDetails();
+    }
+  }, { immediate: true });
+
+  async function fetchTaskDetails() {
+      if (!props.taskId) {
+        console.error("Task ID is undefined");
+        return;
+      }
+      const taskRef = doc(db, "tasks", props.taskId);
+      const taskSnap = await getDoc(taskRef);
+      if (taskSnap.exists()) {
+        const data = taskSnap.data();
+        taskDetails.value = {
+          title: data.title,
+          description: data.description,
+          user_assigned: data.user_assigned,
+          user_reporting: data.user_reporting,
+          due_date: data.due_date.toDate(),
+          priority: data.priority,
+          attachments: data.attachments,
+        };
+        localTitle.value = taskDetails.value.title;
+        localDescription.value = taskDetails.value.description;
+        localDueDate.value = new Date(taskDetails.value.due_date);
+        localPriority.value = taskDetails.value.priority;
+        localAttachments.value = taskDetails.value.attachments;
+        initializeDropdownTitles();
+      } else {
+        console.error("Task does not exist!");
+      }
+  }
+
+  function initializeDropdownTitles() {
+      // Assuming you have a method to fetch a user's full name by their ID
+      fetchUserName(taskDetails.value.user_assigned).then(name => {
+          dropdownAssignedTitle.value = name;
+      });
+      fetchUserName(taskDetails.value.user_reporting).then(name => {
+          dropdownReporterTitle.value = name;
+      });
+      // Set the priority dropdown title directly since it's a predefined list
+      const priorityItem = dropdownPriority.value.find(item => item.value === taskDetails.value.priority);
+      if (priorityItem) {
+          dropdownPriorityTitle.value = priorityItem.label;
+      }
+  }
+
+  // Example function to fetch a user's full name by their ID
+  async function fetchUserName(userId: string) {
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+          return userSnap.data().full_name; // Assuming the field is named 'full_name'
+      }
+      return 'Unknown'; // Fallback value
+  }
+
+
   onMounted(async () => {
     await fetchTeamMembers();
   });
@@ -177,35 +260,38 @@
     emit('close-modal');
   }
 
-  async function saveAndClose(event: any) {
-    // Ensure all required fields are filled
-    if (!localTitle.value || !localDescription.value || !localDueDate.value) {
+  async function saveAndClose() {
+    if (!props.taskId) {
+      console.error("Task ID is undefined");
       return;
     }
-    event.stopPropagation();
+    // Ensure all required fields are filled
+    if (!localTitle.value || !localDescription.value || !localDueDate.value) {
+      console.error("Please fill in all required fields.");
+      return;
+    }
+
     try {
-      const newTask = {
+      const taskRef = doc(db, "tasks", props.taskId);
+      await updateDoc(taskRef, {
         title: localTitle.value,
         description: localDescription.value,
         user_assigned: dropdownAssigned.value.find(user => user.label === dropdownAssignedTitle.value)?.value || '',
         user_reporting: dropdownReporter.value.find(user => user.label === dropdownReporterTitle.value)?.value || '',
-        case: props.caseId,
         due_date: Timestamp.fromDate(new Date(localDueDate.value)),
-        created_date: Timestamp.fromDate(new Date()),
-        status: 0,
         priority: dropdownPriority.value.find(priority => priority.label === dropdownPriorityTitle.value)?.value || 'low',
         attachments: uploadedFiles.value,
-      };
-
-      await addDoc(collection(db, "tasks"), newTask);
+      });
       emit('save-clicked');
       closeModal();
     } catch (error) {
-      console.error("Failed to add new task:", error);
+      console.error("Failed to update task:", error);
     }
   }
+
 </script>
 
 <style>
 @import url(@/components/v-modal/v-modal.scss);
+@import url(./v-preview-task.scss);
 </style>

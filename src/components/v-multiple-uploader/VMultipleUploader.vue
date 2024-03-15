@@ -10,12 +10,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits } from 'vue';
+import { ref, defineEmits, watch, onMounted } from 'vue';
 import { storage } from '@/firebase.js'; // Ensure you have this import for Firebase storage
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const imagesData = ref<string[]>([]);
 const emit = defineEmits(['images-uploaded']);
+
+defineProps({
+  initialFiles: Array,
+});
+const files = ref([]);
 
 function onFileChange(event: Event) {
   const input = event.target as HTMLInputElement;

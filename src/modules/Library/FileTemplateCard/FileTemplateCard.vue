@@ -15,19 +15,13 @@
         <div class="dropdown-menu px-2 py-2" v-if="showDropdown">
           <ul class="dropdown-inline-list">
             <li>
-              <button style="background: none;border: none;" @click="deleteTemplate">
-                Delete
-              </button>
+              <VButton :block="false" size="md" icon="left" icon-style="delete" styled="link-gray" @click="deleteTemplate" text="Delete"></VButton>
             </li>
             <li>
-              <button style="background: none;border: none;" @click="editTemplate">
-                Edit
-              </button>
+              <VButton :block="false" size="md" icon="left" icon-style="edit--3" styled="link-gray" @click="editTemplate" text="Edit"></VButton>
             </li>
             <li>
-              <button style="background: none;border: none;" @click="duplicateTemplate">
-                Duplicate
-              </button>
+              <VButton :block="false" size="md" icon="left" icon-style="duplicate" styled="link-gray" @click="duplicateTemplate" text="Duplicate"></VButton>
             </li>
           </ul>
         </div>

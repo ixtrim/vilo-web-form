@@ -37,10 +37,12 @@ const auth = getAuth();
 const { user } = useUserStore();
 const router = useRouter();
 
+const truncateEmail = (email: string) => email.length > 20 ? `${email.substring(0, 18)}...` : email;
+
 const userInfo = computed(() => {
   return {
     full_name: user.value?.full_name ?? 'No name found',
-    email: user.value?.email ?? 'No email found',
+    email: truncateEmail(user.value?.email ?? 'No email found'),
     avatar: user.value?.avatar ?? 'https://firebasestorage.googleapis.com/v0/b/vilo-ebc86.appspot.com/o/vilo_app%2Favatar.png?alt=media&token=05cebcce-137e-42f2-bd6d-7d8b1ad76b67'
   };
 });

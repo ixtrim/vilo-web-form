@@ -32,6 +32,10 @@ const isClient = computed(() => {
   return [3, 4].includes(user.value?.role ?? 0);
 });
 
+const isGeneral = computed(() => {
+  return [1].includes(user.value?.role ?? 0);
+});
+
 const chatBadgeNumber = ref<number>(0);
 
 // Explicitly type unsubscribe as a function or null
@@ -73,11 +77,26 @@ watch(() => user.value?.id, (newId, oldId) => {
 });
 
 const links = computed(() => {
+  // Links for clients
   if (isClient.value) {
     return [
       { name: 'Invoices', to: '/invoices', icon: 'left', iconStyle: 'invoices' },
+      // Add any other links specific to clients
     ];
-  } else {
+  }
+  // Links for general users
+  else if (isGeneral.value) {
+    return [
+      { name: 'Home', to: '/dashboard', icon: 'left', iconStyle: 'home' },
+      { name: 'Cases', to: '/case-boards', icon: 'left', iconStyle: 'boards' },
+      { name: 'Clients', to: '/clients-management', icon: 'left', iconStyle: 'clients' },
+      { name: 'Library', to: '/library', icon: 'left', iconStyle: 'library' },
+      { name: 'Calendar', to: '/calendar', icon: 'left', iconStyle: 'calendar' },
+      { name: 'Chat', to: '/chat', icon: 'left', iconStyle: 'chat', badge: chatBadgeNumber },
+    ];
+  }
+  // Links for other roles (e.g., Admins)
+  else {
     return [
       { name: 'Home', to: '/dashboard', icon: 'left', iconStyle: 'home' },
       { name: 'Cases', to: '/case-boards', icon: 'left', iconStyle: 'boards' },
@@ -86,7 +105,10 @@ const links = computed(() => {
       { name: 'Invoices', to: '/invoices', icon: 'left', iconStyle: 'invoices' },
       { name: 'Calendar', to: '/calendar', icon: 'left', iconStyle: 'calendar' },
       { name: 'Chat', to: '/chat', icon: 'left', iconStyle: 'chat', badge: chatBadgeNumber },
+      // Add any other links that should be available to all other roles
     ];
   }
 });
+
+
 </script>

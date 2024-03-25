@@ -14,7 +14,7 @@
         <VButton :block="false" size="sm" icon="left" icon-style="settings-dots" styled="simple-icon" @click="toggleDropdown" ></VButton>
         <div class="dropdown-menu px-2 py-2" v-if="showDropdown">
           <ul class="dropdown-inline-list">
-            <li>
+            <li v-if="isAdmin">
               <VButton :block="false" size="md" icon="left" icon-style="delete" styled="link-gray" @click="deleteTemplate" text="Delete"></VButton>
             </li>
             <li>
@@ -41,8 +41,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, computed } from 'vue';
 import VButton from '@/components/v-button/VButton.vue';
+import { useUserStore } from '@/stores/userStore';
 
 export default defineComponent({
   components: {
@@ -73,6 +74,9 @@ export default defineComponent({
   setup() {
     const showDropdown = ref(false);
 
+    const { user } = useUserStore();
+    const isAdmin = computed(() => user.value?.role === 0);
+
     const toggleDropdown = () => {
       console.log('Dropdown toggled');
       showDropdown.value = !showDropdown.value;
@@ -82,6 +86,7 @@ export default defineComponent({
     return {
       showDropdown,
       toggleDropdown,
+      isAdmin,
     };
   },
   methods: {

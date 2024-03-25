@@ -16,7 +16,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div class="row" v-if="!isGeneral">
       <div class="col-lg-7">
         <TotalIncome />
       </div>
@@ -97,7 +97,16 @@ export default defineComponent({
     MyTasks,
     UpcomingMeetings,
     UnreadMessages,
-  }
+  },
+  setup() {
+    const { user } = useUserStore();
+
+    const isGeneral = computed(() => user.value?.role === 1);
+
+    return {
+      isGeneral,
+    };
+  },
 });
 </script>
 

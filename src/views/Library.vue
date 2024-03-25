@@ -111,7 +111,7 @@
                 </div>
                 <div class="col col--l-delete">
                   <!-- <VLink to="#" styled="secondary" @click="deleteDocumentAction(file)">Delete</VLink> -->
-                  <VButton :block="false" size="sm" styled="link-gray" @click="deleteDocumentAction(file)" text="Delete"></VButton>
+                  <VButton v-if="isAdmin" :block="false" size="sm" styled="link-gray" @click="deleteDocumentAction(file)" text="Delete"></VButton>
                 </div>
                 <div class="col col--l-edit">
                   <!-- <VLink to="#" @click="addDocument" styled="primary">Edit</VLink> -->
@@ -168,7 +168,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed,onMounted, watch } from 'vue';
+import { defineComponent, ref, computed, onMounted, watch } from 'vue';
+import { useUserStore } from '@/stores/userStore';
 import VLink from '@/components/v-link/VLink.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import Search from '@/modules/Navigation/Search.vue';
@@ -247,8 +248,6 @@ export default defineComponent({
     };
   },
   setup() {
-
-
     const files = ref<File[]>([]);
     const currentPage = ref(1);
     const itemsPerPage = ref(10);
@@ -259,6 +258,9 @@ export default defineComponent({
     const showDeleteModal = ref(false);
 
     const selectedFileId = ref<string>('');
+
+    const { user } = useUserStore();
+    const isAdmin = computed(() => user.value?.role === 0);
 
     const sortTime = ref([
       { label: 'All', value: 'all' },
@@ -422,6 +424,7 @@ export default defineComponent({
       showDeleteModal,
       deleteDocumentAction,
       selectedFileId,
+      isAdmin,
     }
 
   },

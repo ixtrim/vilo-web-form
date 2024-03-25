@@ -202,7 +202,8 @@
 
   const errorMessage = ref('');
 
-  const avatarUrl = ref('');
+  const defaultAvatarUrl = 'https://firebasestorage.googleapis.com/v0/b/vilo-ebc86.appspot.com/o/vilo_app%2Favatar.png?alt=media&token=05cebcce-137e-42f2-bd6d-7d8b1ad76b67';
+  const avatarUrl = ref(defaultAvatarUrl);
   let croppedImageBlob = ref<Blob | null>(null);
 
   const props = defineProps({
@@ -318,6 +319,14 @@
       isValid = false;
     }
 
+    let avatarUploadUrl = defaultAvatarUrl;
+    if (croppedImageBlob.value) {
+      const avatarFileName = `avatars/${new Date().getTime()}_${localUserEmail.value.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
+      const avatarRef = storageRef(storage, avatarFileName);
+      const avatarUploadResult = await uploadBytes(avatarRef, croppedImageBlob.value);
+      avatarUploadUrl = await getDownloadURL(avatarUploadResult.ref);
+    }
+
     if (!isValid) {
       return;
     }
@@ -333,7 +342,7 @@
       role: roleMappings[dropdownRoleTitle.value as keyof typeof roleMappings],
       status: statusMappings[dropdownStatusTitle.value as keyof typeof statusMappings],
       notes: userNotes.value || '',
-      avatarBlob: croppedImageBlob.value,
+      avatar: avatarUploadUrl,
       google_calendar_api_key: localUserGoogleCalendarAPIKey.value,
       google_calendar_id: localUserGoogleCalendarID.value,
     };

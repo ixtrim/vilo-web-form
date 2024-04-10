@@ -23,7 +23,8 @@
   </div>
 </template>
 <script lang="ts">
-  import axios from 'axios';
+  import { sendPasswordResetEmail } from 'firebase/auth';
+  import { auth } from '@/firebase';
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VLink from '@/components/v-link/VLink.vue';
@@ -59,28 +60,17 @@
 
         if (!this.email) {
           this.emailValidationMessage = 'Email is required!';
+          return;
         }
 
         if (!this.emailValidationMessage) {
           try {
-            await axios.post('https://api-vilo.nestvested.co/auth/request-reset-email/', {
-              email: this.email,
-            }, {
-              headers: {
-                'Content-Type': 'application/json',
-                'accept': 'application/json',
-              },
-            });
-
+            await sendPasswordResetEmail(auth, this.email);
+            // If successful, navigate to the email verification page
             this.$router.push('/email-verification');
-          } catch (error: any) {
-            if (axios.isAxiosError(error) && error.response && error.response.data && error.response.data.email) {
-              this.resetErrorMessage = error.response.data.email[0];
-            } else {
-              this.resetErrorMessage = 'An error occurred. Please try again later.';
-            }
+          } catch (error) {
+            this.resetErrorMessage = (error as any).message || 'An error occurred. Please try again later.';
           }
-          
         } else {
           console.log('Form is invalid, do not submit');
         }

@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts">
-  import axios from 'axios';
+  import { confirmPasswordReset, getAuth } from 'firebase/auth';
   import VButton from '@/components/v-button/VButton.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VIconbox from '@/components/v-iconbox/VIconbox.vue';
@@ -121,71 +121,34 @@
         };
       },
       async handleSubmit() {
-
-        // Check if fields are filled
-        if (!this.password) {
-          this.passwordValidationMessage = 'Password is required!';
+        if (!this.password || !this.confirmPassword) {
+          // Basic validation already handled by individual input validations
           return;
-        } else {
-          this.passwordValidationMessage = '';
         }
 
-        if (!this.confirmPassword) {
-          this.confirmPasswordValidationMessage = 'Confirm password is required!';
+        if (!this.isPasswordValid) {
+          // Additional logic or user feedback can be implemented here
           return;
-        } else {
-          this.confirmPasswordValidationMessage = '';
         }
 
-        // Check if password is valid
-        if (this.isPasswordValid && this.password && this.confirmPassword) {
-          try {
-            const { token1: uidb64, token2: token } = this.$route.params;
-
-            const response = await axios.patch('https://api-vilo.nestvested.co/auth/password-reset-complete/', {
-              password: this.password,
-              uidb64,
-              token
-            }, {
-              headers: {
-                'Content-Type': 'application/json',
-                'accept': 'application/json',
-              },
-            });
-
-            this.$router.push('/password-changed');
-          } catch (error: any) {
-            if (axios.isAxiosError(error)) {
-              if (error.response && error.response.data && error.response.data.message) {
-                this.apiErrorMessage = error.response.data.message;
-              } else {
-                this.apiErrorMessage = 'An unexpected error occurred. Please try again later.';
-              }
-            }
+        try {
+          const oobCode = this.$route.query.oobCode as string;
+          await confirmPasswordReset(getAuth(), oobCode, this.password);
+          this.$router.push('/password-changed'); // Redirect on success
+        } catch (error) {
+            if ((error as any).code === 'auth/invalid-action-code') {
+            this.apiErrorMessage = 'Your reset link has expired or is invalid. Please request a new one.';
+          } else {
+            this.apiErrorMessage = 'Failed to reset password. Please try again.';
           }
-        } else {
-          
+          console.error(error);
         }
-      },
+      }
     },
     async mounted() {
-      try {
-        const { token1: uidb64, token2: token } = this.$route.params;
-
-        const response = await axios.post('https://api-vilo.nestvested.co/auth/password-reset/', {
-          uidb64,
-          token
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-            'accept': 'application/json',
-          },
-        });
-
-        console.log('Response:', response.data);
-
-      } catch (error) {
-        this.$router.push('/forgot-password');
+      if (!this.$route.query.oobCode) {
+        this.apiErrorMessage = 'Invalid or expired password reset link. Please request a new one.';
+        setTimeout(() => this.$router.push('/forgot-password'), 5000);
       }
     },
   };

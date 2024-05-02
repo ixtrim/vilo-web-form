@@ -97,6 +97,7 @@
   const errorTitle = ref('');
   const errorCode = ref('');
   const dropdownClient: Ref<DropdownItem[]> = ref([]);
+  const adminUsers: Ref<DropdownItem[]> = ref([]);
 
   const fetchClients = async () => {
     const clientsQuery = query(collection(db, "users"), where("role", "in", [3, 4]));
@@ -131,12 +132,14 @@
   const selectedTeamMembers: Ref<DropdownItem[]> = ref([]);
 
   const fetchAllUsers = async () => {
-    const usersQuery = query(collection(db, "users"), where("role", "in", [0, 1, 2]));
+    const usersQuery = query(collection(db, "users"));
     const querySnapshot = await getDocs(usersQuery);
     allUsers.value = querySnapshot.docs.map(doc => ({
-      label: doc.data().full_name as string,
-      value: doc.id
+      label: doc.data().full_name,
+      value: doc.id,
+      role: doc.data().role
     }));
+    adminUsers.value = allUsers.value.filter(user => user.role === 0);
   };
 
   onMounted(async () => {
@@ -223,13 +226,15 @@
       return;
     }
 
+    const teamMembers = adminUsers.value.map(admin => admin.value).concat(selectedTeamMembers.value.map(member => member.value));
+
     try {
       await addDoc(collection(db, "cases"), {
         title: localTitle.value,
         inv_code: localInvCode.value,
         description: localDescription.value,
         client_id: localClient.value === '0' ? '' : localClient.value,
-        team_members: selectedTeamMembers.value.map(member => member.value),
+        team_members: teamMembers,
         time_added: new Date(),
         status: 1,
         icon: getRandomIconUrl(),

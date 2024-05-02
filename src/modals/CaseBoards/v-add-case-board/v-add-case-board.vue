@@ -49,7 +49,7 @@
       <div class="col-lg-12">
         <div class="form-group">
           <label>Add team members</label>
-          <VMultiselect :items="allUsers" :selected="selectedTeamMembers" />
+          <VMultiselect :items="filteredUsers" :selected="selectedTeamMembers" />
         </div>
       </div>
     </div>
@@ -98,6 +98,7 @@
   const errorCode = ref('');
   const dropdownClient: Ref<DropdownItem[]> = ref([]);
   const adminUsers: Ref<DropdownItem[]> = ref([]);
+  const filteredUsers: Ref<DropdownItem[]> = ref([]);
 
   const fetchClients = async () => {
     const clientsQuery = query(collection(db, "users"), where("role", "in", [3, 4]));
@@ -140,6 +141,7 @@
       role: doc.data().role
     }));
     adminUsers.value = allUsers.value.filter(user => user.role === 0);
+    filteredUsers.value = allUsers.value.filter(user => user.role !== 0);
   };
 
   onMounted(async () => {

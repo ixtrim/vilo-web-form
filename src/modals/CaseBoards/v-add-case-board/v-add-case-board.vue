@@ -8,6 +8,7 @@
           placeholder="Vilo" 
           v-model="localTitle"
         />
+        <p v-if="errorTitle" class="error-message">{{ errorTitle }}</p>
       </div>
     </div>
 
@@ -19,6 +20,7 @@
           placeholder="VILO" 
           v-model="localInvCode"
         />
+        <p v-if="errorCode" class="error-message">{{ errorCode }}</p>
         <small>4 digits for invoicing purpose</small>
       </div>
       </div>
@@ -92,6 +94,8 @@
   const localInvCode = ref('');
   const localDescription = ref('');
   const localClient = ref('0');
+  const errorTitle = ref('');
+  const errorCode = ref('');
   const dropdownClient: Ref<DropdownItem[]> = ref([]);
 
   const fetchClients = async () => {
@@ -202,6 +206,23 @@
 
   async function saveAndClose(event: any) {
     event.stopPropagation();
+    // Reset error messages
+    errorTitle.value = '';
+    errorCode.value = '';
+
+    // Validation
+    if (!localTitle.value.trim()) {
+      errorTitle.value = 'Title is required!';
+    }
+    if (!localInvCode.value.trim()) {
+      errorCode.value = 'Code is required!';
+    }
+
+    if (errorTitle.value || errorCode.value) {
+      // Prevent saving if there are errors
+      return;
+    }
+
     try {
       await addDoc(collection(db, "cases"), {
         title: localTitle.value,

@@ -1,5 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import * as sgMail from '@sendgrid/mail';
 
 admin.initializeApp();
 
@@ -38,5 +39,65 @@ exports.syncUserEmail = functions.firestore.document('users/{userId}').onUpdate(
     await userRef.update({
       email: afterEmail,
     });
+  }
+});
+
+// --------------------- SendGrid E-mails usage
+
+// Setup SendGrid
+sgMail.setApiKey(functions.config().sendgrid.key);
+
+exports.addNewUser = functions.https.onCall(async (data: any, context: functions.https.CallableContext) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
+  }
+
+  const { email, password, ...otherUserData } = data;
+  try {
+    const userRecord = await admin.auth().createUser({
+      email,
+      password,
+    });
+
+    await admin.firestore().collection('users').doc(userRecord.uid).set({
+      email: userRecord.email,
+      ...otherUserData,
+    });
+
+    return { uid: userRecord.uid };
+  } catch (error) {
+    const message = (error as Error).message;
+    throw new functions.https.HttpsError('internal', message);
+  }
+});
+
+exports.syncUserEmail = functions.firestore.document('users/{userId}').onUpdate(async (change) => {
+  const beforeEmail = change.before.data().email;
+  const afterEmail = change.after.data().email;
+  
+  if (beforeEmail !== afterEmail) {
+    const userRef = admin.firestore().collection('users').doc(change.after.id);
+    await userRef.update({
+      email: afterEmail,
+    });
+  }
+});
+
+exports.sendWelcomeEmail = functions.firestore.document('users/{userId}').onCreate(async (snap, context) => {
+  const newUser = snap.data();
+
+  const msg = {
+    to: newUser.email,
+    from: 'noreply@vilo.nestvested.co',
+    subject: 'Your VILO Account Has Been Created!',
+    text: `Dear ${newUser.full_name || 'there'}, \n\nWe are pleased to inform you that your VILO account has been successfully created. Your email address ${newUser.email || 'there'} has been registered. \n\nTo gain access to your account and start using our services, you will need to reset your password. This extra step ensures the security of your account. \n\nTo reset your password, please follow these simple steps: \n\n1. Visit our website at www.vilo.nestvested.co \n\n2. Click on the "Forgot Password" link. \n\n3. Enter your registered email address ${newUser.email || 'there'}. \n\n4. Follow the instructions provided to set a new, secure password for your account. \n\nOnce you have reset your password, you will be able to log in and explore the various features and services offered by VILO. \n\nThank you for choosing VILO.`,
+    html: `Dear ${newUser.full_name || 'there'}, <br/><br/>We are pleased to inform you that your VILO account has been successfully created. Your email address ${newUser.email || 'there'} has been registered. <br/><br/>To gain access to your account and start using our services, you will need to reset your password. This extra step ensures the security of your account. <br/><br/>To reset your password, please follow these simple steps: <br/>1. Visit our website at <a href="https://www.vilo.nestvested.co/" target="_blank">www.vilo.nestvested.co</a><br/>2. Click on the "Forgot Password" link. <br/>3. Enter your registered email address ${newUser.email || 'there'}. <br/>4. Follow the instructions provided to set a new, secure password for your account. <br/><br/>Once you have reset your password, you will be able to log in and explore the various features and services offered by VILO. <br/><br/>Thank you for choosing VILO.`,
+  };
+
+  try {
+    await sgMail.send(msg);
+    console.log('Welcome email sent successfully');
+  } catch (error) {
+    console.error('Failed to send welcome email:', error);
   }
 });

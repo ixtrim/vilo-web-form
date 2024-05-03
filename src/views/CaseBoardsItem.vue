@@ -16,7 +16,7 @@
           <VUserSmall v-else userName="General case board" userAvatar="https://firebasestorage.googleapis.com/v0/b/vilo-ebc86.appspot.com/o/vilo_app%2Fvilo.svg?alt=media&token=5a714643-100b-4673-a24a-ca52bbf166f6" />
         </div>
       </div>
-      <div class="col-lg-2 align-right">
+      <div class="col-lg-2 align-right" style="display: none;">
         <v-button :block="false" size="sm" icon="left" icon-style="edit--2" styled="outlined" @click="openEditModal" text="Edit"></v-button>
       </div>
     </div>

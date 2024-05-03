@@ -9,6 +9,7 @@
           placeholder="Vilo" 
           v-model="localTitle"
         />
+        <p v-if="errorTitle" class="error-message">{{ errorTitle }}</p>
       </div>
       </div>
     </div>
@@ -21,6 +22,7 @@
           placeholder="VILO" 
           v-model="localInvCode"
         />
+        <p v-if="errorCode" class="error-message">{{ errorCode }}</p>
         <small>4 digits for invoicing purpose</small>
       </div>
       </div>
@@ -49,7 +51,7 @@
       <div class="col-lg-12">
         <div class="form-group">
           <label>Add team members</label>
-          <VMultiselect :items="allUsers" :selected="selectedTeamMembers" />
+          <VMultiselect :items="filteredUsers" :selected="selectedTeamMembers" />
         </div>
       </div>
     </div>
@@ -94,12 +96,16 @@
   const localInvCode = ref('');
   const localDescription = ref('');
   const localClient = ref('');
+  const errorTitle = ref('');
+  const errorCode = ref('');
   const dropdownClient: Ref<DropdownItem[]> = ref([]);
+  const adminUsers: Ref<DropdownItem[]> = ref([]);
+  const filteredUsers: Ref<DropdownItem[]> = ref([]);
 
   const fetchClients = async () => {
     const clientsQuery = query(collection(db, "users"), where("role", "in", [3, 4]));
     const querySnapshot = await getDocs(clientsQuery);
-    dropdownClient.value = [{ label: "General", value: "" }]; // Add General option with empty value
+    dropdownClient.value = [{ label: "General", value: "" }];
     dropdownClient.value.push(...querySnapshot.docs.map(doc => ({
       label: doc.data().full_name as string,
       value: doc.id
@@ -110,12 +116,15 @@
   const selectedTeamMembers: Ref<DropdownItem[]> = ref([]);
 
   const fetchAllUsers = async () => {
-    const usersQuery = query(collection(db, "users"), where("role", "in", [0, 1, 2]));
+    const usersQuery = query(collection(db, "users"));
     const querySnapshot = await getDocs(usersQuery);
     allUsers.value = querySnapshot.docs.map(doc => ({
-      label: doc.data().full_name as string,
-      value: doc.id
+      label: doc.data().full_name,
+      value: doc.id,
+      role: doc.data().role
     }));
+    adminUsers.value = allUsers.value.filter(user => user.role === 0);
+    filteredUsers.value = allUsers.value.filter(user => user.role !== 0);
   };
 
   onMounted(async () => {
@@ -167,6 +176,23 @@
   }
 
   async function saveAndClose() {
+    // Reset error messages
+    errorTitle.value = '';
+    errorCode.value = '';
+
+    // Validation
+    if (!localTitle.value.trim()) {
+      errorTitle.value = 'Title is required!';
+    }
+    if (!localInvCode.value.trim()) {
+      errorCode.value = 'Code is required!';
+    }
+
+    if (errorTitle.value || errorCode.value) {
+      // Prevent saving if there are errors
+      return;
+    }
+    
     if (props.caseData) {
       try {
         const caseRef = doc(db, "cases", props.caseData.id);

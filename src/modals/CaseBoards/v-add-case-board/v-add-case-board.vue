@@ -190,13 +190,32 @@
 
   async function saveAsDraft(event: any) {
     event.stopPropagation();
+    // Reset error messages
+    errorTitle.value = '';
+    errorCode.value = '';
+
+    // Validation
+    if (!localTitle.value.trim()) {
+      errorTitle.value = 'Title is required!';
+    }
+    if (!localInvCode.value.trim()) {
+      errorCode.value = 'Code is required!';
+    }
+
+    if (errorTitle.value || errorCode.value) {
+      // Prevent saving if there are errors
+      return;
+    }
+
+    const teamMembers = adminUsers.value.map(admin => admin.value).concat(selectedTeamMembers.value.map(member => member.value));
+
     try {
       await addDoc(collection(db, "cases"), {
         title: localTitle.value,
         inv_code: localInvCode.value,
         description: localDescription.value,
         client_id: localClient.value === '0' ? '' : localClient.value,
-        team_members: selectedTeamMembers.value.map(member => member.value),
+        team_members: teamMembers,
         time_added: new Date(),
         status: 0,
         icon: 'https://firebasestorage.googleapis.com/v0/b/vilo-ebc86.appspot.com/o/cases_icons%2Fcase-draft.png?alt=media&token=d65fe279-2ac4-4643-bab4-ae755903c19d',

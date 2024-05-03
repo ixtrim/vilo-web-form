@@ -83,6 +83,7 @@
   interface DropdownItem {
     label: string;
     value: string;
+    role?: number;
   }
 
   interface User {

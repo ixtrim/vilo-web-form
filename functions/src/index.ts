@@ -108,20 +108,20 @@ exports.sendCustomNotification = functions.https.onCall(async (data, context) =>
       throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
   }
 
-  // Extract email, status, and notes from the request data
-  const { email, status, notes } = data;
+  // Extract case, email, status, and notes from the request data
+  const { case_title, email, status, notes } = data;
 
   // Ensure all necessary data is present
-  if (!email || !status || !notes) {
-      throw new functions.https.HttpsError('invalid-argument', 'The function must be called with email, status, and notes arguments.');
+  if (!case_title || !email || !status || !notes) {
+      throw new functions.https.HttpsError('invalid-argument', 'The function must be called with case_title, email, status, and notes arguments.');
   }
 
   const msg = {
       to: email,
-      from: 'noreply@yourdomain.com', // This should be the email address verified with SendGrid
-      subject: `Notification: ${status}`,
-      text: `Status: ${status}\nNotes: ${notes}`,
-      html: `<strong>Status:</strong> ${status}<br><strong>Notes:</strong> ${notes}`
+      from: 'noreply@vilo.nestvested.co',
+      subject: `${case_title} case notification: ${status}`,
+      text: `Case: ${case_title}\nStatus: ${status}\nNotes: ${notes}`,
+      html: `<strong>Case:</strong> ${case_title}<br><strong>Status:</strong> ${status}<br><strong>Notes:</strong> ${notes}`
   };
 
   try {

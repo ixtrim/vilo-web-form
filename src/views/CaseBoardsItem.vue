@@ -106,9 +106,6 @@ export default defineComponent({
     const route = useRoute();
     const caseDetails = ref<DocumentData>({ title: '', description: '', client_id: '' });
     const userDetails = ref<DocumentData>({ full_name: '', avatar: '' });
-    const clientDetails = ref<DocumentData>({ email: '' });
-    const functions = getFunctions();
-    const sendNotification = httpsCallable(functions, 'sendNotificationEmail');
 
     const breadcrumbs = computed(() => [
       { text: 'Case boards', to: '/case-boards' },
@@ -229,15 +226,15 @@ export default defineComponent({
       const functions = getFunctions();
       const sendNotification = httpsCallable(functions, 'sendCustomNotification');
       try {
-        await sendNotification({
+        const response = await sendNotification({
+          case_title: this.caseDetails.title,
           email: this.userDetails.email,
           status: notificationData.status,
           notes: notificationData.notes
         });
-        this.triggerNotification('success', 'Update Successful Sent', 'Your update has been sent to the client.');
-        console.log('Notification sent successfully');
+        this.triggerNotification('success', 'Update Successfully Sent', 'Your update has been sent to the client.');
       } catch (error) {
-        console.error('Error sending notification:', error);
+        this.triggerNotification('error', 'Update Failed', 'Failed to send the update.');
       }
     },
     openAddTaskModal() {

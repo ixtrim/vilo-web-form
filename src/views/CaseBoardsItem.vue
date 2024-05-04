@@ -16,8 +16,8 @@
           <VUserSmall v-else userName="General case board" userAvatar="https://firebasestorage.googleapis.com/v0/b/vilo-ebc86.appspot.com/o/vilo_app%2Fvilo.svg?alt=media&token=5a714643-100b-4673-a24a-ca52bbf166f6" />
         </div>
       </div>
-      <div class="col-lg-2 align-right" style="display: none;">
-        <v-button :block="false" size="sm" icon="left" icon-style="edit--2" styled="outlined" @click="openEditModal" text="Edit"></v-button>
+      <div class="col-lg-2 align-right">
+        <VButton :block="true" size="md" icon="left" icon-style="send-notification-white" styled="primary" @click="openAddTaskModal" text="Send notification"></VButton>
       </div>
     </div>
 
@@ -58,7 +58,6 @@
       <VAddTask v-if="showAddTaskModal" :title="modalAddTaskTitle" :caseId="caseDetails.id" @close-modal="showAddTaskModal = false" @save-clicked="handleAddTask" />
       <VEditTask v-if="showEditTaskModal" :title="modalEditTaskTitle" :caseId="caseDetails.id" :taskId="currentTaskId" @close-modal="showEditTaskModal = false" @save-clicked="handleEditTask" />
       <VPreviewTask v-if="showPreviewTaskModal" :title="modalPreviewTaskTitle" :caseId="caseDetails.id" :taskId="currentTaskId" @close-modal="showPreviewTaskModal = false" />
-      <VEditCaseBoard v-if="showEditModal" :title="modalEditTitle" :caseData="editableCaseDetails" @close-modal="showEditModal = false" @save-clicked="handleEditCase" />
     </VModal>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
@@ -80,7 +79,6 @@ import Search from '@/modules/Navigation/Search.vue';
 import Board from '@/modules/Board.vue';
 import VNotification from '@/components/v-notification/VNotification.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
-import VEditCaseBoard from '@/modals/CaseBoards/v-edit-case-board/v-edit-case-board.vue';
 import VAddTask from '@/modals/CaseBoards/v-add-task/v-add-task.vue';
 import VEditTask from '@/modals/CaseBoards/v-edit-task/v-edit-task.vue';
 import VPreviewTask from '@/modals/CaseBoards/v-preview-task/v-preview-task.vue';
@@ -92,7 +90,6 @@ export default defineComponent({
     VButton,
     VNotification,
     VModal,
-    VEditCaseBoard,
     VAddTask,
     VEditTask,
     VPreviewTask,
@@ -210,11 +207,6 @@ export default defineComponent({
       this.notificationHeader = header;
       this.notificationMessage = message;
       (this.$refs.notificationRef as any).showNotification();
-    },
-    openEditModal(caseItem: any) {
-      this.editableCaseDetails = JSON.parse(JSON.stringify(this.caseDetails));
-      this.modalEditTitle = 'Edit Case';
-      this.showEditModal = true;
     },
     async handleEditCase(updatedCase: any) {
       this.showEditModal = false;

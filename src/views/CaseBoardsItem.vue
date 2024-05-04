@@ -58,7 +58,7 @@
       <VAddTask v-if="showAddTaskModal" :title="modalAddTaskTitle" :caseId="caseDetails.id" @close-modal="showAddTaskModal = false" @save-clicked="handleAddTask" />
       <VEditTask v-if="showEditTaskModal" :title="modalEditTaskTitle" :caseId="caseDetails.id" :taskId="currentTaskId" @close-modal="showEditTaskModal = false" @save-clicked="handleEditTask" />
       <VPreviewTask v-if="showPreviewTaskModal" :title="modalPreviewTaskTitle" :caseId="caseDetails.id" :taskId="currentTaskId" @close-modal="showPreviewTaskModal = false" />
-      <VSendNotification v-if="showSendNotificationModal" :title="modalSendNotificationTitle" :caseId="caseDetails.id" @close-modal="showSendNotificationModal = false" @save-clicked="handleSendNotification" />
+      <VSendNotification v-if="showSendNotificationModal" :title="modalSendNotificationTitle" :caseId="caseDetails.id" @close-modal="showSendNotificationModal = false" @send-clicked="handleSendNotification" />
     </VModal>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
@@ -223,6 +223,7 @@ export default defineComponent({
     },
     handleSendNotification() {
       this.showSendNotificationModal = false;
+      this.triggerNotification('success', 'Update Successful Sent', 'Your update has been sent to the client.');
     },
     openAddTaskModal() {
       this.modalAddTaskTitle = 'Create task';

@@ -17,7 +17,7 @@
         </div>
       </div>
       <div class="col-lg-2 align-right">
-        <VButton :block="true" size="md" icon="left" icon-style="send-notification-white" styled="primary" @click="openAddTaskModal" text="Send notification"></VButton>
+        <VButton :block="true" size="md" icon="left" icon-style="send-notification-white" styled="primary" @click="openSendNotificationModal" text="Send notification"></VButton>
       </div>
     </div>
 
@@ -54,10 +54,11 @@
         <Board ref="boardComponent" :caseId="caseDetails.id" @addTask="openAddTaskModal" @editTask="openEditTaskModal" @previewTask="openPreviewTaskModal" />
       </div>
     </div>
-    <VModal :show="showAddTaskModal || showEditTaskModal  || showPreviewTaskModal || showEditModal" :title="modalAddTaskTitle || modalEditTaskTitle || modalEditTitle" @update:show="handleModalClose">
+    <VModal :show="showAddTaskModal || showEditTaskModal  || showPreviewTaskModal || showEditModal || showSendNotificationModal" :title="modalAddTaskTitle || modalEditTaskTitle || modalEditTitle || modalSendNotificationTitle" @update:show="handleModalClose">
       <VAddTask v-if="showAddTaskModal" :title="modalAddTaskTitle" :caseId="caseDetails.id" @close-modal="showAddTaskModal = false" @save-clicked="handleAddTask" />
       <VEditTask v-if="showEditTaskModal" :title="modalEditTaskTitle" :caseId="caseDetails.id" :taskId="currentTaskId" @close-modal="showEditTaskModal = false" @save-clicked="handleEditTask" />
       <VPreviewTask v-if="showPreviewTaskModal" :title="modalPreviewTaskTitle" :caseId="caseDetails.id" :taskId="currentTaskId" @close-modal="showPreviewTaskModal = false" />
+      <VSendNotification v-if="showSendNotificationModal" :title="modalSendNotificationTitle" :caseId="caseDetails.id" @close-modal="showSendNotificationModal = false" @save-clicked="handleSendNotification" />
     </VModal>
 
     <VNotification ref="notificationRef" :type="notificationType" :header="notificationHeader" :message="notificationMessage" :duration="7000" />
@@ -83,6 +84,7 @@ import VAddTask from '@/modals/CaseBoards/v-add-task/v-add-task.vue';
 import VEditTask from '@/modals/CaseBoards/v-edit-task/v-edit-task.vue';
 import VPreviewTask from '@/modals/CaseBoards/v-preview-task/v-preview-task.vue';
 import VUserSmall from '@/components/v-user-small/v-user-small.vue';
+import VSendNotification from '@/modals/CaseBoards/v-send-notification/v-send-notification.vue';
 
 export default defineComponent({
   components: {
@@ -93,6 +95,7 @@ export default defineComponent({
     VAddTask,
     VEditTask,
     VPreviewTask,
+    VSendNotification,
     VUserSmall,
     VDropdown,
     Board,
@@ -150,10 +153,12 @@ export default defineComponent({
       showAddTaskModal: false,
       showEditTaskModal: false,
       showPreviewTaskModal: false,
+      showSendNotificationModal: false,
       modalEditTitle: '',
       modalAddTaskTitle: '',
       modalEditTaskTitle: '',
       modalPreviewTaskTitle: '',
+      modalSendNotificationTitle: '',
       notificationType: 'success',
       notificationHeader: 'Changes saved',
       notificationMessage: 'This account has been successfully edited.',
@@ -212,6 +217,13 @@ export default defineComponent({
       this.showEditModal = false;
       this.triggerNotification('success', 'Case Updated', 'The case has been successfully updated.');
     },
+    openSendNotificationModal() {
+      this.modalSendNotificationTitle = 'Client Update';
+      this.showSendNotificationModal = true;
+    },
+    handleSendNotification() {
+      this.showSendNotificationModal = false;
+    },
     openAddTaskModal() {
       this.modalAddTaskTitle = 'Create task';
       this.showAddTaskModal = true;
@@ -239,6 +251,7 @@ export default defineComponent({
     handleModalClose(value: boolean) {
       this.showEditModal = false;
       this.showAddTaskModal = false;
+      this.showSendNotificationModal = false;
     },
     handleDropdownClick() {
     },

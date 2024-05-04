@@ -37,16 +37,14 @@
 </template>
 
 <script setup lang="ts">
-  import { db } from '@/firebase.js';
-  import { defineComponent, onMounted, ref } from 'vue';
-  import type { Ref } from 'vue';
-  import { defineEmits, defineProps } from 'vue';
+  import { ref } from 'vue';
+  import { defineEmits } from 'vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VTextarea from '@/components/v-textarea/v-textarea.vue';
   import VButton from '@/components/v-button/VButton.vue';
   import '@vuepic/vue-datepicker/dist/main.css';
 
-  const emit = defineEmits(['close-modal', 'send-clicked', 'notification-sent']);
+  const emit = defineEmits(['close-modal', 'send-clicked']);
 
   const notificationStatus = ref('');
   const notificationNotes = ref('');
@@ -76,8 +74,7 @@
     }
     
     try {
-      
-      emit('send-clicked');
+      emit('send-clicked', { status: notificationStatus.value, notes: notificationNotes.value });
       closeModal();
     } catch (error) {
       console.error("Failed to add new task:", error);

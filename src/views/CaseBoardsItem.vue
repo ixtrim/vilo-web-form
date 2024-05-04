@@ -67,6 +67,7 @@
 </template>
 
 <script lang="ts">
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { defineComponent, onMounted, ref, computed } from 'vue';
 import type { Ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -105,6 +106,9 @@ export default defineComponent({
     const route = useRoute();
     const caseDetails = ref<DocumentData>({ title: '', description: '', client_id: '' });
     const userDetails = ref<DocumentData>({ full_name: '', avatar: '' });
+    const clientDetails = ref<DocumentData>({ email: '' });
+    const functions = getFunctions();
+    const sendNotification = httpsCallable(functions, 'sendNotificationEmail');
 
     const breadcrumbs = computed(() => [
       { text: 'Case boards', to: '/case-boards' },
@@ -221,9 +225,20 @@ export default defineComponent({
       this.modalSendNotificationTitle = 'Client Update';
       this.showSendNotificationModal = true;
     },
-    handleSendNotification() {
-      this.showSendNotificationModal = false;
-      this.triggerNotification('success', 'Update Successful Sent', 'Your update has been sent to the client.');
+    async handleSendNotification(notificationData: { status: any; notes: any; }) {
+      const functions = getFunctions();
+      const sendNotification = httpsCallable(functions, 'sendCustomNotification');
+      try {
+        await sendNotification({
+          email: this.userDetails.email,
+          status: notificationData.status,
+          notes: notificationData.notes
+        });
+        this.triggerNotification('success', 'Update Successful Sent', 'Your update has been sent to the client.');
+        console.log('Notification sent successfully');
+      } catch (error) {
+        console.error('Error sending notification:', error);
+      }
     },
     openAddTaskModal() {
       this.modalAddTaskTitle = 'Create task';

@@ -101,3 +101,34 @@ exports.sendWelcomeEmail = functions.firestore.document('users/{userId}').onCrea
     console.error('Failed to send welcome email:', error);
   }
 });
+
+exports.sendCustomNotification = functions.https.onCall(async (data, context) => {
+  // Verify that the user is authenticated
+  if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
+  }
+
+  // Extract email, status, and notes from the request data
+  const { email, status, notes } = data;
+
+  // Ensure all necessary data is present
+  if (!email || !status || !notes) {
+      throw new functions.https.HttpsError('invalid-argument', 'The function must be called with email, status, and notes arguments.');
+  }
+
+  const msg = {
+      to: email,
+      from: 'noreply@yourdomain.com', // This should be the email address verified with SendGrid
+      subject: `Notification: ${status}`,
+      text: `Status: ${status}\nNotes: ${notes}`,
+      html: `<strong>Status:</strong> ${status}<br><strong>Notes:</strong> ${notes}`
+  };
+
+  try {
+      await sgMail.send(msg);
+      return { result: "Email sent successfully" };
+  } catch (error) {
+      console.error('Error sending email:', error);
+      throw new functions.https.HttpsError('internal', 'Unable to send email.');
+  }
+});

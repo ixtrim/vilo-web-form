@@ -396,7 +396,14 @@ export default defineComponent({
     },
     async deleteUser(userId: string) {
       try {
-        await deleteDoc(doc(db, "users", userId));
+        // Initialize functions inside the method
+        const functions = getFunctions();
+        const deleteUserFunction = httpsCallable(functions, 'deleteUser');
+
+        // Call the cloud function to delete the user from both Authentication and Firestore
+        const result = await deleteUserFunction({ userId });
+
+        console.log(result);
 
         // Remove the user from the local state
         this.users = this.users.filter(user => user.id !== userId);
@@ -406,7 +413,8 @@ export default defineComponent({
           this.refreshData();
         }, 1000);
       } catch (error) {
-        this.triggerNotification('error', 'Error!', 'Couldnt delete user.');
+        console.error('Error deleting user:', error);
+        this.triggerNotification('error', 'Error!', 'Could not delete user.');
       }
     },
     async handleSaveChanges(updatedUserData: UpdatedUserData) {

@@ -42,6 +42,29 @@ exports.syncUserEmail = functions.firestore.document('users/{userId}').onUpdate(
   }
 });
 
+// --------------------- Delete user from authentication and Firestore
+
+exports.deleteUser = functions.https.onCall(async (data: any, context: functions.https.CallableContext) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
+  }
+
+  const { userId } = data;
+
+  try {
+    // Delete user from Firebase Authentication
+    await admin.auth().deleteUser(userId);
+
+    // Delete user document from Firestore
+    await admin.firestore().collection('users').doc(userId).delete();
+
+    return { result: 'User deleted successfully' };
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    throw new functions.https.HttpsError('internal', 'Unable to delete user.');
+  }
+});
+
 // --------------------- SendGrid E-mails usage
 
 // Setup SendGrid

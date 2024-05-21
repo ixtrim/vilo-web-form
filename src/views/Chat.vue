@@ -1,9 +1,7 @@
 <template>
   <div class="container-fluid v-chat">
     <div class="row h-100">
-
       <div class="col-md-4 col-lg-3 v-chat__sidebar">
-
         <div class="v-chat__sidebar__toolbar">
           <div class="v-chat__sidebar__toolbar__counter">
             <h3>Messages <span>{{ chats.length }}</span></h3>
@@ -12,13 +10,10 @@
             <VButton :block="true" size="sm" icon="left" icon-style="edit--3" styled="outlined" @click="startNewChat" text=""></VButton>
           </div>
         </div>
-
         <div class="v-chat__sidebar__search">
           <FilterChat @update-search="filterChats" />
         </div>
-
         <div class="v-chat__sidebar__messages">
-          
           <ul class="list-group list-group-flush">
             <li
               class="list-group-item user-messages"
@@ -40,29 +35,23 @@
                   <small>{{ chat.timeAgo }}</small>
                 </div>
               </div>
-
               <div class="user-messages__bottom">
                 <p v-html="sanitizeHtml(truncateText(chat.lastMessage))"></p>
               </div>
             </li>
           </ul>
-
         </div>
-
       </div>
 
       <!-- Right Column for Active Chat -->
       <div class="col-md-8 col-lg-9 v-chat__messages">
-
         <div v-if="isNewChat" class="v-chat__messages__chat v-chat__messages__chat--new">
-
           <div class="v-chat__messages__chat__header">
             <h4 class="v-chat__messages__chat__header__new">New Message</h4>
             <div class="v-chat__messages__chat__header__change" v-if="selectedUser">
               <VButton :block="true" size="sm" icon="no" styled="outlined" @click="changePerson" text="Change person"></VButton>
             </div>
           </div>
-
           <div v-if="selectedUser" class="v-chat__messages__chat__search-user-chosen">
             <img class="rounded-circle mr-2" :src="selectedUser?.avatar" alt="Avatar" style="width: 50px; height: 50px;">
             <h5>{{ selectedUser?.full_name }}<br/><span>@{{ formatNick(selectedUser?.full_name) }}</span></h5>
@@ -80,20 +69,17 @@
               </li>
             </ul>
           </div>
-          
           <div class="v-chat__messages__chat__empty">
             <div class="v-chat__messages__chat__empty__content">
               <v-iconbox class="v-mail-icon" />
               <h4>No chat history yet</h4>
             </div>
           </div>
-
         </div>
 
         <div v-else class="v-chat__messages__chat">
-
           <div class="v-chat__messages__chat__header" v-if="activeChat">
-            <div class="v-chat__messages__chat__header__avatar" >
+            <div class="v-chat__messages__chat__header__avatar">
               <img class="rounded-circle mr-2" :src="activeChat?.userAvatar" alt="{{ activeChat?.full_name }}">
             </div>
             <div class="v-chat__messages__chat__header__name">
@@ -106,11 +92,9 @@
             <h4 class="v-chat__messages__chat__header__new">Select chat</h4>
           </div>
 
-          <div class="v-chat__messages__chat__feed" ref="chatContainer">
+          <div class="v-chat__messages__chat__feed" ref="chatContainer" @click="markMessagesAsRead">
             <div class="v-chat__messages__chat__feed__wrapper">
-
               <div v-for="message in activeMessages" :key="message.id" class="user-message">
-
                 <div v-if="!isCurrentUserMessage(message.from)" class="user-message__other">
                   <div class="user-message__other__avatar">
                     <img :src="activeChat?.userAvatar" alt="Avatar" class="rounded-circle chat-avatar">
@@ -136,19 +120,15 @@
                     <p v-html="sanitizeHtml(message.text)"></p>
                   </div>
                 </div>
-
               </div>
-
             </div>
           </div>
 
           <div class="v-chat__messages__chat__action" v-if="activeChat || isNewChat">
             <div class="v-chat__messages__chat__action__wrapper">
-
-              <div class="input-group">
+              <div class="input-group" @click="markMessagesAsRead">
                 <div contenteditable="true" class="form-control wysiwyg-editor" ref="messageInput" @input="updateMessage"></div>
               </div>
-
               <div class="v-chat__messages__chat__action__wrapper__toolbar">
                 <ul>
                   <li>
@@ -165,12 +145,9 @@
                   </li>
                 </ul>
               </div>
-
             </div>
           </div>
-
         </div>
-
       </div>
     </div>
   </div>
@@ -600,6 +577,23 @@
         newMessage.value = messageInput.value!.innerHTML;
       }
 
+      async function markMessagesAsRead() {
+        if (activeChat.value) {
+          const chatRef = doc(db, "chats", activeChat.value.id);
+          await updateDoc(chatRef, {
+            [`viewed_status.${currentUserId.value}`]: true,
+          });
+
+          const chatIndex = chats.value.findIndex(chat => chat.id === activeChat.value?.id);
+          if (chatIndex !== -1) {
+            if (!chats.value[chatIndex].viewed_status) {
+              chats.value[chatIndex].viewed_status = {};
+            }
+            chats.value[chatIndex].viewed_status![currentUserId.value] = true;
+          }
+        }
+      }
+
       return {
         chats,
         activeChat,
@@ -626,6 +620,7 @@
         chatContainer,
         scrollToBottom,
         currentUserId,
+        markMessagesAsRead,
       };
     },
     methods: {

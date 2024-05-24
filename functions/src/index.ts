@@ -157,6 +157,54 @@ exports.sendCustomNotification = functions.https.onCall(async (data, context) =>
 });
 
 // --------------------- Task Notifications
+
+exports.sendNewTaskEmail = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
+  }
+
+  const { taskTitle, assigneeId, reporterId, caseId } = data;
+
+  try {
+    // Fetch assignee and reporter details
+    const assigneeRef = admin.firestore().collection('users').doc(assigneeId);
+    const assigneeSnap = await assigneeRef.get();
+    const assigneeEmail = assigneeSnap.data()?.email;
+    const assigneeName = assigneeSnap.data()?.full_name;
+
+    const reporterRef = admin.firestore().collection('users').doc(reporterId);
+    const reporterSnap = await reporterRef.get();
+    const reporterEmail = reporterSnap.data()?.email;
+    const reporterName = reporterSnap.data()?.full_name;
+
+    const caseRef = admin.firestore().collection('cases').doc(caseId);
+    const caseSnap = await caseRef.get();
+    const caseNumber = caseSnap.id;
+    const caseTitle = caseSnap.data()?.title;
+
+    if (!assigneeEmail || !caseNumber || !caseTitle) {
+      throw new functions.https.HttpsError('not-found', 'User or Case details not found');
+    }
+
+    // Compose email content
+    const msg = {
+      to: assigneeEmail,
+      from: 'noreply@vilo.nestvested.co',
+      subject: `New Task Assigned: ${taskTitle}`,
+      text: `Dear ${assigneeName},\n\nA new task titled "${taskTitle}" has been created by ${reporterName} and assigned to you as part of Case ${caseTitle}. Please review the task details below and begin action as required.\n\nYou can view and manage the task through the following link: https://vilo.nestvested.co/case-board/${caseNumber} \n\nPlease ensure to update the task status as you progress. Contact ${reporterName} at ${reporterEmail} if you have any questions or require further information.\n\nThank you for your attention to this task.\n\nBest regards,\nVILO Team`,
+      html: `<p>Dear ${assigneeName},</p><p>A new task titled "<strong>${taskTitle}</strong>" has been created by ${reporterName} and assigned to you as part of Case <strong>${caseTitle}</strong>. Please review the task details below and begin action as required.</p><p>You can view and manage the task through the following link: <a href="https://vilo.nestvested.co/case-board/${caseNumber}">https://vilo.nestvested.co/case-board/${caseNumber}</a>.</p><p>Please ensure to update the task status as you progress. Contact ${reporterName} at ${reporterEmail} if you have any questions or require further information.</p><p>Thank you for your attention to this task.</p><p>Best regards,<br>VILO Team</p>`
+    };
+
+    // Send the email
+    await sgMail.send(msg);
+    return { result: 'Email sent successfully' };
+
+  } catch (error) {
+    console.error('Error sending new task email:', error);
+    throw new functions.https.HttpsError('internal', 'Unable to send email.');
+  }
+});
+
 exports.sendTaskUpdateEmail = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');

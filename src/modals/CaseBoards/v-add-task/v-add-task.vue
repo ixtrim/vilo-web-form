@@ -77,6 +77,7 @@
 
 <script setup lang="ts">
   import { db } from '@/firebase.js';
+  import { getFunctions, httpsCallable } from 'firebase/functions';
   import { DocumentReference, addDoc, doc, getDoc, updateDoc, collection, getDocs, deleteDoc, query, where, Timestamp } from 'firebase/firestore';
   import { defineComponent, onMounted, ref, watch, computed } from 'vue';
   import type { Ref } from 'vue';
@@ -178,7 +179,6 @@
   }
 
   async function saveAndClose(event: any) {
-    // Ensure all required fields are filled
     if (!localTitle.value || !localDescription.value || !localDueDate.value) {
       return;
     }
@@ -197,13 +197,24 @@
         attachments: uploadedFiles.value,
       };
 
-      await addDoc(collection(db, "tasks"), newTask);
+      const taskDocRef = await addDoc(collection(db, "tasks"), newTask);
+      const functions = getFunctions();
+      const sendNewTaskEmail = httpsCallable(functions, 'sendNewTaskEmail');
+      await sendNewTaskEmail({
+        taskId: taskDocRef.id,
+        taskTitle: newTask.title,
+        assigneeId: newTask.user_assigned,
+        reporterId: newTask.user_reporting,
+        caseId: newTask.case,
+      });
+
       emit('save-clicked');
       closeModal();
     } catch (error) {
       console.error("Failed to add new task:", error);
     }
   }
+
 </script>
 
 <style>

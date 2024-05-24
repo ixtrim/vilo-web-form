@@ -1,12 +1,12 @@
 <template>
   <div class="board"> 
-    <List v-for="list in lists" :key="list.id" :list="list" @addTask="$emit('addTask')" @editTask="handleEditTask" @previewTask="handlePreviewTask" />
+    <List v-for="list in lists" :key="list.id" :list="list" @addTask="$emit('addTask')" @editTask="handleEditTask" @previewTask="handlePreviewTask" @deleteTask="handleDeleteTask" />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from 'vue';
-import { collection, query, where, getDocs, getDoc, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '@/firebase.js';
 import { Sortable } from '@shopify/draggable';
@@ -25,6 +25,7 @@ interface Task {
   priority: string;
   due_date: string;
   user_assigned: string;
+  user_reporting: string;
   status: number;
 }
 
@@ -104,29 +105,29 @@ export default defineComponent({
             priority: task.priority,
             due_date: task.due_date,
             user_assigned: task.user_assigned,
-            status: 0,
+            user_reporting: task.user_reporting,
+            status: task.status,
           });
         }
       });
     },
     async updateTaskStatus(taskId: string, newStatus: number) {
       const taskRef = doc(db, "tasks", taskId);
-      const taskSnap = await getDoc(taskRef);
-      const taskData = taskSnap.data();
-      const functions = getFunctions();
-      const sendTaskUpdateEmail = httpsCallable(functions, 'sendTaskUpdateEmail');
-      
-      await updateDoc(taskRef, { status: newStatus }).then(async () => {
-        await sendTaskUpdateEmail({
-            taskTitle: taskData?.title ?? '',
-          caseId: this.caseId,
-            userId: taskData?.user_assigned ?? '',
-          newStatus: newStatus,
-        });
-        console.log('Task status updated and email sent');
+      await updateDoc(taskRef, { status: newStatus }).then(() => {
+        console.log('Task status updated');
       }).catch((error) => {
         console.error("Error updating task status: ", error);
       });
+    },
+    async handleDeleteTask(taskId: string) {
+      alert('Delete task?');
+      try {
+        const taskRef = doc(db, "tasks", taskId);
+        await deleteDoc(taskRef);
+        await this.fetchTasks();
+      } catch (error) {
+        console.error("Error deleting task:", error);
+      }
     },
     handleEditTask(taskId: string) {
       this.$emit('editTask', taskId);

@@ -155,3 +155,46 @@ exports.sendCustomNotification = functions.https.onCall(async (data, context) =>
       throw new functions.https.HttpsError('internal', 'Unable to send email.');
   }
 });
+
+// --------------------- Task Notifications
+exports.sendTaskUpdateEmail = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
+  }
+
+  const { taskTitle, caseId, userId } = data;
+
+  try {
+    // Fetch user and case details
+    const userRef = admin.firestore().collection('users').doc(userId);
+    const userSnap = await userRef.get();
+    const userEmail = userSnap.data()?.email;
+    const userName = userSnap.data()?.full_name;
+
+    const caseRef = admin.firestore().collection('cases').doc(caseId);
+    const caseSnap = await caseRef.get();
+    const caseNumber = caseSnap.id;
+    const caseTitle = caseSnap.data()?.title;
+
+    if (!userEmail || !caseNumber || !caseTitle) {
+      throw new functions.https.HttpsError('not-found', 'User or Case details not found');
+    }
+
+    // Compose email content
+    const msg = {
+      to: userEmail,
+      from: 'noreply@vilo.nestvested.co',
+      subject: `Update on Task for Case #${caseTitle}: Status Changed`,
+      text: `Dear ${userName || 'Team'},\n\nPlease be informed that the status of "${taskTitle}" for Case #${caseTitle} has been updated. Details of the update are provided below for your reference.\n\nYou can view the full case and its associated tasks here: https://vilo.nestvested.co/case-board/${caseNumber} \n\nPlease review the updated information and adjust your activities accordingly. Should you have any questions or require further details, feel free to contact task reporter.\n\nThank you for your ongoing cooperation.\n\nBest regards,\nVILO Team`,
+      html: `<p>Dear ${userName || 'Team'},</p><p>Please be informed that the status of "<strong>${taskTitle}</strong>" for Case #<strong>${caseTitle}</strong> has been updated. Details of the update are provided below for your reference.</p><p>You can view the full case and its associated tasks <a href="https://vilo.nestvested.co/case-board/${caseNumber}">here</a>.</p><p>Please review the updated information and adjust your activities accordingly. Should you have any questions or require further details, feel free to contact task reporter.</p><p>Thank you for your ongoing cooperation.</p><p>Best regards,<br>VILO Team</p>`
+    };
+
+    // Send the email
+    await sgMail.send(msg);
+    return { result: 'Email sent successfully' };
+
+  } catch (error) {
+    console.error('Error sending task update email:', error);
+    throw new functions.https.HttpsError('internal', 'Unable to send email.');
+  }
+});

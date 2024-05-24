@@ -7,6 +7,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from 'vue';
 import { collection, query, where, getDocs, getDoc, updateDoc, doc } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '@/firebase.js';
 import { Sortable } from '@shopify/draggable';
 import List from '@/modules/Board/List.vue';
@@ -55,7 +56,7 @@ export default defineComponent({
       },
     });
 
-    sortable.on('sortable:stop', async (event: any) => { // Use 'any' to bypass TypeScript checks
+    sortable.on('sortable:stop', async (event: any) => {
       const taskId = event.data.dragEvent.data.source.getAttribute('data-task-id');
       const targetListElement = event.data.newContainer;
       const targetListId = Array.from(document.querySelectorAll('.list')).indexOf(targetListElement);
@@ -80,22 +81,19 @@ export default defineComponent({
       const tasksQuery = query(collection(db, "tasks"), where("case", "==", this.caseId));
       const querySnapshot = await getDocs(tasksQuery);
       const tasks = querySnapshot.docs.map(doc => {
-        const taskData = doc.data() as any; // Temporarily use 'any' to access Firestore Timestamp
-        const dueDate = taskData.due_date.toDate(); // Convert Firestore Timestamp to Date
+        const taskData = doc.data() as any;
+        const dueDate = taskData.due_date.toDate();
         const formattedDueDate = `${dueDate.getDate().toString().padStart(2, '0')}.${(dueDate.getMonth() + 1).toString().padStart(2, '0')}.${dueDate.getFullYear()}`;
 
         return {
           ...taskData,
           id: doc.id,
-          due_date: formattedDueDate, // Now correctly formatted
+          due_date: formattedDueDate,
         };
       });
-      
 
-      // Reset cards in lists
       this.lists.forEach(list => { list.cards = []; });
 
-      // Assign tasks to the appropriate list based on their status
       tasks.forEach(task => {
         const list = this.lists.find(list => list.id === task.status + 1);
         if (list) {
@@ -113,10 +111,19 @@ export default defineComponent({
     },
     async updateTaskStatus(taskId: string, newStatus: number) {
       const taskRef = doc(db, "tasks", taskId);
-      await updateDoc(taskRef, {
-        status: newStatus
-      }).then(() => {
-        console.log('Task status updated');
+      const taskSnap = await getDoc(taskRef);
+      const taskData = taskSnap.data();
+      const functions = getFunctions();
+      const sendTaskUpdateEmail = httpsCallable(functions, 'sendTaskUpdateEmail');
+      
+      await updateDoc(taskRef, { status: newStatus }).then(async () => {
+        await sendTaskUpdateEmail({
+            taskTitle: taskData?.title ?? '',
+          caseId: this.caseId,
+            userId: taskData?.user_assigned ?? '',
+          newStatus: newStatus,
+        });
+        console.log('Task status updated and email sent');
       }).catch((error) => {
         console.error("Error updating task status: ", error);
       });
@@ -131,7 +138,6 @@ export default defineComponent({
 });
 </script>
 
-
 <style>
-  @import url(./styles/board.scss);
+@import url(./styles/board.scss);
 </style>

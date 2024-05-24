@@ -48,9 +48,8 @@
         <strong>Attachments:</strong>
         <ul>
           <li v-for="(attachment, index) in localAttachments" :key="index">
-            <a :href="attachment" download>
-              <div class="img-frame" :style="{ backgroundImage: 'url(' + attachment + ')' }"></div>
-              <span>Download file</span>
+            <a :href="attachment" target="_blank" title="Download attachment" download>
+              <div class="file-frame"><span>{{ getFileExtension(attachment) }}</span></div>
             </a>
           </li>
         </ul>
@@ -287,6 +286,11 @@
     } catch (error) {
       console.error("Failed to update task:", error);
     }
+  }
+
+  function getFileExtension(url: string) {
+    const parts = url.split('.');
+    return parts[parts.length - 1].split('?')[0].toUpperCase();
   }
 
 </script>

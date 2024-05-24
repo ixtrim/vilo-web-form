@@ -1,26 +1,35 @@
 <template>
   <div class="files-uploader">
-    <input type="file" multiple @change="onFileChange" accept="image/jpeg, image/png, image/gif, image/webp" />
+    <input type="file" multiple @change="onFileChange" accept=".jpeg, .png, .gif, .webp, .pdf, .docx, .doc, .xlsx, .xls, .ppt, .pptx, .txt" />
     <div class="files-uploader__list">
-      <div v-for="(imageSrc, index) in imagesData" :key="index" class="files-uploader__list__item">
-        <img :src="imageSrc" alt="Preview" />
+      <div v-for="(fileData, index) in filesData" :key="index" class="files-uploader__list__item">
+        <template v-if="fileData.isImage">
+          <div class="image-preview">
+            <img :src="fileData.preview" alt="Preview" />
+            <span>Image</span>
+          </div>
+        </template>
+        <template v-else>
+          <div class="file-preview"><span>{{ fileData.extension }}</span></div>
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, defineEmits, watch, onMounted } from 'vue';
-import { storage } from '@/firebase.js'; // Ensure you have this import for Firebase storage
+import { ref, defineEmits } from 'vue';
+import { storage } from '@/firebase.js'; 
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-const imagesData = ref<string[]>([]);
-const emit = defineEmits(['images-uploaded']);
+interface FileData {
+  isImage: boolean;
+  preview: string;
+  extension: string;
+}
 
-defineProps({
-  initialFiles: Array,
-});
-const files = ref([]);
+const filesData = ref<FileData[]>([]);
+const emit = defineEmits(['images-uploaded']);
 
 function onFileChange(event: Event) {
   const input = event.target as HTMLInputElement;
@@ -30,24 +39,35 @@ function onFileChange(event: Event) {
   }
 
   const files = Array.from(input.files);
-  imagesData.value = []; // Reset current images data
+  filesData.value = []; // Reset current files data
 
   files.forEach(file => {
-    if (file.type.startsWith('image/')) {
+    const fileData: FileData = {
+      isImage: file.type.startsWith('image/'),
+      preview: '',
+      extension: ''
+    };
+
+    if (fileData.isImage) {
       const reader = new FileReader();
       reader.onload = async (e) => {
         const result = e.target?.result;
         if (typeof result === 'string') {
-          imagesData.value.push(result);
-          await uploadImage(file); // Upload each image
+          fileData.preview = result;
+          filesData.value.push(fileData);
+          await uploadFile(file); // Upload each image
         }
       };
       reader.readAsDataURL(file);
+    } else {
+      fileData.extension = file.name.split('.').pop()?.toUpperCase() || 'FILE';
+      filesData.value.push(fileData);
+      uploadFile(file); // Upload non-image files without preview
     }
   });
 }
 
-async function uploadImage(file: File) {
+async function uploadFile(file: File) {
   const storagePath = `tasks/${new Date().getTime()}_${file.name}`;
   const fileRef = storageRef(storage, storagePath);
   try {
@@ -59,6 +79,7 @@ async function uploadImage(file: File) {
   }
 }
 </script>
+
 
 <style>
   @import url(./VMultipleUploader.scss);

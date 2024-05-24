@@ -1,6 +1,5 @@
 <template>
   <div :data-task-id="card.id" :class="'card priority--' + card.priority">
-
     <div class="card__actions">
       <ul>
         <li>
@@ -12,9 +11,11 @@
         <li>
           <VButton :block="false" size="sm" icon="left" icon-style="preview" styled="simple-icon" text="" @click="emitPreviewTaskEvent"></VButton>
         </li>
+        <li v-if="canDeleteTask">
+          <VButton :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" text="" @click="emitDeleteTaskEvent"></VButton>
+        </li>
       </ul>
     </div>
-
     <div class="card__task-name">
       <h5>{{ card.title }}</h5>
       <p>{{ card.description }}</p>
@@ -33,9 +34,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, onMounted, ref, computed } from 'vue';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/firebase.js';
+import { useUserStore } from '@/stores/userStore';
 import VButton from '@/components/v-button/VButton.vue';
 
 export default defineComponent({
@@ -50,6 +52,7 @@ export default defineComponent({
   },
   setup(props) {
     const userAvatar = ref('');
+    const { user } = useUserStore();
 
     // Asynchronously fetch the user's avatar when the component mounts
     onMounted(async () => {
@@ -69,7 +72,11 @@ export default defineComponent({
       }
     });
 
-    return { userAvatar };
+    const canDeleteTask = computed(() => {
+      return user.value && (user.value.id === props.card.user_assigned || user.value.id === props.card.user_reporting);
+    });
+
+    return { userAvatar, canDeleteTask };
   },
   methods: {
     emitEditTaskEvent() {
@@ -77,6 +84,9 @@ export default defineComponent({
     },
     emitPreviewTaskEvent() {
       this.$emit('previewTask', this.card.id);
+    },
+    emitDeleteTaskEvent() {
+      this.$emit('deleteTask', this.card.id);
     }
   }
 });

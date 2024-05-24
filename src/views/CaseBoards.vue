@@ -112,7 +112,8 @@
                 <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal(caseItem)" text=""></VButton>
               </div>
               <div class="col col--cb-action" v-if="userRole === 0">
-                <VButton :block="false" size="sm" icon="left" icon-style="archive" styled="simple-icon" @click="archiveCase(caseItem)" text="" v-if="caseItem.status !== 3"></VButton>
+                <VButton :block="false" size="sm" icon="left" icon-style="archive" styled="simple-icon" @click="archiveCase(caseItem)" text="" v-if="caseItem.status !== 3" title="Archive Case"></VButton>
+                <VButton v-if="caseItem.status === 3" :block="false" size="sm" icon="left" icon-style="unarchive" styled="simple-icon" @click="undoArchiveCase(caseItem)" text="" title="Unarchive Case"></VButton>
               </div>
             </div>
 
@@ -219,8 +220,8 @@ export default defineComponent({
         { label: 'Drafts cases' },
         { label: 'Archived cases' },
       ],
-      selectedStatus: 1, // Set default status to Active cases
-      currentDropdownTitle: 'Active cases', // Set default dropdown title to Active cases
+      selectedStatus: 1,
+      currentDropdownTitle: 'Active cases',
       searchTerm: '',
       selectedCase: undefined,
     };
@@ -243,8 +244,8 @@ export default defineComponent({
 
     const currentPage = ref(1);
     const itemsPerPage = ref(10);
-    const selectedStatus = ref<number | null>(1); // Set default status to Active cases
-    const currentDropdownTitle = ref('Active cases'); // Set default dropdown title to Active cases
+    const selectedStatus = ref<number | null>(1);
+    const currentDropdownTitle = ref('Active cases');
 
     const fetchCases = async () => {
       const currentUser = auth.currentUser;
@@ -506,6 +507,16 @@ export default defineComponent({
         this.triggerNotification('success', 'Case Archived', `The case "${caseItem.title}" has been archived.`);
       } catch (error) {
         console.error("Error archiving case:", error);
+      }
+    },
+    async undoArchiveCase(caseItem: Case) {
+      try {
+        const caseRef = doc(db, "cases", caseItem.id);
+        await updateDoc(caseRef, { status: 1 });
+        await this.actions.fetchCases();
+        this.triggerNotification('success', 'Case Restored', `The case "${caseItem.title}" has been restored to active status.`);
+      } catch (error) {
+        console.error("Error restoring case:", error);
       }
     },
   },

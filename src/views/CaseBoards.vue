@@ -69,6 +69,9 @@
             <div class="col col--cb-action">
               &nbsp;
             </div>
+            <div class="col col--cb-action" v-if="userRole === 0">
+              &nbsp;
+            </div>
           </div>
 
           <div class="dashboard__table__page">
@@ -108,6 +111,9 @@
               <div class="col col--cb-action">
                 <VButton :block="false" size="sm" icon="left" icon-style="edit" styled="simple-icon" @click="openEditModal(caseItem)" text=""></VButton>
               </div>
+              <div class="col col--cb-action" v-if="userRole === 0">
+                <VButton :block="false" size="sm" icon="left" icon-style="archive" styled="simple-icon" @click="archiveCase(caseItem)" text="" v-if="caseItem.status !== 3"></VButton>
+              </div>
             </div>
 
           </div>
@@ -143,7 +149,7 @@
 import { defineComponent, ref, computed, onMounted, watch } from 'vue';
 import type { Ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { collection, getDocs, doc, getDoc, Timestamp, query, where } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, updateDoc, Timestamp, query, where } from 'firebase/firestore';
 import { db, auth } from '@/firebase.js';
 import VButton from '@/components/v-button/VButton.vue';
 import Search from '@/modules/Cases/Search.vue';
@@ -164,12 +170,13 @@ interface Case {
   owner: string;
   team_members: string[];
   time_added: Timestamp;
-  status: number; 
+  status: number;
 }
 
 interface User {
   full_name: string;
   avatar: string;
+  role: number;
 }
 
 interface ProcessedCase extends Case {
@@ -213,8 +220,8 @@ export default defineComponent({
         { label: 'Archived cases' },
         { label: 'Hidden cases' },
       ],
-      selectedStatus: null,
-      currentDropdownTitle: 'All cases',
+      selectedStatus: 1, // Set default status to Active cases
+      currentDropdownTitle: 'Active cases', // Set default dropdown title to Active cases
       searchTerm: '',
       selectedCase: undefined,
     };
@@ -224,6 +231,7 @@ export default defineComponent({
     const cases = ref<Case[]>([]);
     const usersMap = ref<{ [key: string]: User }>({});
     const searchTerm = ref<string>('');
+    const userRole = ref<number | null>(null);
 
     const filterTime = ref([
       { label: 'All' },
@@ -236,14 +244,12 @@ export default defineComponent({
 
     const currentPage = ref(1);
     const itemsPerPage = ref(10);
-    const selectedStatus = ref<number | null>(null);
-    const currentDropdownTitle = ref('All cases');
+    const selectedStatus = ref<number | null>(1); // Set default status to Active cases
+    const currentDropdownTitle = ref('Active cases'); // Set default dropdown title to Active cases
 
     const fetchCases = async () => {
-      // Check if there's a logged-in user
       const currentUser = auth.currentUser;
       if (currentUser) {
-        // Create a query that filters cases where the team_members array contains the current user's ID
         const casesQuery = query(collection(db, "cases"), where("team_members", "array-contains", currentUser.uid));
         const querySnapshot = await getDocs(casesQuery);
         originalCases.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as Case);
@@ -256,10 +262,13 @@ export default defineComponent({
             fetchUser(memberId);
           });
         });
+
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        if (userDoc.exists()) {
+          userRole.value = userDoc.data().role;
+        }
       } else {
-        // Handle the case where there is no logged-in user
         console.log("No user logged in");
-        // Optionally clear or set cases to a default state
         cases.value = [];
       }
     };
@@ -273,16 +282,12 @@ export default defineComponent({
         const bTime = b.time_added.toMillis();
 
         if (aTime > cutoffTime && bTime > cutoffTime) {
-          // Both cases are within the specified time range, use the original order
           return aTime - bTime;
         } else if (aTime > cutoffTime) {
-          // Only case a is within the time range
           return -1;
         } else if (bTime > cutoffTime) {
-          // Only case b is within the time range
           return 1;
         } else {
-          // Both cases are outside the time range, use the original order
           return aTime - bTime;
         }
       });
@@ -293,7 +298,7 @@ export default defineComponent({
 
       switch (item.label) {
         case 'All':
-          cases.value = [...originalCases.value]; // Restore original unfiltered data
+          cases.value = [...originalCases.value];
           break;
         case 'Last year':
           cases.value = originalCases.value.filter(caseItem => caseItem.time_added.toMillis() > currentTime - 365 * 24 * 60 * 60 * 1000);
@@ -313,8 +318,6 @@ export default defineComponent({
         default:
           break;
       }
-
-      // Other logic you may need to perform when the dropdown is clicked
       console.log('Dropdown item clicked', item.label);
     };
 
@@ -367,7 +370,7 @@ export default defineComponent({
     };
 
     watch([searchTerm, selectedStatus], () => {
-      currentPage.value = 1; // Reset to first page when filters change
+      currentPage.value = 1;
     }, { deep: true });
 
     const actions = ref({
@@ -463,6 +466,7 @@ export default defineComponent({
       handleFilterSearch,
       searchTerm,
       updateSearchTerm,
+      userRole,
     };
   },
   methods: {
@@ -494,6 +498,16 @@ export default defineComponent({
     handleModalClose(value: boolean) {
       this.showEditModal = false;
       this.showAddModal = false;
+    },
+    async archiveCase(caseItem: Case) {
+      try {
+        const caseRef = doc(db, "cases", caseItem.id);
+        await updateDoc(caseRef, { status: 3 });
+        await this.actions.fetchCases();
+        this.triggerNotification('success', 'Case Archived', `The case "${caseItem.title}" has been archived.`);
+      } catch (error) {
+        console.error("Error archiving case:", error);
+      }
     },
   },
 });

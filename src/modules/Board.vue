@@ -120,7 +120,6 @@ export default defineComponent({
       });
     },
     async handleDeleteTask(taskId: string) {
-      alert('Delete task?');
       try {
         const taskRef = doc(db, "tasks", taskId);
         await deleteDoc(taskRef);

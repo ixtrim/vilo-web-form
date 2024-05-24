@@ -8,6 +8,7 @@
           placeholder="New task" 
           v-model="localTitle"
         />
+        <p v-if="errorTitle" class="error-message">{{ errorTitle }}</p>
       </div>
     </div>
 
@@ -18,6 +19,7 @@
           placeholder="e.g. I joined Stripe’s Customer Success team to help them scale their checkout product. I focused mainly on onboarding new customers and resolving complaints." 
           v-model="localDescription"
         />
+        <p v-if="errorDescription" class="error-message">{{ errorDescription }}</p>
       </div>
     </div>
 
@@ -50,6 +52,7 @@
         <div class="form-group">
           <label>Due Date</label>
           <VueDatePicker label="Due Date" v-model="localDueDate"></VueDatePicker>
+          <p v-if="errorDueDate" class="error-message">{{ errorDueDate }}</p>
         </div>
       </div>
     </div>
@@ -118,6 +121,10 @@
   const dropdownReporter: Ref<DropdownItem[]> = ref([]);
   const dropdownAssigned: Ref<DropdownItem[]> = ref([]);
 
+  const errorTitle = ref<string | null>(null);
+  const errorDescription = ref<string | null>(null);
+  const errorDueDate = ref<string | null>(null);
+
   const fetchTeamMembers = async () => {
     if (props.caseId) {
       const caseDocRef = doc(db, "cases", props.caseId);
@@ -179,10 +186,34 @@
   }
 
   async function saveAndClose(event: any) {
-    if (!localTitle.value || !localDescription.value || !localDueDate.value) {
+    event.stopPropagation();
+    let isValid = true;
+
+    if (!localTitle.value) {
+      errorTitle.value = 'Title is required';
+      isValid = false;
+    } else {
+      errorTitle.value = null;
+    }
+
+    if (!localDescription.value) {
+      errorDescription.value = 'Description is required';
+      isValid = false;
+    } else {
+      errorDescription.value = null;
+    }
+
+    if (!localDueDate.value) {
+      errorDueDate.value = 'Due date is required';
+      isValid = false;
+    } else {
+      errorDueDate.value = null;
+    }
+
+    if (!isValid) {
       return;
     }
-    event.stopPropagation();
+
     try {
       const newTask = {
         title: localTitle.value,

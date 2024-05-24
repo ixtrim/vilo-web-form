@@ -218,7 +218,6 @@ export default defineComponent({
         { label: 'Active cases' },
         { label: 'Drafts cases' },
         { label: 'Archived cases' },
-        { label: 'Hidden cases' },
       ],
       selectedStatus: 1, // Set default status to Active cases
       currentDropdownTitle: 'Active cases', // Set default dropdown title to Active cases

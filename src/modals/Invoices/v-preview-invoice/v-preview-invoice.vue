@@ -96,7 +96,10 @@
     <div class="row invoice__payment">
       <div class="col-lg-12">
         <h5>PAYMENT INSTRUCTIONS</h5>
-        <p>{{ appName }}<br/>
+        <p v-if="custom_app_name">
+          {{ custom_app_name }}<br/>{{ custom_bank_name }} | {{ custom_swift_iban }}<br/>{{ custom_account_number }}<br/>
+        </p>
+        <p v-else>{{ appName }}<br/>
           Bank name: {{ bankName }}<br/>
           SWIFT/IBAN: {{ swiftIban }}<br/>
           Account number: {{ accountNumber }}<br/>
@@ -183,6 +186,10 @@ type Invoice = {
   clientAvatar: string;
   caseTitle: string;
   invoiceItems: InvoiceItem[];
+  custom_app_name: string;
+  custom_bank_name: string;
+  custom_swift_iban: string;
+  custom_account_number: string;
 };
 
 interface InvoiceItem {
@@ -230,6 +237,10 @@ const invoiceSalesTaxes = computed(() => props.invoice?.sales_taxes || 'Unknown'
 const invoiceSubtotalAmount = computed(() => props.invoice?.subtotal_amount || 'Unknown');
 const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
 const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
+const custom_app_name = computed(() => props.invoice?.custom_app_name || '');
+const custom_bank_name = computed(() => props.invoice?.custom_bank_name || '');
+const custom_swift_iban = computed(() => props.invoice?.custom_swift_iban || '');
+const custom_account_number = computed(() => props.invoice?.custom_account_number || '');
 
 const emit = defineEmits(['close-modal', 'invoice-pending', 'invoice-paid', 'invoice-refunded', 'invoice-cancelled']);
 

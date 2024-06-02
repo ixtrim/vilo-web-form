@@ -6,6 +6,11 @@
 
   .modal-body {
     margin-top: 0!important;
+
+    span.size-s {
+      font-size: 12px!important;
+      color: var(--v-gray-700);
+    }
   }
 
   .modal-content {
@@ -91,6 +96,11 @@
           padding-bottom: 0;
           
           label {
+            font-size: 12px!important;
+            color: var(--v-gray-700);
+          }
+
+          span {
             font-size: 12px!important;
             color: var(--v-gray-700);
           }

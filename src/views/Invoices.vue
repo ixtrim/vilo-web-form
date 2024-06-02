@@ -165,7 +165,7 @@
     </div>
 
     <VModal :show="showAddInvoiceModal || showEditInvoiceModal  || showPreviewInvoiceModal || showDownloadInvoiceModal" :title="modalAddInvoiceTitle || modalEditInvoiceTitle || modalPreviewInvoiceTitle || modalDownloadInvoiceTitle" @update:show="handleModalClose">
-      <VAddInvoice v-if="showAddInvoiceModal" @close-modal="showAddInvoiceModal = false" :taxLabel="taxLabel" @add-invoice="handleAddInvoice" />
+      <VAddInvoice v-if="showAddInvoiceModal" @close-modal="showAddInvoiceModal = false" :taxLabel="taxLabel" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @add-invoice="handleAddInvoice" />
       <VEditInvoice v-if="showEditInvoiceModal && currentInvoice" :title="modalEditInvoiceTitle" :taxLabel="taxLabel" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @save-changes="handleInvoiceUpdate" @close-modal="showEditInvoiceModal = false" />
       <VPreviewInvoice v-if="showPreviewInvoiceModal && currentInvoice" :title="modalPreviewInvoiceTitle" :taxLabel="taxLabel" :invoice="currentInvoice" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @invoice-pending="markInvoiceAsPending" @invoice-paid="markInvoiceAsPaid"  @invoice-refunded="markInvoiceAsRefunded" @invoice-cancelled="markInvoiceAsCancelled" @close-modal="showPreviewInvoiceModal = false" />
       <VDownloadInvoice v-if="showDownloadInvoiceModal && currentInvoice" :title="modalDownloadInvoiceTitle" :invoice="currentInvoice" :taxLabel="taxLabel" :userRole="userRole" :generalSettings="generalSettings" :billingSettings="billingSettings" @close-modal="showDownloadInvoiceModal = false" />

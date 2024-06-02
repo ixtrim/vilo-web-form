@@ -19,6 +19,11 @@
         </div>
       </div>
     </div>
+    <div class="row" v-if="errorClientCase">
+      <div class="col-lg-12">
+        <p class="error-message">{{ errorClientCase }}</p>
+      </div>
+    </div>
     <div class="row">
       <div class="col-lg-6">
         <div class="form-group">
@@ -55,11 +60,13 @@
       <div class="col-lg-6">
         <div class="form-group">
           <input type="text" v-model="customAppName" placeholder="App Name" class="form-control" />
+          <p class="error-message" v-if="errorCustomAppName">{{ errorCustomAppName }}</p>
         </div>
       </div>
       <div class="col-lg-6">
         <div class="form-group">
           <input type="text" v-model="customBankName" placeholder="Bank Name" class="form-control" />
+          <p class="error-message" v-if="errorCustomBankName">{{ errorCustomBankName }}</p>
         </div>
       </div>
     </div>
@@ -67,17 +74,14 @@
       <div class="col-lg-6">
         <div class="form-group">
           <input type="text" v-model="customSwiftIban" placeholder="SWIFT/IBAN" class="form-control" />
+          <p class="error-message" v-if="errorCustomSwiftIban">{{ errorCustomSwiftIban }}</p>
         </div>
       </div>
       <div class="col-lg-6">
         <div class="form-group">
           <input type="text" v-model="customAccountNumber" placeholder="Account Number" class="form-control" />
+          <p class="error-message" v-if="errorCustomAccountNumber">{{ errorCustomAccountNumber }}</p>
         </div>
-      </div>
-    </div>
-    <div class="row" v-if="errorClientCase">
-      <div class="col-lg-12">
-        <p class="error-message">{{ errorClientCase }}</p>
       </div>
     </div>
     <div class="invoice__table">
@@ -222,6 +226,10 @@ type Invoice = {
   clientAvatar: string;
   caseTitle: string;
   invoiceItems: InvoiceItem[];
+  custom_app_name: string;
+  custom_bank_name: string;
+  custom_swift_iban: string;
+  custom_account_number: string;
 };
 
 interface InvoiceItem {

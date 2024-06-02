@@ -20,15 +20,29 @@
       </div>
     </div>
     <div class="row invoice__meta">
-      <div class="col-lg-12">
+      <div class="col-lg-6">
         <strong>Billed to:</strong>
         <span>{{ clientName }}<br/>{{ clientEmail }} | {{ clientPhone }}<br/>{{ clientAddress }}</span>
+      </div>
+      <div class="col-lg-6">
+        <strong>Billed by:</strong>
+        <div v-if="hasCustomBillingData">
+          <span>{{ customBillingData.app_name }}<br/>
+          Bank name: {{ customBillingData.bank_name }}<br/>
+          SWIFT/IBAN: {{ customBillingData.swift_iban }}<br/>
+          Account number: {{ customBillingData.account_number }}<br/></span>
+        </div>
+        <div v-else>
+          <span>{{ appName }}<br/>
+          Bank name: {{ bankName }}<br/>
+          SWIFT/IBAN: {{ swiftIban }}<br/>
+          Account number: {{ accountNumber }}<br/></span>
+        </div>
       </div>
     </div>
     
 
     <div class="invoice__table">
-      <!-- Inside your <template> tag, within the <div class="invoice__table"> -->
       <table class="table table-bordered">
         <tbody>
           <tr v-for="(item, index) in invoiceItems" :key="item.id">
@@ -170,6 +184,12 @@
     clientAvatar: string;
     caseTitle: string;
     invoiceItems: InvoiceItem[];
+    custom_billing_data?: {
+      app_name?: string;
+      bank_name?: string;
+      swift_iban?: string;
+      account_number?: string;
+    };
   };
 
   interface InvoiceItem {
@@ -223,6 +243,9 @@
   const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
   const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
   const taxRate = ref(25);
+
+  const hasCustomBillingData = computed(() => !!props.invoice?.custom_billing_data);
+  const customBillingData = computed(() => props.invoice?.custom_billing_data || {});
 
   const emit = defineEmits(['close-modal', 'save-changes']);
 
@@ -371,7 +394,6 @@
       console.error("Error saving changes to Firestore: ", error);
     }
   }
-
 
   function saveAndClose() {
     closeModal();

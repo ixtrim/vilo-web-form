@@ -21,28 +21,20 @@
     </div>
     <div class="row invoice__meta">
       <div class="col-lg-6">
+        <strong>Billed by:</strong>
+        <div v-if="custom_app_name">
+          <span>{{ custom_app_name }}<br/>{{ custom_bank_name }} | {{ custom_swift_iban }}<br/>{{ custom_account_number }}</span>
+        </div>
+        <div v-else><span>{{ appName }}<br/>{{ bankName }} | {{ swiftIban }}<br/>{{ accountNumber }}</span></div>
+      </div>
+      <div class="col-lg-6">
         <strong>Billed to:</strong>
         <span>{{ clientName }}<br/>{{ clientEmail }} | {{ clientPhone }}<br/>{{ clientAddress }}</span>
       </div>
-      <div class="col-lg-6">
-        <strong>Billed by:</strong>
-        <div v-if="hasCustomBillingData">
-          <span>{{ customBillingData.app_name }}<br/>
-          Bank name: {{ customBillingData.bank_name }}<br/>
-          SWIFT/IBAN: {{ customBillingData.swift_iban }}<br/>
-          Account number: {{ customBillingData.account_number }}<br/></span>
-        </div>
-        <div v-else>
-          <span>{{ appName }}<br/>
-          Bank name: {{ bankName }}<br/>
-          SWIFT/IBAN: {{ swiftIban }}<br/>
-          Account number: {{ accountNumber }}<br/></span>
-        </div>
-      </div>
     </div>
-    
 
     <div class="invoice__table">
+      <!-- Inside your <template> tag, within the <div class="invoice__table"> -->
       <table class="table table-bordered">
         <tbody>
           <tr v-for="(item, index) in invoiceItems" :key="item.id">
@@ -184,12 +176,10 @@
     clientAvatar: string;
     caseTitle: string;
     invoiceItems: InvoiceItem[];
-    custom_billing_data?: {
-      app_name?: string;
-      bank_name?: string;
-      swift_iban?: string;
-      account_number?: string;
-    };
+    custom_app_name: string;
+    custom_bank_name: string;
+    custom_swift_iban: string;
+    custom_account_number: string;
   };
 
   interface InvoiceItem {
@@ -243,9 +233,10 @@
   const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
   const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
   const taxRate = ref(25);
-
-  const hasCustomBillingData = computed(() => !!props.invoice?.custom_billing_data);
-  const customBillingData = computed(() => props.invoice?.custom_billing_data || {});
+  const custom_app_name = computed(() => props.invoice?.custom_app_name || '');
+  const custom_bank_name = computed(() => props.invoice?.custom_bank_name || '');
+  const custom_swift_iban = computed(() => props.invoice?.custom_swift_iban || '');
+  const custom_account_number = computed(() => props.invoice?.custom_account_number || '');
 
   const emit = defineEmits(['close-modal', 'save-changes']);
 
@@ -394,6 +385,7 @@
       console.error("Error saving changes to Firestore: ", error);
     }
   }
+
 
   function saveAndClose() {
     closeModal();

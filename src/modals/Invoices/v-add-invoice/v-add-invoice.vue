@@ -518,12 +518,10 @@ async function addInvoice() {
     subtotal_amount: Number(subtotal.value),
     total_amount: Number(totalAmount.value),
     total_discount: Number(totalDiscount.value),
-    custom_billing_data: toggleBillingData.value ? {
-      app_name: customAppName.value,
-      bank_name: customBankName.value,
-      swift_iban: customSwiftIban.value,
-      account_number: customAccountNumber.value,
-    } : null,
+    custom_app_name: toggleBillingData.value ? customAppName.value : null,
+    custom_bank_name: toggleBillingData.value ? customBankName.value : null,
+    custom_swift_iban: toggleBillingData.value ? customSwiftIban.value : null,
+    custom_account_number: toggleBillingData.value ? customAccountNumber.value : null,
   };
 
   try {

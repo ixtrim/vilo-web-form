@@ -197,7 +197,7 @@
 <script setup lang="ts">
 import { db } from '@/firebase.js';
 import { addDoc, collection, doc, getDoc, getDocs, query, Timestamp, updateDoc, where, writeBatch } from 'firebase/firestore';
-import { defineEmits, defineProps, ref, onMounted, computed } from 'vue';
+import { defineEmits, defineProps, ref, onMounted, computed, watch } from 'vue';
 import type { Ref } from 'vue';
 import type { PropType } from 'vue';
 import VDropdown from '@/components/v-dropdown/VDropdown.vue';
@@ -295,6 +295,20 @@ const customAccountNumber = ref('');
 
 const errorClientCase = ref('');
 const errorItems = ref('');
+
+const errorCustomAppName = ref('');
+const errorCustomBankName = ref('');
+const errorCustomSwiftIban = ref('');
+const errorCustomAccountNumber = ref('');
+
+watch(toggleBillingData, (newValue) => {
+  if (!newValue) {
+    customAppName.value = '';
+    customBankName.value = '';
+    customSwiftIban.value = '';
+    customAccountNumber.value = '';
+  }
+});
 
 const fetchClients = async () => {
   const clientsQuery = query(collection(db, "users"), where("role", "in", [3, 4]));
@@ -397,6 +411,29 @@ async function onCaseChanged(item: DropdownItem) {
 function isFormValid() {
   errorClientCase.value = '';
   errorItems.value = '';
+  errorCustomAppName.value = '';
+  errorCustomBankName.value = '';
+  errorCustomSwiftIban.value = '';
+  errorCustomAccountNumber.value = '';
+
+  if (toggleBillingData.value) {
+    if (!customAppName.value.trim()) {
+      errorCustomAppName.value = 'Please fill in the App Name.';
+      return false;
+    }
+    if (!customBankName.value.trim()) {
+      errorCustomBankName.value = 'Please fill in the Bank Name.';
+      return false;
+    }
+    if (!customSwiftIban.value.trim()) {
+      errorCustomSwiftIban.value = 'Please fill in the SWIFT/IBAN.';
+      return false;
+    }
+    if (!customAccountNumber.value.trim()) {
+      errorCustomAccountNumber.value = 'Please fill in the Account Number.';
+      return false;
+    }
+  }
 
   if (localClient.value === '0' || localCase.value === '0') {
     errorClientCase.value = 'Please select a client and a case.';
@@ -503,6 +540,10 @@ function calculateAmount(item: InvoiceItem): string {
 function closeModal() {
   errorClientCase.value = '';
   errorItems.value = '';
+  errorCustomAppName.value = '';
+  errorCustomBankName.value = '';
+  errorCustomSwiftIban.value = '';
+  errorCustomAccountNumber.value = '';
   emit('close-modal');
 }
 
@@ -513,6 +554,10 @@ async function addInvoice() {
 
   errorClientCase.value = '';
   errorItems.value = '';
+  errorCustomAppName.value = '';
+  errorCustomBankName.value = '';
+  errorCustomSwiftIban.value = '';
+  errorCustomAccountNumber.value = '';
 
   // Prepare the invoice data
   const newInvoiceData = {

@@ -179,7 +179,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed } from 'vue';
 import { db } from '@/firebase.js';
-import { orderBy, collection, query, getDocs, doc, getDoc, Timestamp, writeBatch, deleteDoc, updateDoc, where } from 'firebase/firestore';
+import { orderBy, collection, query, getDocs, doc, getDoc, Timestamp, writeBatch, deleteDoc, updateDoc, where, Query } from 'firebase/firestore';
 import VStatus from '@/components/v-status/VStatus.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
@@ -302,17 +302,19 @@ export default defineComponent({
       isLoading.value = true;
       invoices.value = [];
       try {
-        let q;
+        let q: Query;
         if (userRole.value === 3 || userRole.value === 4) {
           q = query(collection(db, "invoices"), where("client_id", "==", userStore.user.value?.id));
         } else if (userRole.value === 0 || userRole.value === 2) {
           q = query(collection(db, "invoices"), orderBy("due_date", "asc"));
+        } else {
+          throw new Error("Invalid user role");
         }
         const querySnapshot = await getDocs(q);
         const invoicesData: Invoice[] = [];
 
         for (const docSnapshot of querySnapshot.docs) {
-          const invoiceData = docSnapshot.data();
+          const invoiceData = docSnapshot.data() as Omit<Invoice, 'id' | 'invoiceItems'> & { id: string }; // Correctly typed with id included
           
           // Fetch client details
           const clientDocRef = doc(db, "users", invoiceData.client_id);
@@ -484,7 +486,7 @@ export default defineComponent({
         const invoicesData: Invoice[] = []; // Typed according to the Invoice interface
     
         for (const docSnapshot of querySnapshot.docs) {
-          const invoiceData = docSnapshot.data() as Omit<Invoice, 'id' | 'invoiceItems'>; // Assuming direct mapping except 'id' and 'invoiceItems'
+          const invoiceData = docSnapshot.data() as Omit<Invoice, 'id' | 'invoiceItems'> & { id: string }; // Assuming direct mapping except 'id' and 'invoiceItems'
           
           // Fetch client details
           const clientDocRef = doc(db, "users", invoiceData.client_id);

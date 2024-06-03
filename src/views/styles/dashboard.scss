@@ -1036,8 +1036,48 @@
     & > li {
       margin-left: 20px;
 
+      &.fill-space {
+        flex: 1 1 0;
+
+        h3 {
+          margin: 0;
+          padding: 0;
+          transform: translateY(-30%);
+        }
+      }
+
       &:first-child {
         margin-left: 0;
+      }
+    }
+
+    &--small {
+      .dropdown {
+        .v-button {
+          padding: 5px 27px 5px 9px;
+          font-size: 12px;
+
+          &::after {
+            top: 50%;
+            right: 10px;
+            margin-top: 0px;
+          }
+        }
+      }
+      .dropdown-menu {
+        font-size: 12px;
+
+        li {
+          padding: 0 3px 2px;
+
+          &:last-child {
+            padding: 0 3px 0;
+          }
+
+          a {
+            padding: 5px;
+          }
+        }
       }
     }
   }

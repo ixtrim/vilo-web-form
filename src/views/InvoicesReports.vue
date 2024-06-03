@@ -28,12 +28,29 @@
           <div class="tax-due">
             <div class="row">
               <div class="col-lg-12">
-                <h3>Tax due</h3>
-                <h2>{{ formatCurrency(taxDueAmount) }}</h2>
+                <ul class="dashboard__actions dashboard__actions--small">
+                  <li class="fill-space">
+                    <h3>Tax due</h3>
+                  </li>
+                  <li>
+                    <VDropdown :title="selectedClientLabel" :items="clientsList" @item-clicked="handleClientFilter" />
+                  </li>
+                  <li>
+                    <VDropdown :title="selectedDateLabel" :items="sortTime" @item-clicked="handleDateFilter" />
+                  </li>
+                </ul>
+                
+              </div>
+            </div>
+            <div class="row mt-3">
+              <div class="col-lg-12">
+                
+                <h2>{{ formatCurrency(filteredTaxDue) }}</h2>
               </div>
             </div>
           </div>
         </div>
+
         <div class="row">
           <div class="clients-breakdown">
             <div class="row align-middle">
@@ -268,6 +285,10 @@ export default defineComponent({
       { label: 'This week', value: 'thisWeek' },
     ]);
     const selectedTimeFrame = ref('all');
+    const selectedDateLabel = computed(() => {
+      const selectedItem = sortTime.value.find(time => time.value === selectedTimeFrame.value);
+      return selectedItem ? selectedItem.label : 'Choose date range';
+    });
 
     const sortStatus = ref([
       { label: 'All', value: null },
@@ -277,6 +298,11 @@ export default defineComponent({
       { label: 'Refunded', value: 4 },
     ]);
     const selectedStatus = ref(null);
+
+    const selectedClientLabel = computed(() => {
+      const selectedItem = clientsList.value.find(client => client.value === selectedClientId.value);
+      return selectedItem ? selectedItem.label : 'Choose client';
+    });
 
     const truncateEmail = (email: string) => email.length > 25 ? `${email.substring(0, 22)}...` : email;
 
@@ -479,6 +505,50 @@ export default defineComponent({
       }
     };
 
+    const handleClientFilter = (item: ClientOption) => {
+      selectedClientId.value = item.value;
+      updateFilteredTaxDue();
+    };
+
+    const handleDateFilter = (item: any) => {
+      selectedTimeFrame.value = item.value;
+      updateFilteredTaxDue();
+    };
+
+    const updateFilteredTaxDue = () => {
+      let filteredTaxDue = 0;
+      filteredInvoices.value.forEach(invoice => {
+        if ((selectedClientId.value === null || invoice.client_id === selectedClientId.value) &&
+            (selectedTimeFrame.value === 'all' || invoice.due_date.toDate() >= getDateRange(selectedTimeFrame.value))) {
+          filteredTaxDue += invoice.total_amount * 0.25; // Assuming 25% tax rate
+        }
+      });
+      return filteredTaxDue;
+    };
+
+    const getDateRange = (timeFrame: string) => {
+      const now = new Date();
+      switch (timeFrame) {
+        case 'lastYear':
+          return new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        case 'lastThreeMonths':
+          return new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+        case 'lastTwoMonths':
+          return new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
+        case 'lastMonth':
+          return new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+        case 'thisWeek':
+          const oneWeekAgo = new Date();
+          oneWeekAgo.setDate(now.getDate() - 7);
+          return oneWeekAgo;
+        default:
+          return new Date(0); // If 'all', return a very old date
+      }
+    };
+
+    const filteredTaxDue = computed(() => {
+      return updateFilteredTaxDue();
+    });
 
     let myChart: Chart | null = null;
     const updateChartData = (data: number[]) => {
@@ -521,7 +591,6 @@ export default defineComponent({
         }
       });
     };
-
 
     const handleFilterTime = (item: any) => {
       selectedTimeFrame.value = item.value;
@@ -598,10 +667,15 @@ export default defineComponent({
       invoiceSummaries,
       selectedClientId,
       handleClientSelected,
+      handleClientFilter,
+      handleDateFilter,
       dropdownTitle,
+      selectedClientLabel,
+      selectedDateLabel,
       canvasKey,
       formatCurrency,
       updateSearchTerm,
+      filteredTaxDue,
     };
   },
   methods: {

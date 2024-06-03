@@ -305,7 +305,7 @@ export default defineComponent({
         let q;
         if (userRole.value === 3 || userRole.value === 4) {
           q = query(collection(db, "invoices"), where("client_id", "==", userStore.user.value?.id));
-        } else {
+        } else if (userRole.value === 0 || userRole.value === 2) {
           q = query(collection(db, "invoices"), orderBy("due_date", "asc"));
         }
         const querySnapshot = await getDocs(q);

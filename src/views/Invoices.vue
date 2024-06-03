@@ -214,6 +214,10 @@ interface Invoice {
   clientAvatar: string;
   caseTitle: string;
   invoiceItems: InvoiceItem[];
+  custom_app_name: string;
+  custom_bank_name: string;
+  custom_swift_iban: string;
+  custom_account_number: string;
 }
 
 interface InvoiceItem {
@@ -376,6 +380,10 @@ export default defineComponent({
             clientAvatar: clientDetails.clientAvatar,
             caseTitle: caseTitle,
             invoiceItems: invoiceItems,
+            custom_app_name: invoiceData.custom_app_name,
+            custom_bank_name: invoiceData.custom_bank_name,
+            custom_swift_iban: invoiceData.custom_swift_iban,
+            custom_account_number: invoiceData.custom_account_number,
           };
 
           invoicesData.push(invoice);
@@ -525,8 +533,8 @@ export default defineComponent({
           })) as InvoiceItem[];
 
           invoicesData.push({
-            id: docSnapshot.id,
             ...invoiceData,
+            id: docSnapshot.id,
             ...clientDetails,
             caseTitle,
             invoiceItems,

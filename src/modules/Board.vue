@@ -120,9 +120,9 @@ export default defineComponent({
       
       await updateDoc(taskRef, { status: newStatus }).then(async () => {
         await sendTaskUpdateEmail({
-          taskTitle: taskData.title,
+            taskTitle: taskData?.title ?? '',
           caseId: this.caseId,
-          userId: taskData.user_assigned,
+            userId: taskData?.user_assigned ?? '',
           newStatus: newStatus,
         });
         console.log('Task status updated and email sent');

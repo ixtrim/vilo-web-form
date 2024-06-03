@@ -179,7 +179,7 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed } from 'vue';
 import { db } from '@/firebase.js';
-import { orderBy, collection, query, getDocs, doc, getDoc, Timestamp, writeBatch, deleteDoc, updateDoc, where } from 'firebase/firestore';
+import { orderBy, collection, query, getDocs, doc, getDoc, Timestamp, writeBatch, deleteDoc, updateDoc, where, Query } from 'firebase/firestore';
 import VStatus from '@/components/v-status/VStatus.vue';
 import VButton from '@/components/v-button/VButton.vue';
 import VModal from '@/components/v-modal/v-modal.vue';
@@ -214,6 +214,10 @@ interface Invoice {
   clientAvatar: string;
   caseTitle: string;
   invoiceItems: InvoiceItem[];
+  custom_app_name: string;
+  custom_bank_name: string;
+  custom_swift_iban: string;
+  custom_account_number: string;
 }
 
 interface InvoiceItem {
@@ -302,17 +306,19 @@ export default defineComponent({
       isLoading.value = true;
       invoices.value = [];
       try {
-        let q;
+        let q: Query;
         if (userRole.value === 3 || userRole.value === 4) {
           q = query(collection(db, "invoices"), where("client_id", "==", userStore.user.value?.id));
         } else if (userRole.value === 0 || userRole.value === 2) {
           q = query(collection(db, "invoices"), orderBy("due_date", "asc"));
+        } else {
+          throw new Error("Invalid user role");
         }
         const querySnapshot = await getDocs(q);
         const invoicesData: Invoice[] = [];
 
         for (const docSnapshot of querySnapshot.docs) {
-          const invoiceData = docSnapshot.data();
+          const invoiceData = docSnapshot.data() as Omit<Invoice, 'id' | 'invoiceItems'> & { id: string }; // Correctly typed with id included
           
           // Fetch client details
           const clientDocRef = doc(db, "users", invoiceData.client_id);
@@ -374,6 +380,10 @@ export default defineComponent({
             clientAvatar: clientDetails.clientAvatar,
             caseTitle: caseTitle,
             invoiceItems: invoiceItems,
+            custom_app_name: invoiceData.custom_app_name,
+            custom_bank_name: invoiceData.custom_bank_name,
+            custom_swift_iban: invoiceData.custom_swift_iban,
+            custom_account_number: invoiceData.custom_account_number,
           };
 
           invoicesData.push(invoice);
@@ -484,7 +494,7 @@ export default defineComponent({
         const invoicesData: Invoice[] = []; // Typed according to the Invoice interface
     
         for (const docSnapshot of querySnapshot.docs) {
-          const invoiceData = docSnapshot.data() as Omit<Invoice, 'id' | 'invoiceItems'>; // Assuming direct mapping except 'id' and 'invoiceItems'
+          const invoiceData = docSnapshot.data() as Omit<Invoice, 'id' | 'invoiceItems'> & { id: string }; // Assuming direct mapping except 'id' and 'invoiceItems'
           
           // Fetch client details
           const clientDocRef = doc(db, "users", invoiceData.client_id);
@@ -523,8 +533,8 @@ export default defineComponent({
           })) as InvoiceItem[];
 
           invoicesData.push({
-            id: docSnapshot.id,
             ...invoiceData,
+            id: docSnapshot.id,
             ...clientDetails,
             caseTitle,
             invoiceItems,

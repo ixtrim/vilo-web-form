@@ -214,10 +214,12 @@ interface Invoice {
   clientAvatar: string;
   caseTitle: string;
   invoiceItems: InvoiceItem[];
-  custom_app_name: string;
+  custom_company_name: string;
   custom_bank_name: string;
-  custom_swift_iban: string;
+  custom_branch: string;
   custom_account_number: string;
+  custom_address: string;
+  custom_sort_code: string;
 }
 
 interface InvoiceItem {
@@ -380,10 +382,12 @@ export default defineComponent({
             clientAvatar: clientDetails.clientAvatar,
             caseTitle: caseTitle,
             invoiceItems: invoiceItems,
-            custom_app_name: invoiceData.custom_app_name,
+            custom_company_name: invoiceData.custom_company_name,
             custom_bank_name: invoiceData.custom_bank_name,
-            custom_swift_iban: invoiceData.custom_swift_iban,
+            custom_branch: invoiceData.custom_branch,
             custom_account_number: invoiceData.custom_account_number,
+            custom_address: invoiceData.custom_address,
+            custom_sort_code: invoiceData.custom_sort_code,
           };
 
           invoicesData.push(invoice);

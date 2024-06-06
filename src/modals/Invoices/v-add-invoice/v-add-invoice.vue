@@ -610,6 +610,8 @@ async function addInvoice() {
     custom_bank_name: toggleBillingData.value ? customBankName.value : null,
     custom_branch: toggleBillingData.value ? customBranch.value : null,
     custom_account_number: toggleBillingData.value ? customAccountNumber.value : null,
+    custom_address: toggleBillingData.value ? customAddress.value : null,
+    custom_sort_code: toggleBillingData.value ? customSortCode.value : null,
   };
 
   try {

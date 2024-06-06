@@ -96,8 +96,13 @@
     <div class="row invoice__payment">
       <div class="col-lg-12">
         <h5>PAYMENT INSTRUCTIONS</h5>
-        <p v-if="custom_app_name">
-          {{ custom_app_name }}<br/>{{ custom_bank_name }} | {{ custom_swift_iban }}<br/>{{ custom_account_number }}<br/>
+        <p v-if="custom_company_name || custom_bank_name || custom_account_number || custom_branch || custom_address || custom_sort_code">
+          {{ custom_company_name }}<br/>
+          Bank name: {{ custom_bank_name }}<br/>
+          Account number: {{ custom_account_number }}<br/>
+          Branch: {{ custom_branch }}<br/>
+          Address: {{ custom_address }}<br/>
+          Sort code: {{ custom_sort_code }}<br/>
         </p>
         <p v-else>{{ appName }}<br/>
           Bank name: {{ bankName }}<br/>
@@ -186,10 +191,12 @@ type Invoice = {
   clientAvatar: string;
   caseTitle: string;
   invoiceItems: InvoiceItem[];
-  custom_app_name: string;
+  custom_company_name: string;
   custom_bank_name: string;
-  custom_swift_iban: string;
+  custom_branch: string;
   custom_account_number: string;
+  custom_address: string;
+  custom_sort_code: string;
 };
 
 interface InvoiceItem {
@@ -237,10 +244,12 @@ const invoiceSalesTaxes = computed(() => props.invoice?.sales_taxes || 'Unknown'
 const invoiceSubtotalAmount = computed(() => props.invoice?.subtotal_amount || 'Unknown');
 const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
 const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
-const custom_app_name = computed(() => props.invoice?.custom_app_name || '');
+const custom_company_name = computed(() => props.invoice?.custom_company_name || '');
 const custom_bank_name = computed(() => props.invoice?.custom_bank_name || '');
-const custom_swift_iban = computed(() => props.invoice?.custom_swift_iban || '');
+const custom_branch = computed(() => props.invoice?.custom_branch || '');
 const custom_account_number = computed(() => props.invoice?.custom_account_number || '');
+const custom_address = computed(() => props.invoice?.custom_address || '');
+const custom_sort_code = computed(() => props.invoice?.custom_sort_code || '');
 
 const emit = defineEmits(['close-modal', 'invoice-pending', 'invoice-paid', 'invoice-refunded', 'invoice-cancelled']);
 

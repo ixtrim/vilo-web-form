@@ -22,8 +22,13 @@
     <div class="row invoice__meta">
       <div class="col-lg-6">
         <strong>Billed by:</strong>
-        <div v-if="custom_app_name">
-          <span>{{ custom_app_name }}<br/>{{ custom_bank_name }} | {{ custom_swift_iban }}<br/>{{ custom_account_number }}</span>
+        <div v-if="custom_company_name">
+          <span>{{ custom_company_name }}<br/>
+          Bank name: {{ custom_bank_name }}<br/>
+          Account number: {{ custom_account_number }}<br/>
+          Branch: {{ custom_branch }}<br/>
+          Address: {{ custom_address }}<br/>
+          Sort code: {{ custom_sort_code }}<br/></span>
         </div>
         <div v-else><span>{{ appName }}<br/>{{ bankName }} | {{ swiftIban }}<br/>{{ accountNumber }}</span></div>
       </div>
@@ -176,10 +181,12 @@
     clientAvatar: string;
     caseTitle: string;
     invoiceItems: InvoiceItem[];
-    custom_app_name: string;
+    custom_company_name: string;
     custom_bank_name: string;
-    custom_swift_iban: string;
+    custom_branch: string;
     custom_account_number: string;
+    custom_address: string;
+    custom_sort_code: string;
   };
 
   interface InvoiceItem {
@@ -233,10 +240,12 @@
   const invoiceTotalAmount = computed(() => props.invoice?.total_amount || 'Unknown');
   const invoiceTotalDiscount = computed(() => props.invoice?.total_discount || 'Unknown');
   const taxRate = ref(25);
-  const custom_app_name = computed(() => props.invoice?.custom_app_name || '');
+  const custom_company_name = computed(() => props.invoice?.custom_company_name || '');
   const custom_bank_name = computed(() => props.invoice?.custom_bank_name || '');
-  const custom_swift_iban = computed(() => props.invoice?.custom_swift_iban || '');
+  const custom_branch = computed(() => props.invoice?.custom_branch || '');
   const custom_account_number = computed(() => props.invoice?.custom_account_number || '');
+  const custom_address = computed(() => props.invoice?.custom_address || '');
+  const custom_sort_code = computed(() => props.invoice?.custom_sort_code || '');
 
   const emit = defineEmits(['close-modal', 'save-changes']);
 

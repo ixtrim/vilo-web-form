@@ -59,28 +59,45 @@
     <div class="row" v-if="toggleBillingData">
       <div class="col-lg-6">
         <div class="form-group">
-          <input type="text" v-model="customAppName" placeholder="App Name" class="form-control" />
-          <p class="error-message" v-if="errorCustomAppName">{{ errorCustomAppName }}</p>
-        </div>
-      </div>
-      <div class="col-lg-6">
-        <div class="form-group">
-          <input type="text" v-model="customBankName" placeholder="Bank Name" class="form-control" />
-          <p class="error-message" v-if="errorCustomBankName">{{ errorCustomBankName }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="row" v-if="toggleBillingData">
-      <div class="col-lg-6">
-        <div class="form-group">
-          <input type="text" v-model="customSwiftIban" placeholder="SWIFT/IBAN" class="form-control" />
-          <p class="error-message" v-if="errorCustomSwiftIban">{{ errorCustomSwiftIban }}</p>
+          <input type="text" v-model="customCompanyName" placeholder="Company Name" class="form-control" />
+          <p class="error-message" v-if="errorCustomCompanyName">{{ errorCustomCompanyName }}</p>
         </div>
       </div>
       <div class="col-lg-6">
         <div class="form-group">
           <input type="text" v-model="customAccountNumber" placeholder="Account Number" class="form-control" />
           <p class="error-message" v-if="errorCustomAccountNumber">{{ errorCustomAccountNumber }}</p>
+        </div>
+        
+      </div>
+    </div>
+    <div class="row" v-if="toggleBillingData">
+      <div class="col-lg-6">
+        <div class="form-group">
+          <input type="text" v-model="customBankName" placeholder="Bank Name" class="form-control" />
+          <p class="error-message" v-if="errorCustomBankName">{{ errorCustomBankName }}</p>
+        </div>
+        
+      </div>
+      <div class="col-lg-6">
+        <div class="form-group">
+          <input type="text" v-model="customBranch" placeholder="Branch" class="form-control" />
+          <p class="error-message" v-if="errorCustomBranch">{{ errorCustomBranch }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="row" v-if="toggleBillingData">
+      <div class="col-lg-6">
+        <div class="form-group">
+          <input type="text" v-model="customAddress" placeholder="Address" class="form-control" />
+          <p class="error-message" v-if="errorCustomAddress">{{ errorCustomAddress }}</p>
+        </div>
+        
+      </div>
+      <div class="col-lg-6">
+        <div class="form-group">
+          <input type="text" v-model="customSortCode" placeholder="Sort Code" class="form-control" />
+          <p class="error-message" v-if="errorCustomSortCode">{{ errorCustomSortCode }}</p>
         </div>
       </div>
     </div>
@@ -226,10 +243,12 @@ type Invoice = {
   clientAvatar: string;
   caseTitle: string;
   invoiceItems: InvoiceItem[];
-  custom_app_name: string;
+  custom_company_name: string;
   custom_bank_name: string;
-  custom_swift_iban: string;
+  custom_branch: string;
   custom_account_number: string;
+  custom_address: string;
+  custom_sort_code: string;
 };
 
 interface InvoiceItem {
@@ -288,25 +307,31 @@ const localCase = ref('0');
 const dropdownCase: Ref<DropdownItem[]> = ref([]);
 const toggleBillingData = ref(false);
 
-const customAppName = ref('');
+const customCompanyName = ref('');
 const customBankName = ref('');
-const customSwiftIban = ref('');
+const customBranch = ref('');
 const customAccountNumber = ref('');
+const customAddress = ref('');
+const customSortCode = ref('');
 
 const errorClientCase = ref('');
 const errorItems = ref('');
 
-const errorCustomAppName = ref('');
+const errorCustomCompanyName = ref('');
 const errorCustomBankName = ref('');
-const errorCustomSwiftIban = ref('');
+const errorCustomBranch = ref('');
 const errorCustomAccountNumber = ref('');
+const errorCustomAddress = ref('');
+const errorCustomSortCode = ref('');
 
 watch(toggleBillingData, (newValue) => {
   if (!newValue) {
-    customAppName.value = '';
+    customCompanyName.value = '';
     customBankName.value = '';
-    customSwiftIban.value = '';
+    customBranch.value = '';
     customAccountNumber.value = '';
+    customAddress.value = '';
+    customSortCode.value = '';
   }
 });
 
@@ -411,26 +436,36 @@ async function onCaseChanged(item: DropdownItem) {
 function isFormValid() {
   errorClientCase.value = '';
   errorItems.value = '';
-  errorCustomAppName.value = '';
+  errorCustomCompanyName.value = '';
   errorCustomBankName.value = '';
-  errorCustomSwiftIban.value = '';
+  errorCustomBranch.value = '';
   errorCustomAccountNumber.value = '';
+  errorCustomAddress.value = '';
+  errorCustomSortCode.value = '';
 
   if (toggleBillingData.value) {
-    if (!customAppName.value.trim()) {
-      errorCustomAppName.value = 'Please fill in the App Name.';
+    if (!customCompanyName.value.trim()) {
+      errorCustomCompanyName.value = 'Please fill in the App Name.';
       return false;
     }
     if (!customBankName.value.trim()) {
       errorCustomBankName.value = 'Please fill in the Bank Name.';
       return false;
     }
-    if (!customSwiftIban.value.trim()) {
-      errorCustomSwiftIban.value = 'Please fill in the SWIFT/IBAN.';
+    if (!customBranch.value.trim()) {
+      errorCustomBranch.value = 'Please fill in the SWIFT/IBAN.';
       return false;
     }
     if (!customAccountNumber.value.trim()) {
       errorCustomAccountNumber.value = 'Please fill in the Account Number.';
+      return false;
+    }
+    if (!customAddress.value.trim()) {
+      errorCustomAddress.value = 'Please fill in the address.';
+      return false;
+    }
+    if (!customSortCode.value.trim()) {
+      errorCustomSortCode.value = 'Please fill in the sort code.';
       return false;
     }
   }
@@ -540,9 +575,9 @@ function calculateAmount(item: InvoiceItem): string {
 function closeModal() {
   errorClientCase.value = '';
   errorItems.value = '';
-  errorCustomAppName.value = '';
+  errorCustomCompanyName.value = '';
   errorCustomBankName.value = '';
-  errorCustomSwiftIban.value = '';
+  errorCustomBranch.value = '';
   errorCustomAccountNumber.value = '';
   emit('close-modal');
 }
@@ -554,9 +589,9 @@ async function addInvoice() {
 
   errorClientCase.value = '';
   errorItems.value = '';
-  errorCustomAppName.value = '';
+  errorCustomCompanyName.value = '';
   errorCustomBankName.value = '';
-  errorCustomSwiftIban.value = '';
+  errorCustomBranch.value = '';
   errorCustomAccountNumber.value = '';
 
   // Prepare the invoice data
@@ -571,9 +606,9 @@ async function addInvoice() {
     subtotal_amount: Number(subtotal.value),
     total_amount: Number(totalAmount.value),
     total_discount: Number(totalDiscount.value),
-    custom_app_name: toggleBillingData.value ? customAppName.value : null,
+    custom_company_name: toggleBillingData.value ? customCompanyName.value : null,
     custom_bank_name: toggleBillingData.value ? customBankName.value : null,
-    custom_swift_iban: toggleBillingData.value ? customSwiftIban.value : null,
+    custom_branch: toggleBillingData.value ? customBranch.value : null,
     custom_account_number: toggleBillingData.value ? customAccountNumber.value : null,
   };
 

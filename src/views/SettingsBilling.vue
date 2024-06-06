@@ -22,6 +22,19 @@
 
           <div class="dashboard__form__section">
             <div class="dashboard__form__section__label">
+              <h4>Company Name</h4>
+            </div>
+            <div class="dashboard__form__section__input dashboard__form__section__input--width">
+              <VInput 
+                label="" 
+                placeholder="VILO Inc." 
+                v-model="companyName"
+              />
+            </div>
+          </div>
+
+          <div class="dashboard__form__section">
+            <div class="dashboard__form__section__label">
               <h4>Account Details</h4>
             </div>
             <div class="dashboard__form__section__input dashboard__form__section__input--width">
@@ -36,14 +49,34 @@
                 v-model="bankName"
               />
               <VInput 
-                label="SWIFT/IBAN" 
-                placeholder="NZ0201230012" 
-                v-model="swiftIban"
+                label="Branch" 
+                placeholder="00001" 
+                v-model="branch"
               />
             </div>
           </div>
 
           <div class="dashboard__form__section">
+            <div class="dashboard__form__section__label">
+              <h4>Account Type</h4>
+              <p>Choose the type of account you have.</p>
+            </div>
+            <div class="dashboard__form__section__input dashboard__form__section__input--width">
+              <VDropdown :title="accountType.label" :items="accountTypeOptions" @item-clicked="changeAccountType" />
+            </div>
+          </div>
+
+          <div class="dashboard__form__section">
+            <div class="dashboard__form__section__label">
+              <h4>Currency</h4>
+              <p>Select the currency of your account.</p>
+            </div>
+            <div class="dashboard__form__section__input dashboard__form__section__input--width">
+              <VDropdown :title="currency.label" :items="currencyOptions" @item-clicked="changeCurrency" />
+            </div>
+          </div>
+
+          <div class="dashboard__form__section" style="display: none;">
             <div class="dashboard__form__section__label">
               <h4>Email address</h4>
               <p>Invoices will be sent to this email address.</p>
@@ -55,7 +88,7 @@
 
           <div class="dashboard__form__section">
             <div class="dashboard__form__section__label">
-              <h4>Street address</h4>
+              <h4>Address</h4>
             </div>
             <div class="dashboard__form__section__input dashboard__form__section__input--width">
               <VInput 
@@ -68,41 +101,14 @@
 
           <div class="dashboard__form__section">
             <div class="dashboard__form__section__label">
-              <h4>City</h4>
+              <h4>Sort Code</h4>
             </div>
             <div class="dashboard__form__section__input dashboard__form__section__input--width">
               <VInput 
                 label="" 
-                placeholder="Collingwood" 
-                v-model="city"
+                placeholder="BAJAJMKN XXX BIC" 
+                v-model="sortCode"
               />
-            </div>
-          </div>
-
-          <div class="dashboard__form__section">
-            <div class="dashboard__form__section__label">
-              <h4>State / Province</h4>
-            </div>
-            <div class="dashboard__form__section__input dashboard__form__section__input--cols">
-              <VInput 
-                label="" 
-                placeholder="VIC" 
-                v-model="state"
-              />
-              <VInput 
-                label="" 
-                placeholder="3066" 
-                v-model="province"
-              />
-            </div>
-          </div>
-
-          <div class="dashboard__form__section">
-            <div class="dashboard__form__section__label">
-              <h4>Country</h4>
-            </div>
-            <div class="dashboard__form__section__input dashboard__form__section__input--width">
-              <VCountryDropdown :selectedCountryCode="selectedCountryCode" @country-selected="handleCountrySelected" />
             </div>
           </div>
           
@@ -120,25 +126,30 @@
   import { doc, getDoc, updateDoc } from 'firebase/firestore';
   import { debounce } from 'lodash';
   import { defineComponent, ref, onMounted } from 'vue';
-  import VCountryDropdown from '@/components/v-country-dropdown/VCountryDropdown.vue';
   import VInput from '@/components/v-input/VInput.vue';
   import VButton from '@/components/v-button/VButton.vue';
   import TabsSettings from '@/modules/TabsSettings.vue';
   import VEmailInputGroup from '@/components/v-email-input-group/VEmailInputGroup.vue';
   import VNotification from '@/components/v-notification/VNotification.vue';
+  import VDropdown from '@/components/v-dropdown/VDropdown.vue';
 
   interface NotificationRef {
     showNotification: () => void;
+  }
+
+  interface DropdownItem {
+    label: string;
+    value: string;
   }
 
   export default defineComponent({
     components: {
       VButton,
       VInput,
-      VCountryDropdown,
       TabsSettings,
       VEmailInputGroup,
       VNotification,
+      VDropdown,
     },
     data() {
       return {
@@ -146,22 +157,31 @@
         notificationType: 'success',
         notificationHeader: 'Changes saved',
         notificationMessage: 'This account has been successfully edited.',
+        companyName: '',
         accountNumber: '',
         bankName: '',
-        swiftIban: '',
+        branch: '',
         emails: [],
         streetAddress: '',
-        city: '',
-        state: '',
-        province: '',
-        selectedCountryCode: '',
+        sortCode: '',
+        accountType: { label: '', value: '' },
+        currency: { label: '', value: '' },
+        accountTypeOptions: [
+          { label: 'Savings', value: 'savings' },
+          { label: 'Checkings', value: 'checkings' },
+        ],
+        currencyOptions: [
+          { label: 'USD', value: 'usd' },
+          { label: 'JMD', value: 'jmd' },
+        ],
+        debouncedUpdateCompanyName: null as ((...args: any[]) => Promise<void> | undefined) | null,
         debouncedUpdateAccountNumber: null as ((...args: any[]) => Promise<void> | undefined) | null,
         debouncedUpdateBankName: null as ((...args: any[]) => Promise<void> | undefined) | null,
-        debouncedUpdateSwiftIban: null as ((...args: any[]) => Promise<void> | undefined) | null,
+        debouncedUpdateBranch: null as ((...args: any[]) => Promise<void> | undefined) | null,
         debouncedUpdateStreetAddress: null as ((...args: any[]) => Promise<void> | undefined) | null,
-        debouncedUpdateCity: null as ((...args: any[]) => Promise<void> | undefined) | null,
-        debouncedUpdateState: null as ((...args: any[]) => Promise<void> | undefined) | null,
-        debouncedUpdateProvince: null as ((...args: any[]) => Promise<void> | undefined) | null,
+        debouncedUpdateSortCode: null as ((...args: any[]) => Promise<void> | undefined) | null,
+        debouncedUpdateAccountType: null as ((...args: any[]) => Promise<void> | undefined) | null,
+        debouncedUpdateCurrency: null as ((...args: any[]) => Promise<void> | undefined) | null,
       };
     },
     methods: {
@@ -179,16 +199,23 @@
           const docSnap = await getDoc(docRef);
 
           if (docSnap.exists()) {
+            this.companyName   = docSnap.data().company_name;
             this.accountNumber = docSnap.data().account_number;
             this.bankName      = docSnap.data().bank_name;
-            this.swiftIban     = docSnap.data().swift_iban;
+            this.branch        = docSnap.data().branch;
             this.emails        = docSnap.data().email_addresses || [];
             this.streetAddress = docSnap.data().street_address;
-            this.city          = docSnap.data().city;
-            this.state               = docSnap.data().state;
-            this.province            = docSnap.data().province;
-            this.selectedCountryCode = docSnap.data().country;
-            
+            this.sortCode      = docSnap.data().sort_code;
+            const accountTypeValue = docSnap.data().account_type;
+            const currencyValue = docSnap.data().currency;
+            const matchingAccountType = this.accountTypeOptions.find(item => item.value === accountTypeValue);
+            const matchingCurrency = this.currencyOptions.find(item => item.value === currencyValue);
+            if (matchingAccountType) {
+              this.accountType = matchingAccountType;
+            }
+            if (matchingCurrency) {
+              this.currency = matchingCurrency;
+            }
           } else {
             console.log("No such document!");
             this.triggerNotification('error', 'Error!', 'Error while connecting with database.');
@@ -200,6 +227,18 @@
           setTimeout(() => {
             this.initialDataLoaded = true;
           }, 750);
+        }
+      },
+      async userInitiatedUpdateCompanyName() {
+        try {
+          const docRef = doc(db, "settings", "billing");
+          await updateDoc(docRef, {
+            company_name: this.companyName
+          });
+          this.triggerNotification('success', 'Changes saved', 'Company name was changed successfully.');
+        } catch (error) {
+          console.error("Error updating document:", error);
+          this.triggerNotification('error', 'Error!', 'Something went wrong.');
         }
       },
       async userInitiatedUpdateAccountNumber() {
@@ -226,13 +265,13 @@
           this.triggerNotification('error', 'Error!', 'Something went wrong.');
         }
       },
-      async userInitiatedUpdateSwiftIban() {
+      async userInitiatedUpdateBranch() {
         try {
           const docRef = doc(db, "settings", "billing");
           await updateDoc(docRef, {
-            swift_iban: this.swiftIban
+            branch: this.branch
           });
-          this.triggerNotification('success', 'Changes saved', 'Bank account SWIFT/IBAN was changed successfully.');
+          this.triggerNotification('success', 'Changes saved', 'Branch information was changed successfully.');
         } catch (error) {
           console.error("Error updating document:", error);
           this.triggerNotification('error', 'Error!', 'Something went wrong.');
@@ -264,70 +303,82 @@
           this.triggerNotification('error', 'Error!', 'Something went wrong.');
         }
       },
-      async userInitiatedUpdateCity() {
+      async userInitiatedUpdateSortCode() {
         try {
           const docRef = doc(db, "settings", "billing");
           await updateDoc(docRef, {
-            city: this.city
+            sort_code: this.sortCode
           });
-          this.triggerNotification('success', 'Changes saved', 'City was changed successfully.');
+          this.triggerNotification('success', 'Changes saved', 'Sort code was changed successfully.');
         } catch (error) {
           console.error("Error updating document:", error);
           this.triggerNotification('error', 'Error!', 'Something went wrong.');
         }
       },
-      async userInitiatedUpdateState() {
+      async userInitiatedUpdateAccountType() {
         try {
           const docRef = doc(db, "settings", "billing");
           await updateDoc(docRef, {
-            state: this.state
+            account_type: this.accountType.value
           });
-          this.triggerNotification('success', 'Changes saved', 'State was changed successfully.');
+          this.triggerNotification('success', 'Changes saved', 'Account type was changed successfully.');
         } catch (error) {
           console.error("Error updating document:", error);
           this.triggerNotification('error', 'Error!', 'Something went wrong.');
         }
       },
-      async userInitiatedUpdateProvince() {
+      async userInitiatedUpdateCurrency() {
         try {
           const docRef = doc(db, "settings", "billing");
           await updateDoc(docRef, {
-            province: this.province
+            currency: this.currency.value
           });
-          this.triggerNotification('success', 'Changes saved', 'Province was changed successfully.');
+          this.triggerNotification('success', 'Changes saved', 'Currency was changed successfully.');
         } catch (error) {
           console.error("Error updating document:", error);
           this.triggerNotification('error', 'Error!', 'Something went wrong.');
         }
       },
-      handleCountrySelected(country: { code: string }) {
-        this.updateCountry(country.code);
-      },
-      async updateCountry(countryCode: string) {
-        try {
-          const docRef = doc(db, "settings", "billing");
-          await updateDoc(docRef, {
-            country: countryCode
-          });
-          this.selectedCountryCode = countryCode;
-          this.triggerNotification('success', 'Changes saved', 'Country was changed successfully.');
-        } catch (error) {
-          console.error("Error updating document:", error);
-          this.triggerNotification('error', 'Error!', 'Something went wrong.');
+      changeAccountType(item: DropdownItem) {
+        this.accountType.label = item.label;
+        this.accountType.value = item.value;
+        if (this.debouncedUpdateAccountType) {
+          try {
+            this.debouncedUpdateAccountType();
+          } catch (e) {
+            console.error(e);
+          }
         }
-      }
+      },
+      changeCurrency(item: DropdownItem) {
+        this.currency.label = item.label;
+        this.currency.value = item.value;
+        if (this.debouncedUpdateCurrency) {
+          try {
+            this.debouncedUpdateCurrency();
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      },
     },
     mounted() {
       this.fetchViewData();
+      this.debouncedUpdateCompanyName     = debounce(this.userInitiatedUpdateCompanyName, 1000);
       this.debouncedUpdateAccountNumber = debounce(this.userInitiatedUpdateAccountNumber, 1000);
       this.debouncedUpdateBankName      = debounce(this.userInitiatedUpdateBankName, 1000);
-      this.debouncedUpdateSwiftIban     = debounce(this.userInitiatedUpdateSwiftIban, 1000);
+      this.debouncedUpdateBranch     = debounce(this.userInitiatedUpdateBranch, 1000);
       this.debouncedUpdateStreetAddress = debounce(this.userInitiatedUpdateStreetAddress, 1000);
-      this.debouncedUpdateCity          = debounce(this.userInitiatedUpdateCity, 1000);
-      this.debouncedUpdateState         = debounce(this.userInitiatedUpdateState, 1000);
-      this.debouncedUpdateProvince      = debounce(this.userInitiatedUpdateProvince, 1000);
+      this.debouncedUpdateSortCode          = debounce(this.userInitiatedUpdateSortCode, 1000);
+      this.debouncedUpdateAccountType = debounce(this.userInitiatedUpdateAccountType, 1000);
+      this.debouncedUpdateCurrency = debounce(this.userInitiatedUpdateCurrency, 1000);
     },
     watch: {
+      companyName(newVal, oldVal) {
+        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateCompanyName) {
+          this.debouncedUpdateCompanyName()?.catch(e => console.error(e));
+        }
+      },
       accountNumber(newVal, oldVal) {
         if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateAccountNumber) {
           this.debouncedUpdateAccountNumber()?.catch(e => console.error(e));
@@ -338,9 +389,9 @@
           this.debouncedUpdateBankName()?.catch(e => console.error(e));
         }
       },
-      swiftIban(newVal, oldVal) {
-        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateSwiftIban) {
-          this.debouncedUpdateSwiftIban()?.catch(e => console.error(e));
+      branch(newVal, oldVal) {
+        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateBranch) {
+          this.debouncedUpdateBranch()?.catch(e => console.error(e));
         }
       },
       streetAddress(newVal, oldVal) {
@@ -348,19 +399,19 @@
           this.debouncedUpdateStreetAddress()?.catch(e => console.error(e));
         }
       },
-      city(newVal, oldVal) {
-        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateCity) {
-          this.debouncedUpdateCity()?.catch(e => console.error(e));
+      sortCode(newVal, oldVal) {
+        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateSortCode) {
+          this.debouncedUpdateSortCode()?.catch(e => console.error(e));
         }
       },
-      state(newVal, oldVal) {
-        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateState) {
-          this.debouncedUpdateState()?.catch(e => console.error(e));
+      accountType(newVal, oldVal) {
+        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateAccountType) {
+          this.debouncedUpdateAccountType()?.catch(e => console.error(e));
         }
       },
-      province(newVal, oldVal) {
-        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateProvince) {
-          this.debouncedUpdateProvince()?.catch(e => console.error(e));
+      currency(newVal, oldVal) {
+        if (this.initialDataLoaded && newVal !== oldVal && this.debouncedUpdateCurrency) {
+          this.debouncedUpdateCurrency()?.catch(e => console.error(e));
         }
       },
     }

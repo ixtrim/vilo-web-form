@@ -151,22 +151,22 @@
 </template>
 
 <script lang="ts">
-  import { db } from '@/firebase.js';
-  import { getFunctions, httpsCallable } from 'firebase/functions';
-  import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
-  import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-  import { debounce } from 'lodash';
-  import { defineComponent, ref, computed, onMounted, reactive, } from 'vue';
-  import VDropdown from '@/components/v-dropdown/VDropdown.vue';
-  import VBadge from '@/components/v-badge/VBadge.vue';
-  import TabsSettings from '@/modules/TabsSettings.vue';
-  import VButton from '@/components/v-button/VButton.vue';
-  import VUser from '@/components/v-user/v-user.vue';
-  import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
-  import VNotification from '@/components/v-notification/VNotification.vue';
-  import VModal from '@/components/v-modal/v-modal.vue';
-  import VEditUser from '@/modals/Team/v-edit-user/v-edit-user.vue';
-  import VAddUser from '@/modals/Team/v-add-user/v-add-user.vue';
+import { db } from '@/firebase.js';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { doc, getDoc, updateDoc, collection, getDocs, deleteDoc, query, where } from 'firebase/firestore';
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { debounce } from 'lodash';
+import { defineComponent, ref, computed, onMounted, reactive } from 'vue';
+import VDropdown from '@/components/v-dropdown/VDropdown.vue';
+import VBadge from '@/components/v-badge/VBadge.vue';
+import TabsSettings from '@/modules/TabsSettings.vue';
+import VButton from '@/components/v-button/VButton.vue';
+import VUser from '@/components/v-user/v-user.vue';
+import VPaginationList from '@/components/v-pagination-list/v-pagination-list.vue';
+import VNotification from '@/components/v-notification/VNotification.vue';
+import VModal from '@/components/v-modal/v-modal.vue';
+import VEditUser from '@/modals/Team/v-edit-user/v-edit-user.vue';
+import VAddUser from '@/modals/Team/v-add-user/v-add-user.vue';
 
 interface DropdownItem {
   label: string;
@@ -194,20 +194,20 @@ interface User {
 }
 
 interface UpdatedUserData {
-    userId: string;
-    userAvatar: string;
-    userName: string;
-    userEmail: string;
-    userPhone: string;
-    userAddress: string;
-    userPosition: string;
-    userCompany: string;
-    userRole: number;
-    userStatus: number;
-    userNotes: string;
-    userGoogleCalendarAPIKey: string;
-    userGoogleCalendarID: string;
-  }
+  userId: string;
+  userAvatar: string;
+  userName: string;
+  userEmail: string;
+  userPhone: string;
+  userAddress: string;
+  userPosition: string;
+  userCompany: string;
+  userRole: number;
+  userStatus: number;
+  userNotes: string;
+  userGoogleCalendarAPIKey: string;
+  userGoogleCalendarID: string;
+}
 
 export default defineComponent({
   components: {
@@ -394,8 +394,26 @@ export default defineComponent({
         this.triggerNotification('error', 'Error!', 'Invalid role selected.');
       }
     },
+    async deleteUserChats(userId: string) {
+      try {
+        const chatsRef = collection(db, "chats");
+        const q = query(chatsRef, where("participants", "array-contains", userId));
+        const querySnapshot = await getDocs(q);
+
+        for (const docSnapshot of querySnapshot.docs) {
+          await deleteDoc(docSnapshot.ref);
+        }
+
+        console.log(`Deleted chats for user with ID ${userId}`);
+      } catch (error) {
+        console.error(`Error deleting chats for user with ID ${userId}:`, error);
+        throw new Error('Could not delete user chats');
+      }
+    },
     async deleteUser(userId: string) {
       try {
+        await this.deleteUserChats(userId);
+
         // Initialize functions inside the method
         const functions = getFunctions();
         const deleteUserFunction = httpsCallable(functions, 'deleteUser');

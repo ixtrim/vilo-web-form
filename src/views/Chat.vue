@@ -138,6 +138,9 @@
                     <button class="wysiwyg-btn wysiwyg-btn--italic" type="button" @click="applyFormat('italic')"></button>
                   </li>
                   <li>
+                    <button class="wysiwyg-btn wysiwyg-btn--underline" type="button" @click="applyFormat('underline')"></button>
+                  </li>
+                  <li>
                     <button class="wysiwyg-btn wysiwyg-btn--list" type="button" @click="applyFormat('insertUnorderedList')"></button>
                   </li>
                   <li>

@@ -654,13 +654,13 @@
 
                 .wysiwyg-btn {
                   width: 31px;
-                  height: 36px;
+                  height: 32px;
                   border: none;
                   background-color: transparent;
                   background-repeat: no-repeat;
                   background-position: center;
                   background-size: 20px 20px;
-                  margin: 0;
+                  margin: 2px 0;
                   padding: 0;
 
                   &:hover {
@@ -673,6 +673,11 @@
 
                   &--italic {
                     background-image: url(../../assets/icons/icon-wysiwyg-italic.svg);
+                  }
+
+                  &--underline {
+                    background-image: url(../../assets/icons/icon-wysiwyg-underline.svg);
+                    background-size: 17px 17px;
                   }
 
                   &--list {

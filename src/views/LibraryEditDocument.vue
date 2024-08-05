@@ -37,8 +37,8 @@
           <div class="row mb-2 editors">
             <div class="col-lg-12 relative" v-for="(item, index) in editorCount">
               <QuillEditor v-if="!hiddenEditors[index]" toolbar="essential" theme="snow" :ref="el => { quill[index] = el }" @change="updateContent" contentType="html" />
-              <div class="page_delete" v-if="!hiddenEditors[index] && index != 0">
-                <v-button v-if="!hiddenEditors[index] && index != 0" :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="toggleEditor(index)" text=""></v-button>
+              <div class="page_delete" v-if="!hiddenEditors[index]">
+                <v-button v-if="!hiddenEditors[index]" :block="false" size="sm" icon="left" icon-style="delete" styled="simple-icon" @click="toggleEditor(index)" text=""></v-button>
               </div>
             </div>
           </div>

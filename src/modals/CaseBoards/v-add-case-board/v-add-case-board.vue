@@ -141,8 +141,8 @@
       value: doc.id,
       role: doc.data().role
     }));
-    adminUsers.value = allUsers.value.filter(user => user.role === 0);
-    filteredUsers.value = allUsers.value.filter(user => user.role !== 0);
+    adminUsers.value = allUsers.value.filter(user => user.role === 6);
+    filteredUsers.value = allUsers.value.filter(user => user.role !== 4);
   };
 
   onMounted(async () => {

@@ -49,7 +49,14 @@
           <div class="v-chat__messages__chat__header">
             <h4 class="v-chat__messages__chat__header__new">New Message</h4>
             <div class="v-chat__messages__chat__header__change" v-if="selectedUser">
-              <VButton :block="true" size="sm" icon="no" styled="outlined" @click="changePerson" text="Change person"></VButton>
+              <ul>
+                <li>
+                  <VButton :block="true" size="sm" icon="no" styled="secondary" @click="changePerson" text="Change person"></VButton>
+                </li>
+                <li>
+                  <VButton :block="true" size="sm" icon="no" styled="outlined" @click="goBack" text="Go back"></VButton>
+                </li>
+              </ul>
             </div>
           </div>
           <div v-if="selectedUser" class="v-chat__messages__chat__search-user-chosen">
@@ -421,6 +428,12 @@
         searchUser.value = '';
       }
 
+      function goBack() {
+        isNewChat.value = false;
+        selectedUser.value = null;
+        searchUser.value = '';
+      }
+
       const activeMessages = computed(() => {
         return activeChat.value ? messages.value[activeChat.value.id] || [] : [];
       });
@@ -616,6 +629,7 @@
         startChatWithSelectedUser,
         selectedUser,
         changePerson,
+        goBack,
         isCurrentUserMessage,
         debouncedStartChat,
         filterChats,

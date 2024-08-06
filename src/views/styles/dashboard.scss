@@ -1197,6 +1197,10 @@
             display: block;
           }
         }
+
+        &:not(:has(.ql-container)) {
+          display: none!important;
+        }
       }
     }
 

@@ -275,9 +275,22 @@
         editorCount.value++;
       }
 
+      const removeElementsWithoutContainer = () => {
+        const elements = document.querySelectorAll('.row.editors .col-lg-12');
+        elements.forEach(element => {
+          if (!element.querySelector('.ql-container') || !element.innerHTML.trim() || element.childElementCount === 0 || element.innerHTML === '' || element.innerHTML === '<!--v-if--><!--v-if-->' || !element.hasChildNodes()) {
+            element.remove();
+          }
+        });
+      };
+      
       const toggleEditor = (index) => {
         quill.value = quill.value.splice(index, 1);
         hiddenEditors.value[index] = !hiddenEditors.value[index];
+        setTimeout(() => {
+          removeElementsWithoutContainer();
+        }, 500);
+        
       };
 
       onMounted(fetchTemplate)
@@ -303,7 +316,7 @@
     },
     methods: {
       updateContent(value){
-        console.log(value)
+        alert('update');
       }
     }
   }
